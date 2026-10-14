@@ -1,8 +1,39 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { nodes, startNode, destination, currentNode, answerQuestion, goBack, restoreHistory } from '../flow.mjs';
+import { nodes, startNode, destination, currentNode, answerQuestion, goBack, restoreHistory, fiberTrace } from '../flow.mjs';
 const follow = (answers, mode = 'direct') => answers.reduce((history, answer) => answerQuestion(history, answer, mode), []);
 const at = (answers, mode = 'direct') => currentNode(follow(answers, mode), mode);
+
+test('fiber picture keeps a passed segment while leaving the next segment unverified', () => {
+  const access = follow(['yes','no','no']);
+  assert.deepEqual(fiberTrace(access), { segment:1, traced:0, observation:'setup' });
+  const ready = answerQuestion(access, 'yes');
+  assert.deepEqual(fiberTrace(ready), { segment:1, traced:0, observation:'unknown' });
+  const seen = answerQuestion(ready, 'yes');
+  assert.deepEqual(fiberTrace(seen), { segment:1, traced:1, observation:'seen' });
+  const next = answerQuestion(seen, 'no');
+  assert.deepEqual(fiberTrace(next), { segment:2, traced:1, observation:'unknown' });
+});
+
+test('fiber picture distinguishes a dark expected port, misport, and corrected route', () => {
+  const dark = follow(['yes','no','no','yes','no']);
+  assert.deepEqual(fiberTrace(dark), { segment:1, traced:0, observation:'missing' });
+  const misport = answerQuestion(dark, 'yes');
+  assert.deepEqual(fiberTrace(misport), { segment:1, traced:0, observation:'misport' });
+  assert.deepEqual(fiberTrace(answerQuestion(misport, 'yes')), { segment:1, traced:1, observation:'seen' });
+  assert.deepEqual(fiberTrace(answerQuestion(misport, 'no')), { segment:1, traced:0, observation:'missing' });
+  const inspect = answerQuestion(dark, 'no');
+  assert.deepEqual(fiberTrace(answerQuestion(inspect, 'no')), { segment:1, traced:0, observation:'missing' });
+});
+
+test('editing or restoring answers reconstructs fiber observations without stale passes', () => {
+  const seen = follow(['yes','no','no','yes','yes'], 'passive');
+  assert.deepEqual(fiberTrace(restoreHistory(JSON.parse(JSON.stringify(seen)), 'passive')), { segment:1, traced:1, observation:'seen' });
+  const revised = answerQuestion(goBack(seen), 'no', 'passive');
+  assert.deepEqual(fiberTrace(revised), { segment:1, traced:0, observation:'missing' });
+  const changedEarlier = answerQuestion(goBack(seen, 0), 'no', 'passive');
+  assert.deepEqual(fiberTrace(changedEarlier), { segment:1, traced:0, observation:'setup' });
+});
 
 test('local loops progress through reachable passives without requiring the remote optic', () => {
   assert.equal(at([]), 'start');

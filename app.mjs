@@ -1,4 +1,4 @@
-import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs?v=7';
+import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory, fiberTrace } from './flow.mjs?v=8';
 
 const storageKey = 'fiberline-loop-first-v5';
 let mode = 'direct';
@@ -25,6 +25,7 @@ function change(next) {
   render(true);
 }
 function sketch(kind) {
+  if (kind === 'fiber') return fiberSketch();
   const figure = el('figure', `test-sketch ${kind}`);
   const defs = '<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#245b91"/></marker><marker id="return-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#226946"/></marker></defs>';
   let drawing, caption, label, lightPath;
@@ -33,20 +34,23 @@ function sketch(kind) {
     drawing = '<rect class="device" x="23" y="37" width="105" height="79" rx="6"/><text x="37" y="82">Optic</text><text class="port" x="103" y="57">TX</text><text class="port" x="103" y="104">RX</text><rect class="connector" x="129" y="43" width="37" height="18" rx="2"/><rect class="connector" x="129" y="91" width="37" height="18" rx="2"/><path class="clip" d="M138 40 H160 M138 88 H160"/><path class="light" d="M128 52 H224" marker-end="url(#arrow)"/><path class="light" d="M225 52 H267 Q296 52 296 76"/><path class="light return" d="M296 76 Q296 100 267 100 H128" marker-end="url(#return-arrow)"/><text x="189" y="27">LC loopback</text><text class="small" x="184" y="76">TX out / RX back</text>';
     caption = 'Light leaves TX and loops back to RX.';
     lightPath = 'M128 52 H267 Q296 52 296 76 Q296 100 267 100 H128';
-  } else if (kind === 'passive') {
+  } else {
     label = 'MMC loopback at passive CAS 1 Port 12. Optic TX connects through an LC follower and the MMC leader to the passive loop; light returns through the mapped LC follower to optic RX. One test pair is illustrated, not the full lane map.';
     drawing = '<text x="8" y="33">Optic</text><rect class="device" x="6" y="49" width="62" height="69" rx="5"/><text class="port" x="39" y="74">TX</text><text class="port" x="39" y="108">RX</text><rect class="connector" x="70" y="62" width="23" height="16" rx="2"/><rect class="connector" x="70" y="96" width="23" height="16" rx="2"/><text class="small" x="85" y="45">LC legs</text><text class="small" x="85" y="132">Followers</text><rect class="connector" x="203" y="59" width="27" height="56" rx="3"/><text class="small" x="159" y="31">MMC leader</text><path class="callout" d="M204 36 L215 56"/><rect class="group" x="231" y="51" width="13" height="72" rx="2"/><text class="small" x="216" y="15">CAS 1 · Port 12</text><path class="callout" d="M240 20 V49"/><rect class="connector loop-plug" x="245" y="59" width="27" height="56" rx="3"/><path class="light" d="M68 70 H169" marker-end="url(#arrow)"/><path class="light" d="M170 70 H302 Q326 70 326 87"/><path class="light return" d="M326 87 Q326 104 302 104 H68" marker-end="url(#return-arrow)"/><text class="small" x="236" y="140">MMC loopback</text><path class="callout" d="M265 125 L259 117"/>';
     caption = 'Tests the optic + LC legs + MMC path to the loop.';
     lightPath = 'M68 70 H302 Q326 70 326 87 Q326 104 302 104 H68';
-  } else {
-    label = 'VFL connected to isolated fiber, traced to the expected passive port.';
-    drawing = '<rect class="device" x="7" y="28" width="69" height="43" rx="6"/><text x="28" y="54">VFL</text><path class="light" d="M76 50 H228" marker-end="url(#arrow)"/><text class="small" x="110" y="36">Isolated fiber</text><rect class="group" x="236" y="21" width="100" height="58" rx="6"/><text x="255" y="46">Expected</text><text x="271" y="66">port</text>';
-    caption = 'Check the exact port and strand.';
-    lightPath = 'M76 50 H228';
   }
-  const movingArrow = `<g class="moving-light" aria-hidden="true"><path d="M-7-5 L3 0 L-7 5 L-4 0 Z"/><animateMotion dur="${kind === 'fiber' ? '2' : '3.5'}s" repeatCount="indefinite" path="${lightPath}" rotate="auto"/></g>`;
-  figure.innerHTML = `<svg viewBox="0 0 350 ${kind === 'fiber' ? 100 : kind === 'direct' ? 125 : 150}" role="img" aria-label="${label}">${defs}${drawing}${movingArrow}</svg>`;
+  figure.innerHTML = `<svg viewBox="0 0 350 ${kind === 'direct' ? 125 : 150}" role="img" aria-label="${label}">${defs}${drawing}${lightArrow(lightPath)}</svg>`;
+  sketchFooter(figure, caption);
+  return figure;
+}
+function lightArrow(path) {
+  return `<g class="moving-light" aria-hidden="true"><path d="M-7-5 L3 0 L-7 5 L-4 0 Z"/><animateMotion dur="3.5s" repeatCount="indefinite" path="${path}" rotate="auto"/></g>`;
+}
+function sketchFooter(figure, caption, animated = true) {
   const footer = el('figcaption');
+  footer.append(el('span', '', caption));
+  if (!animated) { figure.append(footer); return; }
   const toggle = el('button', 'motion-toggle', lightPaused ? 'Play light' : 'Pause light');
   toggle.type = 'button';
   toggle.addEventListener('click', () => {
@@ -55,8 +59,56 @@ function sketch(kind) {
     if (lightPaused) svg.pauseAnimations(); else svg.unpauseAnimations();
     toggle.textContent = lightPaused ? 'Play light' : 'Pause light';
   });
-  footer.append(el('span', '', caption), toggle);
+  footer.append(toggle);
   figure.append(footer);
+}
+function fiberSketch() {
+  const { segment, traced, observation } = fiberTrace(history);
+  const state = {
+    setup: ['Not connected', 'Isolate both ends, then connect VFL to the fiber.'],
+    unknown: ['Not checked', 'VFL is connected. Check the mapped port and strand.'],
+    seen: ['Light seen ✓', 'Trace confirmed here; attenuation is still untested.'],
+    missing: ['No light here ×', 'Check this span, its connections and nearby ports.'],
+    misport: ['Wrong port', 'Light is at another port. Check the map and polarity.']
+  }[observation];
+  const figure = el('figure', `test-sketch fiber-trace ${observation}`);
+  const heading = el('div', 'trace-heading');
+  heading.append(el('strong', '', `Segment ${segment}`), el('span', 'trace-state', state[0]));
+  const progress = el('div', 'trace-progress');
+  progress.append(el('span', 'optic-verified', '✓ Optic loop passed'), el('span', '', `${traced} traced`));
+  figure.append(heading, progress);
+  const expectedPath = 'M84 112 H128 Q144 112 144 95 H246';
+  const otherPath = 'M84 112 H128 Q144 112 144 137 H246';
+  const seen = observation === 'seen', wrong = observation === 'misport';
+  const active = observation !== 'setup';
+  const suspect = observation === 'missing' || wrong;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 350 170');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `Segment ${segment}. ${active ? 'Local optic disconnected from the VFL test.' : 'Disconnect active equipment before connecting VFL.'} ${state[0]}. ${traced} segments traced. ${state[1]}`);
+  svg.innerHTML = `
+    ${suspect ? '<rect class="suspect-span" x="82" y="65" width="261" height="98" rx="7"/>' : ''}
+    <rect class="offline-optic" x="8" y="9" width="82" height="36" rx="5"/><text class="small" x="17" y="32">Local optic</text>
+    <path class="disconnected" d="M90 27 H108 V63 M101 63 H115"/>
+    <text class="small" x="119" y="30">${active ? 'Disconnected' : 'Disconnect first'}</text>
+    <rect class="passive-panel" x="226" y="58" width="116" height="103" rx="5"/>
+    <text class="small" x="231" y="48">Next passive</text>
+    <path class="trace-line ${seen ? 'confirmed' : 'unconfirmed'}" d="${expectedPath}"/>
+    ${wrong ? `<path class="trace-line misrouted" d="${otherPath}"/>` : ''}
+    <rect class="vfl-source ${active ? 'on' : ''}" x="8" y="93" width="76" height="38" rx="5"/>
+    <text x="23" y="117">VFL</text><circle class="source-led ${active ? 'lit' : ''}" cx="71" cy="105" r="3"/>
+    ${active ? '<path class="source-light" d="M84 112 H111"/>' : ''}
+    <text class="small" x="8" y="151">${segment === 1 ? 'First test point' : 'Last traced point'}</text>
+    <rect class="trace-port" x="232" y="81" width="28" height="28" rx="3"/>
+    <circle class="port-light ${seen ? 'lit' : ''}" cx="246" cy="95" r="7"/>
+    <text class="small" x="266" y="99">Expected</text>
+    <rect class="trace-port" x="232" y="123" width="28" height="28" rx="3"/>
+    <circle class="port-light ${wrong ? 'lit' : ''}" cx="246" cy="137" r="7"/>
+    <text class="small" x="266" y="141">Other</text>
+    ${observation === 'missing' || wrong ? '<path class="dark-port" d="M242 91 L250 99 M250 91 L242 99"/>' : ''}
+    ${seen || wrong ? lightArrow(wrong ? otherPath : expectedPath) : ''}`;
+  figure.append(svg);
+  sketchFooter(figure, state[1], seen || wrong);
   return figure;
 }
 function readingExamples() {

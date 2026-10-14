@@ -1,8 +1,8 @@
 // Actions stay short; the chosen loop location defines which section is tested.
 const check = (phase, action, instruction, title, yes, no, visual = '', note = '') =>
   ({ phase, action, instruction, title, yes, no, visual, note });
-const result = (action, instruction, success = false) =>
-  ({ phase: 'Result', action, instruction, title: action, terminal: true, success });
+const result = (action, instruction, success = false, visual = '') =>
+  ({ phase: 'Result', action, instruction, title: action, terminal: true, success, visual });
 
 export const nodes = {
   start: check('Optic', 'Loop the optic', 'Plug the LC loopback into the optic.',
@@ -20,17 +20,17 @@ export const nodes = {
   nextPassive: check('Local check', 'Local loop passed', 'The optic and tested path passed to this loop point. Keep going through the passives you can reach.',
     'Another accessible passive to loop?', 'passiveLoop', 'reconnect'),
   fiberAccess: check('Fiber', 'Check the fiber you can access', 'Use VFL only on a segment disconnected from active equipment at both ends.',
-    'Can you isolate and trace a segment?', 'vfl', 'remoteCheck'),
+    'Can you isolate and trace a segment?', 'vfl', 'remoteCheck', 'fiber'),
   vfl: check('Fiber', 'VFL the next fiber segment', 'Trace the isolated segment to the exact port and strand in your layout.',
     'Light at the expected port and strand?', 'segments', 'wrongPort', 'fiber', 'Disconnect active equipment at both ends before using VFL.'),
   wrongPort: check('Fiber', 'Check nearby ports and LC legs', 'Compare where the light appears with the intended route and leader group.',
-    'Light at a different port or leg?', 'routeFix', 'segmentCheck'),
+    'Light at a different port or leg?', 'routeFix', 'segmentCheck', 'fiber'),
   routeFix: check('Fiber', 'Correct the misport or polarity', 'Follow the port and lane map, then repeat the VFL trace.',
-    'Light at the correct port now?', 'segments', 'routeFault'),
+    'Light at the correct port now?', 'segments', 'routeFault', 'fiber'),
   segmentCheck: check('Fiber', 'Check this segment', 'Check seating, dirty ends, tight bends and damage. Correct any finding; retrace.',
-    'Does this segment trace correctly now?', 'segments', 'fiberFault'),
+    'Does this segment trace correctly now?', 'segments', 'fiberFault', 'fiber'),
   segments: check('Fiber', 'Follow the accessible route', 'Continue through the passive hops you can reach. Leave inaccessible sections unverified.',
-    'All accessible segments traced?', 'recheck', 'vfl'),
+    'All accessible segments traced?', 'recheck', 'vfl', 'fiber'),
   reconnect: check('Local health', 'Reconnect and check local health', 'Remove test gear. Restore the mapped TX-to-RX path and read health at your local optic.',
     'Local RX/TX in range and link stable?', 'done', 'fiberAccess'),
   recheck: check('Local health', 'Recheck after tracing', 'Remove the VFL. Restore the mapped TX-to-RX path and read health at your local optic.',
@@ -42,8 +42,8 @@ export const nodes = {
   badOptic: result('Original optic or mating connection suspect', 'The replacement passed. Inspect the interface, replace as needed and recheck health.'),
   testFault: result('Check the port or loop setup', 'The known-good optic also failed. Confirm compatibility, mapping and the host port.'),
   patchFault: result('Suspect the fiber to this loop point', 'Direct loop passed; passive loop failed. Start beyond the last passing loop point: verify the map and test that section.'),
-  routeFault: result('Port or polarity mismatch remains', 'Reconcile the observed VFL port with the intended map before continuing.'),
-  fiberFault: result('Suspect this fiber segment or connection', 'Verify the VFL setup, compare a known-good jumper and test the segment for loss or a break.'),
+  routeFault: result('Port or polarity mismatch remains', 'Reconcile the observed VFL port with the intended map before continuing.', false, 'fiber'),
+  fiberFault: result('Suspect this fiber segment or connection', 'Verify the VFL setup, compare a known-good jumper and test the segment for loss or a break.', false, 'fiber'),
   lossFault: result('Excessive fiber loss', 'Locate the loss: connectors, seating, bends, damaged fiber or splices. Correct it and retest.'),
   remainingFault: result('Tested section passed', 'Check local compatibility and port settings. Request checks beyond the tested section, including the remote end.'),
   remoteCheck: result('Local checks complete; rest unverified', 'Record the farthest passing loop point. Request checks of the remaining fiber and remote optic.'),
@@ -71,4 +71,19 @@ export function restoreHistory(value, mode = 'direct') {
     valid = answerQuestion(valid, entry.answer, mode);
   }
   return valid;
+}
+
+// Reconstruct the schematic from answers so Back, edits and reloads stay honest.
+export function fiberTrace(history) {
+  let segment = 1, traced = 0, observation = 'setup';
+  for (const { id, answer } of history) {
+    if (id === 'fiberAccess' && answer === 'yes') observation = 'unknown';
+    if (['vfl', 'routeFix', 'segmentCheck'].includes(id)) {
+      observation = answer === 'yes' ? 'seen' : 'missing';
+      if (answer === 'yes') traced = segment;
+    }
+    if (id === 'wrongPort') observation = answer === 'yes' ? 'misport' : 'missing';
+    if (id === 'segments' && answer === 'no') { segment += 1; observation = 'unknown'; }
+  }
+  return { segment, traced, observation };
 }

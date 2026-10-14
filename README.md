@@ -10,6 +10,8 @@ The site's workflow uses an LC loopback directly at the optic and an MMC loopbac
 
 Color-coded RX/TX badges illustrate the user's reported no-light reading (−40) and a good reading (+0.25 dBm). They are examples, not live readings or universal pass/fail thresholds; each lane must meet the applicable site and optic limits. The app contains no uploaded photos or real device IDs and does not connect to Cable Guy. It has no link to the separate EOD app.
 
+The fiber steps retain a schematic of the current isolated segment: disconnected optic, VFL source, expected port and alternate port. Answers distinguish untested, light seen, no light at the expected port, and light at another port. A missing-light result highlights the whole span and its connections without inventing a break location. Confirmed traces advance the segment count; the next section starts unverified. Back, answer edits and reloads reconstruct the picture from history. Segment numbers follow the user's trace sequence, not actual CAS identifiers; use the site layout for real port mapping. VFL shows continuity, not acceptable attenuation.
+
 Technical references: [Cisco optical troubleshooting](https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html), [Fluke fiber troubleshooting](https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber), [US Conec MMC polarity](https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment).
 
 ## Development
