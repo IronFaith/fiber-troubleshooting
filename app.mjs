@@ -1,6 +1,6 @@
 import { nodes, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs';
 
-const storageKey = 'fiberline-low-rx-path-v2';
+const storageKey = 'fiberline-optics-first-v3';
 let history = [];
 try { history = restoreHistory(JSON.parse(sessionStorage.getItem(storageKey))); } catch { /* A fresh path also works without storage. */ }
 
@@ -76,15 +76,10 @@ function render(moveFocus = false) {
   heading.id = 'question-title';
   heading.tabIndex = -1;
   card.append(meta, heading, element('p', 'instruction', node.instruction));
-  if (node.note) {
-    const meaning = element('p', 'meaning');
-    meaning.append(element('strong', '', 'Why this check: '), document.createTextNode(node.note));
-    card.append(meaning);
-  }
-
-  if (node.details.length) {
+  if (node.details.length || node.note) {
     const help = element(node.terminal ? 'div' : 'details', 'help');
     if (!node.terminal) help.append(element('summary', '', 'How to check'));
+    if (node.note) help.append(element('p', 'check-note', node.note));
     if (node.details.length) {
       const list = element('ul');
       for (const detail of node.details) list.append(element('li', '', detail));
@@ -93,7 +88,7 @@ function render(moveFocus = false) {
     card.append(help);
   }
   if (node.terminal) {
-    const findings = history.map(entry => nodes[entry.id].findings?.[entry.answer]).filter(Boolean);
+    const findings = [...new Set(history.map(entry => nodes[entry.id].findings?.[entry.answer]).filter(Boolean))];
     if (findings.length) {
       const evidence = element('div', 'evidence');
       evidence.append(element('h3', '', 'What your checks showed'));
