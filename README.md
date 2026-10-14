@@ -22,9 +22,11 @@ Requires Node.js; no dependencies or build step.
 
 Chapter 2 (`devices.html`) explains the user-provided position `QNO5.5C.16f.17.30`: building QNO5, room 5C, row 16 front, rack 17, elevation 30. Tapping each component changes the location drawing. The elevation is labeled as supplied, without assuming rack-unit conventions or total rack height. A local/remote viewpoint control swaps the labels while keeping A TX → B RX and B TX → A RX fixed. The remote location is unspecified; drawings are examples, not a discovered topology. The position locates a device; the connection record supplies exact device and passive ports. Chapter 1 remains one chapter, and the existing troubleshooting flow is unchanged.
 
+Chapter 3 (`patching.html`) teaches the user-confirmed site mapping: Ethernet `5/1` selects optic 5, physical position 1 on the left; `5/5` selects the same optic, physical position 2 on the right, facing the optic. Each position is shown as a duplex LC pair, not an individual TX or RX strand. Switching the Ethernet selection moves the illustrated connector and updates the caption. The mapping is site-specific, not inferred for all optics. A separate route shows one LC follower through its MMC leader to the passive identified by FIM; it does not invent a CAS assignment or change FIM records. Animated light is illustrative, not a measured health result.
+
 ```sh
 npm run dev
 npm run check
 ```
 
-GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `learn.html`, `devices.html`, `styles.css`, `app.mjs`, `flow.mjs`, `learning.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.
+GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `learn.html`, `devices.html`, `patching.html`, `styles.css`, `app.mjs`, `flow.mjs`, `learning.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.

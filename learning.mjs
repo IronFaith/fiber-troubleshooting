@@ -20,7 +20,8 @@ menuPanel.id = 'learn-links'; menuPanel.hidden = true;
 menuPanel.append(el('p', '', 'Learning resources'));
 const chapterLink = link('Chapter 1 · Optics, fiber & light', './learn.html');
 const devicesLink = link('Chapter 2 · Device locations & links', './devices.html');
-menuPanel.append(chapterLink, devicesLink, link('Back to troubleshooting', './index.html', 'menu-return'));
+const patchingLink = link('Chapter 3 · FIM ports & LC patching', './patching.html');
+menuPanel.append(chapterLink, devicesLink, patchingLink, link('Back to troubleshooting', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {
@@ -243,6 +244,7 @@ function renderDevicesLesson() {
       <p class="lesson-takeaway">Check what you can reach: loop the local optic, then extend through accessible passives. A passing local loop leaves the path beyond it unverified.</p>
     </section>
     <p class="lesson-sources">Position format: your site example. Optical link reference: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing and fiber links</a>.</p>
+    <a class="next-chapter" href="./patching.html">Next chapter: FIM ports & LC patching →</a>
     <a class="next-chapter" href="./learn.html">← Chapter 1: Optics, fiber & light</a>
     <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
   setupLesson();
@@ -321,7 +323,82 @@ function endsPicture(selected) {
     text(180,242,'Mapped fiber + passive ports','class="small" text-anchor="middle"')};
 }
 
+function renderPatchingLesson() {
+  patchingLink.setAttribute('aria-current', 'page');
+  lesson.innerHTML = `
+    <div class="chapter-heading"><p class="chapter-count">Chapter 3</p><button type="button" class="lesson-motion"></button></div>
+    <h2 id="lesson-title">FIM ports & LC patching</h2>
+    <p class="lesson-intro">Read the Ethernet port. Find the optic. Patch the correct LC position.</p>
+    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">Choose the LC position</a><a href="#fim-path">Follow the FIM path</a></nav>
+    <section id="lc-position" class="lesson-section" aria-labelledby="lc-position-title">
+      <h3 id="lc-position-title">Same optic. Two LC positions.</h3>
+      <p class="section-intro">Choose the Ethernet port shown in FIM.</p>
+      <div id="patch-picture"></div>
+      <div class="patch-mapping"><p><strong>5/1</strong><span>Optic 5 · position 1 · left</span></p><p><strong>5/5</strong><span>Optic 5 · position 2 · right</span></p></div>
+      <p class="lesson-takeaway">Each position takes a duplex LC pair: TX and RX together.</p>
+      <p class="picture-note">Your confirmed site example, facing the optic. Check the installed orientation and labels; other hardware may use a different mapping.</p>
+    </section>
+    <section id="fim-path" class="lesson-section" aria-labelledby="fim-path-title">
+      <h3 id="fim-path-title">Follow the LC leg to its passive</h3>
+      <p class="section-intro">Use FIM to match the device, Ethernet port, leg ID and passive port.</p>
+      <div id="patch-route-picture"></div>
+      <p class="lesson-takeaway">The Ethernet number chooses the optic position. FIM tells you which LC follower and MMC passive port belong to that connection.</p>
+      <ol class="patch-steps">
+        <li><b>Match.</b> Confirm the device, port and fiber labels against FIM.</li>
+        <li><b>Inspect.</b> Isolate as required, inspect, clean if needed, then inspect again.</li>
+        <li><b>Seat & check.</b> Seat the mapped connectors fully. Check optic health in Cable Guy.</li>
+      </ol>
+      <p class="picture-note">Moving blue lines illustrate the intended IR path, not a measured result. Use the health check if light is missing.</p>
+    </section>
+    <p class="lesson-sources">Port mapping: your confirmed site example. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a>.</p>
+    <a class="next-chapter" href="./devices.html">← Chapter 2: Device locations & links</a>
+    <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
+  setupLesson();
+  example('patch-picture', 'Ethernet port in FIM', ['Ethernet 5/1', 'Ethernet 5/5'], patchPicture);
+  example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture);
+}
+
+function patchPicture(selected) {
+  const right = selected === 1;
+  const suffix = right ? 5 : 1;
+  const position = right ? 2 : 1;
+  const side = right ? 'right' : 'left';
+  const center = right ? 250 : 110;
+  let drawing = text(180,28,'Optic 5 · front view','class="patch-title" text-anchor="middle"')+
+    '<rect class="optic-metal" x="20" y="43" width="320" height="153" rx="8"/>'+
+    '<path class="optic-detail" d="M31 57 H43 M317 57 H329 M31 180 H43 M317 180 H329"/>';
+  [110,250].forEach((x,index) => {
+    const active = index === selected;
+    drawing += text(x,73,`Position ${index+1}`,'text-anchor="middle"')+
+      text(x,96,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
+      `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-53}" y="108" width="106" height="66" rx="5"/>`+
+      `<rect class="patch-opening" x="${x-39}" y="120" width="31" height="36" rx="2"/><rect class="patch-opening" x="${x+8}" y="120" width="31" height="36" rx="2"/>`;
+  });
+  drawing += `<g class="patch-lc"><rect x="${center-38}" y="140" width="29" height="72" rx="3"/><rect x="${center+9}" y="140" width="29" height="72" rx="3"/><rect x="${center-44}" y="183" width="88" height="17" rx="3"/></g>`+
+    `<path class="patch-fiber" d="M${center-24} 212 V273 M${center+24} 212 V273"/>`+
+    `<path class="patch-insert" d="M${center} 264 V220 m-6 8 6 -8 6 8"/>`+
+    text(right ? 76 : 284,228,'Patch LC','text-anchor="middle"')+
+    text(right ? 76 : 284,249,`on the ${side}`,'class="small" text-anchor="middle"')+
+    text(180,304,`5 = optic   /${suffix} = ${side} LC position`,'class="small" text-anchor="middle"');
+  return {height:324, caption:`Ethernet 5/${suffix} → optic 5 → position ${position} (${side}). Connect the duplex LC here.`, drawing};
+}
+
+function patchRoutePicture() {
+  return {height:218, caption:'One LC follower shown. Match its ID to the MMC leader and the passive port listed in FIM.', drawing:
+    box(6,56,75,88,'Optic 5')+
+    '<rect class="lc-plug" x="83" y="68" width="30" height="22" rx="3"/><rect class="lc-plug" x="83" y="110" width="30" height="22" rx="3"/>'+
+    '<rect class="mmc-plug" x="220" y="65" width="29" height="72" rx="4"/>'+
+    '<rect class="learn-device" x="252" y="51" width="100" height="98" rx="6"/>'+
+    light('M81 79 H267')+light('M267 121 H81','return-ir')+
+    text(83,41,'LC follower','class="small"')+text(235,27,'MMC leader','class="small" text-anchor="middle"')+
+    text(302,95,'Mapped','class="small" text-anchor="middle"')+text(302,113,'CAS port','class="small" text-anchor="middle"')+
+    '<path class="ir-arrow" d="M161 74 l8 5 -8 5"/><path class="return-ir-arrow" d="M169 116 l-8 5 8 5"/>'+
+    text(51,171,'Selected position','class="small" text-anchor="middle"')+
+    text(180,202,'Follow the leg ID and port labels in FIM.','class="small" text-anchor="middle"')};
+}
+
 if (lesson) {
-  if (lesson.dataset.chapter === 'devices') renderDevicesLesson();
+  if (lesson.dataset.chapter === 'patching') renderPatchingLesson();
+  else if (lesson.dataset.chapter === 'devices') renderDevicesLesson();
   else renderLesson();
 }
