@@ -1,8 +1,9 @@
-import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs?v=6';
+import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs?v=7';
 
 const storageKey = 'fiberline-loop-first-v5';
 let mode = 'direct';
 let history = [];
+let lightPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 try {
   const saved = JSON.parse(sessionStorage.getItem(storageKey));
   mode = saved?.mode === 'passive' ? 'passive' : 'direct';
@@ -26,22 +27,36 @@ function change(next) {
 function sketch(kind) {
   const figure = el('figure', `test-sketch ${kind}`);
   const defs = '<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#245b91"/></marker><marker id="return-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#226946"/></marker></defs>';
-  let drawing, caption, label;
+  let drawing, caption, label, lightPath;
   if (kind === 'direct') {
     label = 'LC loopback at the optic. Light leaves TX through one LC plug, loops around, and returns through the other LC plug to RX.';
     drawing = '<rect class="device" x="23" y="37" width="105" height="79" rx="6"/><text x="37" y="82">Optic</text><text class="port" x="103" y="57">TX</text><text class="port" x="103" y="104">RX</text><rect class="connector" x="129" y="43" width="37" height="18" rx="2"/><rect class="connector" x="129" y="91" width="37" height="18" rx="2"/><path class="clip" d="M138 40 H160 M138 88 H160"/><path class="light" d="M128 52 H224" marker-end="url(#arrow)"/><path class="light" d="M225 52 H267 Q296 52 296 76"/><path class="light return" d="M296 76 Q296 100 267 100 H128" marker-end="url(#return-arrow)"/><text x="189" y="27">LC loopback</text><text class="small" x="184" y="76">TX out / RX back</text>';
     caption = 'Light leaves TX and loops back to RX.';
+    lightPath = 'M128 52 H267 Q296 52 296 76 Q296 100 267 100 H128';
   } else if (kind === 'passive') {
     label = 'MMC loopback at passive CAS 1 Port 12. Optic TX connects through an LC follower and the MMC leader to the passive loop; light returns through the mapped LC follower to optic RX. One test pair is illustrated, not the full lane map.';
     drawing = '<text x="8" y="33">Optic</text><rect class="device" x="6" y="49" width="62" height="69" rx="5"/><text class="port" x="39" y="74">TX</text><text class="port" x="39" y="108">RX</text><rect class="connector" x="70" y="62" width="23" height="16" rx="2"/><rect class="connector" x="70" y="96" width="23" height="16" rx="2"/><text class="small" x="85" y="45">LC legs</text><text class="small" x="85" y="132">Followers</text><rect class="connector" x="203" y="59" width="27" height="56" rx="3"/><text class="small" x="159" y="31">MMC leader</text><path class="callout" d="M204 36 L215 56"/><rect class="group" x="231" y="51" width="13" height="72" rx="2"/><text class="small" x="216" y="15">CAS 1 · Port 12</text><path class="callout" d="M240 20 V49"/><rect class="connector loop-plug" x="245" y="59" width="27" height="56" rx="3"/><path class="light" d="M68 70 H169" marker-end="url(#arrow)"/><path class="light" d="M170 70 H302 Q326 70 326 87"/><path class="light return" d="M326 87 Q326 104 302 104 H68" marker-end="url(#return-arrow)"/><text class="small" x="236" y="140">MMC loopback</text><path class="callout" d="M265 125 L259 117"/>';
     caption = 'Tests the optic + LC legs + MMC path to the loop.';
+    lightPath = 'M68 70 H302 Q326 70 326 87 Q326 104 302 104 H68';
   } else {
     label = 'VFL connected to isolated fiber, traced to the expected passive port.';
     drawing = '<rect class="device" x="7" y="28" width="69" height="43" rx="6"/><text x="28" y="54">VFL</text><path class="light" d="M76 50 H228" marker-end="url(#arrow)"/><text class="small" x="110" y="36">Isolated fiber</text><rect class="group" x="236" y="21" width="100" height="58" rx="6"/><text x="255" y="46">Expected</text><text x="271" y="66">port</text>';
     caption = 'Check the exact port and strand.';
+    lightPath = 'M76 50 H228';
   }
-  figure.innerHTML = `<svg viewBox="0 0 350 ${kind === 'fiber' ? 100 : kind === 'direct' ? 125 : 150}" role="img" aria-label="${label}">${defs}${drawing}</svg>`;
-  figure.append(el('figcaption', '', caption));
+  const movingArrow = `<g class="moving-light" aria-hidden="true"><path d="M-7-5 L3 0 L-7 5 L-4 0 Z"/><animateMotion dur="${kind === 'fiber' ? '2' : '3.5'}s" repeatCount="indefinite" path="${lightPath}" rotate="auto"/></g>`;
+  figure.innerHTML = `<svg viewBox="0 0 350 ${kind === 'fiber' ? 100 : kind === 'direct' ? 125 : 150}" role="img" aria-label="${label}">${defs}${drawing}${movingArrow}</svg>`;
+  const footer = el('figcaption');
+  const toggle = el('button', 'motion-toggle', lightPaused ? 'Play light' : 'Pause light');
+  toggle.type = 'button';
+  toggle.addEventListener('click', () => {
+    lightPaused = !lightPaused;
+    const svg = figure.querySelector('svg');
+    if (lightPaused) svg.pauseAnimations(); else svg.unpauseAnimations();
+    toggle.textContent = lightPaused ? 'Play light' : 'Pause light';
+  });
+  footer.append(el('span', '', caption), toggle);
+  figure.append(footer);
   return figure;
 }
 function readingExamples() {
@@ -106,12 +121,12 @@ function render(moveFocus = false) {
     const question = el('div', 'decision-question');
     question.append(el('span', 'decision-icon', '?'), el('h3', '', node.title));
     decision.append(question);
-    if (node.visual === 'direct' || node.visual === 'passive' || ['compare', 'reconnect'].includes(currentNode(history, mode))) decision.append(readingExamples());
+    if (node.visual === 'direct' || node.visual === 'passive' || ['compare', 'reconnect', 'recheck'].includes(currentNode(history, mode))) decision.append(readingExamples());
     current.append(decision);
     const branches = el('div', 'branches');
     for (const answer of ['yes', 'no']) {
       const next = nodes[destination(currentNode(history, mode), answer, mode)];
-      const nextAction = currentNode(history, mode) === 'bothEnds' && answer === 'no' ? 'Loop the other optic' : next.action;
+      const nextAction = next.action;
       const label = answer === 'yes' ? 'Yes' : 'No';
       const branch = el('button', `branch ${answer}`);
       branch.type = 'button';
@@ -128,6 +143,7 @@ function render(moveFocus = false) {
     current.append(fresh);
   }
   diagram.append(current);
+  if (lightPaused) current.querySelector('svg')?.pauseAnimations();
   if (moveFocus) {
     title.focus({ preventScroll: true });
     const anchor = diagram.querySelector('.trail-step:last-child') || current;

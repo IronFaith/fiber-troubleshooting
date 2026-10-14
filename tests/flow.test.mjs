@@ -4,32 +4,40 @@ import { nodes, startNode, destination, currentNode, answerQuestion, goBack, res
 const follow = (answers, mode = 'direct') => answers.reduce((history, answer) => answerQuestion(history, answer, mode), []);
 const at = (answers, mode = 'direct') => currentNode(follow(answers, mode), mode);
 
-test('direct and passive loops isolate different sections before optic replacement or fiber tracing', () => {
+test('local loops progress through reachable passives without requiring the remote optic', () => {
   assert.equal(at([]), 'start');
   assert.equal(at([], 'passive'), 'passiveLoop');
   assert.equal(at(['no']), 'clean');
   assert.equal(at(['no','no','yes']), 'badOptic');
   assert.equal(at(['no','no','no']), 'testFault');
-  assert.equal(at(['yes']), 'bothEnds');
-  assert.equal(at(['yes','no']), 'start');
-  assert.equal(at(['yes','no'], 'passive'), 'passiveLoop');
-  assert.equal(at(['yes','yes']), 'vfl');
+  assert.equal(at(['yes']), 'nextPassive');
+  assert.equal(at(['yes','no']), 'reconnect');
+  assert.equal(at(['yes','yes']), 'passiveLoop');
+  assert.equal(at(['yes','yes','yes']), 'nextPassive');
+  assert.equal(at(['yes','no','yes']), 'done');
+  assert.equal(at(['yes','no','no','no']), 'remoteCheck');
+  assert.equal(at(['yes','no','no','no'], 'passive'), 'remoteCheck');
+  assert.equal(nodes[at(['yes','no','no','no'])].success, false);
   assert.equal(at(['no'], 'passive'), 'isolate');
   assert.equal(at(['no','yes'], 'passive'), 'patchCheck');
   assert.equal(at(['no','yes','no'], 'passive'), 'patchFault');
-  assert.equal(at(['no','yes','yes'], 'passive'), 'bothEnds');
+  assert.equal(at(['no','yes','yes'], 'passive'), 'nextPassive');
   assert.equal(at(['no','no','no','yes'], 'passive'), 'badOptic');
 });
 
 test('fiber routes repeat, preserve mode on refresh, and discard downstream choices when edited', () => {
-  // Both optics pass; one segment passes, another is misported and corrected.
-  const path = ['yes','yes','yes','no','no','yes','yes','yes'];
-  assert.equal(at(path), 'reconnect');
+  // Local loop passes; live link still fails, so trace only accessible fiber.
+  const local = ['yes','no','no','yes'];
+  const path = [...local,'yes','no','no','yes','yes','yes'];
+  assert.equal(at(local), 'vfl');
+  assert.equal(at(path), 'recheck');
   assert.equal(at([...path,'yes']), 'done');
-  assert.equal(at([...path,'no','no']), 'lossFault');
-  assert.equal(at([...path,'no','yes']), 'remainingFault');
-  assert.equal(at(['yes','yes','no','no','no']), 'fiberFault');
-  assert.equal(at(['yes','yes','no','yes','no']), 'routeFault');
+  assert.equal(at([...path,'no']), 'lossAccess');
+  assert.equal(at([...path,'no','no']), 'remoteCheck');
+  assert.equal(at([...path,'no','yes','no']), 'lossFault');
+  assert.equal(at([...path,'no','yes','yes']), 'remainingFault');
+  assert.equal(at([...local,'no','no','no']), 'fiberFault');
+  assert.equal(at([...local,'no','yes','no']), 'routeFault');
   const saved = follow(path, 'passive');
   assert.deepEqual(restoreHistory(JSON.parse(JSON.stringify(saved)), 'passive'), saved);
   assert.deepEqual(restoreHistory(saved, 'direct'), []);
@@ -38,6 +46,7 @@ test('fiber routes repeat, preserve mode on refresh, and discard downstream choi
   assert.equal(changed.length, 1);
   assert.deepEqual(restoreHistory([...changed, {id:'vfl',answer:'yes'}], 'passive'), changed);
   assert.deepEqual(restoreHistory(null), []);
+  assert.deepEqual(restoreHistory([{id:'start',answer:'yes'}, {id:'bothEnds',answer:'yes'}]), [{id:'start',answer:'yes'}]);
   assert.deepEqual(goBack([]), []);
   assert.throws(() => answerQuestion([], 'maybe'));
   const complete = follow([...path,'yes']);
