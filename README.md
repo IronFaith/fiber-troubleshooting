@@ -10,6 +10,8 @@ Start with the optic health report at both active ends. Check seating and cleanl
 
 The application does not connect to Cable Guy or contain actual reports, hostnames, or port IDs. It does not infer good health from a badge color, positive TX telemetry, or a universal dBm threshold. The source snapshot and the public site remain separate.
 
+Use the user's connection layout alongside the diagram: match local/remote device interfaces from the health report, use the expected channel as the intended route, and verify the actual graph or location list in the field. The guide refers to generic active ports, passive/CAS ports, strands, and jumper serials; supplied layout screenshots and identifiers are not published.
+
 ## Development
 
 Requires Node.js. No dependencies or build step.

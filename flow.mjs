@@ -8,6 +8,7 @@ export const nodes = {
   start: question('1 · Optic health check', 'Are RX and TX within limits at both ends?',
     'Refresh the optic health report. Check each affected lane against the limits for that optic.',
     'verify', 'seating', [
+      'Match the local and remote device/interface to the selected connection layout. Record the affected lanes and jumper serial where available.',
       'RX −40 can indicate missing light or the reporting floor. It does not tell you which component failed.',
       'A green badge or positive TX reading alone does not prove the optic is healthy.'
     ]),
@@ -35,15 +36,16 @@ export const nodes = {
       'If no valid comparison is available, pause. Do not treat an untested optic as failed.'
     ]),
   vfl: question('3 · Trace the fiber', 'Does VFL light reach the expected port and strand?',
-    'Start with the disconnected active-end fiber and its corresponding passive port. On each repeat, trace the next isolated segment.',
+    'Use the layout to identify the active port and its corresponding passive/CAS port. Trace the disconnected fiber between them; repeat for each next segment.',
     'segments', 'wrongPort', [
       'Isolate the segment from active equipment at both ends. Never inject VFL light into an optic or look into a fiber.',
       'Use a compatible VFL, adapter, and approved indirect detection method.',
-      'Start with active → first passive. Then trace each remaining passive section and the far-end patch, one segment and affected strand at a time.',
+      'Use the expected channel for the intended route; compare the actual graph and location list with what you find in the field.',
+      'Trace local active → local passive, every intervening passive section, and remote active → remote passive. Include each affected strand and exact port in the layout.',
       'Record the actual start and end ports. VFL confirms the route; it does not prove acceptable operating-wavelength loss.'
     ]),
   wrongPort: question('3 · Check misport / polarity', 'Does the light appear at a different port or strand?',
-    'Check the nearby passive ports and lane positions against the intended connection map.',
+    'Compare the port where light actually appears with the expected passive/CAS port and strand in the layout.',
     'routeCorrection', 'segmentCheck', ['Light at another port suggests a misport or label error. Light on the wrong strand can indicate a polarity or lane-mapping issue.']),
   routeCorrection: question('3 · Correct the route', 'After correction, does light reach the intended port?',
     'Correct the confirmed misport, label, or polarity issue. Repeat the VFL trace on the same segment.',
@@ -56,7 +58,7 @@ export const nodes = {
       'If no issue is found and light still does not reach the expected port, choose No.'
     ]),
   segments: question('3 · Follow the whole route', 'Have all segments and affected strands been traced?',
-    'Include both active-to-passive patches and every passive section between them.',
+    'Check off the local active-to-passive patch, each intervening passive section, and the remote active-to-passive patch in your layout.',
     'mapping', 'vfl', ['If No, move the VFL to the next isolated segment and repeat. Keep the confirmed port-to-port route recorded.']),
   mapping: question('3 · Check the end-to-end match', 'Do the fiber, optics, and TX-to-RX mapping match?',
     'Confirm compatible fiber and connectors, matching optic standards, and the correct TX-to-RX path in both directions.',

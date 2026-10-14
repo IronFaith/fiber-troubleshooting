@@ -8,7 +8,7 @@
   <title>Fiber troubleshooting · Optics first, fiber next</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css?v=3">
-  <script type="module" src="./app.mjs?v=3"></script>
+  <script type="module" src="./app.mjs?v=4"></script>
 </head>
 <body>
   <header class="topbar">
@@ -29,6 +29,15 @@
       <li>Use the model’s actual RX/TX specifications and current readings. A −40 display may be a reporting floor; its meaning depends on the device. A green badge or a positive TX value alone does not establish health.</li>
       <li>VFL shows continuity and routing. A power meter or loss test is needed to establish acceptable optical loss.</li>
     </ul></details>
+    <details class="report-help"><summary>Use your device and port layout</summary>
+      <p><strong>Local active port → local passive port → intervening passive sections → remote passive port → remote active port.</strong></p>
+      <ul>
+        <li>Match the local and remote device/interface in the optic health report to the selected connection layout. Keep those local/remote labels throughout the check.</li>
+        <li>Use the <strong>expected connectivity channel</strong> as the intended route. Compare it with the <strong>actual connectivity graph</strong> and the location list.</li>
+        <li>For each segment, identify its start and end location, device or passive/CAS, exact port/strand, and jumper serial where shown. Include every passive hop in your layout.</li>
+        <li>The layout tells you where to check. Verify the recorded connections in the field: does VFL reach that exact expected port and strand?</li>
+      </ul>
+    </details>
     <div class="toolbar">
       <span id="step-label">Start here</span>
       <div><button id="back" type="button" disabled><span aria-hidden="true">←</span> Back</button><button id="restart" type="button" disabled>Start over</button></div>
