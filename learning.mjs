@@ -1,49 +1,3 @@
-const references = {
-  optics: ['Cisco optics', 'https://www.cisco.com/site/us/en/products/networking/optics-transceiver-modules/index.html'],
-  health: ['Cisco fiber troubleshooting', 'https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html'],
-  clean: ['Cisco inspection and cleaning', 'https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html'],
-  fiber: ['Fluke fiber troubleshooting', 'https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber'],
-  mmc: ['US Conec MMC mapping', 'https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment'],
-  loop: ['SENKO LC loopbacks', 'https://www.senko.com/lc-series/']
-};
-
-const chapters = [
-  { id:'optics', menu:'What is an optic?', title:'What is an optic?',
-    intro:'An optic is the transceiver plugged into a device’s network port. It turns electrical data into light for the fiber, and incoming light back into electrical data.',
-    points:[['TX sends', 'The transmitter produces the outgoing light.'], ['RX receives', 'The receiver reads light arriving from the other end.'], ['They must match', 'Use an optic supported by the port, speed, wavelength and fiber type.']],
-    apply:'Start by checking the local optic. A loopback lets you test its outgoing light returning to its own RX.',
-    sources:['optics','health'] },
-  { id:'path', menu:'Follow the fiber path', title:'Where does the light go?',
-    intro:'The optic provides the light. Fiber carries it through the mapped connectors and passive ports to the receiving optic.',
-    points:[['LC legs / followers', 'In this site’s layout, individual legs belong to an MMC leader group.'], ['MMC leader + passive', 'The leader groups fibers at the passive. A passive connects fibers; it does not create light.'], ['Follow the map', 'Check the exact port, strand and TX-to-RX pairing. Check seating and avoid bends tighter than the cable allows.']],
-    apply:'Use your connection layout at each passive. A matching connector alone does not confirm the correct route.',
-    sources:['mmc','fiber'] },
-  { id:'readings', menu:'Read optic health', title:'What do RX and TX tell you?',
-    intro:'TX reports outgoing power; RX reports incoming power. These readings are usually shown in dBm. Check every affected lane.',
-    options:['Good example','No RX light'],
-    points:[['−40 in your report', 'Treat this site’s no-light indication as a symptom. It does not identify the failed part.'], ['+0.25 example', 'This is a good reading you commonly see, not a universal target.'], ['Use the limits', 'Compare RX and TX with their own minimum and maximum limits for the optic and site.']],
-    apply:'If TX is present but RX is missing, check the incoming path, mapping and far-end source. The local optic may still be good.',
-    sources:['health'] },
-  { id:'cleaning', menu:'Dirty connections', title:'How can a connector get dirty?',
-    intro:'Dust, fingerprints and residue can contaminate the tiny fiber end face. Dirt near the core can block light, add loss or cause reflections.',
-    options:['Clean example','Dirty example'],
-    points:[['Inspect first', 'Isolate the connection and use an approved inspection scope. Check the mating surfaces.'], ['Clean correctly', 'If dirty, use the approved cleaner for that connector. Avoid touching the end face.'], ['Inspect again', 'Confirm the result before reconnecting. Caps protect connectors, but do not prove they are clean.']],
-    apply:'Before blaming the optic, check for contamination and poor seating at the test connections.',
-    sources:['clean'] },
-  { id:'loopbacks', menu:'LC and MMC loopbacks', title:'What does a loopback prove?',
-    intro:'A loopback returns the optic’s TX light to its RX. The loop location decides how much of the path you are testing.',
-    options:['LC at optic','MMC at passive'],
-    points:[['Direct LC loop', 'In this site’s workflow, this tests the optic through a short local return path.'], ['MMC at a passive', 'This includes the optic, mapped fibers and connections up to that loop point.'], ['Check the return', 'Use the supported lane mapping and any required attenuation. RX must stay within its safe limits.']],
-    apply:'A passing loop supports the tested section. Keep moving to reachable passives; leave everything beyond the loop unverified.',
-    sources:['loop','health'] },
-  { id:'vfl', menu:'What is a VFL?', title:'Trace the fiber with a VFL',
-    intro:'A visual fault locator sends visible red light into an isolated fiber. It helps identify the route, continuity and possible faults.',
-    options:['Light seen','No light','Wrong port'],
-    points:[['Connect to isolated fiber', 'Isolate both ends of the test section from active equipment. Use the correct adapter and mapped strand.'], ['Trace the expected port', 'Use your site’s safe viewing method. Never look into the connector or beam.'], ['Know its limit', 'A visible trace does not establish acceptable loss. A source and power meter or loss test set measures that.']],
-    apply:'Check one accessible section at a time. If light is missing, investigate that span and its connections before moving farther.',
-    sources:['fiber','clean'] }
-];
-
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
   if (className) item.className = className;
@@ -51,29 +5,25 @@ function el(tag, className = '', text = '') {
   return item;
 }
 function link(text, href, className = '') {
-  const item = el('a', className, text);
-  item.href = href;
-  return item;
+  const item = el('a', className, text); item.href = href; return item;
 }
 
-// Ordinary navigation links retain native keyboard and browser-history behavior.
 const menu = el('nav', 'learn-nav');
 menu.setAttribute('aria-label', 'Learning resources');
 const menuButton = el('button', 'learn-toggle', 'Learn');
 menuButton.type = 'button';
 menuButton.setAttribute('aria-expanded', 'false');
 menuButton.setAttribute('aria-controls', 'learn-links');
+menuButton.setAttribute('aria-label', 'Learn');
 const menuPanel = el('div', 'learn-menu');
-menuPanel.id = 'learn-links';
-menuPanel.hidden = true;
-menuPanel.append(el('p', '', 'Learning chapters'));
-chapters.forEach((chapter, index) => menuPanel.append(link(`${index + 1}. ${chapter.menu}`, `./learn.html#${chapter.id}`)));
-menuPanel.append(link('Back to troubleshooting', './index.html', 'menu-return'));
+menuPanel.id = 'learn-links'; menuPanel.hidden = true;
+menuPanel.append(el('p', '', 'Learning resources'));
+const chapterLink = link('Chapter 1 · Optics, fiber & light', './learn.html');
+menuPanel.append(chapterLink, link('Back to troubleshooting', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {
-  menuPanel.hidden = true;
-  menuButton.setAttribute('aria-expanded', 'false');
+  menuPanel.hidden = true; menuButton.setAttribute('aria-expanded', 'false');
   if (restoreFocus) menuButton.focus();
 }
 menuButton.addEventListener('click', () => {
@@ -87,87 +37,169 @@ document.addEventListener('keydown', event => {
 });
 
 const lesson = document.querySelector('#lesson');
-if (lesson) {
-  window.addEventListener('hashchange', () => renderChapter(true));
-  renderChapter();
-}
-function renderChapter(moveFocus = false) {
-  const index = Math.max(0, chapters.findIndex(chapter => `#${chapter.id}` === location.hash));
-  const chapter = chapters[index];
-  document.title = `${chapter.title} | Fiber basics`;
-  lesson.replaceChildren();
-  lesson.append(el('p', 'chapter-count', `Chapter ${index + 1} of ${chapters.length}`));
-  const title = el('h2', '', chapter.title);
-  title.id = 'lesson-title'; title.tabIndex = -1;
-  lesson.append(title, el('p', 'lesson-intro', chapter.intro));
-  const example = el('div', 'lesson-example');
-  const figure = el('figure', 'lesson-figure');
-  const options = el('div', 'lesson-options');
-  options.setAttribute('role', 'group'); options.setAttribute('aria-label', 'Choose an illustration');
-  function showExample(selected) {
-    const art = illustration(chapter.id, selected);
-    figure.innerHTML = `<svg viewBox="0 0 360 180" role="img" aria-label="${art.caption}"><defs><marker id="lesson-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#245b91"/></marker></defs>${art.drawing}</svg>`;
-    figure.append(el('figcaption', '', art.caption));
-    [...options.children].forEach((button, number) => button.setAttribute('aria-pressed', String(number === selected)));
+
+function renderLesson() {
+  chapterLink.setAttribute('aria-current', 'page');
+  lesson.innerHTML = `
+    <div class="chapter-heading"><p class="chapter-count">Chapter 1</p><button type="button" class="lesson-motion"></button></div>
+    <h2 id="lesson-title">Optics, fiber & light</h2>
+    <p class="lesson-intro">Follow the light from the optic, through the fiber, to the test.</p>
+    <nav class="lesson-jumps" aria-label="In this chapter">
+      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#loopbacks">Loopbacks</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
+    </nav>
+    <section id="optics" class="lesson-section" aria-labelledby="light-title">
+      <h3 id="light-title">Two light sources, different jobs</h3>
+      <div class="light-comparison">
+        <div class="light-example ir-example"><h4>Optic · infrared</h4><div id="ir-picture"></div><p>Converts device data into light. <b>TX sends. RX receives.</b></p><span class="light-key ir-key">Invisible to your eyes · blue is illustrative</span></div>
+        <div class="light-example red-example"><h4>VFL · visible red</h4><div id="red-picture"></div><p>A separate tool sends red light into <b>isolated fiber</b> to trace it.</p><span class="light-key red-key">Visible red · does not carry network data</span></div>
+      </div>
+      <p class="picture-note">Moving light shows direction. Fiber does not normally glow along its whole jacket. Never look into a fiber end.</p>
+    </section>
+    <section id="path" class="lesson-section" aria-labelledby="path-title">
+      <h3 id="path-title">The fiber carries the light</h3>
+      <p class="section-intro">In your layout: LC followers join an MMC leader at the passive.</p>
+      <div id="path-picture"></div>
+      <p class="lesson-takeaway">A passive routes light; it does not make it. Follow the mapped port, strand and TX → RX pairing.</p>
+    </section>
+    <section id="loopbacks" class="lesson-section" aria-labelledby="loop-title">
+      <h3 id="loop-title">Bring TX light back to RX</h3>
+      <p class="section-intro">Move the loop to see what you are testing.</p>
+      <div id="loop-picture"></div>
+      <div id="readings" class="learning-readings"><span><b>RX +0.25</b> your good example</span><span><b>RX −40</b> your no-light indication</span></div>
+      <p class="picture-note">dBm examples. Check every lane against the optic’s limits. Use the correct loop mapping and any required attenuation.</p>
+    </section>
+    <section id="cleaning" class="lesson-section" aria-labelledby="fault-title">
+      <h3 id="fault-title">What can interrupt the light?</h3>
+      <p class="section-intro">Change the connection to see a possible effect.</p>
+      <div id="fault-picture"></div>
+      <p class="lesson-takeaway">Isolate → inspect → clean if needed → inspect again → seat fully. Keep bends within the cable’s allowed radius.</p>
+    </section>
+    <section id="vfl" class="lesson-section" aria-labelledby="vfl-title">
+      <h3 id="vfl-title">Follow red light to the next passive</h3>
+      <p class="section-intro">Isolate both ends of the accessible section from active equipment. Connect the VFL with the correct adapter.</p>
+      <div id="vfl-picture"></div>
+      <p class="lesson-takeaway">VFL helps trace continuity and mapping. Measure optical loss separately with a source and power meter or loss test set.</p>
+    </section>
+    <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>
+    <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
+  let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const motion = lesson.querySelector('.lesson-motion');
+  function updateMotion() {
+    lesson.classList.toggle('light-paused', paused);
+    motion.textContent = paused ? 'Play light' : 'Pause light';
+    motion.setAttribute('aria-label', paused ? 'Play all light animations' : 'Pause all light animations');
   }
-  if (chapter.options) {
-    chapter.options.forEach((name, number) => {
-      const button = el('button', '', name); button.type = 'button';
-      button.addEventListener('click', () => showExample(number)); options.append(button);
-    });
-    example.append(options);
+  motion.addEventListener('click', () => { paused = !paused; updateMotion(); });
+  updateMotion();
+  example('ir-picture', 'Optic infrared light', [], opticPicture);
+  example('red-picture', 'Visible red VFL light', [], redPicture);
+  example('path-picture', 'Fiber route', [], pathPicture);
+  example('loop-picture', 'Loop location', ['LC at optic', 'MMC at passive'], loopPicture);
+  example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
+  example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
+  // Old chapter links now land on the matching part of this single chapter.
+  function scrollToSection() {
+    const target = document.getElementById(location.hash.slice(1));
+    if (target && lesson.contains(target)) target.scrollIntoView({block:'start'});
   }
-  showExample(0);
-  example.append(figure); lesson.append(example);
-  const points = el('dl', 'lesson-points');
-  chapter.points.forEach(([term, description]) => {
-    const row = el('div'); row.append(el('dt', '', term), el('dd', '', description)); points.append(row);
-  });
-  lesson.append(points);
-  const apply = el('aside', 'lesson-apply');
-  apply.append(el('strong', '', 'Use it in your check'), el('p', '', chapter.apply)); lesson.append(apply);
-  const sources = el('p', 'lesson-sources', 'References: ');
-  chapter.sources.forEach((key, number) => {
-    if (number) sources.append(document.createTextNode(' · '));
-    const [name, url] = references[key];
-    const source = link(name, url); source.target = '_blank'; source.rel = 'noopener noreferrer'; sources.append(source);
-  });
-  lesson.append(sources);
-  const navigation = document.querySelector('#chapter-navigation'); navigation.replaceChildren();
-  navigation.append(index ? link('← Previous chapter', `#${chapters[index - 1].id}`) : link('← Your check', './index.html'));
-  navigation.append(index < chapters.length - 1 ? link(`Next: ${chapters[index + 1].menu} →`, `#${chapters[index + 1].id}`) : link('Use the troubleshooting diagram →', './index.html'));
-  menuPanel.querySelectorAll('a').forEach(item => {
-    if (item.hash === `#${chapter.id}`) item.setAttribute('aria-current', 'page'); else item.removeAttribute('aria-current');
-  });
-  if (moveFocus) { title.focus({preventScroll:true}); window.scrollTo({top:0,behavior:'instant'}); }
+  window.addEventListener('hashchange', scrollToSection);
+  requestAnimationFrame(scrollToSection);
 }
 
-function illustration(id, selected) {
-  const box = (x,y,w,h,label,extra='') => `<rect class="lesson-device ${extra}" x="${x}" y="${y}" width="${w}" height="${h}" rx="5"/><text text-anchor="middle" x="${x+w/2}" y="${y+h/2+5}">${label}</text>`;
-  const wire = (path,extra='') => `<path class="lesson-wire ${extra}" d="${path}" marker-end="url(#lesson-arrow)"/>`;
-  if (id === 'optics') return {
-    caption:'TX sends light through the fiber. RX receives light from the other optic.',
-    drawing:box(8,43,70,92,'Device')+box(89,43,73,92,'Optic')+box(278,43,73,92,'Optic')+wire('M78 89 H89')+wire('M162 66 H278')+wire('M278 111 H162','return-wire')+'<text class="small" x="131" y="62">TX</text><text class="small" x="131" y="126">RX</text><text class="small" x="283" y="62">RX</text><text class="small" x="283" y="126">TX</text><text text-anchor="middle" x="219" y="48">Fiber</text><text class="small" text-anchor="middle" x="180" y="161">Electrical data ↔ light ↔ electrical data</text>'
-  };
-  if (id === 'path') return {
-    caption:'Example route: LC followers → MMC leader → passive ports → remote end. Use your site’s map.',
-    drawing:box(6,12,72,43,'Optic')+box(112,12,96,43,'LC legs')+box(242,12,112,43,'MMC leader')+box(242,112,112,43,'CAS passive')+box(112,112,96,43,'Next passive')+box(6,112,72,43,'Remote')+wire('M78 33 H112')+wire('M208 33 H242')+wire('M298 55 V112')+wire('M242 134 H208')+wire('M112 134 H78')+'<text class="small" x="115" y="76">Followers</text><text class="small" x="247" y="174">Mapped port / strand</text>'
-  };
-  if (id === 'readings') return {
-    caption:selected ? 'Example: TX is present, but RX shows no received light. The fault location is still unknown.' : 'Site example: +0.25 dBm. Actual acceptable readings depend on the optic’s RX and TX limits.',
-    drawing:`<text text-anchor="middle" x="180" y="30">Example health report · dBm</text><rect x="22" y="53" width="145" height="70" rx="5" fill="#1d703f"/><rect x="193" y="53" width="145" height="70" rx="5" fill="${selected ? '#be2532' : '#1d703f'}"/><text class="health-label" x="40" y="78">TX</text><text class="health-value" x="40" y="109">+0.25</text><text class="health-label" x="211" y="78">RX</text><text class="health-value" x="211" y="109">${selected ? '−40' : '+0.25'}</text><text text-anchor="middle" x="180" y="155">${selected ? 'Sending light ≠ receiving light' : 'Check every affected lane'}</text>`
-  };
-  if (id === 'cleaning') return {
-    caption:selected ? 'Dirty example: particles cover part of the core. Cleaning may help; inspect again to verify.' : 'Enlarged drawing of a clean end face. Use approved inspection equipment to check the actual connector.',
-    drawing:`<circle class="end-face" cx="99" cy="89" r="63"/><circle class="fiber-core" cx="99" cy="89" r="10"/><path class="lesson-callout" d="M109 85 L182 42 H199 M159 105 H199"/><text x="205" y="46">Core</text><text x="205" y="109">End face</text>${selected ? '<g class="contamination"><circle cx="103" cy="86" r="7"/><circle cx="75" cy="55" r="5"/><circle cx="132" cy="119" r="6"/><path d="M91 94 Q106 99 113 91"/></g><path class="lesson-callout" d="M114 94 L182 149 H199"/><text x="205" y="153">Dust / oil</text>' : '<text class="small" x="205" y="153">No visible debris</text>'}`
-  };
-  if (id === 'loopbacks') return {
-    caption:selected ? 'MMC loop at the passive: the return includes the optic and the fiber path to this loop point.' : 'LC loop at the optic: TX returns directly to RX through the short loopback.',
-    drawing:box(10,48,91,82,'Optic')+'<text class="small" x="75" y="65">TX</text><text class="small" x="75" y="121">RX</text>'+wire('M101 73 H270 Q316 73 316 91 Q316 109 270 109 H101')+(selected ? '<rect class="lesson-connector" x="209" y="60" width="32" height="62" rx="3"/><text class="small" x="122" y="47">LC legs + fiber</text><text class="small" x="199" y="144">MMC / passive</text><text class="small" x="264" y="47">MMC loop</text>' : '<rect class="lesson-connector" x="104" y="64" width="35" height="18" rx="2"/><rect class="lesson-connector" x="104" y="100" width="35" height="18" rx="2"/><text x="187" y="47">LC loopback</text>')
-  };
-  const seen = selected === 0, wrong = selected === 2;
-  return {
-    caption:seen ? 'Light at the expected port supports continuity. Measure loss separately.' : wrong ? 'Light at a different port suggests a mapping or polarity problem. Check the route.' : 'No light at the expected port: verify the VFL setup, connections and the fiber span.',
-    drawing:box(12,10,80,32,'Optic','offline')+'<text class="small" x="106" y="31">Disconnected</text>'+box(12,85,80,42,'VFL')+'<circle class="vfl-red" cx="80" cy="97" r="3"/>'+box(248,53,104,106,'')+`<path class="lesson-wire ${seen ? 'return-wire' : 'uncertain-wire'}" d="M92 106 H159 Q180 106 180 82 H269"/>${wrong ? '<path class="lesson-wire wrong-wire" d="M92 106 H159 Q180 106 180 132 H269"/>' : ''}<text class="small" x="252" y="44">Next passive</text><circle class="${seen ? 'vfl-red' : 'vfl-dark'}" cx="269" cy="82" r="8"/><text class="small" x="283" y="87">Expected</text><circle class="${wrong ? 'vfl-red' : 'vfl-dark'}" cx="269" cy="132" r="8"/><text class="small" x="283" y="137">Other</text>`
-  };
+function example(id, label, choices, draw) {
+  const host = document.getElementById(id);
+  const controls = el('div', 'lesson-options');
+  controls.setAttribute('role', 'group'); controls.setAttribute('aria-label', label);
+  const figure = el('figure', 'lesson-figure');
+  const caption = el('figcaption'); caption.setAttribute('aria-live', 'polite');
+  function show(selected) {
+    const art = draw(selected);
+    figure.innerHTML = `<svg viewBox="0 0 360 ${art.height || 210}" role="img" aria-label="${art.caption}">${art.drawing}</svg>`;
+    caption.textContent = art.caption; figure.append(caption);
+    [...controls.children].forEach((button, index) => button.setAttribute('aria-pressed', String(index === selected)));
+  }
+  choices.forEach((choice, index) => {
+    const button = el('button', '', choice); button.type = 'button';
+    button.addEventListener('click', () => show(index)); controls.append(button);
+  });
+  if (choices.length) host.append(controls);
+  host.append(figure); show(0);
 }
+
+const text = (x,y,value,extra='') => `<text x="${x}" y="${y}" ${extra}>${value}</text>`;
+const box = (x,y,w,h,label,extra='') => `<rect class="learn-device ${extra}" x="${x}" y="${y}" width="${w}" height="${h}" rx="6"/>${text(x+w/2,y+h/2+5,label,'text-anchor="middle"')}`;
+function light(path, color='ir', strength='') {
+  return `<path class="learn-cable" d="${path}"/><path class="learn-signal ${color} ${strength}" d="${path}"/>`;
+}
+function optic(x,y) {
+  return `<g transform="translate(${x} ${y})"><rect class="optic-metal" x="0" y="0" width="105" height="70" rx="5"/><path class="optic-detail" d="M10 8 H72 M10 16 H72 M10 54 H72 M10 62 H72"/><rect class="optic-port" x="84" y="8" width="29" height="20" rx="2"/><rect class="optic-port" x="84" y="42" width="29" height="20" rx="2"/>${text(12,40,'Optic')}${text(88,23,'TX','class="small"')}${text(88,57,'RX','class="small"')}</g>`;
+}
+function vfl(x,y) {
+  return `<g transform="translate(${x} ${y})"><rect class="vfl-body" x="0" y="0" width="102" height="43" rx="19"/><path class="vfl-grip" d="M13 8 V35 M20 8 V35 M27 8 V35"/><rect class="vfl-tip" x="94" y="11" width="23" height="21" rx="2"/><circle class="red-dot" cx="77" cy="21" r="5"/>${text(36,27,'VFL')}</g>`;
+}
+function opticPicture() {
+  return {height:200, caption:'IR carries data. The receiver turns arriving light back into electrical data.', drawing:
+    text(16,27,'Electrical data → light')+optic(12,52)+box(277,52,73,70,'Optic')+
+    light('M125 70 H277')+light('M277 104 H125')+
+    text(190,57,'TX → RX','class="small" text-anchor="middle"')+text(190,129,'RX ← TX','class="small" text-anchor="middle"')+
+    '<path class="ir-arrow" d="M210 65 l8 5 -8 5 M186 99 l-8 5 8 5"/>'+text(180,172,'No visible glow does not mean no light.','class="small" text-anchor="middle"')};
+}
+function redPicture() {
+  return {height:200, caption:'Red light can be detected at the test end using the site’s safe viewing method.', drawing:
+    text(16,27,'Visible red test light')+vfl(12,69)+light('M129 90 H279','red')+
+    '<rect class="lc-plug" x="268" y="75" width="43" height="30" rx="3"/><circle class="red-halo" cx="318" cy="90" r="19"/><circle class="red-dot" cx="318" cy="90" r="8"/>'+
+    '<path class="red-arrow" d="M210 85 l8 5 -8 5"/>'+text(207,57,'Isolated fiber','class="small" text-anchor="middle"')+text(180,145,'Active equipment disconnected','class="small" text-anchor="middle"')};
+}
+function pathPicture() {
+  return {height:238, caption:'One example pair inside the group. Follow your site’s full lane map.', drawing:
+    optic(5,34)+'<rect class="lc-plug" x="120" y="42" width="27" height="19" rx="2"/><rect class="lc-plug" x="120" y="76" width="27" height="19" rx="2"/>'+
+    '<rect class="mmc-plug" x="233" y="36" width="35" height="70" rx="4"/><rect class="learn-device" x="271" y="27" width="78" height="90" rx="5"/>'+
+    light('M113 52 H310 V173 H89')+light('M89 191 H330 V86 H113')+
+    text(120,22,'LC legs','class="small"')+text(125,124,'Followers','class="small"')+text(205,22,'MMC leader','class="small"')+
+    text(290,138,'CAS 1 · Port 12','class="small" text-anchor="end"')+
+    box(8,159,80,47,'Next')+text(12,224,'Next passive → remote optic','class="small"')+
+    '<path class="ir-arrow" d="M203 47 l8 5 -8 5 M207 168 l-8 5 8 5 M211 186 l8 5 -8 5"/>'};
+}
+function loopPicture(selected) {
+  return {height:215, caption:selected ? 'MMC loop: optic + LC legs + fiber to this passive. Beyond the loop remains untested.' : 'LC loop: a short return tests the local optic. The longer fiber route is not included.', drawing:
+    optic(8,67)+light('M121 85 H284 Q334 85 334 102 Q334 119 284 119 H121')+
+    (selected ? '<rect class="mmc-plug" x="237" y="72" width="26" height="60" rx="3"/>'+text(155,59,'LC + fiber','class="small"')+text(250,157,'MMC at passive','class="small" text-anchor="middle"')+text(250,179,'CAS 1 · Port 12','class="small" text-anchor="middle"') : '<rect class="lc-plug" x="123" y="76" width="32" height="18" rx="2"/><rect class="lc-plug" x="123" y="110" width="32" height="18" rx="2"/>'+text(241,59,'LC loopback','text-anchor="middle"'))+
+    '<path class="ir-arrow" d="M199 80 l8 5 -8 5 M207 114 l-8 5 8 5"/>'+text(180,27,'TX out → loop → RX back','text-anchor="middle"')};
+}
+function faultPicture(selected) {
+  const captions = [
+    'Clean and seated: light can couple across the connection.',
+    'Dirt at the core can block or scatter light. Clean, then inspect again.',
+    'A connector that is not fully seated can cause loss or no light. Check the latch.',
+    'An overly tight bend can let light escape from the core, reducing received power.'
+  ];
+  let drawing = text(12,24,selected === 3 ? 'Fiber side view · exaggerated' : 'Connection close-up · enlarged','class="small"');
+  if (selected === 3) {
+    drawing += light('M15 100 H150 Q195 100 195 130 Q195 155 177 155 Q160 155 160 135 V70 Q160 45 197 45 H345','ir','dim-light');
+    drawing += light('M15 100 H149 Q174 100 188 115')+'<path class="escape-rays" d="M194 132 l33 12 M191 147 l23 25 M173 156 l3 27"/>'+text(237,102,'Light lost','class="small"')+text(237,125,'at the bend','class="small"');
+  } else {
+    const gap = selected === 2 ? 34 : 6;
+    drawing += '<rect class="connector-cutaway" x="16" y="64" width="148" height="65" rx="5"/>'+`<rect class="connector-cutaway" x="${164+gap}" y="64" width="${180-gap}" height="65" rx="5"/>`;
+    drawing += light('M16 96 H164')+light(`M${164+gap} 96 H344`,'ir',selected ? 'dim-light' : '');
+    drawing += `<path class="mating-face" d="M164 61 V133 M${164+gap} 61 V133"/>`;
+    if (selected === 1) drawing += '<g class="dirt"><circle cx="167" cy="94" r="7"/><circle cx="163" cy="74" r="4"/><circle cx="168" cy="117" r="4"/></g><path class="escape-rays" d="M168 92 l20 -27 M168 97 l22 24"/>';
+    if (selected === 2) drawing += text(181,154,'Gap','class="small" text-anchor="middle"');
+    if (selected === 0 || selected === 1) drawing += '<circle class="scope-face" cx="66" cy="177" r="27"/><circle class="scope-core" cx="66" cy="177" r="6"/>'+(selected ? '<circle class="dirt" cx="68" cy="175" r="6"/><circle class="dirt" cx="53" cy="165" r="3"/>' : '')+text(108,174,'End face under a scope','class="small"')+text(108,193,selected ? 'Debris covers the core' : 'Core is clear','class="small"');
+  }
+  return {height:220, caption:captions[selected], drawing};
+}
+function vflPicture(selected) {
+  const seen = selected === 0, wrong = selected === 2;
+  const captions = ['Red at the expected port: this section has continuity. Continue to the next accessible section.', 'Expected port is dark: check the VFL setup, both connections and this span. The fault location is not yet known.', 'Red at another port: check the mapped route, strand and polarity before continuing.'];
+  return {height:250, caption:captions[selected], drawing:
+    box(10,9,79,31,'Optic','offline')+text(103,30,'Disconnected from test section','class="small"')+
+    (!seen ? '<rect class="suspect-section" x="135" y="64" width="215" height="145" rx="7"/>' : '')+
+    vfl(10,110)+'<rect class="learn-device" x="254" y="78" width="92" height="117" rx="5"/>'+text(300,64,'Next passive','class="small" text-anchor="middle"')+
+    (seen ? light('M127 131 H178 Q192 131 192 107 H270','red') : '<path class="untraced-fiber" d="M127 131 H178 Q192 131 192 107 H270"/>')+
+    (wrong ? light('M127 131 H178 Q192 131 192 165 H270','red') : '')+
+    `<circle class="${seen ? 'red-halo' : 'dark-port'}" cx="270" cy="107" r="14"/><circle class="${seen ? 'red-dot' : 'dark-port'}" cx="270" cy="107" r="6"/><circle class="${wrong ? 'red-halo' : 'dark-port'}" cx="270" cy="165" r="14"/><circle class="${wrong ? 'red-dot' : 'dark-port'}" cx="270" cy="165" r="6"/>`+
+    text(290,111,'Right','class="small"')+text(290,169,'Other','class="small"')+
+    text(180,231,seen ? 'Trace confirmed here ✓' : wrong ? 'Light found on a different route' : 'Check this section — location unknown','class="small" text-anchor="middle"')};
+}
+
+if (lesson) renderLesson();

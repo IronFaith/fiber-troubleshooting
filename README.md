@@ -16,7 +16,7 @@ Technical references: [Cisco optical troubleshooting](https://www.cisco.com/c/en
 
 ## Development
 
-The top-right Learn menu opens six short chapters in `learn.html`: optics, fiber paths, health readings, contamination, loopbacks and VFL. Each chapter has an illustration, field guidance and primary references. Example buttons compare clean/dirty connections, readings, loop locations and VFL outcomes. Chapter URLs use hashes; returning to the troubleshooting page restores the existing session path. These are educational illustrations, not live measurements or site pin maps.
+The top-right Learn menu opens one illustrated chapter in `learn.html`: Optics, fiber & light. Related sections stay on one page, with optional jump links (including the old chapter hashes). Animated blue paths represent invisible optic IR; red paths represent VFL test light. A single play/pause control respects reduced-motion preferences. Interactive figures compare loop locations, clean/dirty/unseated connections, excessive bending and VFL outcomes. Returning to troubleshooting restores the existing session path. These are educational illustrations, not live measurements, literal jacket glow or site pin maps.
 
 Requires Node.js; no dependencies or build step.
 
