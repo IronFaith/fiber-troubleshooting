@@ -2,6 +2,8 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 
 const files = { '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/styles.css': ['styles.css', 'text/css'], '/app.mjs': ['app.mjs', 'text/javascript'], '/flow.mjs': ['flow.mjs', 'text/javascript'], '/icon.svg': ['icon.svg', 'image/svg+xml'] };
+files['/learn.html'] = ['learn.html', 'text/html'];
+files['/learning.mjs'] = ['learning.mjs', 'text/javascript'];
 createServer(async (request, response) => {
   const file = files[new URL(request.url, 'http://localhost').pathname];
   if (!file) { response.writeHead(404); response.end('Not found'); return; }

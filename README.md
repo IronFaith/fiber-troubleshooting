@@ -16,6 +16,8 @@ Technical references: [Cisco optical troubleshooting](https://www.cisco.com/c/en
 
 ## Development
 
+The top-right Learn menu opens six short chapters in `learn.html`: optics, fiber paths, health readings, contamination, loopbacks and VFL. Each chapter has an illustration, field guidance and primary references. Example buttons compare clean/dirty connections, readings, loop locations and VFL outcomes. Chapter URLs use hashes; returning to the troubleshooting page restores the existing session path. These are educational illustrations, not live measurements or site pin maps.
+
 Requires Node.js; no dependencies or build step.
 
 ```sh
@@ -23,4 +25,4 @@ npm run dev
 npm run check
 ```
 
-GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `styles.css`, `app.mjs`, `flow.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.
+GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `learn.html`, `styles.css`, `app.mjs`, `flow.mjs`, `learning.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.
