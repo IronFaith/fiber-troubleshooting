@@ -37,19 +37,38 @@ h2:focus { outline:0; }
 .instruction { margin:9px 0 0; font-size:15px; color:#425d71; }
 .test-note { font-size:12px; color:#596f80; margin:10px 0 0; }
 .test-sketch { margin:12px 0 0; border-radius:5px; background:#edf3f7; padding:8px 12px; }
-.test-sketch svg { display:block; width:100%; max-height:84px; color:#245b91; overflow:visible; }
+.test-sketch svg { display:block; width:100%; max-height:150px; color:#245b91; overflow:visible; }
+.test-sketch.direct svg { max-height:120px; }
+.test-sketch.fiber svg { max-height:84px; }
 .test-sketch .device { fill:white; stroke:#466a84; stroke-width:2; }
 .test-sketch .group { fill:#dce9f2; stroke:#668aa4; stroke-width:1.5; }
+.test-sketch .connector { fill:#fff; stroke:#466a84; stroke-width:1.5; }
+.test-sketch .loop-plug { fill:#dbebe2; }
+.test-sketch .clip { fill:none; stroke:#466a84; stroke-width:2; }
+.test-sketch .callout { fill:none; stroke:#7a94a7; stroke-width:1; }
 .test-sketch text { fill:#264c69; font:600 14px 'Segoe UI',sans-serif; }
-.test-sketch text.small { font-size:11px; font-weight:500; }
-.test-sketch text.port { font-size:11px; }
+.test-sketch text.small { font-size:12px; font-weight:500; }
+.test-sketch text.port { font-size:12px; }
 .test-sketch .light { fill:none; stroke:currentColor; stroke-width:3; }
+.test-sketch .light.return { stroke:#226946; }
 .test-sketch.fiber { color:#a74e28; }
 figcaption { color:#536c7c; font-size:11px; text-align:center; margin-top:3px; }
-.decision { position:relative; width:90%; margin:24px auto 0; padding:13px 16px; display:flex; align-items:center; justify-content:center; gap:10px; border:2px solid #7594aa; background:#e8eff4; border-radius:4px; text-align:center; }
+.decision { position:relative; width:90%; margin:24px auto 0; padding:13px 16px; border:2px solid #7594aa; background:#e8eff4; border-radius:4px; text-align:center; }
+.decision-question { display:flex; align-items:center; justify-content:center; gap:10px; }
 .decision::before { content:''; position:absolute; left:calc(50% - 1.5px); bottom:100%; height:26px; width:3px; background:var(--blue); }
 .decision-icon { display:grid; place-items:center; border:1px solid #8aa5b8; border-radius:50%; font-size:12px; width:22px; height:22px; flex-shrink:0; }
 h3 { font-size:17px; line-height:1.3; margin:0; }
+.reading-examples { display:grid; grid-template-columns:1fr 1fr; gap:7px 14px; margin-top:12px; }
+.reading-example { min-width:0; }
+.reading-label { display:block; font-size:12px; font-weight:650; margin-bottom:5px; }
+.reading-example.good { color:#195735; }
+.reading-example.dark { color:#a7212c; }
+.reading-values { display:flex; justify-content:center; gap:5px; }
+.reading-badge { display:flex; align-items:center; gap:5px; padding:4px 7px; border-radius:3px; background:#1d703f; color:#fff; white-space:nowrap; }
+.dark .reading-badge { background:#be2532; }
+.reading-badge > span { font-size:10px; font-weight:600; }
+.reading-badge strong { font-size:15px; font-variant-numeric:tabular-nums; }
+.reading-note { grid-column:1 / -1; font-size:11px; color:#526a7d; margin:0; }
 .branches { position:relative; display:grid; grid-template-columns:1fr 1fr; gap:24px; padding-top:34px; }
 .branches::before { content:''; position:absolute; left:calc(50% - 1.5px); top:0; height:17px; width:3px; background:var(--line); }
 .branches::after { content:''; position:absolute; left:calc(25% - 6px); right:calc(25% - 6px); top:16px; height:2px; background:var(--line); }
@@ -72,13 +91,18 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
   header { margin-bottom:17px; }
   header p { font-size:13px; }
   .loop-choice button { font-size:13px; padding:10px 8px; }
-  .action-card { padding:15px 16px; }
+  .action-card { padding:12px 16px; }
   .instruction { font-size:14px; }
   .test-sketch { padding:5px 4px; }
-  .test-sketch svg { max-height:95px; }
+  .test-sketch svg { max-height:150px; }
+  .test-sketch.direct svg { max-height:120px; }
+  .test-sketch.fiber svg { max-height:95px; }
   .decision { width:94%; padding:11px 12px; margin-top:21px; }
   .decision::before { height:23px; }
   h3 { font-size:16px; }
+  .reading-examples { gap:7px 8px; }
+  .reading-badge { padding:4px 5px; gap:3px; }
+  .reading-badge strong { font-size:14px; }
   .branches { gap:16px; }
   .branches::after { left:calc(25% - 4px); right:calc(25% - 4px); }
   .branch { padding:11px 12px; }

@@ -7,15 +7,15 @@
   <meta name="description" content="Loop the optic, choose the result, and follow a simple fiber troubleshooting diagram.">
   <title>Optic / fiber health</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=5">
-  <script type="module" src="./app.mjs?v=5"></script>
+  <link rel="stylesheet" href="./styles.css?v=6">
+  <script type="module" src="./app.mjs?v=6"></script>
 </head>
 <body>
   <main>
     <header><img src="./icon.svg" width="30" height="30" alt=""><div><h1>Optic / fiber health</h1><p>Loop the optic. Follow the result.</p></div></header>
     <fieldset class="loop-choice"><legend>Where are you looping?</legend><div>
-      <button type="button" data-mode="direct" aria-pressed="true">At the optic</button>
-      <button type="button" data-mode="passive" aria-pressed="false">At a passive / CAS</button>
+      <button type="button" data-mode="direct" aria-pressed="true">LC at the optic</button>
+      <button type="button" data-mode="passive" aria-pressed="false">MMC at the passive</button>
     </div></fieldset>
     <nav class="toolbar" aria-label="Troubleshooting controls"><span id="step-label">Step 1</span><div><button id="back" type="button" disabled>← Back</button><button id="restart" type="button" disabled>Restart</button></div></nav>
     <div id="diagram" aria-label="Your troubleshooting path"></div>

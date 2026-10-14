@@ -1,4 +1,4 @@
-import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs?v=5';
+import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs?v=6';
 
 const storageKey = 'fiberline-loop-first-v5';
 let mode = 'direct';
@@ -25,24 +25,42 @@ function change(next) {
 }
 function sketch(kind) {
   const figure = el('figure', `test-sketch ${kind}`);
-  const defs = '<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="currentColor"/></marker></defs>';
+  const defs = '<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#245b91"/></marker><marker id="return-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#226946"/></marker></defs>';
   let drawing, caption, label;
   if (kind === 'direct') {
-    label = 'Light leaves optic TX, passes through the direct loopback, and returns to optic RX.';
-    drawing = '<rect class="device" x="15" y="12" width="104" height="74" rx="6"/><text x="35" y="53">Optic</text><text class="port" x="91" y="34">TX</text><text class="port" x="91" y="72">RX</text><path class="light" d="M120 30 H239 Q263 30 263 50 Q263 70 239 70 H120" marker-end="url(#arrow)"/><text x="158" y="53">Loopback</text>';
-    caption = 'Tests the optic through the direct loop.';
+    label = 'LC loopback at the optic. Light leaves TX through one LC plug, loops around, and returns through the other LC plug to RX.';
+    drawing = '<rect class="device" x="23" y="37" width="105" height="79" rx="6"/><text x="37" y="82">Optic</text><text class="port" x="103" y="57">TX</text><text class="port" x="103" y="104">RX</text><rect class="connector" x="129" y="43" width="37" height="18" rx="2"/><rect class="connector" x="129" y="91" width="37" height="18" rx="2"/><path class="clip" d="M138 40 H160 M138 88 H160"/><path class="light" d="M128 52 H224" marker-end="url(#arrow)"/><path class="light" d="M225 52 H267 Q296 52 296 76"/><path class="light return" d="M296 76 Q296 100 267 100 H128" marker-end="url(#return-arrow)"/><text x="189" y="27">LC loopback</text><text class="small" x="184" y="76">TX out / RX back</text>';
+    caption = 'Light leaves TX and loops back to RX.';
   } else if (kind === 'passive') {
-    label = 'Loop path: optic, MMC leader and mapped LC follower group, passive loop, back to the optic. Group illustration, not a pin map.';
-    drawing = '<rect class="device" x="5" y="20" width="64" height="60" rx="6"/><text x="15" y="55">Optic</text><rect class="group" x="91" y="12" width="147" height="77" rx="6"/><text x="106" y="38">MMC leader</text><text class="small" x="107" y="61">LC legs / followers</text><path class="light" d="M69 33 H91 M238 33 H286 Q310 33 310 51 Q310 71 286 71 H238 M91 71 H69" marker-end="url(#arrow)"/><text class="small" x="263" y="17">CAS loop</text>';
-    caption = 'Tests the optic + fiber to the loop point.';
+    label = 'MMC loopback at passive CAS 1 Port 12. Optic TX connects through an LC follower and the MMC leader to the passive loop; light returns through the mapped LC follower to optic RX. One test pair is illustrated, not the full lane map.';
+    drawing = '<text x="8" y="33">Optic</text><rect class="device" x="6" y="49" width="62" height="69" rx="5"/><text class="port" x="39" y="74">TX</text><text class="port" x="39" y="108">RX</text><rect class="connector" x="70" y="62" width="23" height="16" rx="2"/><rect class="connector" x="70" y="96" width="23" height="16" rx="2"/><text class="small" x="85" y="45">LC legs</text><text class="small" x="85" y="132">Followers</text><rect class="connector" x="203" y="59" width="27" height="56" rx="3"/><text class="small" x="159" y="31">MMC leader</text><path class="callout" d="M204 36 L215 56"/><rect class="group" x="231" y="51" width="13" height="72" rx="2"/><text class="small" x="216" y="15">CAS 1 · Port 12</text><path class="callout" d="M240 20 V49"/><rect class="connector loop-plug" x="245" y="59" width="27" height="56" rx="3"/><path class="light" d="M68 70 H169" marker-end="url(#arrow)"/><path class="light" d="M170 70 H302 Q326 70 326 87"/><path class="light return" d="M326 87 Q326 104 302 104 H68" marker-end="url(#return-arrow)"/><text class="small" x="236" y="140">MMC loopback</text><path class="callout" d="M265 125 L259 117"/>';
+    caption = 'Tests the optic + LC legs + MMC path to the loop.';
   } else {
     label = 'VFL connected to isolated fiber, traced to the expected passive port.';
     drawing = '<rect class="device" x="7" y="28" width="69" height="43" rx="6"/><text x="28" y="54">VFL</text><path class="light" d="M76 50 H228" marker-end="url(#arrow)"/><text class="small" x="110" y="36">Isolated fiber</text><rect class="group" x="236" y="21" width="100" height="58" rx="6"/><text x="255" y="46">Expected</text><text x="271" y="66">port</text>';
     caption = 'Check the exact port and strand.';
   }
-  figure.innerHTML = `<svg viewBox="0 0 350 100" role="img" aria-label="${label}">${defs}${drawing}</svg>`;
+  figure.innerHTML = `<svg viewBox="0 0 350 ${kind === 'fiber' ? 100 : kind === 'direct' ? 125 : 150}" role="img" aria-label="${label}">${defs}${drawing}</svg>`;
   figure.append(el('figcaption', '', caption));
   return figure;
+}
+function readingExamples() {
+  const examples = el('div', 'reading-examples');
+  examples.setAttribute('aria-label', 'Example optic health readings in dBm');
+  for (const [state, label, value] of [['good', '✓ Good example', '+0.25'], ['dark', '× No light', '−40']]) {
+    const example = el('div', `reading-example ${state}`);
+    example.append(el('span', 'reading-label', label));
+    const values = el('div', 'reading-values');
+    for (const signal of ['RX', 'TX']) {
+      const badge = el('span', 'reading-badge');
+      badge.append(el('span', '', signal), el('strong', '', value));
+      values.append(badge);
+    }
+    example.append(values);
+    examples.append(example);
+  }
+  examples.append(el('p', 'reading-note', 'dBm examples · use site / optic limits'));
+  return examples;
 }
 function render(moveFocus = false) {
   diagram.replaceChildren();
@@ -85,7 +103,10 @@ function render(moveFocus = false) {
   current.append(card);
   if (!node.terminal) {
     const decision = el('div', 'decision');
-    decision.append(el('span', 'decision-icon', '?'), el('h3', '', node.title));
+    const question = el('div', 'decision-question');
+    question.append(el('span', 'decision-icon', '?'), el('h3', '', node.title));
+    decision.append(question);
+    if (node.visual === 'direct' || node.visual === 'passive' || ['compare', 'reconnect'].includes(currentNode(history, mode))) decision.append(readingExamples());
     current.append(decision);
     const branches = el('div', 'branches');
     for (const answer of ['yes', 'no']) {
