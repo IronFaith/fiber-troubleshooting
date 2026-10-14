@@ -1,24 +1,22 @@
-# Fiber troubleshooting
-
-A Yes/No decision diagram for a reported low-RX condition, adapted from the supplied Fiberline guide and the user's optic-health workflow.
+# Optic / fiber health
 
 Live site: https://ironfaith.github.io/fiber-troubleshooting/
 
-Every answered question retains both branches. A colored elbow connects the selected branch to the next question. Use Back, an earlier question, or either earlier branch to revise an answer; downstream answers are discarded. Start over clears the path. Progress survives refresh in the same tab when session storage is available. No account, analytics, or backend is used.
+A small, dependency-free Yes/No troubleshooting diagram. Start with a direct optic loop or a loop at a passive. Each screen shows one action, a short test-path sketch where useful, and one result question. Branches preview the next action. The compact trail retains the chosen answers and connects them to the current action. Click a previous step or Back to revise a result; later answers are discarded. Restart clears the path; changing loop location starts a fresh path. Session storage preserves the selected mode and valid history.
 
-Start with the optic health report at both active ends. Check seating and cleanliness, then require both optics to pass a valid reference-link or supported optical-loopback test before tracing the production fiber. Failed optics go to a controlled known-good comparison. Once the optics pass, trace disconnected active-to-passive fiber segments with a VFL, checking misports, polarity, passive connections, and tight bends. Repeat for each segment and affected strand. Confirm end-to-end compatibility, reconnect, and recheck health; persistent issues lead to measured loss testing. Unavailable tests remain unanswered, not assumed to pass or fail. The final result retains relevant evidence and uncertainty.
+A passive loop covers the optic plus the fiber and connections to its loop point. A failed passive loop leads to direct optic isolation, not an immediate optic-failure conclusion. A valid direct-loop failure leads to inspection/cleaning and a controlled known-good comparison. Passing optic tests lead to VFL tracing, route/polarity checks, and loss testing when needed. A VFL pass does not prove an acceptable optical loss budget. Test availability is not assumed: answer only after a valid site-approved test.
 
-The application does not connect to Cable Guy or contain actual reports, hostnames, or port IDs. It does not infer good health from a badge color, positive TX telemetry, or a universal dBm threshold. The source snapshot and the public site remain separate.
+MMC leader / LC follower illustrations show a functional group, not a pin map, fiber count or connector specification. Use the site's exact lane mapping and supported loopback/attenuation. CAS 1 Port 12 is the user's generic example, not an actual connection record. The app contains no uploaded photos or real device IDs and does not connect to Cable Guy. It has no link to the separate EOD app.
 
-Use the user's connection layout alongside the diagram: match local/remote device interfaces from the health report, use the expected channel as the intended route, and verify the actual graph or location list in the field. The guide refers to generic active ports, passive/CAS ports, strands, and jumper serials; supplied layout screenshots and identifiers are not published.
+Technical references: [Cisco optical troubleshooting](https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html), [Fluke fiber troubleshooting](https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber), [US Conec MMC polarity](https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment).
 
 ## Development
 
-Requires Node.js. No dependencies or build step.
+Requires Node.js; no dependencies or build step.
 
 ```sh
 npm run dev
 npm run check
 ```
 
-GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `styles.css`, `app.mjs`, `flow.mjs`, and `icon.svg`.
+GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `styles.css`, `app.mjs`, `flow.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.

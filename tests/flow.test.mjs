@@ -1,72 +1,74 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { nodes, currentNode, answerQuestion, goBack, restoreHistory } from '../flow.mjs';
+import { nodes, startNode, destination, currentNode, answerQuestion, goBack, restoreHistory } from '../flow.mjs';
+const follow = (answers, mode = 'direct') => answers.reduce((history, answer) => answerQuestion(history, answer, mode), []);
+const at = (answers, mode = 'direct') => currentNode(follow(answers, mode), mode);
 
-function follow(answers) {
-  return answers.reduce((history, answer) => answerQuestion(history, answer), []);
-}
-const toOpticTest = ['no', 'no', 'no'];
-const toVfl = [...toOpticTest, 'yes'];
-
-test('optic tests gate fiber tracing; each fiber segment can repeat before recovery or loss testing', () => {
-  assert.equal(currentNode(follow(['yes', 'yes'])), 'done');
-  assert.equal(currentNode(follow(['no', 'yes'])), 'verify');
-  assert.equal(currentNode(follow(['no', 'no', 'yes'])), 'verify');
-  assert.equal(currentNode(follow(toOpticTest)), 'opticTest');
-  assert.equal(currentNode(follow([...toOpticTest, 'no', 'yes'])), 'badOptic');
-  assert.equal(currentNode(follow([...toOpticTest, 'no', 'no'])), 'opticUnresolved');
-  assert.equal(currentNode(follow(toVfl)), 'vfl');
-  // Pass first segment, trace another, find a misport, correct it, then finish tracing.
-  const traced = [...toVfl, 'yes', 'no', 'no', 'yes', 'yes', 'yes'];
-  assert.equal(currentNode(follow(traced)), 'mapping');
-  assert.equal(currentNode(follow([...traced, 'no'])), 'mismatch');
-  assert.equal(currentNode(follow([...traced, 'yes', 'yes', 'yes'])), 'done');
-  assert.equal(currentNode(follow([...traced, 'yes', 'no', 'no'])), 'excessLoss');
-  assert.equal(currentNode(follow([...traced, 'yes', 'no', 'yes'])), 'unresolved');
-  assert.equal(currentNode(follow([...toVfl, 'no', 'no', 'no'])), 'fiberUnresolved');
-  assert.equal(currentNode(follow([...toVfl, 'no', 'no', 'yes'])), 'segments');
-  assert.equal(currentNode(follow([...toVfl, 'no', 'yes', 'no'])), 'routeUnresolved');
+test('direct and passive loops isolate different sections before optic replacement or fiber tracing', () => {
+  assert.equal(at([]), 'start');
+  assert.equal(at([], 'passive'), 'passiveLoop');
+  assert.equal(at(['no']), 'clean');
+  assert.equal(at(['no','no','yes']), 'badOptic');
+  assert.equal(at(['no','no','no']), 'testFault');
+  assert.equal(at(['yes']), 'bothEnds');
+  assert.equal(at(['yes','no']), 'start');
+  assert.equal(at(['yes','no'], 'passive'), 'passiveLoop');
+  assert.equal(at(['yes','yes']), 'vfl');
+  assert.equal(at(['no'], 'passive'), 'isolate');
+  assert.equal(at(['no','yes'], 'passive'), 'patchCheck');
+  assert.equal(at(['no','yes','no'], 'passive'), 'patchFault');
+  assert.equal(at(['no','yes','yes'], 'passive'), 'bothEnds');
+  assert.equal(at(['no','no','no','yes'], 'passive'), 'badOptic');
 });
 
-test('editing the optic decision discards downstream fiber checks; segment loops survive refresh', () => {
-  const loop = follow([...toVfl, 'yes', 'no', 'yes', 'yes']);
-  assert.equal(currentNode(loop), 'mapping');
-  assert.deepEqual(restoreHistory(JSON.parse(JSON.stringify(loop))), loop);
-  const changed = answerQuestion(goBack(loop, 3), 'no');
-  assert.equal(currentNode(changed), 'opticCompare');
-  assert.equal(changed.length, 4);
-  assert.deepEqual(restoreHistory([...changed, { id: 'vfl', answer: 'yes' }]), changed);
-  assert.deepEqual(restoreHistory([{ id: 'done', answer: 'yes' }]), []);
+test('fiber routes repeat, preserve mode on refresh, and discard downstream choices when edited', () => {
+  // Both optics pass; one segment passes, another is misported and corrected.
+  const path = ['yes','yes','yes','no','no','yes','yes','yes'];
+  assert.equal(at(path), 'reconnect');
+  assert.equal(at([...path,'yes']), 'done');
+  assert.equal(at([...path,'no','no']), 'lossFault');
+  assert.equal(at([...path,'no','yes']), 'remainingFault');
+  assert.equal(at(['yes','yes','no','no','no']), 'fiberFault');
+  assert.equal(at(['yes','yes','no','yes','no']), 'routeFault');
+  const saved = follow(path, 'passive');
+  assert.deepEqual(restoreHistory(JSON.parse(JSON.stringify(saved)), 'passive'), saved);
+  assert.deepEqual(restoreHistory(saved, 'direct'), []);
+  const changed = answerQuestion(goBack(saved, 0), 'no', 'passive');
+  assert.equal(currentNode(changed, 'passive'), 'isolate');
+  assert.equal(changed.length, 1);
+  assert.deepEqual(restoreHistory([...changed, {id:'vfl',answer:'yes'}], 'passive'), changed);
   assert.deepEqual(restoreHistory(null), []);
   assert.deepEqual(goBack([]), []);
   assert.throws(() => answerQuestion([], 'maybe'));
-  const complete = follow(['yes', 'yes']);
-  assert.equal(currentNode(goBack(complete)), 'verify');
+  const complete = follow([...path,'yes']);
   assert.equal(answerQuestion(complete, 'yes'), complete);
 });
 
-test('every visible Yes/No branch is usable, and every reachable question has a way to an outcome', () => {
-  const paths = new Map([['start', []]]);
-  const queue = ['start'];
-  while (queue.length) {
-    const id = queue.shift();
-    const node = nodes[id];
-    if (node.terminal) continue;
-    for (const answer of ['yes', 'no']) {
-      const history = answerQuestion(paths.get(id), answer);
-      const next = currentNode(history);
-      assert.ok(nodes[next], `${id}: ${answer} has a destination`);
-      if (!paths.has(next)) { paths.set(next, history); queue.push(next); }
+test('both loop modes have usable branches and every question can reach a result', () => {
+  const all = new Set();
+  for (const mode of ['direct','passive']) {
+    const paths = new Map([[startNode(mode), []]]);
+    const queue = [startNode(mode)];
+    while (queue.length) {
+      const id = queue.shift();
+      all.add(id);
+      if (nodes[id].terminal) continue;
+      for (const answer of ['yes','no']) {
+        const history = answerQuestion(paths.get(id), answer, mode);
+        const next = currentNode(history, mode);
+        assert.ok(nodes[next], `${mode}: ${id} ${answer} resolves`);
+        if (!paths.has(next)) { paths.set(next, history); queue.push(next); }
+      }
     }
+    const canFinish = new Set([...paths.keys()].filter(id => nodes[id].terminal));
+    let count;
+    do {
+      count = canFinish.size;
+      for (const id of paths.keys()) {
+        if (!nodes[id].terminal && ['yes','no'].some(answer => canFinish.has(destination(id,answer,mode)))) canFinish.add(id);
+      }
+    } while (canFinish.size !== count);
+    assert.equal(canFinish.size, paths.size);
   }
-  assert.equal(paths.size, Object.keys(nodes).length);
-  const canFinish = new Set(Object.keys(nodes).filter(id => nodes[id].terminal));
-  let previous;
-  do {
-    previous = canFinish.size;
-    for (const [id, node] of Object.entries(nodes)) {
-      if (canFinish.has(node.yes) || canFinish.has(node.no)) canFinish.add(id);
-    }
-  } while (canFinish.size !== previous);
-  assert.equal(canFinish.size, paths.size);
+  assert.equal(all.size, Object.keys(nodes).length);
 });

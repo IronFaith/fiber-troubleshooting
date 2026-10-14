@@ -1,139 +1,68 @@
-// Check the optics first, then trace the passive fiber one segment at a time.
-const question = (phase, title, instruction, yes, no, details = [], note = '') =>
-  ({ phase, title, instruction, yes, no, details, note });
-const outcome = (title, instruction, details, success = false) =>
-  ({ phase: success ? 'Verified result' : 'Likely issue / next action', title, instruction, details, success, terminal: true });
+// Actions stay short; the chosen loop location defines which section is tested.
+const check = (phase, action, instruction, title, yes, no, visual = '', note = '') =>
+  ({ phase, action, instruction, title, yes, no, visual, note });
+const result = (action, instruction, success = false) =>
+  ({ phase: 'Result', action, instruction, title: action, terminal: true, success });
 
 export const nodes = {
-  start: question('1 · Optic health check', 'Are RX and TX within limits at both ends?',
-    'Refresh the optic health report. Check each affected lane against the limits for that optic.',
-    'verify', 'seating', [
-      'Match the local and remote device/interface to the selected connection layout. Record the affected lanes and jumper serial where available.',
-      'RX −40 can indicate missing light or the reporting floor. It does not tell you which component failed.',
-      'A green badge or positive TX reading alone does not prove the optic is healthy.'
-    ]),
-  seating: question('1 · Check seating', 'Did reseating restore optic health?',
-    'Check that the optics and fiber connectors are fully seated at both active ends. Recheck RX and TX.',
-    'verify', 'cleaning', ['Use the site procedure for disconnecting and reseating. Check latches without forcing the connector.']),
-  cleaning: question('1 · Inspect and clean', 'Did cleaning restore optic health?',
-    'Inspect, clean if needed, and reinspect both mating surfaces at each active end. Reconnect and recheck.',
-    'verify', 'opticTest', [
-      'Include the fiber endfaces and optic receptacles. Use the correct inspection and cleaning tools.',
-      'Do not reconnect dirty or damaged surfaces. If inspection is unavailable, pause here.'
-    ]),
-  opticTest: question('2 · Rule out the optics', 'Have the optics at both ends passed a valid test?',
-    'Test the affected TX/RX lanes on a known-good reference link or a supported optical loopback.',
-    'vfl', 'opticCompare', [
-      'Use the correct test mode, lane mapping, wavelength, and receive-power limits, including attenuation where required.',
-      'A reference link must use compatible known-good fiber and a known-good peer. Check both production optics.',
-      'Choose No for a failed valid test. If a test is unavailable or uncertain, pause here.',
-      'A passing test supports optic operation under those conditions; intermittent faults can still need further checks.'
-    ], 'Only a passing optic test moves this diagram into tracing the production fiber.'),
-  opticCompare: question('2 · Compare the failed optic', 'Does a known-good optic pass the same test?',
-    'Keep the test fiber, port, and settings unchanged. Compare the failed optic with a compatible known-good optic.',
-    'badOptic', 'opticUnresolved', [
-      'Inspect the mating connection before the comparison.',
-      'If no valid comparison is available, pause. Do not treat an untested optic as failed.'
-    ]),
-  vfl: question('3 · Trace the fiber', 'Does VFL light reach the expected port and strand?',
-    'Use the layout to identify the active port and its corresponding passive/CAS port. Trace the disconnected fiber between them; repeat for each next segment.',
-    'segments', 'wrongPort', [
-      'Isolate the segment from active equipment at both ends. Never inject VFL light into an optic or look into a fiber.',
-      'Use a compatible VFL, adapter, and approved indirect detection method.',
-      'Use the expected channel for the intended route; compare the actual graph and location list with what you find in the field.',
-      'Trace local active → local passive, every intervening passive section, and remote active → remote passive. Include each affected strand and exact port in the layout.',
-      'Record the actual start and end ports. VFL confirms the route; it does not prove acceptable operating-wavelength loss.'
-    ]),
-  wrongPort: question('3 · Check misport / polarity', 'Does the light appear at a different port or strand?',
-    'Compare the port where light actually appears with the expected passive/CAS port and strand in the layout.',
-    'routeCorrection', 'segmentCheck', ['Light at another port suggests a misport or label error. Light on the wrong strand can indicate a polarity or lane-mapping issue.']),
-  routeCorrection: question('3 · Correct the route', 'After correction, does light reach the intended port?',
-    'Correct the confirmed misport, label, or polarity issue. Repeat the VFL trace on the same segment.',
-    'segments', 'routeUnresolved', ['Use the approved map and lane assignments. Do not flip or move fibers at random.']),
-  segmentCheck: question('3 · Check this fiber segment', 'After checking the segment, does the VFL trace pass?',
-    'Check passive seating, dirty endfaces, tight bends, pinches, and visible damage. Correct any finding and retrace.',
-    'segments', 'fiberUnresolved', [
-      'Inspect and clean both mating surfaces before reconnecting at the passive.',
-      'Follow the cable’s minimum bend radius. Relieve strain or replace visibly damaged jumpers.',
-      'If no issue is found and light still does not reach the expected port, choose No.'
-    ]),
-  segments: question('3 · Follow the whole route', 'Have all segments and affected strands been traced?',
-    'Check off the local active-to-passive patch, each intervening passive section, and the remote active-to-passive patch in your layout.',
-    'mapping', 'vfl', ['If No, move the VFL to the next isolated segment and repeat. Keep the confirmed port-to-port route recorded.']),
-  mapping: question('3 · Check the end-to-end match', 'Do the fiber, optics, and TX-to-RX mapping match?',
-    'Confirm compatible fiber and connectors, matching optic standards, and the correct TX-to-RX path in both directions.',
-    'recheck', 'mismatch', [
-      'Check single-mode versus multimode, connector/polish, wavelength pairing, speed, and any breakout or parallel-lane mapping.',
-      'Red light at the expected port alone does not prove the optic pair or fiber type is compatible.'
-    ]),
-  recheck: question('4 · Recheck optic health', 'Is optic health restored after reconnecting?',
-    'Remove the VFL, restore the verified production route, and refresh RX/TX readings at both ends.',
-    'verify', 'lossTest', ['Compare every affected lane with its actual operating limits.']),
-  lossTest: question('4 · Check fiber loss', 'Does the fiber path pass its optical loss budget?',
-    'Use a referenced light source and power meter or loss test set at the required operating wavelength.',
-    'unresolved', 'excessLoss', [
-      'VFL light can reach the end even when loss is too high for the link.',
-      'Test the affected lanes and required directions against the specified path budget.',
-      'If loss testing is unavailable, arrange that test before choosing Yes or No.'
-    ]),
-  verify: question('4 · Confirm recovery', 'Are both ends healthy and the link stable?',
-    'Confirm RX/TX limits, affected lanes, expected link state, and the site observation period.',
-    'done', 'unresolved', ['If readings pass but the link is still down or unstable, retain the results for a port, configuration, or optical-quality check.']),
-  badOptic: outcome('The original optic or its connection is suspect.',
-    'The known-good optic passed where the original failed. Inspect the interface and replace the suspect optic as needed.',
-    ['Recheck optic health after replacement.', 'If the fault remains, restart the check and verify both optics before tracing the fiber.']),
-  opticUnresolved: outcome('The optic fault is not isolated yet.',
-    'The known-good optic also failed. Check the host port, test setup, and compatibility before blaming the production fiber.',
-    ['Correct the test setup or compare on a known-good compatible port.', 'Return to the optic test once a valid result is available.']),
-  routeUnresolved: outcome('The port or polarity mismatch is unresolved.',
-    'Reconcile the labels, patching, and lane map with the actual VFL result.',
-    ['Confirm the intended connection with the site lead.', 'Return to the route correction and retrace before continuing.']),
-  fiberUnresolved: outcome('Isolate this fiber segment or connection.',
-    'The expected VFL path is still missing. A break, bad jumper, connector fault, or unresolved misport is possible.',
-    ['Verify the VFL and adapter with a known-good compatible jumper; no visible light alone does not prove a break.', 'Substitute the suspect jumper or test this segment for loss. Use suitable fault-location testing if needed.', 'Return to this segment’s check after correction.']),
-  mismatch: outcome('Correct the confirmed mismatch.',
-    'The fiber, connector, optic pair, or TX-to-RX lane mapping does not match the required link.',
-    ['Correct the identified mismatch using the approved connection map and optic specifications.', 'Return to the end-to-end match question, then reconnect and recheck health.']),
-  excessLoss: outcome('The fiber path has excessive loss.',
-    'Locate the loss in the affected segment or connection.',
-    ['Check dirty or damaged connectors, poor seating, tight bends, damaged fiber, and splices.', 'Use segment-by-segment loss measurements or suitable OTDR testing to locate the fault.', 'Correct it, retest loss, then recheck optic health.']),
-  unresolved: outcome('Keep the test results and isolate the remaining fault.',
-    'Health or link stability is still not confirmed. Do not declare the optic or fiber good from one reading.',
-    ['Compare actual incoming optical power with the receiver limits and verify the report maps to the correct port and lane.', 'Review host port, configuration, compatibility, and intermittent behavior with the site lead.']),
-  done: outcome('Optic health and link operation verified.',
-    'Both ends meet the recovery checks.',
-    ['Record the final readings and the correction that restored service.'], true)
+  start: check('Optic', 'Loop the optic', 'Fit the supported optical loopback directly at the optic.',
+    'RX within range on every tested lane?', 'bothEnds', 'clean', 'direct', 'Use the mapped lanes, test mode and safe RX limits.'),
+  passiveLoop: check('Optic + patch', 'Loop at the passive', 'Use the mapped loop at your passive port, e.g. CAS 1 Port 12.',
+    'RX within range on every tested lane?', 'bothEnds', 'isolate', 'passive', 'Use the mapped lanes, test mode and safe RX limits.'),
+  isolate: check('Optic', 'Move the loop to the optic', 'Bypass the passive, MMC leader and LC legs with a supported direct loop.',
+    'Does the direct loop pass?', 'patchCheck', 'clean', 'direct'),
+  clean: check('Optic', 'Clean and reseat the test connections', 'Inspect, clean and reinspect. Check loop mapping and RX limits, then retry directly.',
+    'Does the direct loop now pass?', 'bothEnds', 'compare', 'direct'),
+  compare: check('Optic', 'Try a known-good optic', 'Keep the same validated direct-loop setup and port.',
+    'Does the known-good optic pass?', 'badOptic', 'testFault'),
+  patchCheck: check('Optic + patch', 'Check the leader and LC legs', 'Check the mapped group, seating, dirt and tight bends. Repeat the passive loop.',
+    'Does the passive loop now pass?', 'bothEnds', 'patchFault', 'passive'),
+  bothEnds: check('Optic', 'Check the other active end', 'Repeat the loop test at the other end before tracing the remaining fiber.',
+    'Have both ends passed?', 'vfl', '$loop'),
+  vfl: check('Fiber', 'VFL the next fiber segment', 'Trace the isolated segment to the exact port and strand in your layout.',
+    'Light at the expected port and strand?', 'segments', 'wrongPort', 'fiber', 'Disconnect active equipment at both ends before using VFL.'),
+  wrongPort: check('Fiber', 'Check nearby ports and LC legs', 'Compare where the light appears with the intended route and leader group.',
+    'Light at a different port or leg?', 'routeFix', 'segmentCheck'),
+  routeFix: check('Fiber', 'Correct the misport or polarity', 'Follow the port and lane map, then repeat the VFL trace.',
+    'Light at the correct port now?', 'segments', 'routeFault'),
+  segmentCheck: check('Fiber', 'Check this segment', 'Check seating, dirty ends, tight bends and damage. Correct any finding; retrace.',
+    'Does this segment trace correctly now?', 'segments', 'fiberFault'),
+  segments: check('Fiber', 'Follow the route to the remote end', 'Include every passive hop and both active-to-passive patches.',
+    'All affected segments and strands traced?', 'reconnect', 'vfl'),
+  reconnect: check('Health', 'Reconnect and check optic health', 'Remove test gear. Restore the mapped TX-to-RX path and check both ends.',
+    'RX/TX in range and link stable?', 'done', 'loss'),
+  loss: check('Fiber', 'Measure the fiber loss', 'Use a referenced loss test at the operating wavelength.',
+    'Loss within the link budget?', 'remainingFault', 'lossFault', '', 'VFL continuity alone does not establish acceptable loss.'),
+  badOptic: result('Original optic or mating connection suspect', 'The replacement passed. Inspect the interface, replace as needed and recheck health.'),
+  testFault: result('Check the port or loop setup', 'The known-good optic also failed. Confirm compatibility, mapping and the host port.'),
+  patchFault: result('Suspect the active-to-passive section', 'Direct loop passed; passive loop failed. VFL this section, verify the leader/leg map and compare a known-good patch.'),
+  routeFault: result('Port or polarity mismatch remains', 'Reconcile the observed VFL port with the intended map before continuing.'),
+  fiberFault: result('Suspect this fiber segment or connection', 'Verify the VFL setup, compare a known-good jumper and test the segment for loss or a break.'),
+  lossFault: result('Excessive fiber loss', 'Locate the loss: connectors, seating, bends, damaged fiber or splices. Correct it and retest.'),
+  remainingFault: result('Check compatibility and the active ports', 'Loss passed. Check optic/fiber type, lane mapping, actual incoming power and intermittent behavior.'),
+  done: result('Optic / fiber health restored', 'Record the correction and final readings.', true)
 };
 
-nodes.seating.findings = { yes: 'Health recovered after reseating: seating or contact at the changed connection is implicated.' };
-nodes.cleaning.findings = { yes: 'Health recovered after cleaning: contamination or contact at the changed connection is implicated.' };
-nodes.opticTest.findings = { yes: 'Both optics passed a valid reference-link or supported optical-loopback test.' };
-nodes.opticCompare.findings = { yes: 'A known-good optic passed the same test where the original failed.', no: 'A known-good optic also failed the test; an optic-only fault was not established.' };
-nodes.wrongPort.findings = { yes: 'VFL light was found at a different port or strand.' };
-nodes.routeCorrection.findings = { yes: 'Correcting the route restored the expected VFL trace.' };
-nodes.segmentCheck.findings = { yes: 'The segment passed VFL tracing after work on its connections or cable condition.' };
-nodes.segments.findings = { yes: 'All affected segments and strands were traced; VFL alone does not establish acceptable loss.' };
-nodes.mapping.findings = { no: 'The end-to-end compatibility or TX-to-RX mapping check failed.' };
-nodes.lossTest.findings = { yes: 'The referenced path-loss test passed its specified budget.', no: 'The referenced path-loss test exceeded its specified budget.' };
-
-export function currentNode(history) {
-  return history.length ? nodes[history.at(-1).id][history.at(-1).answer] : 'start';
+export function startNode(mode = 'direct') { return mode === 'passive' ? 'passiveLoop' : 'start'; }
+export function destination(id, answer, mode = 'direct') {
+  const next = nodes[id][answer];
+  return next === '$loop' ? startNode(mode) : next;
 }
-export function answerQuestion(history, answer) {
-  if (answer !== 'yes' && answer !== 'no') throw new Error('Choose Yes or No.');
-  const id = currentNode(history);
-  if (nodes[id].terminal) return history;
-  return [...history, { id, answer }];
+export function currentNode(history, mode = 'direct') {
+  return history.length ? destination(history.at(-1).id, history.at(-1).answer, mode) : startNode(mode);
 }
-export function goBack(history, index = history.length - 1) {
-  return history.slice(0, Math.max(0, index));
+export function answerQuestion(history, answer, mode = 'direct') {
+  if (!['yes', 'no'].includes(answer)) throw new Error('Choose Yes or No.');
+  const id = currentNode(history, mode);
+  return nodes[id].terminal ? history : [...history, { id, answer }];
 }
-export function restoreHistory(value) {
+export function goBack(history, index = history.length - 1) { return history.slice(0, Math.max(0, index)); }
+export function restoreHistory(value, mode = 'direct') {
   if (!Array.isArray(value) || value.length > 500) return [];
   let valid = [];
   for (const entry of value) {
-    if (!entry || entry.id !== currentNode(valid) || nodes[entry.id]?.terminal || !['yes', 'no'].includes(entry.answer)) break;
-    valid = answerQuestion(valid, entry.answer);
+    if (!entry || entry.id !== currentNode(valid, mode) || nodes[entry.id]?.terminal || !['yes', 'no'].includes(entry.answer)) break;
+    valid = answerQuestion(valid, entry.answer, mode);
   }
   return valid;
 }

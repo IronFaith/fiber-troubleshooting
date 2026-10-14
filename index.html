@@ -4,49 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#173b59">
-  <meta name="description" content="A simple Yes/No fiber troubleshooting diagram: check optic health, test the optics, then trace active-to-passive fiber connections with a VFL.">
-  <title>Fiber troubleshooting · Optics first, fiber next</title>
+  <meta name="description" content="Loop the optic, choose the result, and follow a simple fiber troubleshooting diagram.">
+  <title>Optic / fiber health</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=3">
-  <script type="module" src="./app.mjs?v=4"></script>
+  <link rel="stylesheet" href="./styles.css?v=5">
+  <script type="module" src="./app.mjs?v=5"></script>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="./" aria-label="Fiber troubleshooting home"><img src="./icon.svg" width="32" height="32" alt="">Fiberline</a>
-    <a class="eod-link" href="https://ironfaith.github.io/eod-work-log/">EOD work log <span aria-hidden="true">↗</span></a>
-  </header>
   <main>
-    <div class="intro">
-      <h1>Find the fiber fault.</h1>
-      <p>Check optic health. Rule out the optics.<br>Then trace the fiber, one connection at a time.</p>
-    </div>
-    <section class="signal-context" aria-label="Troubleshooting stages">
-      <div class="signal-direction"><span>Health check</span><span aria-hidden="true">→</span><span>Optic test</span><span aria-hidden="true">→</span><span>Fiber trace</span></div>
-    </section>
-    <details class="report-help"><summary>Reading the optic health report</summary><ul>
-      <li><strong>RX</strong> is received light; <strong>TX</strong> is reported outgoing light. Check both active ends and each affected lane.</li>
-      <li>Test the optics before tracing the production fiber. Start the VFL at the disconnected active-end fiber, then follow the corresponding passive ports.</li>
-      <li>Use the model’s actual RX/TX specifications and current readings. A −40 display may be a reporting floor; its meaning depends on the device. A green badge or a positive TX value alone does not establish health.</li>
-      <li>VFL shows continuity and routing. A power meter or loss test is needed to establish acceptable optical loss.</li>
-    </ul></details>
-    <details class="report-help"><summary>Use your device and port layout</summary>
-      <p><strong>Local active port → local passive port → intervening passive sections → remote passive port → remote active port.</strong></p>
-      <ul>
-        <li>Match the local and remote device/interface in the optic health report to the selected connection layout. Keep those local/remote labels throughout the check.</li>
-        <li>Use the <strong>expected connectivity channel</strong> as the intended route. Compare it with the <strong>actual connectivity graph</strong> and the location list.</li>
-        <li>For each segment, identify its start and end location, device or passive/CAS, exact port/strand, and jumper serial where shown. Include every passive hop in your layout.</li>
-        <li>The layout tells you where to check. Verify the recorded connections in the field: does VFL reach that exact expected port and strand?</li>
-      </ul>
-    </details>
-    <div class="toolbar">
-      <span id="step-label">Start here</span>
-      <div><button id="back" type="button" disabled><span aria-hidden="true">←</span> Back</button><button id="restart" type="button" disabled>Start over</button></div>
-    </div>
-    <div id="diagram" class="diagram" aria-label="Your troubleshooting decision path"></div>
+    <header><img src="./icon.svg" width="30" height="30" alt=""><div><h1>Optic / fiber health</h1><p>Loop the optic. Follow the result.</p></div></header>
+    <fieldset class="loop-choice"><legend>Where are you looping?</legend><div>
+      <button type="button" data-mode="direct" aria-pressed="true">At the optic</button>
+      <button type="button" data-mode="passive" aria-pressed="false">At a passive / CAS</button>
+    </div></fieldset>
+    <nav class="toolbar" aria-label="Troubleshooting controls"><span id="step-label">Step 1</span><div><button id="back" type="button" disabled>← Back</button><button id="restart" type="button" disabled>Restart</button></div></nav>
+    <div id="diagram" aria-label="Your troubleshooting path"></div>
     <p id="status" class="sr-only" role="status"></p>
-    <noscript><p class="notice">Enable JavaScript to use the Yes/No troubleshooting diagram.</p></noscript>
-    <aside class="safety"><span aria-hidden="true">△</span><p>Never look into a fiber or optic. Use approved equipment and site limits. If you cannot confirm a result, pause and check with the site lead.</p></aside>
-    <footer><span>Optic health checks · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html">RX/TX reference</a> · <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber">Fiber testing reference</a></span><a href="https://github.com/IronFaith/fiber-troubleshooting">View on GitHub</a></footer>
+    <noscript>Enable JavaScript to use this diagram.</noscript>
+    <p class="safety">Never look into a fiber. Use site-approved tests. Answer only after a valid test.</p>
   </main>
 </body>
 </html>
