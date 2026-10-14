@@ -1,4 +1,4 @@
-import { nodes, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs';
+import { nodes, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs?v=3';
 
 const storageKey = 'fiberline-optics-first-v3';
 let history = [];
