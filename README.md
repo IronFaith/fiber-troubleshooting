@@ -16,13 +16,15 @@ Technical references: [Cisco optical troubleshooting](https://www.cisco.com/c/en
 
 ## Development
 
-The top-right Learn menu opens one illustrated chapter in `learn.html`: Optics, fiber & light. Related sections stay on one page, with optional jump links (including the old chapter hashes). Animated blue paths represent invisible optic IR; red paths represent VFL test light. A single play/pause control respects reduced-motion preferences. Interactive figures compare loop locations, clean/dirty/unseated connections, excessive bending and VFL outcomes. Returning to troubleshooting restores the existing session path. These are educational illustrations, not live measurements, literal jacket glow or site pin maps.
+The top-right Learn menu links to each chapter. Chapter 1, Optics, fiber & light (`learn.html`), keeps related sections on one page, with optional jump links (including the old chapter hashes). Animated blue paths represent invisible optic IR; red paths represent VFL test light. A single play/pause control respects reduced-motion preferences. Interactive figures compare loop locations, clean/dirty/unseated connections, excessive bending and VFL outcomes. Returning to troubleshooting restores the existing session path. These are educational illustrations, not live measurements, literal jacket glow or site pin maps.
 
 Requires Node.js; no dependencies or build step.
+
+Chapter 2 (`devices.html`) explains the user-provided position `QNO5.5C.16f.17.30`: building QNO5, room 5C, row 16 front, rack 17, elevation 30. Tapping each component changes the location drawing. The elevation is labeled as supplied, without assuming rack-unit conventions or total rack height. A local/remote viewpoint control swaps the labels while keeping A TX → B RX and B TX → A RX fixed. The remote location is unspecified; drawings are examples, not a discovered topology. The position locates a device; the connection record supplies exact device and passive ports. Chapter 1 remains one chapter, and the existing troubleshooting flow is unchanged.
 
 ```sh
 npm run dev
 npm run check
 ```
 
-GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `learn.html`, `styles.css`, `app.mjs`, `flow.mjs`, `learning.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.
+GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `learn.html`, `devices.html`, `styles.css`, `app.mjs`, `flow.mjs`, `learning.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.

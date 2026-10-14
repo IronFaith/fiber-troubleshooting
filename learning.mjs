@@ -19,7 +19,8 @@ const menuPanel = el('div', 'learn-menu');
 menuPanel.id = 'learn-links'; menuPanel.hidden = true;
 menuPanel.append(el('p', '', 'Learning resources'));
 const chapterLink = link('Chapter 1 · Optics, fiber & light', './learn.html');
-menuPanel.append(chapterLink, link('Back to troubleshooting', './index.html', 'menu-return'));
+const devicesLink = link('Chapter 2 · Device locations & links', './devices.html');
+menuPanel.append(chapterLink, devicesLink, link('Back to troubleshooting', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {
@@ -81,7 +82,18 @@ function renderLesson() {
       <p class="lesson-takeaway">VFL helps trace continuity and mapping. Measure optical loss separately with a source and power meter or loss test set.</p>
     </section>
     <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>
+    <a class="next-chapter" href="./devices.html">Next chapter: Device locations & links →</a>
     <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
+  setupLesson();
+  example('ir-picture', 'Optic infrared light', [], opticPicture);
+  example('red-picture', 'Visible red VFL light', [], redPicture);
+  example('path-picture', 'Fiber route', [], pathPicture);
+  example('loop-picture', 'Loop location', ['LC at optic', 'MMC at passive'], loopPicture);
+  example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
+  example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
+}
+
+function setupLesson() {
   let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const motion = lesson.querySelector('.lesson-motion');
   function updateMotion() {
@@ -91,12 +103,6 @@ function renderLesson() {
   }
   motion.addEventListener('click', () => { paused = !paused; updateMotion(); });
   updateMotion();
-  example('ir-picture', 'Optic infrared light', [], opticPicture);
-  example('red-picture', 'Visible red VFL light', [], redPicture);
-  example('path-picture', 'Fiber route', [], pathPicture);
-  example('loop-picture', 'Loop location', ['LC at optic', 'MMC at passive'], loopPicture);
-  example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
-  example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
   // Old chapter links now land on the matching part of this single chapter.
   function scrollToSection() {
     const target = document.getElementById(location.hash.slice(1));
@@ -202,4 +208,120 @@ function vflPicture(selected) {
     text(180,231,seen ? 'Trace confirmed here ✓' : wrong ? 'Light found on a different route' : 'Check this section — location unknown','class="small" text-anchor="middle"')};
 }
 
-if (lesson) renderLesson();
+function renderDevicesLesson() {
+  devicesLink.setAttribute('aria-current', 'page');
+  lesson.innerHTML = `
+    <div class="chapter-heading"><p class="chapter-count">Chapter 2</p><button type="button" class="lesson-motion"></button></div>
+    <h2 id="lesson-title">Device locations & links</h2>
+    <p class="lesson-intro">Find the device. Confirm the port. Follow its connection.</p>
+    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#position">Read the position</a><a href="#ends">Local & remote</a><a href="#ports">Confirm the ports</a></nav>
+    <section id="position" class="lesson-section" aria-labelledby="position-title">
+      <h3 id="position-title">Every part narrows the location</h3>
+      <p class="position-code">QNO5.5C.16f.17.30</p>
+      <p class="section-intro">Tap a part to see where it takes you.</p>
+      <div class="position-parts" role="group" aria-label="Parts of the rack position">
+        <button type="button" data-position="0"><strong>QNO5</strong><span>Building</span></button>
+        <button type="button" data-position="1"><strong>5C</strong><span>Room</span></button>
+        <button type="button" data-position="2"><strong>16f</strong><span>Row / front</span></button>
+        <button type="button" data-position="3"><strong>17</strong><span>Rack</span></button>
+        <button type="button" data-position="4"><strong>30</strong><span>Elevation</span></button>
+      </div>
+      <figure id="position-picture" class="lesson-figure"></figure>
+      <p class="picture-note">Your naming format. Drawings are illustrative; use the site labels and layout to locate the actual device.</p>
+    </section>
+    <section id="ends" class="lesson-section" aria-labelledby="ends-title">
+      <h3 id="ends-title">Local and remote are the two ends</h3>
+      <p class="section-intro">Local is the device you are checking. Remote is the connected device at the other end, possibly in another room or building.</p>
+      <div id="ends-picture"></div>
+      <div class="endpoint-locations"><p><strong>Device A · your example</strong><span>QNO5.5C.16f.17.30</span></p><p><strong>Device B · the other end</strong><span>Find its own position in the connection record.</span></p></div>
+      <p class="picture-note">One duplex pair shown. Blue and teal illustrate two directions of invisible IR. Use the full lane map for multi-fiber links.</p>
+    </section>
+    <section id="ports" class="lesson-section" aria-labelledby="ports-title">
+      <h3 id="ports-title">Match the device and its port</h3>
+      <div class="port-route" aria-label="Connection checks"><span>Rack position</span><b aria-hidden="true">↓</b><span>Device + exact port</span><b aria-hidden="true">↓</b><span>Optic + mapped passive ports</span><b aria-hidden="true">↓</b><span>Remote device + exact port</span></div>
+      <p class="lesson-takeaway">The position tells you where to go. The connection record tells you which ports and passives join the two devices.</p>
+      <p class="lesson-takeaway">Check what you can reach: loop the local optic, then extend through accessible passives. A passing local loop leaves the path beyond it unverified.</p>
+    </section>
+    <p class="lesson-sources">Position format: your site example. Optical link reference: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing and fiber links</a>.</p>
+    <a class="next-chapter" href="./learn.html">← Chapter 1: Optics, fiber & light</a>
+    <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
+  setupLesson();
+  const positionFigure = document.querySelector('#position-picture');
+  const positionCaption = el('figcaption'); positionCaption.setAttribute('aria-live', 'polite');
+  const parts = [...lesson.querySelectorAll('[data-position]')];
+  function selectPosition(selected) {
+    const art = positionPicture(selected);
+    positionFigure.innerHTML = `<svg viewBox="0 0 360 260" role="img" aria-label="${art.caption}">${art.drawing}</svg>`;
+    positionCaption.textContent = art.caption; positionFigure.append(positionCaption);
+    parts.forEach((button, index) => button.setAttribute('aria-pressed', String(index === selected)));
+  }
+  parts.forEach((button, index) => button.addEventListener('click', () => selectPosition(index)));
+  selectPosition(0);
+  example('ends-picture', 'Choose the device you are checking', ['At device A', 'At device B'], endsPicture);
+}
+
+function positionPicture(selected) {
+  const captions = [
+    'QNO5 = building. Start at this building.',
+    '5C = data hall / room. Find room 5C inside QNO5.',
+    '16f = row 16, front. The f identifies front in your naming format.',
+    '17 = rack. Find rack 17 in row 16, at the front.',
+    '30 = elevation. Find the device at elevation 30 in rack 17.'
+  ];
+  let drawing;
+  if (selected === 0) {
+    drawing = '<path class="site-building" d="M28 224 V64 L180 27 L332 64 V224 Z"/>'+text(180,87,'QNO5','class="position-large" text-anchor="middle"');
+    for (let row=0; row<2; row++) for(let column=0; column<5; column++) drawing += `<rect class="site-window" x="${55+column*53}" y="${108+row*38}" width="35" height="22" rx="2"/>`;
+    drawing += '<rect class="site-door" x="155" y="183" width="50" height="41" rx="2"/>'+text(180,250,'Building','text-anchor="middle"');
+  } else if (selected === 1) {
+    drawing = text(15,25,'Inside building QNO5')+'<rect class="site-building" x="15" y="42" width="330" height="194" rx="6"/>';
+    drawing += '<rect class="site-room" x="30" y="60" width="133" height="72" rx="4"/><rect class="site-room" x="30" y="149" width="133" height="68" rx="4"/><rect class="position-active" x="182" y="60" width="145" height="157" rx="4"/>'+text(254,134,'5C','class="position-large" text-anchor="middle"')+text(254,160,'Data hall / room','class="small" text-anchor="middle"');
+  } else if (selected === 2) {
+    drawing = text(15,26,'Inside room 5C');
+    for (let row=0; row<3; row++) {
+      const y=48+row*66;
+      drawing += `<rect class="${row===1 ? 'position-active' : 'site-room'}" x="77" y="${y}" width="266" height="44" rx="4"/>`;
+      for (let rack=0; rack<7; rack++) drawing += `<path class="site-divider" d="M${86+rack*37} ${y+5} V${y+39}"/>`;
+      if (row===1) drawing += text(12,y+27,'Row 16','class="small"')+`<path class="front-edge" d="M82 ${y+44} H338"/>`+text(210,y+60,'f = front','class="small" text-anchor="middle"');
+    }
+  } else if (selected === 3) {
+    drawing = text(15,26,'Room 5C · row 16 · front');
+    for (let rack=0; rack<5; rack++) {
+      const x=11+rack*69;
+      drawing += `<rect class="${rack===2 ? 'position-active' : 'site-room'}" x="${x}" y="51" width="61" height="155" rx="5"/>`;
+      for(let shelf=0; shelf<8; shelf++) drawing += `<path class="site-divider" d="M${x+7} ${68+shelf*16} H${x+54}"/>`;
+      drawing += text(x+30,230,rack===2?'Rack 17':'…','text-anchor="middle"');
+    }
+  } else {
+    drawing = text(15,24,'Rack 17 · front view')+'<rect class="rack-frame" x="59" y="39" width="150" height="202" rx="5"/>';
+    for(let elevation=34; elevation>=25; elevation--) {
+      const y=49+(34-elevation)*18;
+      drawing += `<rect class="${elevation===30 ? 'elevation-active' : 'rack-slot'}" x="72" y="${y}" width="122" height="15" rx="2"/>`+text(47,y+12,String(elevation),'class="small" text-anchor="end"');
+      if(elevation===30) {
+        for(let port=0; port<6; port++) drawing += `<rect class="rack-port" x="${82+port*17}" y="${y+4}" width="10" height="6" rx="1"/>`;
+        drawing += `<path class="elevation-callout" d="M197 ${y+7} H229"/>`+text(235,y+2,'Elevation 30','class="small"')+text(235,y+22,'Device here','class="small"');
+      }
+    }
+    drawing += text(250,222,'Rack excerpt','class="small"');
+  }
+  return {caption:captions[selected],drawing};
+}
+
+function endsPicture(selected) {
+  const atB = selected === 1;
+  return {height:270, caption:atB ? 'From B: B is local and A is remote. B TX sends to A RX; A TX sends to B RX.' : 'From A: A is local and B is remote. A TX sends to B RX; B TX sends to A RX.', drawing:
+    text(49,25,atB?'Remote':'Local','class="endpoint-name" text-anchor="middle"')+text(311,25,atB?'Local':'Remote','class="endpoint-name" text-anchor="middle"')+
+    '<rect class="learn-device" x="5" y="40" width="88" height="165" rx="6"/><rect class="learn-device" x="267" y="40" width="88" height="165" rx="6"/>'+
+    text(49,69,'Device A','text-anchor="middle"')+text(311,69,'Device B','text-anchor="middle"')+
+    '<rect class="mmc-plug" x="140" y="94" width="26" height="90" rx="4"/><rect class="mmc-plug" x="194" y="94" width="26" height="90" rx="4"/>'+
+    light('M93 110 H267')+light('M267 168 H93','return-ir')+
+    text(69,115,'TX','class="small"')+text(274,115,'RX','class="small"')+text(69,173,'RX','class="small"')+text(274,173,'TX','class="small"')+
+    text(180,84,'A TX → B RX','class="small" text-anchor="middle"')+text(180,205,'A RX ← B TX','class="small" text-anchor="middle"')+
+    '<path class="ir-arrow" d="M176 105 l8 5 -8 5"/><path class="return-ir-arrow" d="M184 163 l-8 5 8 5"/>'+
+    text(180,242,'Mapped fiber + passive ports','class="small" text-anchor="middle"')};
+}
+
+if (lesson) {
+  if (lesson.dataset.chapter === 'devices') renderDevicesLesson();
+  else renderLesson();
+}
