@@ -20,7 +20,7 @@ menuPanel.id = 'learn-links'; menuPanel.hidden = true;
 menuPanel.append(el('p', '', 'Learning resources'));
 const chapterLink = link('Chapter 1 · Optics, fiber & light', './learn.html');
 const devicesLink = link('Chapter 2 · Device locations & links', './devices.html');
-const patchingLink = link('Chapter 3 · FIM ports & LC patching', './patching.html');
+const patchingLink = link('Chapter 3 · FIM, LC & MMC patching', './patching.html');
 menuPanel.append(chapterLink, devicesLink, patchingLink, link('Back to troubleshooting', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
@@ -244,7 +244,7 @@ function renderDevicesLesson() {
       <p class="lesson-takeaway">Check what you can reach: loop the local optic, then extend through accessible passives. A passing local loop leaves the path beyond it unverified.</p>
     </section>
     <p class="lesson-sources">Position format: your site example. Optical link reference: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing and fiber links</a>.</p>
-    <a class="next-chapter" href="./patching.html">Next chapter: FIM ports & LC patching →</a>
+    <a class="next-chapter" href="./patching.html">Next chapter: FIM, LC & MMC patching →</a>
     <a class="next-chapter" href="./learn.html">← Chapter 1: Optics, fiber & light</a>
     <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
   setupLesson();
@@ -327,9 +327,9 @@ function renderPatchingLesson() {
   patchingLink.setAttribute('aria-current', 'page');
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 3</p><button type="button" class="lesson-motion"></button></div>
-    <h2 id="lesson-title">FIM ports & LC patching</h2>
-    <p class="lesson-intro">Read the Ethernet port. Find the optic. Patch the correct LC position.</p>
-    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">Choose the LC position</a><a href="#fim-path">Follow the FIM path</a></nav>
+    <h2 id="lesson-title">FIM, LC & MMC patching</h2>
+    <p class="lesson-intro">Match the optic position, the follower and its MMC head.</p>
+    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">LC position</a><a href="#fim-path">FIM path</a><a href="#mmc-fanout">MMC head & followers</a></nav>
     <section id="lc-position" class="lesson-section" aria-labelledby="lc-position-title">
       <h3 id="lc-position-title">Same optic. Two LC positions.</h3>
       <p class="section-intro">Choose the Ethernet port shown in FIM.</p>
@@ -350,12 +350,26 @@ function renderPatchingLesson() {
       </ol>
       <p class="picture-note">Moving blue lines illustrate the intended IR path, not a measured result. Use the health check if light is missing.</p>
     </section>
-    <p class="lesson-sources">Port mapping: your confirmed site example. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a>.</p>
+    <section id="mmc-fanout" class="lesson-section" aria-labelledby="mmc-fanout-title">
+      <h3 id="mmc-fanout-title">One MMC head. 12 followers.</h3>
+      <p class="section-intro">The leader/head identifies this fanout. Its 12 legs belong to the same assembly.</p>
+      <p class="fanout-serial"><span>Example head serial</span><strong>S747885346FWL</strong></p>
+      <p class="section-intro">Choose a leg to trace it back to the head.</p>
+      <div id="fanout-picture"></div>
+      <p class="picture-note">One line per leg; individual strands are not shown. Leg numbers are illustration labels—use the actual labels and mapping in FIM.</p>
+      <p class="lesson-takeaway">A fanout groups separate fiber paths. It does not split one optic’s light among all 12 legs.</p>
+      <h4 class="mmc-patch-title">Patch the head into the passive</h4>
+      <div id="mmc-patch-picture"></div>
+      <p class="lesson-takeaway">The serial identifies the fanout. FIM identifies its destination passive and port. Then match each follower to its assigned optic port.</p>
+    </section>
+    <p class="lesson-sources">Port mapping and fanout: your site examples. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
     <a class="next-chapter" href="./devices.html">← Chapter 2: Device locations & links</a>
     <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
   setupLesson();
   example('patch-picture', 'Ethernet port in FIM', ['Ethernet 5/1', 'Ethernet 5/5'], patchPicture);
   example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture);
+  example('fanout-picture', 'Choose a fanout follower', Array.from({length:12}, (_, index) => `Leg ${index+1}`), fanoutPicture);
+  example('mmc-patch-picture', 'MMC patching steps', ['1 · Match', '2 · Prepare', '3 · Seat'], mmcPatchPicture);
 }
 
 function patchPicture(selected) {
@@ -395,6 +409,48 @@ function patchRoutePicture() {
     '<path class="ir-arrow" d="M161 74 l8 5 -8 5"/><path class="return-ir-arrow" d="M169 116 l-8 5 8 5"/>'+
     text(51,171,'Selected position','class="small" text-anchor="middle"')+
     text(180,202,'Follow the leg ID and port labels in FIM.','class="small" text-anchor="middle"')};
+}
+
+function fanoutPicture(selected) {
+  let drawing = text(58,177,'Leader / head','class="small" text-anchor="middle"')+
+    text(298,38,'Followers','text-anchor="middle"');
+  for (let index=0; index<12; index++) {
+    const endY = 62+index*29;
+    const startY = 202+index*4;
+    drawing += `<path class="fanout-branch${index===selected ? ' fanout-selected' : ''}" d="M87 ${startY} C157 ${startY} 173 ${endY} 275 ${endY}"/>`;
+  }
+  drawing += '<rect class="fanout-head" x="22" y="188" width="65" height="70" rx="6"/><path class="optic-detail" d="M30 197 V249 M36 197 V249"/>'+text(62,229,'MMC','class="small" text-anchor="middle"');
+  for (let index=0; index<12; index++) {
+    const y = 62+index*29;
+    drawing += `<rect class="fanout-tag${index===selected ? ' fanout-tag-selected' : ''}" x="275" y="${y-11}" width="48" height="22" rx="4"/>`+
+      text(299,y+4,String(index+1),'class="small" text-anchor="middle"');
+  }
+  return {height:407, caption:`Leg ${selected+1} belongs to MMC head S747885346FWL. Match this follower’s actual label in FIM.`, drawing};
+}
+
+function mmcPatchPicture(selected) {
+  const seated = selected === 2;
+  const headX = seated ? 181 : 36;
+  const captions = [
+    'Match head serial S747885346FWL and its destination passive / port against FIM.',
+    'Inspect, clean if needed, then inspect again. Align the MMC rails with the adapter; do not force it.',
+    'Seat the head fully and confirm its latch is engaged. Support the cable and keep bends within its specified radius.'
+  ];
+  let drawing = text(14,25,'Head: S747885346FWL','class="small"')+
+    '<rect class="learn-device" x="246" y="53" width="103" height="128" rx="6"/>'+
+    text(298,77,'Passive','text-anchor="middle"')+
+    '<path class="mmc-adapter" d="M246 94 H272 V143 H246 Z"/>'+
+    text(299,161,'Port from FIM','class="small" text-anchor="middle"')+
+    `<path class="fanout-bundle" d="M8 119 H${headX}"/>`+
+    `<rect class="fanout-head" x="${headX}" y="97" width="83" height="43" rx="5"/>`+
+    `<path class="mmc-rail" d="M${headX+9} 105 H${headX+76} M${headX+9} 130 H${headX+76}"/>`+
+    text(headX+41,122,'MMC','class="small" text-anchor="middle"');
+  if (!seated) drawing += '<path class="patch-insert" d="M139 119 H224 m-8 -6 8 6 -8 6"/>'+
+    text(180,87,selected ? 'Align rails' : 'Match in FIM','class="small" text-anchor="middle"');
+  else drawing += text(184,200,'Head seated in the mapped port','class="small" text-anchor="middle"');
+  if (selected === 1) drawing += '<path class="mmc-alignment" d="M119 105 H246 M119 130 H246"/>';
+  drawing += text(14,232,'12 followers share this head','class="small"');
+  return {height:250, caption:captions[selected], drawing};
 }
 
 if (lesson) {
