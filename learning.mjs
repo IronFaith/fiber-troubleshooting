@@ -335,7 +335,7 @@ function renderPatchingLesson() {
       <p class="section-intro">Choose the Ethernet port shown in FIM.</p>
       <div id="patch-picture"></div>
       <div class="patch-mapping"><p><strong>5/1</strong><span>Optic 5 · position 1 · left</span></p><p><strong>5/5</strong><span>Optic 5 · position 2 · right</span></p></div>
-      <p class="lesson-takeaway">Each position takes a duplex LC pair: TX and RX together.</p>
+      <p class="lesson-takeaway">Each position takes a vertical duplex LC pair. The two positions sit side by side in one optic.</p>
       <p class="picture-note">Your confirmed site example, facing the optic. Check the installed orientation and labels; other hardware may use a different mapping.</p>
     </section>
     <section id="fim-path" class="lesson-section" aria-labelledby="fim-path-title">
@@ -377,24 +377,21 @@ function patchPicture(selected) {
   const suffix = right ? 5 : 1;
   const position = right ? 2 : 1;
   const side = right ? 'right' : 'left';
-  const center = right ? 250 : 110;
+  const center = right ? 222 : 138;
   let drawing = text(180,28,'Optic 5 · front view','class="patch-title" text-anchor="middle"')+
-    '<rect class="optic-metal" x="20" y="43" width="320" height="153" rx="8"/>'+
-    '<path class="optic-detail" d="M31 57 H43 M317 57 H329 M31 180 H43 M317 180 H329"/>';
-  [110,250].forEach((x,index) => {
+    '<rect class="optic-metal" x="92" y="104" width="176" height="138" rx="8"/>'+
+    '<path class="optic-detail" d="M98 111 V235 M262 111 V235"/>';
+  [138,222].forEach((x,index) => {
     const active = index === selected;
-    drawing += text(x,73,`Position ${index+1}`,'text-anchor="middle"')+
-      text(x,96,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
-      `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-53}" y="108" width="106" height="66" rx="5"/>`+
-      `<rect class="patch-opening" x="${x-39}" y="120" width="31" height="36" rx="2"/><rect class="patch-opening" x="${x+8}" y="120" width="31" height="36" rx="2"/>`;
+    drawing += text(x,66,`Position ${index+1}`,'class="small" text-anchor="middle"')+
+      text(x,89,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
+      `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-34}" y="116" width="68" height="112" rx="5"/>`+
+      `<rect class="patch-opening" x="${x-22}" y="125" width="44" height="36" rx="2"/><rect class="patch-opening" x="${x-22}" y="179" width="44" height="36" rx="2"/>`;
   });
-  drawing += `<g class="patch-lc"><rect x="${center-38}" y="140" width="29" height="72" rx="3"/><rect x="${center+9}" y="140" width="29" height="72" rx="3"/><rect x="${center-44}" y="183" width="88" height="17" rx="3"/></g>`+
-    `<path class="patch-fiber" d="M${center-24} 212 V273 M${center+24} 212 V273"/>`+
-    `<path class="patch-insert" d="M${center} 264 V220 m-6 8 6 -8 6 8"/>`+
-    text(right ? 76 : 284,228,'Patch LC','text-anchor="middle"')+
-    text(right ? 76 : 284,249,`on the ${side}`,'class="small" text-anchor="middle"')+
-    text(180,304,`5 = optic   /${suffix} = ${side} LC position`,'class="small" text-anchor="middle"');
-  return {height:324, caption:`Ethernet 5/${suffix} → optic 5 → position ${position} (${side}). Connect the duplex LC here.`, drawing};
+  drawing += `<g class="patch-lc"><rect x="${center-19}" y="128" width="38" height="30" rx="3"/><rect x="${center-19}" y="182" width="38" height="30" rx="3"/><rect x="${center-25}" y="143" width="9" height="54" rx="3"/></g>`+
+    `<path class="patch-insert" d="M${center} 281 V249 m-6 8 6 -8 6 8"/>`+
+    text(180,306,`Patch LC at position ${position} (${side})`,'class="small" text-anchor="middle"');
+  return {height:324, caption:`Ethernet 5/${suffix} → optic 5 → position ${position} (${side}). Connect the vertical duplex LC pair here.`, drawing};
 }
 
 function patchRoutePicture() {
