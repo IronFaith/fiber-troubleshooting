@@ -1,6 +1,6 @@
 import { nodes, currentNode, answerQuestion, goBack, restoreHistory } from './flow.mjs';
 
-const storageKey = 'fiberline-decision-path-v1';
+const storageKey = 'fiberline-low-rx-path-v2';
 let history = [];
 try { history = restoreHistory(JSON.parse(sessionStorage.getItem(storageKey))); } catch { /* A fresh path also works without storage. */ }
 
@@ -25,16 +25,32 @@ function change(nextHistory) {
   render(true);
 }
 
+function branchesFor(id, index, selected) {
+  const branches = element('div', `branches${selected ? ' answered' : ''}`);
+  for (const answer of ['yes', 'no']) {
+    const destination = nodes[nodes[id][answer]];
+    const branch = element('button', `branch ${answer}${selected === answer ? ' selected' : ''}`);
+    branch.type = 'button';
+    branch.dataset.answer = answer;
+    const name = answer === 'yes' ? 'Yes' : 'No';
+    branch.setAttribute('aria-label', `${selected ? `Change question ${index + 1} to ` : ''}${name}: ${destination.title}`);
+    if (selected) branch.setAttribute('aria-pressed', String(selected === answer));
+    const label = element('span', 'branch-label');
+    label.append(element('span', 'branch-symbol', answer === 'yes' ? '✓' : '×'), document.createTextNode(name));
+    branch.append(label, element('span', 'branch-next', destination.title));
+    if (selected === answer) branch.append(element('span', 'followed-label', 'Your path ↓'));
+    branch.addEventListener('click', () => change(answerQuestion(goBack(history, index), answer)));
+    branches.append(branch);
+  }
+  return branches;
+}
+
 function render(moveFocus = false) {
   diagram.replaceChildren();
   const id = currentNode(history);
   const node = nodes[id];
   document.querySelector('#step-label').textContent = node.terminal ? 'Your next action' : `Question ${history.length + 1}`;
   back.disabled = restart.disabled = history.length === 0;
-
-  if (history.some(entry => entry.id === 'loopbackAllowed' && entry.answer === 'no')) {
-    diagram.append(element('p', 'unverified', 'Optical loopback was skipped. A standalone local optic test has not been verified.'));
-  }
 
   history.forEach((entry, index) => {
     const item = element('div', 'past-step');
@@ -43,9 +59,10 @@ function render(moveFocus = false) {
     question.append(element('span', 'past-number', String(index + 1)), element('span', '', nodes[entry.id].title), element('span', 'edit-label', 'Change'));
     question.setAttribute('aria-label', `Change answer to question ${index + 1}: ${nodes[entry.id].title}`);
     question.addEventListener('click', () => change(goBack(history, index)));
-    const connector = element('div', `path-connector ${entry.answer}`);
-    connector.append(element('span', '', entry.answer === 'yes' ? 'Yes' : 'No'));
-    item.append(question, connector);
+    const connector = element('div', `continuation ${entry.answer}`);
+    connector.setAttribute('aria-hidden', 'true');
+    connector.append(element('span', 'connector-arrow'));
+    item.append(question, branchesFor(entry.id, index, entry.answer), connector);
     diagram.append(item);
   });
 
@@ -59,8 +76,13 @@ function render(moveFocus = false) {
   heading.id = 'question-title';
   heading.tabIndex = -1;
   card.append(meta, heading, element('p', 'instruction', node.instruction));
+  if (node.note) {
+    const meaning = element('p', 'meaning');
+    meaning.append(element('strong', '', 'Why this check: '), document.createTextNode(node.note));
+    card.append(meaning);
+  }
 
-  if (node.details.length || node.note) {
+  if (node.details.length) {
     const help = element(node.terminal ? 'div' : 'details', 'help');
     if (!node.terminal) help.append(element('summary', '', 'How to check'));
     if (node.details.length) {
@@ -68,27 +90,23 @@ function render(moveFocus = false) {
       for (const detail of node.details) list.append(element('li', '', detail));
       help.append(list);
     }
-    if (node.note) help.append(element('p', 'check-note', node.note));
     card.append(help);
+  }
+  if (node.terminal) {
+    const findings = history.map(entry => nodes[entry.id].findings?.[entry.answer]).filter(Boolean);
+    if (findings.length) {
+      const evidence = element('div', 'evidence');
+      evidence.append(element('h3', '', 'What your checks showed'));
+      const list = element('ul');
+      for (const finding of findings) list.append(element('li', '', finding));
+      evidence.append(list);
+      card.append(evidence);
+    }
   }
   current.append(card);
 
   if (!node.terminal) {
-    const branches = element('div', 'branches');
-    for (const answer of ['yes', 'no']) {
-      const destination = nodes[node[answer]];
-      const branch = element('button', `branch ${answer}`);
-      branch.type = 'button';
-      branch.dataset.answer = answer;
-      const name = answer === 'yes' ? 'Yes' : 'No';
-      branch.setAttribute('aria-label', `${name}: ${destination.title}`);
-      const label = element('span', 'branch-label');
-      label.append(element('span', 'branch-symbol', answer === 'yes' ? '✓' : '×'), document.createTextNode(name));
-      branch.append(label, element('span', 'branch-next', destination.title));
-      branch.addEventListener('click', () => change(answerQuestion(history, answer)));
-      branches.append(branch);
-    }
-    current.append(branches);
+    current.append(branchesFor(id, history.length));
     current.append(element('p', 'branch-hint', 'Tap a branch to continue.'));
   } else {
     const reset = element('button', 'primary-button', 'Start a new check');
@@ -99,7 +117,8 @@ function render(moveFocus = false) {
   diagram.append(current);
   if (moveFocus) {
     heading.focus({ preventScroll: true });
-    current.scrollIntoView({ block: 'start', behavior: 'instant' });
+    const anchor = diagram.querySelector('.past-step:last-of-type .branches') || current;
+    anchor.scrollIntoView({ block: 'start', behavior: 'instant' });
     document.querySelector('#status').textContent = `${node.terminal ? 'Next action' : `Question ${history.length + 1}`}: ${node.title}`;
   }
 }

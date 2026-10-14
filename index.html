@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#173b59">
-  <meta name="description" content="A simple yes-or-no fiber troubleshooting diagram. Follow each branch from connector inspection to a verified link or a clear next action.">
-  <title>Fiber troubleshooting · Follow the branch</title>
+  <meta name="description" content="RX at −40 or below its limit? Follow a visible Yes/No decision tree to isolate the source, fiber path, connections, or receiving optic.">
+  <title>Optic health · Trace low RX</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.mjs"></script>
@@ -17,9 +17,19 @@
   </header>
   <main>
     <div class="intro">
-      <h1>Fiber troubleshooting</h1>
-      <p>Check the result. Choose <strong>Yes</strong> or <strong>No</strong>.<br>Follow the branch to your next step.</p>
+      <h1>RX is low. Where is the light?</h1>
+      <p>Start with <strong>RX −40</strong> or a below-limit reading.<br>Follow each branch to narrow down the cause.</p>
     </div>
+    <section class="signal-context" aria-label="Direction of the light being tested">
+      <div class="signal-direction"><span>Far-end TX</span><span aria-hidden="true">→</span><span>Fiber &amp; connections</span><span aria-hidden="true">→</span><span>Local RX</span></div>
+      <p>Local = the end with low RX. Check one direction and its affected lanes at a time. If both ends are low, repeat for the other direction.</p>
+    </section>
+    <details class="report-help"><summary>Reading the optic health report</summary><ul>
+      <li><strong>RX</strong> is received light; <strong>TX</strong> is the optic’s reported outgoing light. Pair local RX with the far-end TX lane that feeds it.</li>
+      <li>Record which lanes are affected. All lanes at −40 and one low lane need different attention to the common route versus an individual lane.</li>
+      <li>Use the model’s actual RX/TX specifications and current readings. A −40 display may be a reporting floor; its meaning depends on the device. A green badge or a positive TX value alone does not establish health.</li>
+      <li>A “No neighbor” result does not identify whether the cause is fiber, an optic, or configuration.</li>
+    </ul></details>
     <div class="toolbar">
       <span id="step-label">Start here</span>
       <div><button id="back" type="button" disabled><span aria-hidden="true">←</span> Back</button><button id="restart" type="button" disabled>Start over</button></div>
@@ -28,7 +38,7 @@
     <p id="status" class="sr-only" role="status"></p>
     <noscript><p class="notice">Enable JavaScript to use the Yes/No troubleshooting diagram.</p></noscript>
     <aside class="safety"><span aria-hidden="true">△</span><p>Never look into a fiber or optic. Use approved equipment and site limits. If you cannot confirm a result, pause and check with the site lead.</p></aside>
-    <footer><span>Based on the Fiberline troubleshooting guide.</span><a href="https://github.com/IronFaith/fiber-troubleshooting">View on GitHub</a></footer>
+    <footer><span>Optic health checks · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html">RX/TX reference</a> · <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber">Fiber testing reference</a></span><a href="https://github.com/IronFaith/fiber-troubleshooting">View on GitHub</a></footer>
   </main>
 </body>
 </html>

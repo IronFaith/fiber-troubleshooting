@@ -6,22 +6,27 @@ function follow(answers) {
   return answers.reduce((history, answer) => answerQuestion(history, answer), []);
 }
 
-test('recovery requires final verification; unsuccessful and unavailable checks reach the right next action', () => {
-  assert.equal(currentNode(follow(['yes', 'yes', 'yes'])), 'verify');
-  assert.equal(currentNode(follow(['yes', 'yes', 'yes', 'yes'])), 'done');
-  assert.equal(currentNode(follow(['yes', 'yes', 'yes', 'no'])), 'handoff');
-  assert.equal(currentNode(follow(['no'])), 'hold');
-  assert.equal(currentNode(follow(['yes', 'no', 'yes', 'no'])), 'damaged');
-  assert.equal(currentNode(follow(['yes', 'yes', 'no', 'no', 'no'])), 'txHandoff');
-  assert.equal(currentNode(follow(['yes', 'yes', 'no', 'yes', 'no', 'yes'])), 'path');
-  assert.equal(currentNode(follow(['yes', 'yes', 'no', 'yes', 'yes', 'no', 'yes', 'no'])), 'localHandoff');
+test('low RX isolates source, connection, fiber, or receiver evidence before final recovery', () => {
+  assert.equal(currentNode(follow(['no', 'no'])), 'sourceHandoff');
+  const afterCleaning = ['yes', 'yes', 'no', 'yes', 'yes'];
+  assert.equal(currentNode(follow(afterCleaning)), 'verify');
+  assert.equal(currentNode(follow([...afterCleaning, 'yes'])), 'done');
+  assert.equal(currentNode(follow([...afterCleaning, 'no'])), 'unresolved');
+  assert.equal(currentNode(follow(['yes', 'yes', 'no', 'no'])), 'connectorHandoff');
+  const meterPath = ['yes', 'yes', 'yes', 'no', 'yes'];
+  assert.equal(currentNode(follow([...meterPath, 'yes'])), 'swapAvailable');
+  assert.equal(currentNode(follow([...meterPath, 'no', 'yes'])), 'highPowerHandoff');
+  assert.equal(currentNode(follow([...meterPath, 'no', 'no', 'yes'])), 'vflAvailable');
+  assert.equal(currentNode(follow([...meterPath, 'yes', 'yes', 'no'])), 'receiverHandoff');
+  assert.equal(currentNode(follow([...meterPath, 'yes', 'yes', 'yes', 'yes'])), 'done');
+  assert.equal(currentNode(follow(['yes', 'yes', 'yes', 'no', 'no', 'yes', 'yes'])), 'patchAvailable');
 });
 
 test('changing an earlier answer removes its abandoned branch and refresh only restores a valid path', () => {
-  const complete = follow(['yes', 'yes', 'yes', 'yes']);
+  const complete = follow(['yes', 'yes', 'no', 'yes', 'yes', 'yes']);
   assert.equal(currentNode(goBack(complete)), 'verify');
   const changed = answerQuestion(goBack(complete, 1), 'no');
-  assert.equal(currentNode(changed), 'cleanable');
+  assert.equal(currentNode(changed), 'routeFix');
   assert.equal(changed.length, 2);
   assert.deepEqual(restoreHistory(JSON.parse(JSON.stringify(changed))), changed);
   assert.deepEqual(restoreHistory([{ id: 'done', answer: 'yes' }]), []);

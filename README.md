@@ -1,12 +1,14 @@
 # Fiber troubleshooting
 
-A simple Yes/No decision diagram for fiber troubleshooting, adapted from the supplied Fiberline guide.
+A Yes/No decision diagram for a reported low-RX condition, adapted from the supplied Fiberline guide and the user's optic-health workflow.
 
 Live site: https://ironfaith.github.io/fiber-troubleshooting/
 
-Each question shows both branches and previews their next step. The chosen path remains visible. Use Back or select an earlier question to revise an answer; Start over clears the path. The current path survives refresh in the same tab using session storage when available. No account, analytics, or backend is used.
+Every answered question retains both branches. A colored elbow connects the selected branch to the next question. Use Back, an earlier question, or either earlier branch to revise an answer; downstream answers are discarded. Start over clears the path. Progress survives refresh in the same tab when session storage is available. No account, analytics, or backend is used.
 
-The guide covers inspection and cleaning, local transmit power, optical loopback, routing, continuity, loss, segment comparisons, remote checks, and final verification. Equipment-specific limits and test approval come from the site procedure. Unsupported tests stay unverified; escalation does not claim a definitive fault.
+Start with RX at −40 or below its model-specific limit. Work from the far-end TX through its intended lane and fiber path into the local RX. The flow distinguishes routing, dirty/damaged interfaces, cable conditions, measured input power, source output, path loss, local optical loopback, and controlled patch/optic substitutions. Available tests have explicit alternative routes. The final result retains relevant evidence and uncertainty.
+
+The application does not connect to Cable Guy or contain actual reports, hostnames, or port IDs. It does not infer good health from a badge color, positive TX telemetry, or a universal dBm threshold. The source snapshot and the public site remain separate.
 
 ## Development
 
