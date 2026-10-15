@@ -11,8 +11,8 @@ const line = (path,red=false) => `<path class="quiz-light${red ? ' quiz-red' : '
 const arrow = (x,y,red=false) => `<path class="quiz-light${red ? ' quiz-red' : ''}" d="M${x-5} ${y-5} l6 5 -6 5"/>`;
 
 function opticFace(x,y) {
-  return `<g transform="translate(${x} ${y})"><path fill="#7053a4" d="M0 17 H9 V81 H85 V17 H94 V91 H0 Z"/><rect fill="#cacbd0" stroke="#777a84" x="7" y="7" width="80" height="67" rx="3"/>`+
-    [30,64].map(center => `<rect fill="#454252" x="${center-12}" y="20" width="24" height="43" rx="2"/>`+[31,52].map(y => `<circle fill="#bfc1c9" cx="${center}" cy="${y}" r="6"/><circle fill="#262435" cx="${center}" cy="${y}" r="3"/>`).join('')).join('')+'</g>';
+  return `<g transform="translate(${x} ${y})"><g transform="translate(0 98) scale(1 -1)"><path fill="#7053a4" d="M0 17 H9 V81 H85 V17 H94 V91 H0 Z"/><rect fill="#cacbd0" stroke="#777a84" x="7" y="7" width="80" height="67" rx="3"/>`+
+    [30,64].map(center => `<rect fill="#454252" x="${center-12}" y="20" width="24" height="43" rx="2"/>`+[31,52].map(y => `<circle fill="#bfc1c9" cx="${center}" cy="${y}" r="6"/><circle fill="#262435" cx="${center}" cy="${y}" r="3"/>`).join('')).join('')+'</g></g>';
 }
 
 function readingFigure(kind) {

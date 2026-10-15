@@ -134,6 +134,7 @@ function example(id, label, choices, draw) {
   });
   if (choices.length) host.append(controls);
   host.append(figure); show(0);
+  return show;
 }
 
 const text = (x,y,value,extra='') => `<text x="${x}" y="${y}" ${extra}>${value}</text>`;
@@ -337,8 +338,8 @@ function renderPatchingLesson() {
       <h3 id="lc-position-title">Same optic. Two LC positions.</h3>
       <p class="section-intro">Choose the Ethernet port shown in FIM.</p>
       <div id="patch-picture"></div>
-      <div class="patch-mapping"><p><strong>5/1</strong><span>Optic 5 · position 1 · left</span></p><p><strong>5/5</strong><span>Optic 5 · position 2 · right</span></p></div>
-      <p class="lesson-takeaway">Each position takes a vertical duplex LC pair. The two positions sit side by side in one optic.</p>
+      <div id="patch-mapping" class="patch-mapping"></div>
+      <p class="lesson-takeaway">Tab above = upright. Flip the optic and the ports swap sides; their Ethernet numbers stay with them.</p>
       <p class="picture-note">Your confirmed site example, facing the optic. Check the installed orientation and labels; other hardware may use a different mapping.</p>
     </section>
     <section id="fim-path" class="lesson-section" aria-labelledby="fim-path-title">
@@ -370,24 +371,51 @@ function renderPatchingLesson() {
     <a class="next-chapter" href="./devices.html">← Chapter 2: Device locations & links</a>
     <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
   setupLesson();
-  example('patch-picture', 'Ethernet port in FIM', ['Ethernet 5/1', 'Ethernet 5/5'], patchPicture);
+  setupPatchExample();
   example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture);
   example('fanout-picture', 'Choose a fanout follower', Array.from({length:12}, (_, index) => `Leg ${index+1}`), fanoutPicture);
   example('mmc-patch-picture', 'MMC patching steps', ['1 · Match', '2 · Prepare', '3 · Seat'], mmcPatchPicture);
 }
 
-function patchPicture(selected) {
-  const right = selected === 1;
-  const suffix = right ? 5 : 1;
-  const position = right ? 2 : 1;
+function setupPatchExample() {
+  let flipped = false;
+  let selectedPort = 0;
+  const show = example('patch-picture', 'Ethernet port in FIM', ['Ethernet 5/1', 'Ethernet 5/5'], selected => {
+    selectedPort = selected;
+    return patchPicture(selected, flipped);
+  });
+  const host = document.getElementById('patch-picture');
+  const controls = el('div', 'patch-orientation-controls');
+  const status = el('span', 'patch-orientation-status');
+  const flip = el('button', '', '↻ Flip optic 180°');
+  flip.type = 'button';
+  flip.setAttribute('aria-controls', 'patch-picture patch-mapping');
+  controls.append(status, flip);
+  host.insertBefore(controls, host.querySelector('figure'));
+  function updateOrientation() {
+    status.textContent = flipped ? 'Upside down · tab below' : 'Upright · tab above';
+    flip.setAttribute('aria-pressed', String(flipped));
+    document.getElementById('patch-mapping').innerHTML = (flipped ? [1,0] : [0,1]).map((port,index) =>
+      `<p><strong>5/${port ? 5 : 1}</strong><span>Position ${port+1} · ${index ? 'right' : 'left'}</span></p>`).join('');
+  }
+  flip.addEventListener('click', () => { flipped = !flipped; show(selectedPort); updateOrientation(); });
+  updateOrientation();
+}
+
+function patchPicture(selected, flipped = false) {
+  const right = (selected === 1) !== flipped;
+  const suffix = selected ? 5 : 1;
+  const position = selected+1;
   const side = right ? 'right' : 'left';
-  const center = right ? 232 : 128;
-  const outerEdgeX = right ? center+23 : center-31;
+  const center = selected ? 232 : 128;
+  const outerEdgeX = selected ? center+23 : center-31;
+  const screenCenter = flipped ? 360-center : center;
   let drawing = `<defs>
       <linearGradient id="patch-metal-face" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#97989c"/><stop offset=".2" stop-color="#dedfe1"/><stop offset=".48" stop-color="#b6b7bb"/><stop offset=".75" stop-color="#e6e7e9"/><stop offset="1" stop-color="#999a9f"/></linearGradient>
       <linearGradient id="patch-pull-purple" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#51417d"/><stop offset="1" stop-color="#8063bb"/></linearGradient>
     </defs>`+
     text(180,24,'Optic 5 · front view','class="patch-title" text-anchor="middle"')+
+    `<g class="patch-assembly" transform="rotate(${flipped ? 180 : 0} 180 197)"><g transform="translate(0 394) scale(1 -1)">`+
     '<path class="patch-pull-tab" d="M49 102 H70 V270 Q70 279 80 279 H280 Q290 279 290 270 V102 H311 V292 Q311 312 291 312 H69 Q49 312 49 292 Z"/>'+
     '<rect class="patch-module-face" x="62" y="82" width="236" height="153" rx="5"/>'+
     '<path class="patch-face-lip" d="M66 86 H294 V105 H66 Z"/>'+
@@ -395,17 +423,20 @@ function patchPicture(selected) {
   [128,232].forEach((x,index) => {
     const active = index === selected;
     const keyX = index ? x+23 : x-31;
-    drawing += text(x,59,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
-      `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-37}" y="111" width="74" height="112" rx="3"/>`+
+    drawing += `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-37}" y="111" width="74" height="112" rx="3"/>`+
       `<rect class="patch-opening" x="${x-23}" y="118" width="46" height="40" rx="2"/><rect class="patch-opening" x="${x-23}" y="176" width="46" height="40" rx="2"/>`+
       `<rect class="patch-keyway" x="${keyX}" y="138" width="8" height="58" rx="1"/>`+
       `<circle class="patch-ferrule" cx="${x}" cy="138" r="11"/><circle class="patch-ferrule" cx="${x}" cy="196" r="11"/>`+
-      `<circle class="patch-ferrule-core" cx="${x}" cy="138" r="5"/><circle class="patch-ferrule-core" cx="${x}" cy="196" r="5"/>`+
-      text(x,258,`Position ${index+1}`,'class="small" text-anchor="middle"');
+      `<circle class="patch-ferrule-core" cx="${x}" cy="138" r="5"/><circle class="patch-ferrule-core" cx="${x}" cy="196" r="5"/>`;
   });
-  drawing += `<g class="patch-lc"><rect x="${center-23}" y="118" width="46" height="40" rx="2"/><rect x="${center-23}" y="176" width="46" height="40" rx="2"/><rect class="patch-outer-edge" x="${outerEdgeX}" y="138" width="8" height="58" rx="1"/></g>`+
-    `<path class="patch-insert" d="M${center} 65 V78 m-5 -5 5 5 5 -5"/>`;
-  return {height:329, caption:`Front view: Ethernet 5/${suffix} → optic 5 → position ${position} (${side}). The connector’s outside edge faces ${side}.`, drawing};
+  drawing += `<g class="patch-lc"><rect x="${center-23}" y="118" width="46" height="40" rx="2"/><rect x="${center-23}" y="176" width="46" height="40" rx="2"/><rect class="patch-outer-edge" x="${outerEdgeX}" y="138" width="8" height="58" rx="1"/></g></g></g>`;
+  [128,232].forEach((x,index) => {
+    const visibleX = flipped ? 360-x : x;
+    drawing += text(visibleX,flipped ? 59 : 140,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
+      text(visibleX,flipped ? 258 : 338,`Position ${index+1}`,'class="small" text-anchor="middle"');
+  });
+  drawing += `<path class="patch-insert" d="M${screenCenter} ${flipped ? 65 : 146} V${flipped ? 78 : 156} m-5 -5 5 5 5 -5"/>`;
+  return {height:354, caption:`${flipped ? 'Upside down · tab below' : 'Upright · tab above'}. Ethernet 5/${suffix} → position ${position}, now on the ${side}. The outside connector edge faces ${side}.`, drawing};
 }
 
 function patchRoutePicture() {
