@@ -372,9 +372,26 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .lab-lc-plug { fill:#9bd0ed; stroke:#315d7f; stroke-width:1.5; }
 .lab-lc-plug .lab-ferrule { fill:#e3e8ec; }
 .lab-lc-plug .lab-grip { fill:none; stroke:#e5f4fc; stroke-width:2; }
-.lab-tray .lab-dragging { opacity:.4; }
-.lab-drag-ghost { position:fixed; z-index:100; pointer-events:none; width:110px; height:72px; border:2px solid #277ab4; border-radius:7px; background:#f7fbffe8; box-shadow:0 5px 15px #1a394833; }
-.lab-drag-ghost svg { width:100%; height:100%; }
+.lab-workbench { position:relative; isolation:isolate; }
+.lab-cable-in-use .lab-connector-head { visibility:hidden; }
+.lab-tray button.lab-cable-in-use { opacity:1; }
+.lab-cable-layer { position:absolute; inset:0; width:100%; height:100%; overflow:hidden; pointer-events:none; z-index:1; }
+.lab-flex-cable { filter:drop-shadow(0 2px 1px #273a4830); }
+.lab-cable-shadow, .lab-cable-jacket, .lab-cable-shine { fill:none; stroke-linecap:round; }
+.lab-cable-shadow { stroke:#86652a; stroke-width:6; }
+.lab-cable-jacket { stroke:#f3c746; stroke-width:4; }
+.lab-cable-shine { stroke:#ffe998; stroke-width:1; }
+.lab-flex-mmc .lab-cable-shadow { stroke-width:8; }
+.lab-flex-mmc .lab-cable-jacket { stroke-width:6; }
+.lab-flex-mmc .lab-cable-shine { stroke-width:1.5; }
+.lab-plug-body { fill:#93cbe9; stroke:#315d7f; stroke-width:1.5; }
+.lab-plug-boot { fill:#5d99ba; stroke:#315d7f; stroke-width:1; }
+.lab-plug-latch { fill:#d9f0fc; stroke:#315d7f; stroke-width:1; }
+.lab-plug-grip { fill:none; stroke:#edfaff; stroke-width:1.3; }
+.lab-plug-nose { fill:#d2dbdf; stroke:#657984; stroke-width:1; }
+.lab-moving-mmc .lab-plug-body { fill:#a7cbb9; stroke:#385e4d; }
+.lab-moving-mmc .lab-plug-boot { fill:#5c8270; stroke:#385e4d; }
+.lab-moving-mmc .lab-plug-latch { fill:#d9eee1; stroke:#385e4d; }
 .lab-board { margin-top:12px; background:#edf3f7; border:1px solid #c7d5df; border-radius:6px; padding:10px 0; }
 .lab-orientation { text-align:center; color:#536277; font-size:12px; margin:4px 0; }
 .lab-optic-board { position:relative; max-width:360px; margin:0 auto; }
