@@ -215,23 +215,19 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .lesson-figure text.endpoint-name { font-weight:700; font-size:17px; }
 .lesson-figure text.patch-title { font-weight:700; font-size:17px; }
 .lesson-figure text.patch-port-label { font:700 18px Consolas,monospace; }
-.patch-socket { fill:#dce5ec; stroke:#7c95a8; stroke-width:1.5; }
-.patch-socket-active { fill:#e1f1fc; stroke:#1b75b4; stroke-width:3; }
-.patch-opening { fill:#53697a; stroke:#354f62; stroke-width:1.5; }
-.patch-lc rect { fill:#acd9f4; fill-opacity:.92; stroke:#1e6a9e; stroke-width:1.5; }
+.patch-socket { fill:#a7a7ae; stroke:#74747d; stroke-width:1.5; }
+.patch-socket-active { fill:#b7bfca; stroke:#1b75b4; stroke-width:3; }
+.patch-opening { fill:#282536; stroke:#6b6875; stroke-width:1.5; }
+.patch-lc rect { fill:#acd9f4; fill-opacity:.2; stroke:#368fc9; stroke-width:2; }
 #patch-picture svg { max-height:none; max-width:390px; margin:0 auto; }
-.patch-module-top { fill:url(#patch-metal-top); stroke:#718594; stroke-width:1.5; }
-.patch-module-side { fill:#8e9da9; stroke:#627887; stroke-width:1.5; }
-.patch-module-face { fill:url(#patch-metal-face); stroke:#637c8e; stroke-width:2; }
-.patch-module-rib { fill:none; stroke:#9caebc; stroke-width:2; }
-.patch-module-seam { fill:none; stroke:#6e8495; stroke-width:1.4; }
-.patch-module-label { fill:#f8fafb; stroke:#9eafb9; stroke-width:1; }
-.patch-pcb { fill:#466955; stroke:#334e40; }
-.patch-contact { fill:#c6a45c; stroke:#9d7b35; stroke-width:.5; }
-.patch-bail { fill:none; stroke:#506d82; stroke-width:4; stroke-linecap:round; }
-.patch-keyway { fill:#8b9da9; stroke:#3c5567; stroke-width:1; }
-.patch-ferrule { fill:#d0d8dc; stroke:#8da3b2; stroke-width:2; }
-.patch-lc .patch-outer-edge { fill:#68acd7; stroke:#155d8c; stroke-width:2; }
+.patch-module-face { fill:url(#patch-metal-face); stroke:#7c7d84; stroke-width:2; }
+.patch-face-lip { fill:#d3d4d8; stroke:#ececef; stroke-width:1; }
+.patch-module-seam { fill:none; stroke:#85858d; stroke-width:1.4; }
+.patch-pull-tab { fill:url(#patch-pull-purple); stroke:#554184; stroke-width:2; }
+.patch-keyway { fill:#393447; stroke:#696472; stroke-width:1; }
+.patch-ferrule { fill:#c5c4ca; stroke:#83818b; stroke-width:2; }
+.patch-ferrule-core { fill:#292737; }
+.patch-lc .patch-outer-edge { fill:#68acd7; fill-opacity:1; stroke:#155d8c; stroke-width:2; }
 .patch-fiber { fill:none; stroke:#dcac32; stroke-width:5; }
 .patch-insert { fill:none; stroke:#1b75b4; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
 .patch-mapping { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:12px; }

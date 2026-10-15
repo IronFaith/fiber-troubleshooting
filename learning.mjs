@@ -377,37 +377,31 @@ function patchPicture(selected) {
   const suffix = right ? 5 : 1;
   const position = right ? 2 : 1;
   const side = right ? 'right' : 'left';
-  const center = right ? 206 : 112;
-  const outerEdgeX = right ? center+20 : center-28;
+  const center = right ? 232 : 128;
+  const outerEdgeX = right ? center+23 : center-31;
   let drawing = `<defs>
-      <linearGradient id="patch-metal-top" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0f3f4"/><stop offset=".5" stop-color="#bcc6ce"/><stop offset="1" stop-color="#e6ebee"/></linearGradient>
-      <linearGradient id="patch-metal-face" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#b0bdc7"/><stop offset=".45" stop-color="#e5ebef"/><stop offset="1" stop-color="#9eafbc"/></linearGradient>
+      <linearGradient id="patch-metal-face" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#97989c"/><stop offset=".2" stop-color="#dedfe1"/><stop offset=".48" stop-color="#b6b7bb"/><stop offset=".75" stop-color="#e6e7e9"/><stop offset="1" stop-color="#999a9f"/></linearGradient>
+      <linearGradient id="patch-pull-purple" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#51417d"/><stop offset="1" stop-color="#8063bb"/></linearGradient>
     </defs>`+
-    text(180,24,'Optic 5 · connection face','class="patch-title" text-anchor="middle"')+
-    '<path class="patch-pcb" d="M129 39 H307 V58 H120 Z"/>';
-  for (let contact=0; contact<10; contact++) drawing += `<rect class="patch-contact" x="${137+contact*16}" y="40" width="10" height="13" rx="1"/>`;
-  drawing += '<path class="patch-module-side" d="M268 174 L321 57 V195 L268 318 Z"/>'+
-    '<path class="patch-module-top" d="M50 174 L113 57 H321 L268 174 Z"/>';
-  for (let rib=0; rib<8; rib++) drawing += `<path class="patch-module-rib" d="M${65+rib*25} 164 L${119+rib*25} 65"/>`;
-  drawing += '<path class="patch-module-label" d="M110 111 L128 77 H272 L254 111 Z"/>'+
-    text(193,99,'Optic 5','class="small" text-anchor="middle"')+
-    '<path class="patch-module-seam" d="M278 178 L312 102 M278 193 L312 117 M278 208 L312 132"/>'+
-    '<rect class="patch-module-face" x="50" y="174" width="218" height="144" rx="7"/>'+
-    '<path class="patch-module-seam" d="M58 182 V307 H260 V182"/>'+
-    '<path class="patch-bail" d="M62 296 V323 Q62 332 72 332 H246 Q256 332 256 323 V296"/>';
-  [112,206].forEach((x,index) => {
+    text(180,24,'Optic 5 · front view','class="patch-title" text-anchor="middle"')+
+    '<path class="patch-pull-tab" d="M49 102 H70 V270 Q70 279 80 279 H280 Q290 279 290 270 V102 H311 V292 Q311 312 291 312 H69 Q49 312 49 292 Z"/>'+
+    '<rect class="patch-module-face" x="62" y="82" width="236" height="153" rx="5"/>'+
+    '<path class="patch-face-lip" d="M66 86 H294 V105 H66 Z"/>'+
+    '<path class="patch-module-seam" d="M69 112 V226 H291 V112 M180 111 V227"/>';
+  [128,232].forEach((x,index) => {
     const active = index === selected;
-    const keyX = index ? x+20 : x-28;
-    drawing += text(x,190,String(index+1),'class="small" text-anchor="middle"')+
-      text(x,355,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
-      `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-34}" y="198" width="68" height="106" rx="5"/>`+
-      `<rect class="patch-opening" x="${x-22}" y="209" width="44" height="34" rx="3"/><rect class="patch-opening" x="${x-22}" y="259" width="44" height="34" rx="3"/>`+
-      `<circle class="patch-ferrule" cx="${x}" cy="226" r="7"/><circle class="patch-ferrule" cx="${x}" cy="276" r="7"/>`+
-      `<rect class="patch-keyway" x="${keyX}" y="226" width="8" height="50" rx="2"/>`;
+    const keyX = index ? x+23 : x-31;
+    drawing += text(x,59,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
+      `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-37}" y="111" width="74" height="112" rx="3"/>`+
+      `<rect class="patch-opening" x="${x-23}" y="118" width="46" height="40" rx="2"/><rect class="patch-opening" x="${x-23}" y="176" width="46" height="40" rx="2"/>`+
+      `<rect class="patch-keyway" x="${keyX}" y="138" width="8" height="58" rx="1"/>`+
+      `<circle class="patch-ferrule" cx="${x}" cy="138" r="11"/><circle class="patch-ferrule" cx="${x}" cy="196" r="11"/>`+
+      `<circle class="patch-ferrule-core" cx="${x}" cy="138" r="5"/><circle class="patch-ferrule-core" cx="${x}" cy="196" r="5"/>`+
+      text(x,258,`Position ${index+1}`,'class="small" text-anchor="middle"');
   });
-  drawing += `<g class="patch-lc"><rect x="${center-19}" y="212" width="38" height="28" rx="3"/><rect x="${center-19}" y="262" width="38" height="28" rx="3"/><rect class="patch-outer-edge" x="${outerEdgeX}" y="226" width="8" height="50" rx="2"/></g>`+
-    `<path class="patch-insert" d="M${center} 385 V366 m-6 8 6 -8 6 8"/>`;
-  return {height:397, caption:`Ethernet 5/${suffix} → optic 5 → position ${position} (${side}). The connector’s outside edge faces ${side}.`, drawing};
+  drawing += `<g class="patch-lc"><rect x="${center-23}" y="118" width="46" height="40" rx="2"/><rect x="${center-23}" y="176" width="46" height="40" rx="2"/><rect class="patch-outer-edge" x="${outerEdgeX}" y="138" width="8" height="58" rx="1"/></g>`+
+    `<path class="patch-insert" d="M${center} 65 V78 m-5 -5 5 5 5 -5"/>`;
+  return {height:329, caption:`Front view: Ethernet 5/${suffix} → optic 5 → position ${position} (${side}). The connector’s outside edge faces ${side}.`, drawing};
 }
 
 function patchRoutePicture() {
