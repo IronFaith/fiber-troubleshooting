@@ -1,4 +1,5 @@
 import { loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=2';
+import { rackIllustration } from './rack-visuals.mjs?v=1';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -335,7 +336,7 @@ function renderPatchingLesson() {
     <div class="chapter-heading"><p class="chapter-count">Chapter 3</p><button type="button" class="lesson-motion"></button></div>
     <h2 id="lesson-title">FIM, LC & MMC patching</h2>
     <p class="lesson-intro">Match the optic position, the follower and its MMC head.</p>
-    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">LC position</a><a href="#fim-path">FIM path</a><a href="#mmc-fanout">MMC head & followers</a></nav>
+    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">LC position</a><a href="#rack-path">Rack view</a><a href="#fim-path">FIM path</a><a href="#mmc-fanout">MMC head & followers</a></nav>
     <section id="lc-position" class="lesson-section" aria-labelledby="lc-position-title">
       <h3 id="lc-position-title">Same optic. Two LC positions.</h3>
       <p class="section-intro">Choose the Ethernet port shown in FIM.</p>
@@ -343,6 +344,12 @@ function renderPatchingLesson() {
       <div id="patch-mapping" class="patch-mapping"></div>
       <p class="lesson-takeaway">Tab above = upright. Flip the optic and the ports swap sides; their Ethernet numbers stay with them.</p>
       <p class="picture-note">Your confirmed site example, facing the optic. Check the installed orientation and labels; other hardware may use a different mapping.</p>
+    </section>
+    <section id="rack-path" class="lesson-section" aria-labelledby="rack-path-title">
+      <h3 id="rack-path-title">Find the device. Follow its fiber.</h3>
+      <p class="section-intro">From the optic, up the side manager, to the green CAS.</p>
+      <div id="rack-picture"></div>
+      <p class="picture-note">Example rack layout. Elevations, CAS 1 / 12 and front/rear routes are teaching examples; confirm the installed path in FIM.</p>
     </section>
     <section id="fim-path" class="lesson-section" aria-labelledby="fim-path-title">
       <h3 id="fim-path-title">Follow the LC leg to its passive</h3>
@@ -374,9 +381,31 @@ function renderPatchingLesson() {
     <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
   setupLesson();
   setupPatchExample();
+  setupRackExample();
   example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture);
   example('fanout-picture', 'Choose a fanout follower', Array.from({length:12}, (_, index) => `Leg ${index+1}`), fanoutPicture);
   example('mmc-patch-picture', 'MMC patching steps', ['1 · Match', '2 · Prepare', '3 · Seat'], mmcPatchPicture);
+}
+
+function setupRackExample() {
+  let elevation = 30;
+  let side = 0;
+  const show = example('rack-picture', 'MMC connection at the CAS', ['CAS front', 'Behind CAS'], selected => {
+    side = selected;
+    return rackIllustration(side,elevation);
+  });
+  const host = document.getElementById('rack-picture');
+  const controls = el('div', 'rack-elevation-controls');
+  const label = el('label', '', 'Device elevation');
+  label.htmlFor = 'rack-elevation';
+  const select = el('select'); select.id = 'rack-elevation';
+  for(const level of [30,18]) {
+    const option = el('option', '', `${level} · example`);
+    option.value = level; select.append(option);
+  }
+  select.addEventListener('change', () => { elevation = Number(select.value); show(side); });
+  controls.append(label,select);
+  host.prepend(controls);
 }
 
 function setupPatchExample() {
