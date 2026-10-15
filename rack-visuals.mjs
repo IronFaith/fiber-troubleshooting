@@ -102,3 +102,82 @@ export function rackIllustration(side=0,elevation=30) {
   return {height:708,hardware:true,drawing,
     caption:`TX starts at optic 5, elevation ${elevation}: LC leg → MMC head → CAS 1 Port 12 (${rear ? 'rear' : 'front'}) → onward fiber. IR light is invisible; blue arrows illustrate its direction.`};
 }
+
+// Compact rack faces keep both ends of one duplex pair visible together.
+// Connector positions are enlarged for teaching, not a lane or rear-wiring map.
+function linkRack(offset,name,local) {
+  let drawing = `<g class="link-rack${local ? ' link-rack-local' : ''}" data-device="${name}" transform="translate(${offset} 0)">
+    <rect class="link-role-badge" x="10" y="4" width="152" height="28" rx="5"/>
+    ${label(86,23,local ? 'LOCAL · YOU ARE HERE' : 'REMOTE','rack-center link-role')}
+    ${label(86,53,`Device ${name}`,'rack-center link-device-name')}
+    ${label(86,73,name==='A' ? 'Rack 17 · elevation 30' : 'Other rack · find in FIM','rack-center link-location')}
+    <rect class="rack-shadow" x="14" y="186" width="152" height="264" rx="4"/>
+    <rect class="rack-frame" x="10" y="182" width="152" height="264" rx="4"/>
+    <rect class="rack-interior" x="18" y="212" width="136" height="221"/>
+    <path class="rack-rail" d="M17 213 V432 M155 213 V432"/>
+    ${label(68,195,'CAS 1','rack-center rack-on-dark link-location')}
+    ${label(68,209,'Port 12','rack-center rack-on-dark link-location')}
+    <rect class="rack-cas" x="30" y="214" width="118" height="39" rx="2"/>`;
+  for(let port=1;port<=32;port++) {
+    const x=35+((port-1)%16)*7.4, y=port<=16 ? 224 : 240;
+    drawing += `<g class="rack-cas-port${port===12 ? ' rack-cas-selected' : ''}" data-port="${port}">
+      <rect x="${x-2.5}" y="${y}" width="5" height="9" rx=".5"/>
+      <path d="M${x-1} ${y+2} h2 v5 h-2z"/></g>`;
+  }
+  for(const y of [402,424]) {
+    drawing += `<rect class="rack-chassis" x="32" y="${y}" width="115" height="12" rx="1"/>
+      <path class="rack-vent" d="M36 ${y+3} H140 M36 ${y+5} H140"/>`;
+    for(let port=0;port<8;port++) drawing += `<rect class="rack-optic" x="${37+port*13}" y="${y+7}" width="8" height="4"/>`;
+  }
+  drawing += `<g class="rack-device-selected">
+    <rect class="rack-chassis" x="32" y="311" width="115" height="65" rx="2"/>
+    <circle class="rack-led" cx="139" cy="319" r="2"/>
+    <rect class="hardware-metal" x="49" y="331" width="54" height="40" rx="3"/>
+    <path class="optic-pull" d="M46 341 V322 H106 V341 H101 V328 H51 V341 Z"/>
+    <path class="cassette-seam" d="M77 334 V368"/>
+    <rect class="optic-opening" x="57" y="337" width="14" height="12" rx="1"/>
+    <rect class="optic-opening" x="57" y="357" width="14" height="12" rx="1"/>
+    <rect class="optic-opening" x="83" y="337" width="14" height="12" rx="1"/>
+    <rect class="optic-opening" x="83" y="357" width="14" height="12" rx="1"/>
+    ${label(111,347,'TX',name==='A' ? 'link-blue' : 'link-teal')}
+    ${label(111,367,'RX',name==='A' ? 'link-teal' : 'link-blue')}
+    </g>
+    ${label(144,299,'LC leg','rack-end rack-on-dark link-location')}
+    ${label(86,394,name==='A' ? 'Device A · elevation 30' : 'Device B · other end','rack-center rack-on-dark link-location')}
+    <rect class="rack-foot" x="17" y="446" width="24" height="6" rx="2"/>
+    <rect class="rack-foot" x="132" y="446" width="24" height="6" rx="2"/>
+    </g>`;
+  return drawing;
+}
+
+export function localRemoteIllustration(selected=0) {
+  const atB = selected===1;
+  // Each path begins at one optic's TX and ends at the other optic's RX.
+  // Viewpoint changes labels only; it never reverses the actual light paths.
+  const aToB = 'M64 343 H36 Q22 343 22 329 V284 Q22 270 36 270 H100 Q112 270 112 258 V126 Q112 110 128 110 H284 Q300 110 300 126 V258 Q300 280 288 280 H230 Q218 280 218 292 V349 Q218 363 232 363 H252';
+  const bToA = 'M252 343 H224 Q210 343 210 329 V284 Q210 270 224 270 H296 Q308 270 308 258 V150 Q308 138 296 138 H132 Q120 138 120 150 V268 Q120 280 108 280 H42 Q30 280 30 292 V349 Q30 363 42 363 H64';
+  let drawing = `<g class="rack-art link-racks">
+    ${linkRack(0,'A',!atB)}${linkRack(188,'B',atB)}
+    ${route(aToB)}${route(bToA)}`;
+  for(const offset of [0,188]) {
+    drawing += `<g transform="translate(${offset} 0)">
+      <rect class="hardware-plug" x="108" y="226" width="16" height="31" rx="2"/>
+      <path class="hardware-grip" d="M111 236 h10 M111 242 h10 M111 248 h10"/>
+      <rect class="hardware-boot" x="110" y="257" width="12" height="7" rx="1"/>
+      ${label(80,264,'MMC','rack-end rack-on-dark link-location')}
+      <path class="rack-manager" d="M16 301 H35 V308 H16 M16 325 H35 V332 H16"/>
+      </g>`;
+  }
+  drawing += `${lightFlow(aToB)}${lightFlow(bToA,'return-ir')}
+    ${lightSource(64,343)}${lightSource(252,343,'return-ir')}
+    <circle class="link-receiver link-blue" cx="252" cy="363" r="4"/>
+    <circle class="link-receiver link-teal" cx="64" cy="363" r="4"/>
+    <path class="link-direction link-blue" d="M179 105 l7 5 -7 5 M17 316 l5 -7 5 7 M213 315 l5 7 5 -7"/>
+    <path class="link-direction link-teal" d="M187 133 l-7 5 7 5 M205 316 l5 -7 5 7 M25 315 l5 7 5 -7"/>
+    ${label(210,98,'A sends → B receives','rack-center link-blue')}
+    ${label(210,162,'A receives ← B sends','rack-center link-teal')}
+    ${label(180,478,'Optic → LC leg → MMC / CAS → other end','rack-center')}
+    </g>`;
+  return {height:488,hardware:true,drawing,
+    caption:`${atB ? 'B is local; A is remote.' : 'A is local; B is remote.'} Each optic makes its own TX light. Follow it to the other optic’s RX. The CAS passes that light onward.`};
+}

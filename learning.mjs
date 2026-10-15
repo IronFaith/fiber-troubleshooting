@@ -1,5 +1,5 @@
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
-import { rackIllustration } from './rack-visuals.mjs?v=3';
+import { rackIllustration, localRemoteIllustration } from './rack-visuals.mjs?v=4';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 
 function el(tag, className = '', text = '') {
@@ -240,10 +240,10 @@ function renderDevicesLesson() {
     </section>
     <section id="ends" class="lesson-section" aria-labelledby="ends-title">
       <h3 id="ends-title">Local and remote are the two ends</h3>
-      <p class="section-intro">Local is the device you are checking. Remote is the connected device at the other end, possibly in another room or building.</p>
+      <p class="section-intro">Local is where you are checking. Remote is the connected device, possibly in another room or building. Choose your side below.</p>
       <div id="ends-picture"></div>
       <div class="endpoint-locations"><p><strong>Device A · your example</strong><span>QNO5.5C.16f.17.30</span></p><p><strong>Device B · the other end</strong><span>Find its own position in the connection record.</span></p></div>
-      <p class="picture-note">One duplex pair shown. Blue and teal illustrate two directions of invisible IR. Use the full lane map for multi-fiber links.</p>
+      <p class="picture-note">One pair enlarged: blue A → B, teal B → A. IR is invisible. The rack layouts, CAS 1 / 12 and onward route are examples; use FIM for the actual passives and lane map.</p>
     </section>
     <section id="ports" class="lesson-section" aria-labelledby="ports-title">
       <h3 id="ports-title">Match the device and its port</h3>
@@ -267,7 +267,7 @@ function renderDevicesLesson() {
   }
   parts.forEach((button, index) => button.addEventListener('click', () => selectPosition(index)));
   selectPosition(0);
-  example('ends-picture', 'Choose the device you are checking', ['At device A', 'At device B'], endsPicture);
+  example('ends-picture', 'Choose the device you are checking', ['At device A', 'At device B'], localRemoteIllustration);
 }
 
 function positionPicture(selected) {
@@ -315,20 +315,6 @@ function positionPicture(selected) {
     drawing += text(250,222,'Rack excerpt','class="small"');
   }
   return {caption:captions[selected],drawing};
-}
-
-function endsPicture(selected) {
-  const atB = selected === 1;
-  return {height:270, caption:atB ? 'From B: B is local and A is remote. B TX sends to A RX; A TX sends to B RX.' : 'From A: A is local and B is remote. A TX sends to B RX; B TX sends to A RX.', drawing:
-    text(49,25,atB?'Remote':'Local','class="endpoint-name" text-anchor="middle"')+text(311,25,atB?'Local':'Remote','class="endpoint-name" text-anchor="middle"')+
-    '<rect class="learn-device" x="5" y="40" width="88" height="165" rx="6"/><rect class="learn-device" x="267" y="40" width="88" height="165" rx="6"/>'+
-    text(49,69,'Device A','text-anchor="middle"')+text(311,69,'Device B','text-anchor="middle"')+
-    '<rect class="mmc-plug" x="140" y="94" width="26" height="90" rx="4"/><rect class="mmc-plug" x="194" y="94" width="26" height="90" rx="4"/>'+
-    light('M93 110 H267')+light('M267 168 H93','return-ir')+lightSource(93,110)+lightSource(267,168,'return-ir')+
-    text(69,115,'TX','class="small"')+text(274,115,'RX','class="small"')+text(69,173,'RX','class="small"')+text(274,173,'TX','class="small"')+
-    text(180,84,'A TX → B RX','class="small" text-anchor="middle"')+text(180,205,'A RX ← B TX','class="small" text-anchor="middle"')+
-    '<path class="ir-arrow" d="M176 105 l8 5 -8 5"/><path class="return-ir-arrow" d="M184 163 l-8 5 8 5"/>'+
-    text(180,242,'Mapped fiber + passive ports','class="small" text-anchor="middle"')};
 }
 
 function renderPatchingLesson() {

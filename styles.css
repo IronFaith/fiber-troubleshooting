@@ -423,6 +423,19 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .rack-art .rack-level-number { fill:#61420c; font:700 15px Consolas,monospace; }
 .rack-foot { fill:#243642; }
 .rack-cutaway-body { fill:#235a45; stroke:#517f66; stroke-width:1.5; }
+.link-racks .link-role-badge { fill:#dce5eb; stroke:#b1c2ce; }
+.link-racks .link-rack-local .link-role-badge { fill:#173b59; stroke:#173b59; }
+.link-racks .link-role { font-size:12px; letter-spacing:.2px; }
+.link-racks .link-rack-local .link-role { fill:#fff; }
+.link-racks .link-rack-local .rack-frame { stroke:#b98025; stroke-width:2.5; }
+.link-racks .link-device-name { font-size:17px; }
+.link-racks .link-location { font-size:11px; }
+.link-racks .link-blue { --direction-color:#176cae; fill:var(--direction-color); }
+.link-racks .link-teal { --direction-color:#126e5f; fill:var(--direction-color); }
+.link-racks .rack-device-selected .link-blue { fill:#12568a; }
+.link-racks .rack-device-selected .link-teal { fill:#0c5749; }
+.link-racks .link-direction { fill:none; stroke:var(--direction-color); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.link-racks .link-receiver { fill:#fff; stroke:var(--direction-color); stroke-width:2; }
 .mmc-seating { animation:mmc-seat 1.2s ease-out both; }
 .mmc-seated-check { fill:none; stroke:#27815b; stroke-width:3; animation:mmc-latched 1.2s step-end both; }
 .light-paused .mmc-seating, .light-paused .mmc-seated-check { animation:none; }
