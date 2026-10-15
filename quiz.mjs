@@ -1,9 +1,12 @@
-import {questions, topics, startAttempt, recordAnswer, resultsFor} from './quiz-data.mjs?v=1';
+import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress} from './quiz-data.mjs?v=2';
 
 const host = document.querySelector('#quiz');
 let attempt;
 let index = 0;
 let retry = false;
+let currentRound = 0;
+let roundAnswers = {};
+let firstScore = 0;
 
 const label = (x,y,value,extra='') => `<text x="${x}" y="${y}" ${extra}>${value}</text>`;
 const block = (x,y,w,h,name) => `<rect class="quiz-device" x="${x}" y="${y}" width="${w}" height="${h}" rx="5"/>${label(x+w/2,y+h/2+5,name,'text-anchor="middle"')}`;
@@ -16,16 +19,29 @@ function opticFace(x,y) {
 }
 
 function readingFigure(kind) {
+  if (kind === 'simple-dark') return `<figure class="quiz-readings"><div class="quiz-reading-pair">${['RX','TX'].map(name => `<div class="quiz-reading reading-alert"><span>${name}</span><strong>−40</strong></div>`).join('')}</div><figcaption>Example Cable Guy report</figcaption></figure>`;
   if (kind === 'lanes') return `<figure class="quiz-readings"><div class="quiz-lanes">${['+0.25','+0.28','−40','+0.21'].map((value,i) => `<div class="quiz-reading ${i === 2 ? 'reading-alert' : ''}"><span>RX lane ${i+1}</span><strong>${value}</strong><small>dBm</small></div>`).join('')}</div><figcaption>Example report: four receive lanes. −40 is the reported no-light indication.</figcaption></figure>`;
   const values = {healthy:['+0.80','+0.25'],dark:['+0.80','−40'],weak:['+0.80','−4.20'],high:['+0.80','+4.00']}[kind];
   return `<figure class="quiz-readings"><div class="quiz-reading-pair"><div class="quiz-reading"><span>TX · sending</span><strong>${values[0]}</strong><small>dBm</small></div><div class="quiz-reading ${kind === 'dark' ? 'reading-alert' : ''}"><span>RX · receiving</span><strong>${values[1]}</strong><small>dBm</small></div></div><figcaption>${kind === 'dark' ? 'Example from your workflow: RX −40 is highlighted red for no light.' : '<b>Training limits only:</b> TX −1.00 to +3.00 dBm · RX −3.00 to +3.00 dBm.<br>Real optics use their own limits.'}</figcaption></figure>`;
 }
 
 function diagram(kind) {
-  if (['healthy','dark','weak','high','lanes'].includes(kind)) return readingFigure(kind);
+  if (['simple-dark','healthy','dark','weak','high','lanes'].includes(kind)) return readingFigure(kind);
   let drawing = '';
   let caption = '';
-  if (kind === 'optic') {
+  if (kind === 'unseated') {
+    drawing = opticFace(12,36)+'<rect class="quiz-device" x="108" y="64" width="45" height="38" rx="3"/><rect class="lc-plug" x="184" y="64" width="62" height="38" rx="3"/><path class="quiz-fiber" d="M246 83 H343"/><path class="quiz-gap" d="M156 57 H181 M156 52 V62 M181 52 V62"/>'+label(168,39,'Gap','text-anchor="middle"');
+    caption = 'The connector is not fully seated.';
+  } else if (kind === 'bend') {
+    drawing = '<path class="quiz-fiber" d="M20 65 H242 Q251 65 251 74 Q251 83 242 83 H115 Q85 83 85 113 V145"/><circle class="quiz-gap" cx="250" cy="74" r="24"/>'+label(274,32,'Tight bend','text-anchor="middle"');
+    caption = 'A tight bend in the fiber route.';
+  } else if (kind === 'port-label') {
+    drawing = '<rect class="quiz-device" x="74" y="34" width="212" height="94" rx="5"/>'+label(180,57,'CAS 1','text-anchor="middle"')+block(101,72,57,37,'11')+block(201,72,57,37,'12')+label(180,157,'Record: CAS 1 Port 12','text-anchor="middle"');
+    caption = 'Use the destination listed in the connection record.';
+  } else if (kind === 'recheck') {
+    drawing = block(8,58,130,57,'One fix')+line('M138 86 H222')+arrow(194,86)+block(222,58,130,57,'Recheck');
+    caption = 'Check the result after each change.';
+  } else if (kind === 'optic') {
     drawing = block(8,58,83,52,'Device')+line('M92 84 H130')+opticFace(133,35)+line('M232 84 H348')+arrow(306,84)+label(180,26,'Optic module','text-anchor="middle"')+label(289,112,'Fiber','text-anchor="middle"');
     caption = 'The module sits between the device and its fiber connection.';
   } else if (kind === 'link') {
@@ -78,27 +94,33 @@ function begin(ids, isRetry = false) {
   renderQuestion();
 }
 
+function beginRound(topic) {
+  currentRound = topic;
+  roundAnswers = {};
+  firstScore = 0;
+  begin(roundQuestionIds(topic));
+}
+
 function renderIntro() {
-  host.innerHTML = `<p class="chapter-count">Beginner practice · 20 questions · about 10 minutes</p>
-    <h2 id="quiz-title" tabindex="-1">Optic & fiber knowledge check</h2>
-    <p class="lesson-intro">Know what the optic does, read its light levels, and choose the next useful test.</p>
-    ${diagram('optic')}
-    <ul class="quiz-topics">${topics.map(topic => `<li>${topic}</li>`).join('')}</ul>
-    <p class="section-intro">One question at a time. No timer. Get a simple explanation after each answer, then revisit anything you missed.</p>
-    <button class="quiz-primary" type="button" id="quiz-start">Start knowledge check</button>
+  host.innerHTML = `<p class="chapter-count">Beginner practice · 5 questions · about 2 minutes</p>
+    <h2 id="quiz-title" tabindex="-1">Start with the simple signs</h2>
+    <p class="lesson-intro">Recognize what you see in Cable Guy and what could cause it.</p>
+    ${diagram('simple-dark')}
+    <p class="section-intro">One short question at a time, with a simple explanation. Finish five, review your answers, then choose whether to continue.</p>
+    <button class="quiz-primary" type="button" id="quiz-start">Start 5 questions</button>
     <a class="quiz-lesson-link" href="./learn.html">Learn the basics first</a>`;
-  host.querySelector('#quiz-start').addEventListener('click',() => begin());
+  host.querySelector('#quiz-start').addEventListener('click',() => beginRound(0));
 }
 
 function renderQuestion() {
   const question = questions.find(item => item.id === attempt.ids[index]);
-  host.innerHTML = `<div class="quiz-progress-label"><span>${retry ? 'Retry' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>${topics[question.topic]}</span></div>
+  host.innerHTML = `<div class="quiz-progress-label"><span>${retry ? 'Retry' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>Round ${currentRound+1} · ${topics[question.topic]}</span></div>
     <progress class="quiz-progress" value="${index}" max="${attempt.ids.length}" aria-label="Questions answered"></progress>
     <h2 id="quiz-title" class="quiz-question" tabindex="-1">${question.prompt}</h2>
     ${diagram(question.visual)}
     <div class="quiz-answers" role="group" aria-labelledby="quiz-title">${question.choices.map((choice,i) => `<button type="button" class="quiz-answer" data-choice="${i}"><span class="quiz-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span>${choice}<span class="quiz-answer-state"></span></span></button>`).join('')}</div>
     <div id="quiz-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
-    <button class="quiz-primary" type="button" id="quiz-next" hidden>${index === attempt.ids.length-1 ? 'See results' : 'Next question'}</button>`;
+    <button class="quiz-primary" type="button" id="quiz-next" hidden>${index === attempt.ids.length-1 ? 'Finish this round' : 'Next question'}</button>`;
   host.querySelectorAll('.quiz-answer').forEach(button => button.addEventListener('click',() => choose(question,Number(button.dataset.choice))));
   host.querySelector('#quiz-next').addEventListener('click',() => {
     if (!Object.hasOwn(attempt.answers,question.id)) return;
@@ -110,6 +132,7 @@ function renderQuestion() {
 function choose(question,choice) {
   if (Object.hasOwn(attempt.answers,question.id)) return;
   attempt = recordAnswer(attempt,question.id,choice);
+  roundAnswers = {...roundAnswers,[question.id]:choice};
   const correct = choice === question.correct;
   host.querySelectorAll('.quiz-answer').forEach((button,i) => {
     button.disabled = true;
@@ -128,23 +151,30 @@ function choose(question,choice) {
 
 function renderResults() {
   const result = resultsFor(attempt);
-  host.innerHTML = `<p class="chapter-count">${retry ? 'Retry complete' : 'Knowledge check complete'}</p>
-    <h2 id="quiz-title" tabindex="-1">${result.missed.length ? 'Your next learning steps' : 'You’ve covered the basics'}</h2>
-    <p class="quiz-score"><strong>${result.correct}<span> / ${result.total}</span></strong> correct on your first answer${retry ? ' in this retry' : ''}</p>
-    <p class="section-intro">${result.missed.length ? 'Review the ideas below, then try the missed questions again.' : 'Keep using the real optic limits, FIM mapping and your site’s procedures in the field.'}</p>
-    <ul class="quiz-breakdown">${topics.map((topic,topicIndex) => {
-      const ids = attempt.ids.filter(id => questions.find(question => question.id === id).topic === topicIndex);
-      return ids.length ? `<li><span>${topic}</span><strong>${ids.length-ids.filter(id => result.missed.includes(id)).length} / ${ids.length}</strong></li>` : '';
-    }).join('')}</ul>
-    <div class="quiz-result-actions">${result.missed.length ? '<button type="button" class="quiz-primary" id="quiz-retry">Retry missed questions</button>' : ''}<button type="button" class="quiz-secondary" id="quiz-restart">Start the full check again</button></div>
-    ${result.missed.length ? `<h3 class="quiz-review-title">Review these ideas</h3><ol class="quiz-review">${result.missed.map(id => {
+  if (!retry) firstScore = result.correct;
+  const progress = roundProgress(currentRound,roundAnswers);
+  const nextRound = progress.nextRound;
+  const title = !progress.passed ? 'A little more practice' : nextRound === null ? 'You’ve finished the last round' : 'Ready for the next five';
+  host.innerHTML = `<p class="chapter-count">Round ${currentRound+1} ${retry ? 'practice complete' : 'complete'} · ${topics[currentRound]}</p>
+    <h2 id="quiz-title" tabindex="-1">${title}</h2>
+    <p class="quiz-score"><strong>${progress.correct}<span> / 5</span></strong> ${retry ? 'answered correctly after practice' : 'correct on your first answer'}</p>
+    ${retry ? `<p class="picture-note">First try: ${firstScore}/5. This retry: ${result.correct}/${result.total}.</p>` : ''}
+    <p class="section-intro">${progress.passed ? 'You can stop here, revisit an idea, or keep learning.' : currentRound === topics.length-1 ? 'Review the ideas below and retry the missed questions. Aim for four correct answers out of five.' : 'Review the ideas below and retry the missed questions. Four correct answers out of five opens the next round.'}</p>
+    ${nextRound !== null ? `<p class="quiz-next-round"><strong>Next: ${topics[nextRound]}</strong><span>${roundDescriptions[nextRound]}</span></p>` : ''}
+    <div class="quiz-result-actions">
+      ${nextRound !== null ? '<button type="button" class="quiz-primary" id="quiz-continue">Try the next 5 questions</button>' : ''}
+      ${progress.missed.length ? `<button type="button" class="${progress.passed ? 'quiz-secondary' : 'quiz-primary'}" id="quiz-retry">Retry ${progress.missed.length} missed ${progress.missed.length === 1 ? 'question' : 'questions'}</button>` : ''}
+      <button type="button" class="quiz-secondary" id="quiz-restart">Repeat these 5 questions</button>
+      <a class="quiz-lesson-link" href="./learn.html">Stop here · back to lessons</a>
+    </div>
+    ${progress.missed.length ? `<h3 class="quiz-review-title">Ideas to revisit</h3><ol class="quiz-review">${progress.missed.map(id => {
       const question = questions.find(item => item.id === id);
-      return `<li><h4>${question.prompt}</h4><p class="quiz-review-choice">Your answer: ${question.choices[attempt.answers[id]]}</p><p><b>Correct:</b> ${question.choices[question.correct]}</p><p>${question.explanation}</p><a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review lesson ↗<span class="sr-only"> (opens in a new tab)</span></a></li>`;
+      return `<li><h4>${question.prompt}</h4><p class="quiz-review-choice">Your answer: ${question.choices[roundAnswers[id]]}</p><p><b>Correct:</b> ${question.choices[question.correct]}</p><p>${question.explanation}</p><a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review lesson ↗<span class="sr-only"> (opens in a new tab)</span></a></li>`;
     }).join('')}</ol>` : ''}
-    <p class="picture-note">This is a learning check, not an equipment health result or field qualification.</p>
     <a class="lesson-return" href="./index.html">Use the optic / fiber health check →</a>`;
-  host.querySelector('#quiz-retry')?.addEventListener('click',() => begin(result.missed,true));
-  host.querySelector('#quiz-restart').addEventListener('click',() => begin());
+  host.querySelector('#quiz-continue')?.addEventListener('click',() => beginRound(nextRound));
+  host.querySelector('#quiz-retry')?.addEventListener('click',() => begin(progress.missed,true));
+  host.querySelector('#quiz-restart').addEventListener('click',() => beginRound(currentRound));
   focusTitle();
 }
 
