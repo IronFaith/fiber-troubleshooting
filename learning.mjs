@@ -1,5 +1,5 @@
 import { loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=2';
-import { rackIllustration } from './rack-visuals.mjs?v=1';
+import { rackIllustration } from './rack-visuals.mjs?v=2';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
