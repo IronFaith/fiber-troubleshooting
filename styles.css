@@ -64,7 +64,6 @@ h2:focus { outline:0; }
 .test-sketch text.port { font-size:12px; }
 .test-sketch .light { fill:none; stroke:currentColor; stroke-width:3; }
 .test-sketch .light.return { stroke:#226946; }
-.moving-light path { fill:#c6600c; stroke:#fff; stroke-width:1.3; stroke-linejoin:round; }
 .motion-toggle { border:1px solid #adc0ce; border-radius:4px; background:#fff; color:#315570; min-height:30px; padding:4px 8px; font-size:11px; white-space:nowrap; }
 .trace-heading, .trace-progress { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .trace-heading { font-size:13px; margin:2px 3px 7px; }
@@ -89,7 +88,6 @@ h2:focus { outline:0; }
 .fiber-trace .port-light, .fiber-trace .source-led { fill:#e0e7ed; stroke:#9cabb6; stroke-width:1; }
 .fiber-trace .lit { fill:#e32340; stroke:#b71b32; }
 .fiber-trace .dark-port { stroke:#6d7f8d; stroke-width:1.7; }
-.fiber-trace .moving-light path { fill:#e32340; }
 figcaption { display:flex; justify-content:space-between; align-items:center; gap:8px; color:#536c7c; font-size:11px; text-align:left; margin-top:3px; }
 .decision { position:relative; width:90%; margin:24px auto 0; padding:13px 16px; border:2px solid #7594aa; background:#e8eff4; border-radius:4px; text-align:center; }
 .decision-question { display:flex; align-items:center; justify-content:center; gap:10px; }
@@ -254,6 +252,16 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .learn-signal.dim-light { opacity:.24; stroke-width:2; }
 .light-paused .learn-signal { animation-play-state:paused; }
 @keyframes learn-flow { to { stroke-dashoffset:-22; } }
+.light-flow, .light-source { --light-color:#2583ce; }
+.light-flow.return-ir, .light-source.return-ir { --light-color:#16816f; }
+.light-flow.red, .light-source.red { --light-color:#e22d46; }
+.light-flow .learn-signal { stroke:var(--light-color); }
+.light-flow.dim-light { opacity:.24; }
+.flow-arrow { fill:var(--light-color); stroke:#fff; stroke-width:1.3; stroke-linejoin:round; offset-rotate:auto; animation:light-travel 4s linear infinite; }
+.light-source-core { fill:#fff; stroke:var(--light-color); stroke-width:2; }
+.light-source-halo { fill:var(--light-color); opacity:.25; }
+.light-paused .flow-arrow { animation-play-state:paused; }
+@keyframes light-travel { from { offset-distance:0%; } to { offset-distance:100%; } }
 .ir-arrow { fill:none; stroke:#1765a5; stroke-width:2.5; }
 .red-arrow { fill:none; stroke:#d0223b; stroke-width:2.5; }
 .vfl-body { fill:#e8edf1; stroke:#607f96; stroke-width:1.5; }
@@ -410,13 +418,7 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .rack-hidden-route { stroke-dasharray:7 5; }
 .rack-manager { fill:#253640; stroke:#617682; stroke-width:1; }
 .rack-optic-focus { fill:transparent; stroke:#ffe595; stroke-width:1.5; }
-.rack-light-arrow { fill:#71e6ff; stroke:#163b55; stroke-width:1.2; offset-rotate:auto; animation:rack-light-travel 4s linear infinite; }
 .rack-direction { fill:none; stroke:#8feaff; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
-.rack-tx-source { fill:#fff; stroke:#49cfff; stroke-width:2; }
-.rack-tx-halo { fill:#4bd9ff; opacity:.22; animation:rack-tx-glow 4s ease-out infinite; }
-.light-paused .rack-light-arrow, .light-paused .rack-tx-halo { animation-play-state:paused; }
-@keyframes rack-light-travel { from { offset-distance:0%; } to { offset-distance:100%; } }
-@keyframes rack-tx-glow { 0%,100% { opacity:.5; } 25%,80% { opacity:.12; } }
 .rack-level-tag { fill:#fff1c8; stroke:#ac7c27; stroke-width:1; }
 .rack-art .rack-level-number { fill:#61420c; font:700 15px Consolas,monospace; }
 .rack-foot { fill:#243642; }

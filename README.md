@@ -40,3 +40,5 @@ npm run check
 ```
 
 GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `learn.html`, `devices.html`, `patching.html`, `quiz.html`, `styles.css`, `app.mjs`, `flow.mjs`, `learning.mjs`, `quiz.mjs`, `quiz-data.mjs`, `loop-visuals.mjs`, `rack-visuals.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.
+
+Light direction is shared through `light-visuals.mjs`: a source glow, moving arrow and directional dashes. Chapters 1–3 and the troubleshooting loops use this renderer; quizzes retain still illustrations with the same source markers and hardware. Chapter 1 uses the shared 32-port cassette for the LC/MMC route and VFL tracing. Unknown or dark VFL spans remain unlit; no arrow invents a fault position. Lesson and troubleshooting controls pause all animated light and honor reduced motion.

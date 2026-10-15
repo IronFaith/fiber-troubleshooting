@@ -1,5 +1,6 @@
 // Shared educational hardware drawings. Port numbering follows the site's layout;
 // the enlarged light path illustrates one pair, not a connector pin map.
+import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 const text = (x,y,value,style='') => `<text x="${x}" y="${y}" class="hardware-label ${style}">${value}</text>`;
 
 export function cassetteFront({port = 12, inserted = false, patched = false, name = 'CAS 1'} = {}) {
@@ -66,6 +67,7 @@ export function patchRouteIllustration() {
     caption:'Example: LC follower → MMC head → CAS 1 Port 12. Light continues through the passive; this is a patch, not a loopback. Use your actual FIM destination.',
     drawing:`${cassetteFront()}<g class="hardware-art">
       ${text(12,199,'Example · CAS 1 Port 12','hardware-small')}
+      ${text(12,219,'CAS passes TX onward → remote RX','hardware-small')}
       <path class="optic-pull" d="M9 277 V254 H74 V277 H67 V261 H16 V277 Z"/>
       <rect class="hardware-metal" x="13" y="266" width="58" height="64" rx="4"/>
       <rect class="optic-opening" x="48" y="271" width="18" height="15" rx="2"/>
@@ -77,9 +79,9 @@ export function patchRouteIllustration() {
       <path class="hardware-grip" d="M249 72 H259 M249 78 H259 M249 84 H259"/>
       <rect class="hardware-boot" x="248" y="92" width="12" height="12" rx="2"/>
       ${signal(out,back)}
-      <path class="learn-signal ir" d="${out}"/><path class="learn-signal return-ir" d="${back}"/>
+      ${lightFlow(out)}${lightFlow(back,'return-ir')}${lightSource(65,278)}
       <path class="hardware-tx-arrow" d="M142 274 l7 4 -7 4"/><path class="hardware-rx-arrow" d="M149 314 l-7 4 7 4"/>
-      ${text(128,263,'TX out','hardware-small hardware-center')}${text(128,340,'RX back','hardware-small hardware-center')}
+      ${text(128,263,'TX starts here →','hardware-small hardware-center')}${text(128,340,'RX ← from remote','hardware-small hardware-center')}
       ${text(278,111,'MMC head','hardware-small')}
       ${text(39,356,'Local optic','hardware-small hardware-center')}${text(168,368,'LC follower','hardware-small hardware-center')}
     </g>`};
@@ -131,8 +133,9 @@ export function loopIllustration(kind = 'direct') {
           text(x,199,i ? 'Position 2' : 'Position 1','hardware-center hardware-tiny')).join('')}
         ${cable(lightPath)}${lcPlug(160,88)}${lcPlug(160,140)}
         ${signal(out,back)}
+        ${lightSource(200,102)}
         <path class="hardware-tx-arrow" d="M105 98 l-7 4 7 4"/><path class="hardware-rx-arrow" d="M98 150 l7 4 -7 4"/>
-        ${text(132,83,'TX out','hardware-small hardware-center')}${text(130,183,'RX back','hardware-small hardware-center')}
+        ${text(124,83,'TX starts here','hardware-small hardware-center')}${text(130,183,'RX receives','hardware-small hardware-center')}
         ${text(56,208,'LC loopback','hardware-small')}${text(180,230,'Two LC plugs · one return loop','hardware-small hardware-center')}
       </g>`};
   }
@@ -161,8 +164,9 @@ export function loopIllustration(kind = 'direct') {
       <path class="hardware-grip" d="M252 275 V321 M258 275 V321 M264 275 V321"/>
       <rect class="hardware-boot" x="279" y="271" width="14" height="14" rx="3"/><rect class="hardware-boot" x="279" y="311" width="14" height="14" rx="3"/>
       ${signal(out,back)}
+      ${lightSource(65,278)}
       <path class="hardware-tx-arrow" d="M137 274 l7 4 -7 4"/><path class="hardware-rx-arrow" d="M144 314 l-7 4 7 4"/>
-      ${text(130,265,'TX out','hardware-small hardware-center')}${text(130,340,'RX back','hardware-small hardware-center')}
+      ${text(130,265,'TX starts here →','hardware-small hardware-center')}${text(130,340,'RX ← loop return','hardware-small hardware-center')}
       ${text(130,365,'LC + fiber','hardware-small hardware-center')}${text(200,353,'Head','hardware-small hardware-center')}
       ${text(231,367,'Adapter','hardware-tiny hardware-center')}${text(309,353,'Loopback','hardware-small hardware-center')}
     </g>`};

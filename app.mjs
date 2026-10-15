@@ -1,4 +1,5 @@
-import { loopIllustration } from './loop-visuals.mjs?v=1';
+import { loopIllustration } from './loop-visuals.mjs?v=3';
+import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory, fiberTrace } from './flow.mjs?v=8';
 
 const storageKey = 'fiberline-loop-first-v5';
@@ -29,14 +30,12 @@ function sketch(kind) {
   if (kind === 'fiber') return fiberSketch();
   const art = loopIllustration(kind);
   const figure = el('figure', 'test-sketch hardware-sketch');
-  figure.innerHTML = `<svg viewBox="0 0 360 ${art.height}" role="img" aria-label="${art.label}">${art.drawing}${lightArrow(art.lightPath)}</svg>`;
+  figure.innerHTML = `<svg viewBox="0 0 360 ${art.height}" role="img" aria-label="${art.label}">${art.drawing}${lightFlow(art.lightPath)}</svg>`;
   sketchFooter(figure, art.caption);
   return figure;
 }
-function lightArrow(path) {
-  return `<g class="moving-light" aria-hidden="true"><path d="M-7-5 L3 0 L-7 5 L-4 0 Z"/><animateMotion dur="3.5s" repeatCount="indefinite" path="${path}" rotate="auto"/></g>`;
-}
 function sketchFooter(figure, caption, animated = true) {
+  figure.classList.toggle('light-paused',lightPaused);
   const footer = el('figcaption');
   footer.append(el('span', '', caption));
   if (!animated) { figure.append(footer); return; }
@@ -44,8 +43,7 @@ function sketchFooter(figure, caption, animated = true) {
   toggle.type = 'button';
   toggle.addEventListener('click', () => {
     lightPaused = !lightPaused;
-    const svg = figure.querySelector('svg');
-    if (lightPaused) svg.pauseAnimations(); else svg.unpauseAnimations();
+    figure.classList.toggle('light-paused',lightPaused);
     toggle.textContent = lightPaused ? 'Play light' : 'Pause light';
   });
   footer.append(toggle);
@@ -95,7 +93,8 @@ function fiberSketch() {
     <circle class="port-light ${wrong ? 'lit' : ''}" cx="246" cy="137" r="7"/>
     <text class="small" x="266" y="141">Other</text>
     ${observation === 'missing' || wrong ? '<path class="dark-port" d="M242 91 L250 99 M250 91 L242 99"/>' : ''}
-    ${seen || wrong ? lightArrow(wrong ? otherPath : expectedPath) : ''}`;
+    ${active ? lightSource(84,112,'red') : ''}
+    ${seen || wrong ? lightFlow(wrong ? otherPath : expectedPath,'red')+'<path class="red-arrow" d="M172 90 l7 5 -7 5" transform="translate(0 '+(wrong ? 42 : 0)+')"/>' : ''}`;
   figure.append(svg);
   sketchFooter(figure, state[1], seen || wrong);
   return figure;
@@ -184,11 +183,6 @@ function render(moveFocus = false) {
     current.append(fresh);
   }
   diagram.append(current);
-  if (lightPaused) {
-    const svg = current.querySelector('svg');
-    svg?.setCurrentTime(0.001);
-    svg?.pauseAnimations();
-  }
   if (moveFocus) {
     title.focus({ preventScroll: true });
     const anchor = diagram.querySelector('.trail-step:last-child') || current;

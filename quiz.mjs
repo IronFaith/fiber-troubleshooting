@@ -1,4 +1,5 @@
-import { cassetteFront, loopIllustration } from './loop-visuals.mjs?v=1';
+import { cassetteFront, loopIllustration } from './loop-visuals.mjs?v=3';
+import { lightSource } from './light-visuals.mjs?v=1';
 import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress} from './quiz-data.mjs?v=5';
 
 const host = document.querySelector('#quiz');
@@ -53,9 +54,11 @@ function diagram(kind) {
   } else if (kind === 'optic') {
     drawing = block(8,58,83,52,'Device')+line('M92 84 H130')+opticFace(133,35)+line('M232 84 H348')+arrow(306,84)+label(180,26,'Optic module','text-anchor="middle"')+label(289,112,'Fiber','text-anchor="middle"');
     caption = 'The module sits between the device and its fiber connection.';
+    drawing += lightSource(232,84);
   } else if (kind === 'link') {
     drawing = block(8,45,90,90,'Local')+block(262,45,90,90,'Remote')+line('M98 65 H262')+line('M262 113 H98')+arrow(190,65)+`<path class="quiz-light" d="M174 108 l-6 5 6 5"/>`+label(110,54,'TX → RX')+label(110,137,'RX ← TX');
     caption = 'Two directions let each device send and receive. Blue represents invisible IR.';
+    drawing += lightSource(98,65)+lightSource(262,113);
   } else if (kind === 'passive-loop' || kind === 'direct-loop') {
     const art = loopIllustration(kind === 'direct-loop' ? 'direct' : 'passive');
     drawing = art.drawing; caption = art.caption; height = art.height; hardware = true;
@@ -75,6 +78,7 @@ function diagram(kind) {
     const wrong = kind === 'wrong-port';
     const dark = kind === 'dark-section';
     drawing = '<rect class="vfl-body" x="6" y="61" width="69" height="36" rx="16"/>'+label(40,84,'VFL','text-anchor="middle"')+line('M75 79 H132',true)+'<path class="quiz-unverified" d="M132 79 H242"/>'+block(242,36,109,50,'Expected');
+    drawing += lightSource(75,79,'red');
     if (wrong) {
       drawing += block(242,108,109,44,'Other port')+line('M132 79 Q177 79 194 129 H242',true)+'<circle class="red-dot" cx="249" cy="130" r="7"/>';
       caption = 'Red light is detected at a different port from the expected destination.';

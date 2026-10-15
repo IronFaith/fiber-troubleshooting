@@ -1,5 +1,6 @@
-import { loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=2';
-import { rackIllustration } from './rack-visuals.mjs?v=2';
+import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
+import { rackIllustration } from './rack-visuals.mjs?v=3';
+import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -60,12 +61,13 @@ function renderLesson() {
         <div class="light-example ir-example"><h4>Optic · infrared</h4><div id="ir-picture"></div><p>Converts device data into light. <b>TX sends. RX receives.</b></p><span class="light-key ir-key">Invisible to your eyes · blue is illustrative</span></div>
         <div class="light-example red-example"><h4>VFL · visible red</h4><div id="red-picture"></div><p>A separate tool sends red light into <b>isolated fiber</b> to trace it.</p><span class="light-key red-key">Visible red · does not carry network data</span></div>
       </div>
-      <p class="picture-note">Moving light shows direction. Fiber does not normally glow along its whole jacket. Never look into a fiber end.</p>
+      <p class="picture-note">The glow marks the source; arrows show where its light goes. Blue/teal represents invisible IR. Red represents VFL light. Fiber does not normally glow along its jacket.</p>
     </section>
     <section id="path" class="lesson-section" aria-labelledby="path-title">
       <h3 id="path-title">The fiber carries the light</h3>
       <p class="section-intro">In your layout: LC followers join an MMC leader at the passive.</p>
       <div id="path-picture"></div>
+      <p><a href="./patching.html#rack-path">See this fiber path inside a rack →</a></p>
       <p class="lesson-takeaway">A passive routes light; it does not make it. Follow the mapped port, strand and TX → RX pairing.</p>
     </section>
     <section id="loopbacks" class="lesson-section" aria-labelledby="loop-title">
@@ -144,7 +146,7 @@ function example(id, label, choices, draw) {
 const text = (x,y,value,extra='') => `<text x="${x}" y="${y}" ${extra}>${value}</text>`;
 const box = (x,y,w,h,label,extra='') => `<rect class="learn-device ${extra}" x="${x}" y="${y}" width="${w}" height="${h}" rx="6"/>${text(x+w/2,y+h/2+5,label,'text-anchor="middle"')}`;
 function light(path, color='ir', strength='') {
-  return `<path class="learn-cable" d="${path}"/><path class="learn-signal ${color} ${strength}" d="${path}"/>`;
+  return `<path class="learn-cable" d="${path}"/>${lightFlow(path,color,strength)}`;
 }
 function optic(x,y) {
   return `<g transform="translate(${x} ${y})"><rect class="optic-metal" x="0" y="0" width="105" height="70" rx="5"/><path class="optic-detail" d="M10 8 H72 M10 16 H72 M10 54 H72 M10 62 H72"/><rect class="optic-port" x="84" y="8" width="29" height="20" rx="2"/><rect class="optic-port" x="84" y="42" width="29" height="20" rx="2"/>${text(12,40,'Optic')}${text(88,23,'TX','class="small"')}${text(88,57,'RX','class="small"')}</g>`;
@@ -155,29 +157,22 @@ function vfl(x,y) {
 function opticPicture() {
   return {height:200, caption:'IR carries data. The receiver turns arriving light back into electrical data.', drawing:
     text(16,27,'Electrical data → light')+optic(12,52)+box(277,52,73,70,'Optic')+
-    light('M125 70 H277')+light('M277 104 H125')+
+    light('M125 70 H277')+light('M277 104 H125','return-ir')+lightSource(125,70)+lightSource(277,104,'return-ir')+
     text(190,57,'TX → RX','class="small" text-anchor="middle"')+text(190,129,'RX ← TX','class="small" text-anchor="middle"')+
-    '<path class="ir-arrow" d="M210 65 l8 5 -8 5 M186 99 l-8 5 8 5"/>'+text(180,172,'No visible glow does not mean no light.','class="small" text-anchor="middle"')};
+    '<path class="ir-arrow" d="M210 65 l8 5 -8 5"/><path class="return-ir-arrow" d="M186 99 l-8 5 8 5"/>'+text(180,157,'Each optic’s TX starts its own light.','class="small" text-anchor="middle"')+text(180,180,'The other optic’s RX receives it.','class="small" text-anchor="middle"')};
 }
 function redPicture() {
   return {height:200, caption:'Red light can be detected at the test end using the site’s safe viewing method.', drawing:
-    text(16,27,'Visible red test light')+vfl(12,69)+light('M129 90 H279','red')+
+    text(16,27,'VFL light starts here')+vfl(12,69)+light('M129 90 H318','red')+
     '<rect class="lc-plug" x="268" y="75" width="43" height="30" rx="3"/><circle class="red-halo" cx="318" cy="90" r="19"/><circle class="red-dot" cx="318" cy="90" r="8"/>'+
-    '<path class="red-arrow" d="M210 85 l8 5 -8 5"/>'+text(207,57,'Isolated fiber','class="small" text-anchor="middle"')+text(180,145,'Active equipment disconnected','class="small" text-anchor="middle"')};
+    lightSource(129,90,'red')+'<path class="red-arrow" d="M210 85 l8 5 -8 5"/>'+text(207,57,'Isolated fiber','class="small" text-anchor="middle"')+text(180,145,'Active equipment disconnected','class="small" text-anchor="middle"')};
 }
 function pathPicture() {
-  return {height:238, caption:'One example pair inside the group. Follow your site’s full lane map.', drawing:
-    optic(5,34)+'<rect class="lc-plug" x="120" y="42" width="27" height="19" rx="2"/><rect class="lc-plug" x="120" y="76" width="27" height="19" rx="2"/>'+
-    '<rect class="mmc-plug" x="233" y="36" width="35" height="70" rx="4"/><rect class="learn-device" x="271" y="27" width="78" height="90" rx="5"/>'+
-    light('M113 52 H310 V173 H89')+light('M89 191 H330 V86 H113')+
-    text(120,22,'LC legs','class="small"')+text(125,124,'Followers','class="small"')+text(205,22,'MMC leader','class="small"')+
-    text(290,138,'CAS 1 · Port 12','class="small" text-anchor="end"')+
-    box(8,159,80,47,'Next')+text(12,224,'Next passive → remote optic','class="small"')+
-    '<path class="ir-arrow" d="M203 47 l8 5 -8 5 M207 168 l-8 5 8 5 M211 186 l8 5 -8 5"/>'};
+  return {...patchRouteIllustration(), caption:'TX starts at the optic → LC follower → MMC head → CAS → onward fiber. The separate RX path carries light from the remote optic. One pair shown; follow the full lane map in FIM.'};
 }
 function loopPicture(selected) {
   const art = loopIllustration(selected ? 'passive' : 'direct');
-  return {...art, hardware:true, drawing:art.drawing + `<path class="learn-signal ir" d="${art.lightPath}"/>`,
+  return {...art, hardware:true, drawing:art.drawing + lightFlow(art.lightPath),
     caption:selected ? 'MMC loop at CAS 1 Port 12: tests the optic + fiber to this port. Beyond the loop is untested. One pair illustrated.' : 'LC loop inserted: TX returns to RX at the optic. The longer fiber route is outside this test.'};
 }
 function faultPicture(selected) {
@@ -187,7 +182,7 @@ function faultPicture(selected) {
     'A connector that is not fully seated can cause loss or no light. Check the latch.',
     'An overly tight bend can let light escape from the core, reducing received power.'
   ];
-  let drawing = text(12,24,selected === 3 ? 'Fiber side view · exaggerated' : 'Connection close-up · enlarged','class="small"');
+  let drawing = text(12,24,selected === 3 ? 'Fiber side view · exaggerated' : 'Connection close-up · enlarged','class="small"')+text(12,48,'TX light arrives from the optic →','class="small"');
   if (selected === 3) {
     drawing += light('M15 100 H150 Q195 100 195 130 Q195 155 177 155 Q160 155 160 135 V70 Q160 45 197 45 H345','ir','dim-light');
     drawing += light('M15 100 H149 Q174 100 188 115')+'<path class="escape-rays" d="M194 132 l33 12 M191 147 l23 25 M173 156 l3 27"/>'+text(237,102,'Light lost','class="small"')+text(237,125,'at the bend','class="small"');
@@ -205,15 +200,21 @@ function faultPicture(selected) {
 function vflPicture(selected) {
   const seen = selected === 0, wrong = selected === 2;
   const captions = ['Red at the expected port: this section has continuity. Continue to the next accessible section.', 'Expected port is dark: check the VFL setup, both connections and this span. The fault location is not yet known.', 'Red at another port: check the mapped route, strand and polarity before continuing.'];
-  return {height:250, caption:captions[selected], drawing:
-    box(10,9,79,31,'Optic','offline')+text(103,30,'Disconnected from test section','class="small"')+
-    (!seen ? '<rect class="suspect-section" x="135" y="64" width="215" height="145" rx="7"/>' : '')+
-    vfl(10,110)+'<rect class="learn-device" x="254" y="78" width="92" height="117" rx="5"/>'+text(300,64,'Next passive','class="small" text-anchor="middle"')+
-    (seen ? light('M127 131 H178 Q192 131 192 107 H270','red') : '<path class="untraced-fiber" d="M127 131 H178 Q192 131 192 107 H270"/>')+
-    (wrong ? light('M127 131 H178 Q192 131 192 165 H270','red') : '')+
-    `<circle class="${seen ? 'red-halo' : 'dark-port'}" cx="270" cy="107" r="14"/><circle class="${seen ? 'red-dot' : 'dark-port'}" cx="270" cy="107" r="6"/><circle class="${wrong ? 'red-halo' : 'dark-port'}" cx="270" cy="165" r="14"/><circle class="${wrong ? 'red-dot' : 'dark-port'}" cx="270" cy="165" r="6"/>`+
-    text(290,111,'Right','class="small"')+text(290,169,'Other','class="small"')+
-    text(180,231,seen ? 'Trace confirmed here ✓' : wrong ? 'Light found on a different route' : 'Check this section — location unknown','class="small" text-anchor="middle"')};
+  const expected = 'M127 279 H199 Q249 279 249 230 V72';
+  const other = 'M127 279 H219 Q269 279 269 230 V72';
+  return {height:354, hardware:true, caption:captions[selected], drawing:
+    cassetteFront({port:12})+
+    text(12,198,'Example: expected 12 · other 13','class="small"')+
+    text(12,222,'Optic disconnected','class="small"')+text(12,242,'Isolated section','class="small"')+
+    vfl(10,258)+
+    (seen ? light(expected,'red') : `<path class="untraced-fiber" d="${expected}"/>`)+
+    (wrong ? light(other,'red') : '')+
+    lightSource(127,279,'red')+
+    (seen || wrong ? '<path class="red-arrow" d="M174 274 l7 5 -7 5"/>' : '')+
+    (seen || wrong ? `<circle class="red-halo" cx="${seen ? 249 : 269}" cy="72" r="13"/><circle class="red-dot" cx="${seen ? 249 : 269}" cy="72" r="5"/>` : '')+
+    (!seen ? '<path class="quiz-gap" d="M245 68 l8 8 m0 -8 -8 8"/>' : '')+
+    text(12,325,'VFL starts here','class="small"')+
+    text(180,347,seen ? 'Light reaches port 12 ✓' : wrong ? 'Light reaches port 13 · check mapping' : 'Port 12 dark · location unknown','class="small" text-anchor="middle"')};
 }
 
 function renderDevicesLesson() {
@@ -323,7 +324,7 @@ function endsPicture(selected) {
     '<rect class="learn-device" x="5" y="40" width="88" height="165" rx="6"/><rect class="learn-device" x="267" y="40" width="88" height="165" rx="6"/>'+
     text(49,69,'Device A','text-anchor="middle"')+text(311,69,'Device B','text-anchor="middle"')+
     '<rect class="mmc-plug" x="140" y="94" width="26" height="90" rx="4"/><rect class="mmc-plug" x="194" y="94" width="26" height="90" rx="4"/>'+
-    light('M93 110 H267')+light('M267 168 H93','return-ir')+
+    light('M93 110 H267')+light('M267 168 H93','return-ir')+lightSource(93,110)+lightSource(267,168,'return-ir')+
     text(69,115,'TX','class="small"')+text(274,115,'RX','class="small"')+text(69,173,'RX','class="small"')+text(274,173,'TX','class="small"')+
     text(180,84,'A TX → B RX','class="small" text-anchor="middle"')+text(180,205,'A RX ← B TX','class="small" text-anchor="middle"')+
     '<path class="ir-arrow" d="M176 105 l8 5 -8 5"/><path class="return-ir-arrow" d="M184 163 l-8 5 8 5"/>'+

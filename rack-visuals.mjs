@@ -1,10 +1,10 @@
-import { mmcHead } from './loop-visuals.mjs?v=2';
+import { mmcHead } from './loop-visuals.mjs?v=3';
+import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 
 // A teaching rack inspired by the reference photo, not a surveyed rack layout.
 const label = (x,y,value,extra='') => `<text x="${x}" y="${y}" class="rack-label ${extra}">${value}</text>`;
 const levelY = elevation => 50 + (42-elevation)*10;
 const route = (path,hidden=false) => `<path class="rack-route-outline${hidden ? ' rack-hidden-route' : ''}" d="${path}"/><path class="rack-route${hidden ? ' rack-hidden-route' : ''}" d="${path}"/>`;
-const lightFlow = path => `<path class="learn-signal ir" d="${path}"/><path class="rack-light-arrow" d="M-8 -5 L3 0 L-8 5 L-4 0 Z" style="offset-path:path('${path}')"/>`;
 
 function device(elevation,selected=false) {
   const y = levelY(elevation+1);
@@ -90,9 +90,7 @@ export function rackIllustration(side=0,elevation=30) {
   drawing += route(leg)+route(`M67 133 ${cas}`,rear);
   for(const y of [142,202,262,322,382,442]) drawing += `<path class="rack-manager" d="M59 ${y} h17 v7 H59"/>`;
   const upArrowY = (sourceY+133)/2;
-  drawing += lightFlow(fullPath)+`<path class="rack-direction" d="M62 ${upArrowY+4} l5 -7 5 7 M218 108 l5 -7 5 7"/>
-    <circle class="rack-tx-halo" cx="140" cy="${sourceY}" r="8"/>
-    <circle class="rack-tx-source" cx="140" cy="${sourceY}" r="3"/>`;
+  drawing += lightFlow(fullPath)+lightSource(140,sourceY)+`<path class="rack-direction" d="M62 ${upArrowY+4} l5 -7 5 7 M218 108 l5 -7 5 7"/>`;
   drawing += `<rect class="rack-optic-focus" x="133" y="${deviceY+5}" width="15" height="16" rx="2"/>
     <rect class="rack-level-tag" x="4" y="${deviceY-1}" width="38" height="22" rx="3"/>`+
     label(23,deviceY+14,String(elevation),'rack-center rack-level-number')+
