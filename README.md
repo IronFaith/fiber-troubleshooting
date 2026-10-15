@@ -24,6 +24,8 @@ Chapter 2 (`devices.html`) explains the user-provided position `QNO5.5C.16f.17.3
 
 Chapter 3 (`patching.html`) teaches the user-confirmed site mapping: Ethernet `5/1` selects optic 5, physical position 1 on the left; `5/5` selects the same optic, physical position 2 on the right, facing the optic. The two duplex LC pairs stand vertically side by side in one compact optic housing; each position includes both strands. Switching the Ethernet selection moves the illustrated connector and updates the caption. The mapping is site-specific, not inferred for all optics. A separate route shows one LC follower through its MMC leader to the passive identified by FIM; it does not invent a CAS assignment or change FIM records. Animated light is illustrative, not a measured health result.
 
+The optic drawing includes a metal module body, recessed connection face and rear contacts. Both sockets and the selected connector show mirrored outside edges: left for position 1, right for position 2. The housing is an illustration, not a dimensional model of a specific transceiver.
+
 The MMC section uses example head serial `S747885346FWL` and 12 selectable followers. Each diagram line represents a leg, with no single/duplex strand-count claim or ferrule pin mapping. Leg numbers 1–12 are illustration labels, not invented physical serial suffixes. Selecting a leg highlights its separate path to the shared head. A three-step illustration covers matching the serial and FIM destination, inspection/cleaning and rail alignment, then seating/latching. No real CAS destination is assigned to the example serial.
 
 ```sh

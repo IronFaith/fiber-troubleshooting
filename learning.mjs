@@ -377,21 +377,37 @@ function patchPicture(selected) {
   const suffix = right ? 5 : 1;
   const position = right ? 2 : 1;
   const side = right ? 'right' : 'left';
-  const center = right ? 222 : 138;
-  let drawing = text(180,28,'Optic 5 · front view','class="patch-title" text-anchor="middle"')+
-    '<rect class="optic-metal" x="92" y="104" width="176" height="138" rx="8"/>'+
-    '<path class="optic-detail" d="M98 111 V235 M262 111 V235"/>';
-  [138,222].forEach((x,index) => {
+  const center = right ? 206 : 112;
+  const outerEdgeX = right ? center+20 : center-28;
+  let drawing = `<defs>
+      <linearGradient id="patch-metal-top" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0f3f4"/><stop offset=".5" stop-color="#bcc6ce"/><stop offset="1" stop-color="#e6ebee"/></linearGradient>
+      <linearGradient id="patch-metal-face" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#b0bdc7"/><stop offset=".45" stop-color="#e5ebef"/><stop offset="1" stop-color="#9eafbc"/></linearGradient>
+    </defs>`+
+    text(180,24,'Optic 5 · connection face','class="patch-title" text-anchor="middle"')+
+    '<path class="patch-pcb" d="M129 39 H307 V58 H120 Z"/>';
+  for (let contact=0; contact<10; contact++) drawing += `<rect class="patch-contact" x="${137+contact*16}" y="40" width="10" height="13" rx="1"/>`;
+  drawing += '<path class="patch-module-side" d="M268 174 L321 57 V195 L268 318 Z"/>'+
+    '<path class="patch-module-top" d="M50 174 L113 57 H321 L268 174 Z"/>';
+  for (let rib=0; rib<8; rib++) drawing += `<path class="patch-module-rib" d="M${65+rib*25} 164 L${119+rib*25} 65"/>`;
+  drawing += '<path class="patch-module-label" d="M110 111 L128 77 H272 L254 111 Z"/>'+
+    text(193,99,'Optic 5','class="small" text-anchor="middle"')+
+    '<path class="patch-module-seam" d="M278 178 L312 102 M278 193 L312 117 M278 208 L312 132"/>'+
+    '<rect class="patch-module-face" x="50" y="174" width="218" height="144" rx="7"/>'+
+    '<path class="patch-module-seam" d="M58 182 V307 H260 V182"/>'+
+    '<path class="patch-bail" d="M62 296 V323 Q62 332 72 332 H246 Q256 332 256 323 V296"/>';
+  [112,206].forEach((x,index) => {
     const active = index === selected;
-    drawing += text(x,66,`Position ${index+1}`,'class="small" text-anchor="middle"')+
-      text(x,89,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
-      `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-34}" y="116" width="68" height="112" rx="5"/>`+
-      `<rect class="patch-opening" x="${x-22}" y="125" width="44" height="36" rx="2"/><rect class="patch-opening" x="${x-22}" y="179" width="44" height="36" rx="2"/>`;
+    const keyX = index ? x+20 : x-28;
+    drawing += text(x,190,String(index+1),'class="small" text-anchor="middle"')+
+      text(x,355,`5/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"')+
+      `<rect class="${active ? 'patch-socket-active' : 'patch-socket'}" x="${x-34}" y="198" width="68" height="106" rx="5"/>`+
+      `<rect class="patch-opening" x="${x-22}" y="209" width="44" height="34" rx="3"/><rect class="patch-opening" x="${x-22}" y="259" width="44" height="34" rx="3"/>`+
+      `<circle class="patch-ferrule" cx="${x}" cy="226" r="7"/><circle class="patch-ferrule" cx="${x}" cy="276" r="7"/>`+
+      `<rect class="patch-keyway" x="${keyX}" y="226" width="8" height="50" rx="2"/>`;
   });
-  drawing += `<g class="patch-lc"><rect x="${center-19}" y="128" width="38" height="30" rx="3"/><rect x="${center-19}" y="182" width="38" height="30" rx="3"/><rect x="${center-25}" y="143" width="9" height="54" rx="3"/></g>`+
-    `<path class="patch-insert" d="M${center} 281 V249 m-6 8 6 -8 6 8"/>`+
-    text(180,306,`Patch LC at position ${position} (${side})`,'class="small" text-anchor="middle"');
-  return {height:324, caption:`Ethernet 5/${suffix} → optic 5 → position ${position} (${side}). Connect the vertical duplex LC pair here.`, drawing};
+  drawing += `<g class="patch-lc"><rect x="${center-19}" y="212" width="38" height="28" rx="3"/><rect x="${center-19}" y="262" width="38" height="28" rx="3"/><rect class="patch-outer-edge" x="${outerEdgeX}" y="226" width="8" height="50" rx="2"/></g>`+
+    `<path class="patch-insert" d="M${center} 385 V366 m-6 8 6 -8 6 8"/>`;
+  return {height:397, caption:`Ethernet 5/${suffix} → optic 5 → position ${position} (${side}). The connector’s outside edge faces ${side}.`, drawing};
 }
 
 function patchRoutePicture() {
