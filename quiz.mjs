@@ -1,3 +1,4 @@
+import { cassetteFront, loopIllustration } from './loop-visuals.mjs?v=1';
 import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress} from './quiz-data.mjs?v=5';
 
 const host = document.querySelector('#quiz');
@@ -34,6 +35,8 @@ function diagram(kind) {
   if (['simple-dark','simple-rx-dark','light-returns','healthy','dark','weak','high','lanes'].includes(kind)) return readingFigure(kind);
   let drawing = '';
   let caption = '';
+  let height = 175;
+  let hardware = false;
   if (kind === 'unseated') {
     drawing = opticFace(12,36)+'<rect class="quiz-device" x="108" y="64" width="45" height="38" rx="3"/><rect class="lc-plug" x="184" y="64" width="62" height="38" rx="3"/><path class="quiz-fiber" d="M246 83 H343"/><path class="quiz-gap" d="M156 57 H181 M156 52 V62 M181 52 V62"/>'+label(168,39,'Gap','text-anchor="middle"');
     caption = 'The connector is not fully seated.';
@@ -41,8 +44,9 @@ function diagram(kind) {
     drawing = '<path class="quiz-fiber" d="M20 65 H242 Q251 65 251 74 Q251 83 242 83 H115 Q85 83 85 113 V145"/><circle class="quiz-gap" cx="250" cy="74" r="24"/>'+label(274,32,'Tight bend','text-anchor="middle"');
     caption = 'A tight bend in the fiber route.';
   } else if (kind === 'port-label') {
-    drawing = '<rect class="quiz-device" x="74" y="34" width="212" height="94" rx="5"/>'+label(180,57,'CAS 1','text-anchor="middle"')+block(101,72,57,37,'11')+block(201,72,57,37,'12')+label(180,157,'Record: CAS 1 Port 12','text-anchor="middle"');
-    caption = 'Use the destination listed in the connection record.';
+    drawing = cassetteFront()+label(180,205,'Record: CAS 1 Port 12','text-anchor="middle"');
+    height = 220; hardware = true;
+    caption = 'Top row: 1–16. Bottom row: 17–32. Match the port in the record.';
   } else if (kind === 'recheck') {
     drawing = block(8,58,130,57,'One fix')+line('M138 86 H222')+arrow(194,86)+block(222,58,130,57,'Recheck');
     caption = 'Check the result after each change.';
@@ -52,15 +56,12 @@ function diagram(kind) {
   } else if (kind === 'link') {
     drawing = block(8,45,90,90,'Local')+block(262,45,90,90,'Remote')+line('M98 65 H262')+line('M262 113 H98')+arrow(190,65)+`<path class="quiz-light" d="M174 108 l-6 5 6 5"/>`+label(110,54,'TX → RX')+label(110,137,'RX ← TX');
     caption = 'Two directions let each device send and receive. Blue represents invisible IR.';
-  } else if (kind === 'passive' || kind === 'passive-loop' || kind === 'direct-loop') {
-    const direct = kind === 'direct-loop';
-    drawing = opticFace(8,37)+label(54,25,'Local optic','text-anchor="middle"')+line('M104 72 H274 Q324 72 324 89 Q324 106 274 106 H104')+arrow(187,72)+`<path class="quiz-light" d="M193 101 l-6 5 6 5"/>`;
-    if (!direct) drawing += block(234,49,48,77,'MMC')+label(255,148,'CAS 1 · Port 12','text-anchor="middle"');
-    else drawing += block(109,58,40,61,'LC')+label(235,146,'Short local return','text-anchor="middle"');
-    caption = kind === 'passive' ? 'Example of light passing through a passive connection.' : direct ? 'LC loop at the local optic. The long fiber route is outside this test.' : 'MMC loop at the passive. The route continues beyond this test point.';
-    if (kind === 'passive') {
-      drawing = opticFace(8,37)+line('M104 72 H225')+block(225,48,63,73,'CAS')+line('M288 72 H348')+arrow(175,72)+arrow(333,72)+label(259,145,'Passive','text-anchor="middle"');
-    }
+  } else if (kind === 'passive-loop' || kind === 'direct-loop') {
+    const art = loopIllustration(kind === 'direct-loop' ? 'direct' : 'passive');
+    drawing = art.drawing; caption = art.caption; height = art.height; hardware = true;
+  } else if (kind === 'passive') {
+    drawing = cassetteFront({port:null}); height = 190; hardware = true;
+    caption = 'A 32-port passive cassette. It connects fiber paths; it does not produce light.';
   } else if (kind === 'dirty') {
     drawing = '<circle class="scope-face" cx="180" cy="79" r="57"/><circle class="scope-core" cx="180" cy="79" r="16"/><circle class="dirt" cx="171" cy="73" r="9"/><circle class="dirt" cx="194" cy="88" r="6"/><circle class="dirt" cx="151" cy="103" r="4"/>'+label(180,157,'Magnified end face','text-anchor="middle"');
     caption = 'A connector end face seen with the appropriate inspection tool.';
@@ -85,7 +86,7 @@ function diagram(kind) {
       caption = kind === 'vfl-seen' ? 'Red light is detected at the expected port using the safe viewing method.' : 'VFL red light is a separate test source; active equipment is disconnected.';
     }
   }
-  return `<figure class="lesson-figure quiz-diagram"><svg viewBox="0 0 360 175" role="img" aria-label="${caption}">${drawing}</svg><figcaption>${caption}</figcaption></figure>`;
+  return `<figure class="lesson-figure quiz-diagram"><svg class="${hardware ? 'hardware-diagram' : ''}" viewBox="0 0 360 ${height}" role="img" aria-label="${caption}">${drawing}</svg><figcaption>${caption}</figcaption></figure>`;
 }
 
 function focusTitle() {

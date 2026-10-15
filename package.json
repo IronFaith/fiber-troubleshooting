@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check app.mjs && node --check flow.mjs && node --check learning.mjs && node --check quiz.mjs && node --check quiz-data.mjs && node --test tests/*.test.mjs",
+    "check": "node --check app.mjs && node --check flow.mjs && node --check learning.mjs && node --check quiz.mjs && node --check quiz-data.mjs && node --check loop-visuals.mjs && node --test tests/*.test.mjs",
     "dev": "node preview.mjs"
   }
 }

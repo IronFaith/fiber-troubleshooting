@@ -1,3 +1,4 @@
+import { loopIllustration } from './loop-visuals.mjs?v=1';
 import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory, fiberTrace } from './flow.mjs?v=8';
 
 const storageKey = 'fiberline-loop-first-v5';
@@ -26,22 +27,10 @@ function change(next) {
 }
 function sketch(kind) {
   if (kind === 'fiber') return fiberSketch();
-  const figure = el('figure', `test-sketch ${kind}`);
-  const defs = '<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#245b91"/></marker><marker id="return-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#226946"/></marker></defs>';
-  let drawing, caption, label, lightPath;
-  if (kind === 'direct') {
-    label = 'LC loopback at the optic. Light leaves TX through one LC plug, loops around, and returns through the other LC plug to RX.';
-    drawing = '<rect class="device" x="23" y="37" width="105" height="79" rx="6"/><text x="37" y="82">Optic</text><text class="port" x="103" y="57">TX</text><text class="port" x="103" y="104">RX</text><rect class="connector" x="129" y="43" width="37" height="18" rx="2"/><rect class="connector" x="129" y="91" width="37" height="18" rx="2"/><path class="clip" d="M138 40 H160 M138 88 H160"/><path class="light" d="M128 52 H224" marker-end="url(#arrow)"/><path class="light" d="M225 52 H267 Q296 52 296 76"/><path class="light return" d="M296 76 Q296 100 267 100 H128" marker-end="url(#return-arrow)"/><text x="189" y="27">LC loopback</text><text class="small" x="184" y="76">TX out / RX back</text>';
-    caption = 'Light leaves TX and loops back to RX.';
-    lightPath = 'M128 52 H267 Q296 52 296 76 Q296 100 267 100 H128';
-  } else {
-    label = 'MMC loopback at passive CAS 1 Port 12. Optic TX connects through an LC follower and the MMC leader to the passive loop; light returns through the mapped LC follower to optic RX. One test pair is illustrated, not the full lane map.';
-    drawing = '<text x="8" y="33">Optic</text><rect class="device" x="6" y="49" width="62" height="69" rx="5"/><text class="port" x="39" y="74">TX</text><text class="port" x="39" y="108">RX</text><rect class="connector" x="70" y="62" width="23" height="16" rx="2"/><rect class="connector" x="70" y="96" width="23" height="16" rx="2"/><text class="small" x="85" y="45">LC legs</text><text class="small" x="85" y="132">Followers</text><rect class="connector" x="203" y="59" width="27" height="56" rx="3"/><text class="small" x="159" y="31">MMC leader</text><path class="callout" d="M204 36 L215 56"/><rect class="group" x="231" y="51" width="13" height="72" rx="2"/><text class="small" x="216" y="15">CAS 1 · Port 12</text><path class="callout" d="M240 20 V49"/><rect class="connector loop-plug" x="245" y="59" width="27" height="56" rx="3"/><path class="light" d="M68 70 H169" marker-end="url(#arrow)"/><path class="light" d="M170 70 H302 Q326 70 326 87"/><path class="light return" d="M326 87 Q326 104 302 104 H68" marker-end="url(#return-arrow)"/><text class="small" x="236" y="140">MMC loopback</text><path class="callout" d="M265 125 L259 117"/>';
-    caption = 'Tests the optic + LC legs + MMC path to the loop.';
-    lightPath = 'M68 70 H302 Q326 70 326 87 Q326 104 302 104 H68';
-  }
-  figure.innerHTML = `<svg viewBox="0 0 350 ${kind === 'direct' ? 125 : 150}" role="img" aria-label="${label}">${defs}${drawing}${lightArrow(lightPath)}</svg>`;
-  sketchFooter(figure, caption);
+  const art = loopIllustration(kind);
+  const figure = el('figure', 'test-sketch hardware-sketch');
+  figure.innerHTML = `<svg viewBox="0 0 360 ${art.height}" role="img" aria-label="${art.label}">${art.drawing}${lightArrow(art.lightPath)}</svg>`;
+  sketchFooter(figure, art.caption);
   return figure;
 }
 function lightArrow(path) {
@@ -195,7 +184,11 @@ function render(moveFocus = false) {
     current.append(fresh);
   }
   diagram.append(current);
-  if (lightPaused) current.querySelector('svg')?.pauseAnimations();
+  if (lightPaused) {
+    const svg = current.querySelector('svg');
+    svg?.setCurrentTime(0.001);
+    svg?.pauseAnimations();
+  }
   if (moveFocus) {
     title.focus({ preventScroll: true });
     const anchor = diagram.querySelector('.trail-step:last-child') || current;

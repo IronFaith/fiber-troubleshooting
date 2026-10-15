@@ -1,3 +1,5 @@
+import { cassetteFront, loopIllustration } from './loop-visuals.mjs?v=1';
+
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
   if (className) item.className = className;
@@ -124,7 +126,7 @@ function example(id, label, choices, draw) {
   const caption = el('figcaption'); caption.setAttribute('aria-live', 'polite');
   function show(selected) {
     const art = draw(selected);
-    figure.innerHTML = `<svg viewBox="0 0 360 ${art.height || 210}" role="img" aria-label="${art.caption}">${art.drawing}</svg>`;
+    figure.innerHTML = `<svg class="${art.hardware ? 'hardware-diagram' : ''}" viewBox="0 0 360 ${art.height || 210}" role="img" aria-label="${art.caption}">${art.drawing}</svg>`;
     caption.textContent = art.caption; figure.append(caption);
     [...controls.children].forEach((button, index) => button.setAttribute('aria-pressed', String(index === selected)));
   }
@@ -172,10 +174,9 @@ function pathPicture() {
     '<path class="ir-arrow" d="M203 47 l8 5 -8 5 M207 168 l-8 5 8 5 M211 186 l8 5 -8 5"/>'};
 }
 function loopPicture(selected) {
-  return {height:215, caption:selected ? 'MMC loop: optic + LC legs + fiber to this passive. Beyond the loop remains untested.' : 'LC loop: a short return tests the local optic. The longer fiber route is not included.', drawing:
-    optic(8,67)+light('M121 85 H284 Q334 85 334 102 Q334 119 284 119 H121')+
-    (selected ? '<rect class="mmc-plug" x="237" y="72" width="26" height="60" rx="3"/>'+text(155,59,'LC + fiber','class="small"')+text(250,157,'MMC at passive','class="small" text-anchor="middle"')+text(250,179,'CAS 1 · Port 12','class="small" text-anchor="middle"') : '<rect class="lc-plug" x="123" y="76" width="32" height="18" rx="2"/><rect class="lc-plug" x="123" y="110" width="32" height="18" rx="2"/>'+text(241,59,'LC loopback','text-anchor="middle"'))+
-    '<path class="ir-arrow" d="M199 80 l8 5 -8 5 M207 114 l-8 5 8 5"/>'+text(180,27,'TX out → loop → RX back','text-anchor="middle"')};
+  const art = loopIllustration(selected ? 'passive' : 'direct');
+  return {...art, hardware:true, drawing:art.drawing + `<path class="learn-signal ir" d="${art.lightPath}"/>`,
+    caption:selected ? 'MMC loop at CAS 1 Port 12: tests the optic + fiber to this port. Beyond the loop is untested. One pair illustrated.' : 'LC loop inserted: TX returns to RX at the optic. The longer fiber route is outside this test.'};
 }
 function faultPicture(selected) {
   const captions = [
@@ -492,7 +493,7 @@ function mmcPatchPicture(selected) {
   else drawing += text(184,200,'Head seated in the mapped port','class="small" text-anchor="middle"');
   if (selected === 1) drawing += '<path class="mmc-alignment" d="M119 105 H246 M119 130 H246"/>';
   drawing += text(14,232,'12 followers share this head','class="small"');
-  return {height:250, caption:captions[selected], drawing};
+  return {height:440, hardware:true, caption:captions[selected], drawing:cassetteFront({port:null,name:'Passive'})+'<g transform="translate(0 190)">'+drawing+'</g>'};
 }
 
 if (lesson) {

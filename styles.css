@@ -341,6 +341,42 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .mmc-adapter { fill:#e1eee6; stroke:#5f8c72; stroke-width:2; }
 .mmc-rail { fill:none; stroke:#719481; stroke-width:1.5; }
 .mmc-alignment { fill:none; stroke:#4b8766; stroke-width:1.5; stroke-dasharray:4 4; }
+.test-sketch.hardware-sketch svg, .lesson-figure svg.hardware-diagram, #quiz .quiz-diagram svg.hardware-diagram { max-height:none; max-width:460px; margin:0 auto; }
+.hardware-art .hardware-label { font:600 14px 'Segoe UI',sans-serif; fill:#294a60; }
+.hardware-art .hardware-small { font-size:12px; font-weight:500; }
+.hardware-art .hardware-tiny { font-size:10px; font-weight:500; }
+.hardware-art .hardware-center, .hardware-art .cassette-number { text-anchor:middle; }
+.hardware-art .hardware-end { text-anchor:end; }
+.hardware-art .cassette-number { font-size:10px; font-weight:700; fill:#253a48; }
+.cassette-ear { fill:#91a1ad; stroke:#5e7180; stroke-width:1; }
+.cassette-case, .hardware-metal { fill:#d0d7dd; stroke:#647786; stroke-width:1.5; }
+.cassette-seam { fill:none; stroke:#f4f7f9; stroke-width:2; }
+.cassette-screw { fill:#485965; }
+.cassette-adapter { fill:#8bb5a4; stroke:#3f6959; stroke-width:1.2; }
+.cassette-opening { fill:#263b35; stroke:#c2ded1; stroke-width:.7; }
+.cassette-key { fill:none; stroke:#e0eee8; stroke-width:1.2; }
+.cassette-port-focus { fill:transparent; stroke:none; }
+.cassette-selected .cassette-port-focus { fill:#fff0c9; stroke:#9f6729; stroke-width:1.2; }
+.cassette-selected .cassette-number { fill:#673c10; }
+.hardware-detail { fill:#f8fbfd; stroke:#b2c4d0; stroke-width:1; }
+.hardware-plug { fill:#a7cbb9; stroke:#385e4d; stroke-width:1.3; }
+.hardware-boot { fill:#5c8270; stroke:#385e4d; stroke-width:1; }
+.hardware-grip { fill:none; stroke:#e6f0ea; stroke-width:1.5; }
+.hardware-latch { fill:#d9eee1; stroke:#385e4d; stroke-width:1; }
+.loop-jacket { fill:none; stroke:#8b7341; stroke-width:8; stroke-linecap:round; stroke-linejoin:round; }
+.loop-cord { fill:none; stroke:#e8c365; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+.cassette-port .loop-jacket { stroke-width:4; }
+.cassette-port .loop-cord { stroke-width:2.5; }
+.optic-pull { fill:#775aa6; stroke:#564078; stroke-width:1; }
+.optic-recess { fill:#a0a8b1; stroke:#687180; stroke-width:1; }
+.optic-opening { fill:#383846; stroke:#687180; stroke-width:1; }
+.optic-ferrule { fill:#bec4cb; }
+.optic-core { fill:#252633; }
+.hardware-tx, .hardware-rx { fill:none; stroke:#227bc1; stroke-width:2.5; }
+.hardware-rx { stroke:#27815b; }
+.hardware-tx-arrow, .hardware-rx-arrow { fill:none; stroke:#155386; stroke-width:2; }
+.hardware-rx-arrow { stroke:#155e40; }
+.hardware-diagram .learn-signal { stroke-width:2; }
 .endpoint-locations { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:13px; }
 .endpoint-locations p { margin:0; font-size:13px; color:#526a7d; }
 .endpoint-locations strong, .endpoint-locations span { display:block; overflow-wrap:anywhere; }
