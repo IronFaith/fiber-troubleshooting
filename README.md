@@ -28,9 +28,13 @@ The optic drawing uses a straight-on front view based on the user's reference ph
 
 The MMC section uses example head serial `S747885346FWL` and 12 selectable followers. Each diagram line represents a leg, with no single/duplex strand-count claim or ferrule pin mapping. Leg numbers 1–12 are illustration labels, not invented physical serial suffixes. Selecting a leg highlights its separate path to the shared head. A three-step illustration covers matching the serial and FIM destination, inspection/cleaning and rail alignment, then seating/latching. No real CAS destination is assigned to the example serial.
 
+The beginner knowledge check (`quiz.html`) contains 20 questions in four groups: optic basics, TX/RX power readings, local optic tests, and accessible fiber tracing. Each question shows a diagram or readings, three choices, and immediate plain-language feedback with a lesson link. The results count the first answer once, show a topic breakdown and an open review of missed questions, and allow a fresh retry of only those questions or the whole check. Results live only in the current page; reloading starts over. The check is educational, not a field qualification.
+
+Numeric quiz limits (TX −1 to +3 dBm and RX −3 to +3 dBm) are explicitly fictional training limits, not installed-optic specifications or a universal site threshold. The quiz includes the user's −40 no-light indication and +0.25 example, teaches lower and upper bounds, checks each lane, and distinguishes a power reading from proof of complete link health. VFL questions distinguish continuity/mapping from measured loss. The shared Learn menu links to the check from every page.
+
 ```sh
 npm run dev
 npm run check
 ```
 
-GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `learn.html`, `devices.html`, `patching.html`, `styles.css`, `app.mjs`, `flow.mjs`, `learning.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.
+GitHub Pages serves `main` at the repository root. Runtime files are `index.html`, `learn.html`, `devices.html`, `patching.html`, `quiz.html`, `styles.css`, `app.mjs`, `flow.mjs`, `learning.mjs`, `quiz.mjs`, `quiz-data.mjs`, and `icon.svg`. Versioned runtime URLs avoid mixing older cached scripts with a new diagram.

@@ -21,7 +21,9 @@ menuPanel.append(el('p', '', 'Learning resources'));
 const chapterLink = link('Chapter 1 · Optics, fiber & light', './learn.html');
 const devicesLink = link('Chapter 2 · Device locations & links', './devices.html');
 const patchingLink = link('Chapter 3 · FIM, LC & MMC patching', './patching.html');
-menuPanel.append(chapterLink, devicesLink, patchingLink, link('Back to troubleshooting', './index.html', 'menu-return'));
+const quizLink = link('Beginner knowledge check', './quiz.html');
+if (document.querySelector('#quiz')) quizLink.setAttribute('aria-current', 'page');
+menuPanel.append(chapterLink, devicesLink, patchingLink, quizLink, link('Back to troubleshooting', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {
@@ -83,6 +85,7 @@ function renderLesson() {
       <p class="lesson-takeaway">VFL helps trace continuity and mapping. Measure optical loss separately with a source and power meter or loss test set.</p>
     </section>
     <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>
+    <a class="next-chapter" href="./quiz.html">Try the beginner knowledge check →</a>
     <a class="next-chapter" href="./devices.html">Next chapter: Device locations & links →</a>
     <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
   setupLesson();
@@ -363,6 +366,7 @@ function renderPatchingLesson() {
       <p class="lesson-takeaway">The serial identifies the fanout. FIM identifies its destination passive and port. Then match each follower to its assigned optic port.</p>
     </section>
     <p class="lesson-sources">Port mapping and fanout: your site examples. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
+    <a class="next-chapter" href="./quiz.html">Try the beginner knowledge check →</a>
     <a class="next-chapter" href="./devices.html">← Chapter 2: Device locations & links</a>
     <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
   setupLesson();
