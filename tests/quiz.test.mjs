@@ -1,20 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {questions, topics, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress, rookieRank} from '../quiz-data.mjs';
+import {questions, topics, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress} from '../quiz-data.mjs';
 
 const wrongAnswer = question => Array.isArray(question.correct) ? [question.correct[0]] : (question.correct+1)%question.choices.length;
 const correctRound = topic => Object.fromEntries(questions.filter(question => question.topic === topic).map(question => [question.id,question.correct]));
 
-test('rookie stripes require passing complete rounds in order, through beginner completion', () => {
-  assert.equal(rookieRank(0,1,correctRound(1)).level,0);
-  let level = 0;
-  for (const [topic,numeral] of ['I','II','III','IV'].entries()) {
+test('rookie stripes count different passed quizzes in any order through beginner completion', () => {
+  let scores = topics.map(() => null);
+  for (const [index,topic] of [3,1,0,2].entries()) {
     const answers = correctRound(topic);
     const first = questions.find(question => question.topic === topic);
     answers[first.id] = wrongAnswer(first);
-    const rank = rookieRank(level,topic,answers);
-    assert.deepEqual(rank,{level:topic+1,title:`Fiber Rookie ${numeral}`,complete:topic === 3});
-    level = rank.level;
+    scores = recordRoundProgress(scores,topic,answers);
+    const rank = rookieRank(scores);
+    assert.deepEqual(rank,{level:index+1,title:`Fiber Rookie ${['I','II','III','IV'][index]}`,complete:index === 3});
+    if (index === 0) assert.deepEqual(scores,[null,null,null,4]);
   }
 });
 
@@ -23,13 +23,31 @@ test('practice can earn a stripe, without duplicating or removing an earned stri
   const first = questions[0], second = questions[1];
   answers[first.id] = wrongAnswer(first);
   answers[second.id] = wrongAnswer(second);
-  assert.deepEqual(rookieRank(0,0,answers),{level:0,title:'Fiber Rookie',complete:false});
-  assert.equal(rookieRank(0,0,{[first.id]:first.correct}).level,0);
+  let scores = topics.map(() => null);
+  assert.equal(recordRoundProgress(scores,0,{[first.id]:first.correct}),scores);
+  scores = recordRoundProgress(scores,0,answers);
+  assert.deepEqual(rookieRank(scores),{level:0,title:'Fiber Rookie',complete:false});
   const practiced = {...answers,[first.id]:first.correct};
-  assert.equal(rookieRank(0,0,practiced).level,1);
-  assert.equal(rookieRank(1,0,practiced).level,1);
-  assert.equal(rookieRank(1,0,answers).level,1);
-  assert.deepEqual(rookieRank(4,3,{}),{level:4,title:'Fiber Rookie IV',complete:true});
+  scores = recordRoundProgress(scores,0,practiced);
+  assert.equal(rookieRank(scores).level,1);
+  scores = recordRoundProgress(scores,0,correctRound(0));
+  assert.equal(rookieRank(scores).level,1);
+  assert.deepEqual(recordRoundProgress(scores,0,answers),[5,null,null,null]);
+});
+
+test('saved quiz results survive loading again and invalid or unavailable storage stays usable', () => {
+  const values = new Map();
+  const storage = {getItem:key => values.get(key) ?? null,setItem:(key,value) => values.set(key,value)};
+  assert.deepEqual(loadQuizProgress(storage),{scores:[null,null,null,null],canSave:true});
+  const scores = [4,null,2,5];
+  assert.equal(saveQuizProgress(storage,scores),true);
+  assert.deepEqual(loadQuizProgress(storage),{scores,canSave:true});
+  assert.equal(rookieRank(loadQuizProgress(storage).scores).level,2);
+  assert.deepEqual(loadQuizProgress({getItem:() => '{bad json'}).scores,[null,null,null,null]);
+  assert.deepEqual(loadQuizProgress({getItem:() => '{"scores":[6,"5",-1,4]}'}).scores,[null,null,null,4]);
+  const blocked = {getItem:() => {throw Error('blocked');},setItem:() => {throw Error('blocked');}};
+  assert.deepEqual(loadQuizProgress(blocked),{scores:[null,null,null,null],canSave:false});
+  assert.equal(saveQuizProgress(blocked,scores),false);
 });
 
 test('the beginner attempt has five questions and counts only the first valid answer', () => {

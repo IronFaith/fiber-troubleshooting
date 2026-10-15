@@ -1,4 +1,4 @@
-import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank} from './quiz-data.mjs?v=4';
+import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress} from './quiz-data.mjs?v=5';
 
 const host = document.querySelector('#quiz');
 let attempt;
@@ -7,7 +7,9 @@ let retry = false;
 let currentRound = 0;
 let roundAnswers = {};
 let firstScore = 0;
-let rookieLevel = 0;
+let progressStorage;
+try { progressStorage = window.localStorage; } catch { /* Quizzes still work without storage. */ }
+let {scores:savedScores,canSave} = loadQuizProgress(progressStorage);
 
 const label = (x,y,value,extra='') => `<text x="${x}" y="${y}" ${extra}>${value}</text>`;
 const block = (x,y,w,h,name) => `<rect class="quiz-device" x="${x}" y="${y}" width="${w}" height="${h}" rx="5"/>${label(x+w/2,y+h/2+5,name,'text-anchor="middle"')}`;
@@ -105,20 +107,36 @@ function beginRound(topic) {
 }
 
 function renderIntro() {
-  host.innerHTML = `<p class="chapter-count">Beginner practice · 5 questions · about 2 minutes</p>
-    <h2 id="quiz-title" tabindex="-1">Start with the simple signs</h2>
-    <p class="lesson-intro">Recognize what you see in Cable Guy and what could cause it.</p>
-    ${diagram('simple-dark')}
-    <p class="section-intro">One short question at a time, with a simple explanation. Get four out of five to earn a Fiber Rookie stripe, then choose whether to continue.</p>
-    <button class="quiz-primary" type="button" id="quiz-start">Start 5 questions</button>
+  const rank = rookieRank(savedScores);
+  host.innerHTML = `<p class="chapter-count">Beginner practice · 5 questions per quiz</p>
+    <h2 id="quiz-title" tabindex="-1">Choose your quiz</h2>
+    <p class="lesson-intro">From simple signs to applied checks. All four are beginner quizzes, and you can take them in any order.</p>
+    ${rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Get 4/5 to earn a Fiber Rookie stripe. Each different quiz you pass adds one stripe.</p>'}
+    <div class="quiz-picker">${topics.map((topic,i) => {
+      const score = savedScores[i];
+      const passed = score !== null && score >= 4;
+      return `<button type="button" class="quiz-pick${passed ? ' quiz-pick-passed' : ''}" data-round="${i}">
+        <span class="quiz-pick-number" aria-hidden="true">${i+1}</span><span class="quiz-pick-content">
+          <strong>${topic}</strong><span class="quiz-pick-description">${roundDescriptions[i]}</span>
+          <span class="quiz-pick-status">${score === null ? 'Not taken' : `${passed ? '✓ Passed' : 'Keep practicing'} · Best result ${score}/5`}</span>
+          <span class="quiz-pick-action">${score === null ? 'Start quiz' : 'Retake quiz'} →</span>
+        </span></button>`;
+    }).join('')}</div>
+    <p class="picture-note">${canSave ? 'Completed quiz results and stripes stay in this browser on this device. Best results include retries.' : 'This browser cannot save progress. You can still choose any quiz; results last for this visit.'}</p>
     <a class="quiz-lesson-link" href="./learn.html">Learn the basics first</a>`;
-  host.querySelector('#quiz-start').addEventListener('click',() => beginRound(0));
+  host.querySelectorAll('.quiz-pick').forEach(button => button.addEventListener('click',() => beginRound(Number(button.dataset.round))));
+}
+
+function showQuizPicker() {
+  renderIntro();
+  focusTitle();
 }
 
 function renderQuestion() {
   const question = questions.find(item => item.id === attempt.ids[index]);
   const multiple = Array.isArray(question.correct);
-  host.innerHTML = `<div class="quiz-progress-label"><span>${retry ? 'Retry' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>Round ${currentRound+1} · ${topics[question.topic]}</span></div>
+  host.innerHTML = `<button class="quiz-picker-back" type="button" id="quiz-all">← All quizzes</button>
+    <div class="quiz-progress-label"><span>${retry ? 'Retry' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>Round ${currentRound+1} · ${topics[question.topic]}</span></div>
     <progress class="quiz-progress" value="${index}" max="${attempt.ids.length}" aria-label="Questions answered"></progress>
     <h2 id="quiz-title" class="quiz-question" tabindex="-1">${question.prompt}</h2>
     ${diagram(question.visual)}
@@ -142,6 +160,7 @@ function renderQuestion() {
     if (!Object.hasOwn(attempt.answers,question.id)) return;
     if (++index < attempt.ids.length) renderQuestion(); else renderResults();
   });
+  host.querySelector('#quiz-all').addEventListener('click',showQuizPicker);
   focusTitle();
 }
 
@@ -178,7 +197,7 @@ function choose(question,choice) {
 
 function rankCard(rank, earnedNow, passed) {
   const note = rank.complete ? 'All four beginner rounds passed.'
-    : !passed && currentRound >= rank.level ? 'Get 4/5 in this round to earn your next stripe.'
+    : !passed && (savedScores[currentRound] ?? 0) < 4 ? 'Get 4/5 in this round to earn your next stripe.'
     : !passed ? 'Your earned stripe stays while you practice.'
     : 'One stripe for each beginner round passed.';
   return `<section class="quiz-rank${rank.complete ? ' rank-complete' : ''}" aria-labelledby="quiz-rank-title">
@@ -199,20 +218,24 @@ function renderResults() {
   if (!retry) firstScore = result.correct;
   const progress = roundProgress(currentRound,roundAnswers);
   const nextRound = progress.nextRound;
-  const rank = rookieRank(rookieLevel,currentRound,roundAnswers);
-  const earnedNow = rank.level > rookieLevel;
-  rookieLevel = rank.level;
-  const title = !progress.passed ? 'A little more practice' : nextRound === null ? 'You’ve finished the last round' : 'Ready for the next five';
+  const previousRank = rookieRank(savedScores);
+  savedScores = recordRoundProgress(savedScores,currentRound,roundAnswers);
+  canSave = saveQuizProgress(progressStorage,savedScores);
+  const rank = rookieRank(savedScores);
+  const earnedNow = rank.level > previousRank.level;
+  const title = !progress.passed ? 'A little more practice' : rank.complete ? 'Beginner basics complete' : earnedNow ? 'You earned a stripe' : 'Round complete';
   host.innerHTML = `<p class="chapter-count">Round ${currentRound+1} ${retry ? 'practice complete' : 'complete'} · ${topics[currentRound]}</p>
     <h2 id="quiz-title" tabindex="-1">${title}</h2>
     ${rankCard(rank,earnedNow,progress.passed)}
     <p class="quiz-score"><strong>${progress.correct}<span> / 5</span></strong> ${retry ? 'answered correctly after practice' : 'correct on your first answer'}</p>
     ${retry ? `<p class="picture-note">First try: ${firstScore}/5. This retry: ${result.correct}/${result.total}.</p>` : ''}
-    <p class="section-intro">${progress.passed ? 'You can stop here, revisit an idea, or keep learning.' : currentRound === topics.length-1 ? 'Review the ideas below and retry the missed questions. Aim for four correct answers out of five.' : 'Review the ideas below and retry the missed questions. Four correct answers out of five opens the next round.'}</p>
+    <p class="section-intro">${progress.passed ? 'You can revisit an idea or choose any other quiz.' : 'Review the ideas below and retry the missed questions. Aim for four correct answers out of five.'}</p>
+    ${!canSave ? '<p class="picture-note">Progress could not be saved in this browser. It will last for this visit.</p>' : ''}
     ${nextRound !== null ? `<p class="quiz-next-round"><strong>Next: ${topics[nextRound]}</strong><span>${roundDescriptions[nextRound]}</span></p>` : ''}
     <div class="quiz-result-actions">
       ${nextRound !== null ? '<button type="button" class="quiz-primary" id="quiz-continue">Try the next 5 questions</button>' : ''}
       ${progress.missed.length ? `<button type="button" class="${progress.passed ? 'quiz-secondary' : 'quiz-primary'}" id="quiz-retry">Retry ${progress.missed.length} missed ${progress.missed.length === 1 ? 'question' : 'questions'}</button>` : ''}
+      <button type="button" class="${nextRound === null && progress.passed ? 'quiz-primary' : 'quiz-secondary'}" id="quiz-all">Choose another quiz</button>
       <button type="button" class="quiz-secondary" id="quiz-restart">Repeat these 5 questions</button>
       <a class="quiz-lesson-link" href="./learn.html">Stop here · back to lessons</a>
     </div>
@@ -225,6 +248,7 @@ function renderResults() {
   host.querySelector('#quiz-continue')?.addEventListener('click',() => beginRound(nextRound));
   host.querySelector('#quiz-retry')?.addEventListener('click',() => begin(progress.missed,true));
   host.querySelector('#quiz-restart').addEventListener('click',() => beginRound(currentRound));
+  host.querySelector('#quiz-all').addEventListener('click',showQuizPicker);
   focusTitle();
 }
 

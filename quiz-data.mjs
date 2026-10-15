@@ -186,8 +186,35 @@ export function roundProgress(topic, answers) {
   return {...result, passed, nextRound:passed && topic < topics.length-1 ? topic+1 : null};
 }
 
-export function rookieRank(previousLevel, topic, answers) {
-  const level = topic === previousLevel && roundProgress(topic,answers).passed ? previousLevel+1 : previousLevel;
+export function rookieRank(scores) {
+  const level = scores.filter(score => score >= 4).length;
   const numeral = ['','I','II','III','IV'][level];
   return {level, title:`Fiber Rookie${numeral ? ` ${numeral}` : ''}`, complete:level === topics.length};
+}
+
+const progressKey = 'fiber-quiz-progress-v1';
+const emptyScores = () => topics.map(() => null);
+
+export function loadQuizProgress(storage) {
+  let raw;
+  try { raw = storage.getItem(progressKey); }
+  catch { return {scores:emptyScores(),canSave:false}; }
+  let saved;
+  try { saved = JSON.parse(raw); } catch { /* An unreadable record starts fresh. */ }
+  const scores = topics.map((_,i) => {
+    const score = saved?.scores?.[i];
+    return Number.isInteger(score) && score >= 0 && score <= 5 ? score : null;
+  });
+  return {scores,canSave:true};
+}
+
+export function saveQuizProgress(storage, scores) {
+  try { storage.setItem(progressKey,JSON.stringify({scores})); return true; }
+  catch { return false; }
+}
+
+export function recordRoundProgress(scores, topic, answers) {
+  const result = roundProgress(topic,answers);
+  if (!result.complete || result.total !== 5) return scores;
+  return scores.map((score,i) => i === topic ? Math.max(score ?? 0,result.correct) : score);
 }
