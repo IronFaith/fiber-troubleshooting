@@ -1,4 +1,4 @@
-import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress} from './quiz-data.mjs?v=3';
+import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank} from './quiz-data.mjs?v=4';
 
 const host = document.querySelector('#quiz');
 let attempt;
@@ -7,6 +7,7 @@ let retry = false;
 let currentRound = 0;
 let roundAnswers = {};
 let firstScore = 0;
+let rookieLevel = 0;
 
 const label = (x,y,value,extra='') => `<text x="${x}" y="${y}" ${extra}>${value}</text>`;
 const block = (x,y,w,h,name) => `<rect class="quiz-device" x="${x}" y="${y}" width="${w}" height="${h}" rx="5"/>${label(x+w/2,y+h/2+5,name,'text-anchor="middle"')}`;
@@ -108,7 +109,7 @@ function renderIntro() {
     <h2 id="quiz-title" tabindex="-1">Start with the simple signs</h2>
     <p class="lesson-intro">Recognize what you see in Cable Guy and what could cause it.</p>
     ${diagram('simple-dark')}
-    <p class="section-intro">One short question at a time, with a simple explanation. Finish five, review your answers, then choose whether to continue.</p>
+    <p class="section-intro">One short question at a time, with a simple explanation. Get four out of five to earn a Fiber Rookie stripe, then choose whether to continue.</p>
     <button class="quiz-primary" type="button" id="quiz-start">Start 5 questions</button>
     <a class="quiz-lesson-link" href="./learn.html">Learn the basics first</a>`;
   host.querySelector('#quiz-start').addEventListener('click',() => beginRound(0));
@@ -175,14 +176,36 @@ function choose(question,choice) {
   feedback.scrollIntoView({block:'nearest',behavior:'instant'});
 }
 
+function rankCard(rank, earnedNow, passed) {
+  const note = rank.complete ? 'All four beginner rounds passed.'
+    : !passed && currentRound >= rank.level ? 'Get 4/5 in this round to earn your next stripe.'
+    : !passed ? 'Your earned stripe stays while you practice.'
+    : 'One stripe for each beginner round passed.';
+  return `<section class="quiz-rank${rank.complete ? ' rank-complete' : ''}" aria-labelledby="quiz-rank-title">
+    <svg class="quiz-rank-badge" viewBox="0 0 88 100" aria-hidden="true" focusable="false">
+      <path class="rank-shield" d="M8 7 Q44 -1 80 7 V59 Q80 78 44 96 Q8 78 8 59 Z"/>
+      ${Array.from({length:4},(_,i) => `<path class="rank-stripe${i < rank.level ? ' stripe-earned' : ''}" d="M23 ${21+i*14} L44 ${28+i*14} L65 ${21+i*14} V${28+i*14} L44 ${35+i*14} L23 ${28+i*14} Z"/>`).join('')}
+    </svg>
+    <div><p class="quiz-rank-label">Beginner · ${earnedNow ? 'Stripe earned' : rank.level ? 'Your earned rank' : 'Your first stripe is next'}</p>
+      <h3 id="quiz-rank-title">${rank.title}</h3>
+      <p class="quiz-rank-count">${rank.level} of 4 stripes${rank.complete ? ' · Beginner complete' : ''}</p>
+      <p class="quiz-rank-note">${note}</p>
+    </div>
+  </section>`;
+}
+
 function renderResults() {
   const result = resultsFor(attempt);
   if (!retry) firstScore = result.correct;
   const progress = roundProgress(currentRound,roundAnswers);
   const nextRound = progress.nextRound;
+  const rank = rookieRank(rookieLevel,currentRound,roundAnswers);
+  const earnedNow = rank.level > rookieLevel;
+  rookieLevel = rank.level;
   const title = !progress.passed ? 'A little more practice' : nextRound === null ? 'You’ve finished the last round' : 'Ready for the next five';
   host.innerHTML = `<p class="chapter-count">Round ${currentRound+1} ${retry ? 'practice complete' : 'complete'} · ${topics[currentRound]}</p>
     <h2 id="quiz-title" tabindex="-1">${title}</h2>
+    ${rankCard(rank,earnedNow,progress.passed)}
     <p class="quiz-score"><strong>${progress.correct}<span> / 5</span></strong> ${retry ? 'answered correctly after practice' : 'correct on your first answer'}</p>
     ${retry ? `<p class="picture-note">First try: ${firstScore}/5. This retry: ${result.correct}/${result.total}.</p>` : ''}
     <p class="section-intro">${progress.passed ? 'You can stop here, revisit an idea, or keep learning.' : currentRound === topics.length-1 ? 'Review the ideas below and retry the missed questions. Aim for four correct answers out of five.' : 'Review the ideas below and retry the missed questions. Four correct answers out of five opens the next round.'}</p>

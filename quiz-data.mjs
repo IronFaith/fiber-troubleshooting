@@ -185,3 +185,9 @@ export function roundProgress(topic, answers) {
   const passed = result.complete && result.total === 5 && result.correct >= 4;
   return {...result, passed, nextRound:passed && topic < topics.length-1 ? topic+1 : null};
 }
+
+export function rookieRank(previousLevel, topic, answers) {
+  const level = topic === previousLevel && roundProgress(topic,answers).passed ? previousLevel+1 : previousLevel;
+  const numeral = ['','I','II','III','IV'][level];
+  return {level, title:`Fiber Rookie${numeral ? ` ${numeral}` : ''}`, complete:level === topics.length};
+}
