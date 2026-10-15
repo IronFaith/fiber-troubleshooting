@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {questions, topics, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress} from '../quiz-data.mjs';
 
+const wrongAnswer = question => Array.isArray(question.correct) ? [question.correct[0]] : (question.correct+1)%question.choices.length;
+
 test('the beginner attempt has five questions and counts only the first valid answer', () => {
   let attempt = startAttempt();
   assert.equal(attempt.ids[0],'no-light');
@@ -37,7 +39,7 @@ test('a short retry builds round progress without changing the original first-an
   let original = startAttempt();
   for (const id of original.ids) {
     const question = questions.find(item => item.id === id);
-    const choice = ['no-light','no-light-cause'].includes(id) ? (question.correct+1)%question.choices.length : question.correct;
+    const choice = ['no-light','no-light-cause'].includes(id) ? wrongAnswer(question) : question.correct;
     original = recordAnswer(original,id,choice);
   }
   const initial = resultsFor(original);
@@ -45,11 +47,33 @@ test('a short retry builds round progress without changing the original first-an
   let retry = startAttempt(initial.missed);
   assert.deepEqual(retry.ids,['no-light','no-light-cause']);
   retry = recordAnswer(retry,'no-light',0);
-  retry = recordAnswer(retry,'no-light-cause',0);
+  retry = recordAnswer(retry,'no-light-cause',[0]);
   const progress = roundProgress(0,{...original.answers,...retry.answers});
   assert.equal(progress.correct,4);
   assert.equal(progress.passed,true);
   assert.deepEqual(progress.missed,['no-light-cause']);
   assert.equal(resultsFor(original).correct,3);
   assert.equal(resultsFor(retry).total,2);
+});
+
+test('multiple answers score one point only for all correct causes and no incorrect ones', () => {
+  const question = questions.find(item => item.id === 'no-light-cause');
+  for (const [answer,score] of [[question.correct.toReversed(),1],[question.correct.slice(1),0],[[...question.correct,2],0],[[2],0]]) {
+    const attempt = recordAnswer(startAttempt([question.id]),question.id,answer);
+    assert.equal(resultsFor(attempt).correct,score);
+    assert.equal(resultsFor(attempt).complete,true);
+  }
+});
+
+test('multiple answers require a valid selection and lock a copy of the submitted choices', () => {
+  const id = 'no-light-cause';
+  const initial = startAttempt([id]);
+  for (const answer of [[],0,[0,99],[-1],[0,'1'],[0,1.5]]) assert.equal(recordAnswer(initial,id,answer),initial);
+  const selections = [4,3,1,0,0];
+  const submitted = recordAnswer(initial,id,selections);
+  selections.length = 0;
+  assert.deepEqual(submitted.answers[id],[0,1,3,4]);
+  assert.equal(recordAnswer(submitted,id,[2]),submitted);
+  assert.equal(resultsFor(submitted).correct,1);
+  assert.deepEqual(startAttempt([id]).answers,{});
 });

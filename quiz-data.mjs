@@ -16,31 +16,31 @@ export const questions = [
     lesson:'learn.html#readings'
   },
   {
-    id:'no-light-cause', topic:0, visual:'simple-dark',
-    prompt:'Does a −40 reading tell us that the optic is definitely bad?',
-    choices:['Yes, replace the optic immediately.', 'No, several things could cause it.'], correct:1,
-    explanation:'It could be dirt, a loose connection, a tight bend, damaged fiber, the wrong port, or an optic problem. The reading alone does not tell us which.',
+    id:'no-light-cause', topic:0, visual:'simple-rx-dark',
+    prompt:'No light is arriving. Which problems could cause this?',
+    choices:['A dirty or loose connection.', 'A badly bent or damaged fiber.', 'Normal infrared light being invisible.', 'The wrong port or fiber pairing.', 'An optic or sending port that is not producing light.'], correct:[0,1,3,4],
+    explanation:'Dirt, seating, bends, damage, patching and the light source are all possible causes. This reading alone cannot tell us which. Normal infrared light being invisible does not cause a no-light reading.',
     lesson:'learn.html#cleaning'
   },
   {
-    id:'dirt-blocks', topic:0, visual:'dirty',
-    prompt:'Can a tiny bit of dirt on a fiber connection affect the light?',
-    choices:['No, only a broken cable matters.', 'Yes, dirt can reduce or block the light.'], correct:1,
-    explanation:'The light travels through a very small area. Even a tiny speck in the wrong place can interfere with it.',
+    id:'dirt-blocks', topic:0, visual:'light-returns',
+    prompt:'You clean and reseat a connection. Light returns. What does that suggest?',
+    choices:['The optic was definitely broken.', 'Dirt or seating likely affected the connection.', 'Every part of the link is now proven healthy.'], correct:1,
+    explanation:'Light returning points to the connection you worked on. Because you cleaned and reseated it, you cannot say which action helped. Recheck the readings and link health before calling it fixed.',
     lesson:'learn.html#cleaning'
   },
   {
-    id:'loose-connection', topic:0, visual:'unseated',
-    prompt:'A connector is not fully seated. Could that explain missing light?',
-    choices:['Yes, a loose connection can interrupt the path.', 'No, touching the port is enough.'], correct:0,
-    explanation:'The connector needs to be correctly aligned and fully seated. A gap can stop the light from reaching the next part of the path.',
+    id:'loose-connection', topic:0, visual:'recheck',
+    prompt:'The connector is clean and fully seated, but the report still shows no light. What next?',
+    choices:['Keep isolating the possible causes, one check at a time.', 'Replace the optic: this proves it is bad.', 'Stop: a seated connector proves the fiber is good.'], correct:0,
+    explanation:'You checked one possible cause, not the whole path. Verify the mapped port and test the local optic with the approved loop setup. A passing loop helps you move outward through the fiber you can access.',
     lesson:'learn.html#cleaning'
   },
   {
     id:'bend-cause', topic:0, visual:'bend',
-    prompt:'Can a fiber bent too tightly cause a light problem?',
-    choices:['No, bends never affect light.', 'Yes, a tight bend can reduce the light.'], correct:1,
-    explanation:'A tight bend can let light escape or damage the fiber. Missing light does not always mean the optic itself is bad.',
+    prompt:'After you relieve a tight bend correctly, the light reading improves. What have you learned?',
+    choices:['The whole link must be healthy now.', 'The bend likely contributed; check the reading against the allowed limits.', 'The optic must be replaced anyway.'], correct:1,
+    explanation:'A tight bend can let light escape or damage the fiber. Improvement after correcting it points to the bend, but improved does not always mean within limits. Recheck health before moving on.',
     lesson:'learn.html#cleaning'
   },
   {
@@ -158,13 +158,25 @@ export function startAttempt(ids = roundQuestionIds(0)) {
 
 export function recordAnswer(attempt, id, choice) {
   const question = questions.find(item => item.id === id);
-  if (!attempt.ids.includes(id) || Object.hasOwn(attempt.answers,id) || !Number.isInteger(choice) || !question?.choices[choice]) return attempt;
-  return { ...attempt, answers:{...attempt.answers,[id]:choice} };
+  if (!question || !attempt.ids.includes(id) || Object.hasOwn(attempt.answers,id)) return attempt;
+  const multiple = Array.isArray(question.correct);
+  if (multiple !== Array.isArray(choice)) return attempt;
+  const choices = multiple ? choice : [choice];
+  if (!choices.length || choices.some(value => !Number.isInteger(value) || value < 0 || value >= question.choices.length)) return attempt;
+  const answer = multiple ? [...new Set(choices)].sort((a,b) => a-b) : choice;
+  return { ...attempt, answers:{...attempt.answers,[id]:answer} };
+}
+
+export function isCorrectAnswer(question, answer) {
+  if (!Array.isArray(question.correct)) return answer === question.correct;
+  if (!Array.isArray(answer)) return false;
+  const selected = new Set(answer);
+  return selected.size === question.correct.length && question.correct.every(choice => selected.has(choice));
 }
 
 export function resultsFor(attempt) {
   const answered = attempt.ids.filter(id => Object.hasOwn(attempt.answers,id));
-  const missed = answered.filter(id => attempt.answers[id] !== questions.find(question => question.id === id).correct);
+  const missed = answered.filter(id => !isCorrectAnswer(questions.find(question => question.id === id),attempt.answers[id]));
   return { total:attempt.ids.length, answered:answered.length, correct:answered.length-missed.length, missed, complete:answered.length === attempt.ids.length };
 }
 

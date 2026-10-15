@@ -1,4 +1,4 @@
-import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress} from './quiz-data.mjs?v=2';
+import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress} from './quiz-data.mjs?v=3';
 
 const host = document.querySelector('#quiz');
 let attempt;
@@ -19,6 +19,8 @@ function opticFace(x,y) {
 }
 
 function readingFigure(kind) {
+  if (kind === 'simple-rx-dark') return `<figure class="quiz-readings"><div class="quiz-reading reading-alert"><span>RX · light arriving</span><strong>−40</strong></div><figcaption>Example Cable Guy report · no light received</figcaption></figure>`;
+  if (kind === 'light-returns') return `<figure class="quiz-readings"><div class="quiz-reading-pair"><div class="quiz-reading reading-alert"><span>Before</span><strong>−40</strong><small>No light reported</small></div><div class="quiz-reading"><span>After</span><strong>Light returns</strong><small>Check the new reading</small></div></div><figcaption>You cleaned and reseated this connection.</figcaption></figure>`;
   if (kind === 'simple-dark') return `<figure class="quiz-readings"><div class="quiz-reading-pair">${['RX','TX'].map(name => `<div class="quiz-reading reading-alert"><span>${name}</span><strong>−40</strong></div>`).join('')}</div><figcaption>Example Cable Guy report</figcaption></figure>`;
   if (kind === 'lanes') return `<figure class="quiz-readings"><div class="quiz-lanes">${['+0.25','+0.28','−40','+0.21'].map((value,i) => `<div class="quiz-reading ${i === 2 ? 'reading-alert' : ''}"><span>RX lane ${i+1}</span><strong>${value}</strong><small>dBm</small></div>`).join('')}</div><figcaption>Example report: four receive lanes. −40 is the reported no-light indication.</figcaption></figure>`;
   const values = {healthy:['+0.80','+0.25'],dark:['+0.80','−40'],weak:['+0.80','−4.20'],high:['+0.80','+4.00']}[kind];
@@ -26,7 +28,7 @@ function readingFigure(kind) {
 }
 
 function diagram(kind) {
-  if (['simple-dark','healthy','dark','weak','high','lanes'].includes(kind)) return readingFigure(kind);
+  if (['simple-dark','simple-rx-dark','light-returns','healthy','dark','weak','high','lanes'].includes(kind)) return readingFigure(kind);
   let drawing = '';
   let caption = '';
   if (kind === 'unseated') {
@@ -114,14 +116,27 @@ function renderIntro() {
 
 function renderQuestion() {
   const question = questions.find(item => item.id === attempt.ids[index]);
+  const multiple = Array.isArray(question.correct);
   host.innerHTML = `<div class="quiz-progress-label"><span>${retry ? 'Retry' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>Round ${currentRound+1} · ${topics[question.topic]}</span></div>
     <progress class="quiz-progress" value="${index}" max="${attempt.ids.length}" aria-label="Questions answered"></progress>
     <h2 id="quiz-title" class="quiz-question" tabindex="-1">${question.prompt}</h2>
     ${diagram(question.visual)}
-    <div class="quiz-answers" role="group" aria-labelledby="quiz-title">${question.choices.map((choice,i) => `<button type="button" class="quiz-answer" data-choice="${i}"><span class="quiz-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span>${choice}<span class="quiz-answer-state"></span></span></button>`).join('')}</div>
+    ${multiple ? '<p class="quiz-selection-hint" id="quiz-selection-hint">Select all that could cause it, then check your answers.</p>' : ''}
+    <div class="quiz-answers" role="group" aria-labelledby="quiz-title"${multiple ? ' aria-describedby="quiz-selection-hint"' : ''}>${question.choices.map((choice,i) => multiple
+      ? `<label class="quiz-answer quiz-multiple"><input type="checkbox" value="${i}"><span>${choice}<span class="quiz-answer-state"></span></span></label>`
+      : `<button type="button" class="quiz-answer" data-choice="${i}"><span class="quiz-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span>${choice}<span class="quiz-answer-state"></span></span></button>`).join('')}</div>
+    ${multiple ? '<button class="quiz-primary" type="button" id="quiz-check" disabled>Check answers</button>' : ''}
     <div id="quiz-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
     <button class="quiz-primary" type="button" id="quiz-next" hidden>${index === attempt.ids.length-1 ? 'Finish this round' : 'Next question'}</button>`;
-  host.querySelectorAll('.quiz-answer').forEach(button => button.addEventListener('click',() => choose(question,Number(button.dataset.choice))));
+  if (multiple) {
+    const check = host.querySelector('#quiz-check');
+    host.querySelectorAll('.quiz-multiple input').forEach(input => input.addEventListener('change',() => {
+      check.disabled = !host.querySelector('.quiz-multiple input:checked');
+    }));
+    check.addEventListener('click',() => choose(question,[...host.querySelectorAll('.quiz-multiple input:checked')].map(input => Number(input.value))));
+  } else {
+    host.querySelectorAll('.quiz-answer').forEach(button => button.addEventListener('click',() => choose(question,Number(button.dataset.choice))));
+  }
   host.querySelector('#quiz-next').addEventListener('click',() => {
     if (!Object.hasOwn(attempt.answers,question.id)) return;
     if (++index < attempt.ids.length) renderQuestion(); else renderResults();
@@ -131,18 +146,29 @@ function renderQuestion() {
 
 function choose(question,choice) {
   if (Object.hasOwn(attempt.answers,question.id)) return;
-  attempt = recordAnswer(attempt,question.id,choice);
-  roundAnswers = {...roundAnswers,[question.id]:choice};
-  const correct = choice === question.correct;
-  host.querySelectorAll('.quiz-answer').forEach((button,i) => {
-    button.disabled = true;
-    const status = button.querySelector('.quiz-answer-state');
-    if (i === question.correct) { button.classList.add('answer-correct'); status.textContent = correct ? 'Your answer · correct' : 'Correct answer'; }
-    else if (i === choice) { button.classList.add('answer-missed'); status.textContent = 'Your answer'; }
+  const updated = recordAnswer(attempt,question.id,choice);
+  if (updated === attempt) return;
+  attempt = updated;
+  roundAnswers = {...roundAnswers,[question.id]:attempt.answers[question.id]};
+  const correct = isCorrectAnswer(question,choice);
+  const multiple = Array.isArray(question.correct);
+  const expected = multiple ? question.correct : [question.correct];
+  const selected = multiple ? choice : [choice];
+  host.querySelectorAll('.quiz-answer').forEach((card,i) => {
+    if (multiple) card.querySelector('input').disabled = true; else card.disabled = true;
+    const status = card.querySelector('.quiz-answer-state');
+    if (expected.includes(i)) {
+      card.classList.add('answer-correct');
+      status.textContent = selected.includes(i) ? 'Your answer · correct' : multiple ? 'Also a possible cause · not selected' : 'Correct answer';
+    } else if (selected.includes(i)) {
+      card.classList.add('answer-missed'); status.textContent = multiple ? 'Your answer · not a cause' : 'Your answer';
+    }
   });
+  const check = host.querySelector('#quiz-check');
+  if (check) { check.disabled = true; check.hidden = true; }
   const feedback = host.querySelector('#quiz-feedback');
   feedback.className = `quiz-feedback ${correct ? 'feedback-correct' : 'feedback-missed'}`;
-  feedback.innerHTML = `<strong>${correct ? 'That’s right.' : 'Here’s the key idea.'}</strong><p>${question.explanation}</p><a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review the illustrated lesson <span class="sr-only">(opens in a new tab)</span>↗</a>`;
+  feedback.innerHTML = `<strong>${correct ? 'That’s right.' : multiple ? 'Look at each possible cause.' : 'Here’s the key idea.'}</strong>${multiple && !correct ? '<p>For this question, include every possible cause and leave out the option that is not a cause.</p>' : ''}<p>${question.explanation}</p><a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review the illustrated lesson <span class="sr-only">(opens in a new tab)</span>↗</a>`;
   host.querySelector('.quiz-progress').value = index+1;
   const next = host.querySelector('#quiz-next'); next.hidden = false;
   next.focus({preventScroll:true});
@@ -169,7 +195,8 @@ function renderResults() {
     </div>
     ${progress.missed.length ? `<h3 class="quiz-review-title">Ideas to revisit</h3><ol class="quiz-review">${progress.missed.map(id => {
       const question = questions.find(item => item.id === id);
-      return `<li><h4>${question.prompt}</h4><p class="quiz-review-choice">Your answer: ${question.choices[roundAnswers[id]]}</p><p><b>Correct:</b> ${question.choices[question.correct]}</p><p>${question.explanation}</p><a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review lesson ↗<span class="sr-only"> (opens in a new tab)</span></a></li>`;
+      const answerText = answer => (Array.isArray(answer) ? answer : [answer]).map(choice => question.choices[choice]).join(' ');
+      return `<li><h4>${question.prompt}</h4><p class="quiz-review-choice">Your answer: ${answerText(roundAnswers[id])}</p><p><b>Correct:</b> ${answerText(question.correct)}</p><p>${question.explanation}</p><a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review lesson ↗<span class="sr-only"> (opens in a new tab)</span></a></li>`;
     }).join('')}</ol>` : ''}
     <a class="lesson-return" href="./index.html">Use the optic / fiber health check →</a>`;
   host.querySelector('#quiz-continue')?.addEventListener('click',() => beginRound(nextRound));
