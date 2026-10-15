@@ -12,6 +12,7 @@ files['/quiz-data.mjs'] = ['quiz-data.mjs', 'text/javascript'];
 files['/loop-visuals.mjs'] = ['loop-visuals.mjs', 'text/javascript'];
 files['/rack-visuals.mjs'] = ['rack-visuals.mjs', 'text/javascript'];
 files['/light-visuals.mjs'] = ['light-visuals.mjs', 'text/javascript'];
+for(const name of ['patching-visuals.mjs','patch-practice.mjs','patch-practice-data.mjs']) files[`/${name}`]=[name,'text/javascript'];
 createServer(async (request, response) => {
   const file = files[new URL(request.url, 'http://localhost').pathname];
   if (!file) { response.writeHead(404); response.end('Not found'); return; }
