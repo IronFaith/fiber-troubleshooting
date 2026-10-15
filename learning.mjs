@@ -1,4 +1,4 @@
-import { cassetteFront, loopIllustration } from './loop-visuals.mjs?v=1';
+import { loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=2';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -104,8 +104,9 @@ function setupLesson() {
   const motion = lesson.querySelector('.lesson-motion');
   function updateMotion() {
     lesson.classList.toggle('light-paused', paused);
-    motion.textContent = paused ? 'Play light' : 'Pause light';
-    motion.setAttribute('aria-label', paused ? 'Play all light animations' : 'Pause all light animations');
+    const patching = lesson.dataset.chapter === 'patching';
+    motion.textContent = paused ? (patching ? 'Play animation' : 'Play light') : (patching ? 'Pause animation' : 'Pause light');
+    motion.setAttribute('aria-label', paused ? 'Play all animations' : 'Pause all animations');
   }
   motion.addEventListener('click', () => { paused = !paused; updateMotion(); });
   updateMotion();
@@ -441,17 +442,7 @@ function patchPicture(selected, flipped = false) {
 }
 
 function patchRoutePicture() {
-  return {height:218, caption:'One LC follower shown. Match its ID to the MMC leader and the passive port listed in FIM.', drawing:
-    box(6,56,75,88,'Optic 5')+
-    '<rect class="lc-plug" x="83" y="68" width="30" height="22" rx="3"/><rect class="lc-plug" x="83" y="110" width="30" height="22" rx="3"/>'+
-    '<rect class="mmc-plug" x="220" y="65" width="29" height="72" rx="4"/>'+
-    '<rect class="learn-device" x="252" y="51" width="100" height="98" rx="6"/>'+
-    light('M81 79 H267')+light('M267 121 H81','return-ir')+
-    text(83,41,'LC follower','class="small"')+text(235,27,'MMC leader','class="small" text-anchor="middle"')+
-    text(302,95,'Mapped','class="small" text-anchor="middle"')+text(302,113,'CAS port','class="small" text-anchor="middle"')+
-    '<path class="ir-arrow" d="M161 74 l8 5 -8 5"/><path class="return-ir-arrow" d="M169 116 l-8 5 8 5"/>'+
-    text(51,171,'Selected position','class="small" text-anchor="middle"')+
-    text(180,202,'Follow the leg ID and port labels in FIM.','class="small" text-anchor="middle"')};
+  return patchRouteIllustration();
 }
 
 function fanoutPicture(selected) {
@@ -459,41 +450,20 @@ function fanoutPicture(selected) {
     text(298,38,'Followers','text-anchor="middle"');
   for (let index=0; index<12; index++) {
     const endY = 62+index*29;
-    const startY = 202+index*4;
-    drawing += `<path class="fanout-branch${index===selected ? ' fanout-selected' : ''}" d="M87 ${startY} C157 ${startY} 173 ${endY} 275 ${endY}"/>`;
+    const startY = 221+index*1.5;
+    drawing += `<path class="fanout-branch${index===selected ? ' fanout-selected' : ''}" d="M123 ${startY} C157 ${startY} 173 ${endY} 275 ${endY}"/>`;
   }
-  drawing += '<rect class="fanout-head" x="22" y="188" width="65" height="70" rx="6"/><path class="optic-detail" d="M30 197 V249 M36 197 V249"/>'+text(62,229,'MMC','class="small" text-anchor="middle"');
+  drawing += '<g class="hardware-art"><g transform="translate(103 253) rotate(180)">'+mmcHead(0,0,false)+'</g></g>'+text(57,233,'MMC','class="small" text-anchor="middle"');
   for (let index=0; index<12; index++) {
     const y = 62+index*29;
     drawing += `<rect class="fanout-tag${index===selected ? ' fanout-tag-selected' : ''}" x="275" y="${y-11}" width="48" height="22" rx="4"/>`+
       text(299,y+4,String(index+1),'class="small" text-anchor="middle"');
   }
-  return {height:407, caption:`Leg ${selected+1} belongs to MMC head S747885346FWL. Match this follower’s actual label in FIM.`, drawing};
+  return {height:407, hardware:true, caption:`Leg ${selected+1} belongs to MMC head S747885346FWL. Match this follower’s actual label in FIM.`, drawing};
 }
 
 function mmcPatchPicture(selected) {
-  const seated = selected === 2;
-  const headX = seated ? 181 : 36;
-  const captions = [
-    'Match head serial S747885346FWL and its destination passive / port against FIM.',
-    'Inspect, clean if needed, then inspect again. Align the MMC rails with the adapter; do not force it.',
-    'Seat the head fully and confirm its latch is engaged. Support the cable and keep bends within its specified radius.'
-  ];
-  let drawing = text(14,25,'Head: S747885346FWL','class="small"')+
-    '<rect class="learn-device" x="246" y="53" width="103" height="128" rx="6"/>'+
-    text(298,77,'Passive','text-anchor="middle"')+
-    '<path class="mmc-adapter" d="M246 94 H272 V143 H246 Z"/>'+
-    text(299,161,'Port from FIM','class="small" text-anchor="middle"')+
-    `<path class="fanout-bundle" d="M8 119 H${headX}"/>`+
-    `<rect class="fanout-head" x="${headX}" y="97" width="83" height="43" rx="5"/>`+
-    `<path class="mmc-rail" d="M${headX+9} 105 H${headX+76} M${headX+9} 130 H${headX+76}"/>`+
-    text(headX+41,122,'MMC','class="small" text-anchor="middle"');
-  if (!seated) drawing += '<path class="patch-insert" d="M139 119 H224 m-8 -6 8 6 -8 6"/>'+
-    text(180,87,selected ? 'Align rails' : 'Match in FIM','class="small" text-anchor="middle"');
-  else drawing += text(184,200,'Head seated in the mapped port','class="small" text-anchor="middle"');
-  if (selected === 1) drawing += '<path class="mmc-alignment" d="M119 105 H246 M119 130 H246"/>';
-  drawing += text(14,232,'12 followers share this head','class="small"');
-  return {height:440, hardware:true, caption:captions[selected], drawing:cassetteFront({port:null,name:'Passive'})+'<g transform="translate(0 190)">'+drawing+'</g>'};
+  return mmcPatchingIllustration(selected);
 }
 
 if (lesson) {

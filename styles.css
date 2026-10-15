@@ -377,6 +377,11 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .hardware-tx-arrow, .hardware-rx-arrow { fill:none; stroke:#155386; stroke-width:2; }
 .hardware-rx-arrow { stroke:#155e40; }
 .hardware-diagram .learn-signal { stroke-width:2; }
+.mmc-seating { animation:mmc-seat 1.2s ease-out both; }
+.mmc-seated-check { fill:none; stroke:#27815b; stroke-width:3; animation:mmc-latched 1.2s step-end both; }
+.light-paused .mmc-seating, .light-paused .mmc-seated-check { animation:none; }
+@keyframes mmc-seat { from { transform:translateX(-99px); } to { transform:translateX(0); } }
+@keyframes mmc-latched { from { opacity:0; } to { opacity:1; } }
 .endpoint-locations { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:13px; }
 .endpoint-locations p { margin:0; font-size:13px; color:#526a7d; }
 .endpoint-locations strong, .endpoint-locations span { display:block; overflow-wrap:anywhere; }

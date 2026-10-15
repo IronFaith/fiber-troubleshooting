@@ -2,7 +2,7 @@
 // the enlarged light path illustrates one pair, not a connector pin map.
 const text = (x,y,value,style='') => `<text x="${x}" y="${y}" class="hardware-label ${style}">${value}</text>`;
 
-export function cassetteFront({port = 12, inserted = false, name = 'CAS 1'} = {}) {
+export function cassetteFront({port = 12, inserted = false, patched = false, name = 'CAS 1'} = {}) {
   let drawing = text(10,17,`${name} · front view`)+text(350,17,'32 ports','hardware-end hardware-small')+
     '<rect class="cassette-ear" x="2" y="57" width="356" height="86" rx="4"/>'+
     '<rect class="cassette-case" x="10" y="29" width="340" height="149" rx="6"/>'+
@@ -24,6 +24,11 @@ export function cassetteFront({port = 12, inserted = false, name = 'CAS 1'} = {}
       `<rect class="hardware-plug" x="${x-5}" y="${y+4}" width="10" height="24" rx="2"/>`+
       `<path class="hardware-grip" d="M${x-3} ${y+14} h6 m-6 4 h6 m-6 4 h6"/>`+
       `<rect class="hardware-boot" x="${x-4}" y="${y+27}" width="8" height="8" rx="1"/>`;
+    if (selected && patched) drawing +=
+      `<path class="loop-jacket" d="M${x} ${y+26} V${y+59}"/><path class="loop-cord" d="M${x} ${y+26} V${y+59}"/>`+
+      `<rect class="hardware-plug" x="${x-5}" y="${y+4}" width="10" height="24" rx="2"/>`+
+      `<path class="hardware-grip" d="M${x-3} ${y+14} h6 m-6 4 h6 m-6 4 h6"/>`+
+      `<rect class="hardware-boot" x="${x-4}" y="${y+27}" width="8" height="8" rx="1"/>`;
     drawing += '</g>';
   }
   return `<g class="hardware-art">${drawing}</g>`;
@@ -40,6 +45,74 @@ function lcPlug(x,y) {
     '<rect class="hardware-boot" x="-17" y="8" width="18" height="12" rx="3"/>'+
     '<path class="hardware-latch" d="M6 3 H30 L34 7 H9 Z"/>'+
     '<path class="hardware-grip" d="M5 9 V19 M10 9 V19 M15 9 V19"/></g>';
+}
+
+// Side view: a keyed head, its latch, grip, ferrule nose and cable boot.
+export function mmcHead(x,y,label = true) {
+  return `<g transform="translate(${x} ${y})">
+    <rect class="hardware-boot" x="-20" y="15" width="24" height="18" rx="4"/>
+    <path class="hardware-plug" d="M0 4 H64 L73 10 V38 L64 44 H0 Z"/>
+    <path class="hardware-metal" d="M73 12 H83 V36 H73 Z"/>
+    <path class="hardware-latch" d="M28 0 H65 L72 7 H31 Z"/>
+    <path class="hardware-grip" d="M7 10 V38 M13 10 V38 M19 10 V38"/>
+    <path class="mmc-rail" d="M25 11 H67 M25 37 H67"/>
+    ${label ? text(46,29,'MMC','hardware-tiny hardware-center') : ''}</g>`;
+}
+
+export function patchRouteIllustration() {
+  const out = 'M65 278 H148 Q250 278 250 217 V75';
+  const back = 'M258 75 V225 Q258 318 148 318 H65';
+  return {height:376, hardware:true,
+    caption:'Example: LC follower → MMC head → CAS 1 Port 12. Light continues through the passive; this is a patch, not a loopback. Use your actual FIM destination.',
+    drawing:`${cassetteFront()}<g class="hardware-art">
+      ${text(12,199,'Example · CAS 1 Port 12','hardware-small')}
+      <path class="optic-pull" d="M9 277 V254 H74 V277 H67 V261 H16 V277 Z"/>
+      <rect class="hardware-metal" x="13" y="266" width="58" height="64" rx="4"/>
+      <rect class="optic-opening" x="48" y="271" width="18" height="15" rx="2"/>
+      <rect class="optic-opening" x="48" y="310" width="18" height="15" rx="2"/>
+      ${text(39,301,'Optic 5','hardware-small hardware-center')}
+      ${cable(out)}${cable(back)}
+      <g transform="translate(95 264) scale(-.75 1)">${lcPlug(0,0)}${lcPlug(0,40)}</g>
+      <rect class="hardware-plug" x="246" y="63" width="16" height="29" rx="2"/>
+      <path class="hardware-grip" d="M249 72 H259 M249 78 H259 M249 84 H259"/>
+      <rect class="hardware-boot" x="248" y="92" width="12" height="12" rx="2"/>
+      ${signal(out,back)}
+      <path class="learn-signal ir" d="${out}"/><path class="learn-signal return-ir" d="${back}"/>
+      <path class="hardware-tx-arrow" d="M142 274 l7 4 -7 4"/><path class="hardware-rx-arrow" d="M149 314 l-7 4 7 4"/>
+      ${text(128,263,'TX out','hardware-small hardware-center')}${text(128,340,'RX back','hardware-small hardware-center')}
+      ${text(278,111,'MMC head','hardware-small')}
+      ${text(39,356,'Local optic','hardware-small hardware-center')}${text(168,368,'LC follower','hardware-small hardware-center')}
+    </g>`};
+}
+
+export function mmcPatchingIllustration(step) {
+  const seated = step === 2;
+  const headX = seated ? 199 : 100;
+  const captions = [
+    'Match the head serial and FIM destination. CAS 1 Port 12 is only the destination used in this illustration.',
+    'Inspect, clean if needed, then inspect again. Align the head with the adapter rails; do not force it.',
+    'Head seated in Port 12. Confirm the latch, support the cable and check optic health. Select Seat again to replay.'
+  ];
+  return {height:400, hardware:true, caption:captions[step],
+    drawing:`${cassetteFront({patched:seated})}<g class="hardware-art">
+      ${text(180,199,'Example destination · CAS 1 Port 12','hardware-center hardware-small')}
+      <rect class="hardware-detail" x="3" y="215" width="354" height="179" rx="6"/>
+      ${text(15,237,'Port 12 · enlarged side view','hardware-small')}
+      <rect class="hardware-metal" x="285" y="255" width="46" height="86" rx="3"/>
+      <rect class="cassette-adapter" x="268" y="265" width="30" height="66" rx="2"/>
+      <path class="cassette-opening" d="M268 276 H281 V320 H268 Z"/>
+      <path class="cassette-key" d="M270 279 H291 M270 317 H291"/>
+      ${text(300,357,'Port 12','hardware-small hardware-center')}
+      ${step === 1 ? '<path class="mmc-alignment" d="M173 285 H268 M173 311 H268"/>' : ''}
+      <svg x="12" y="248" width="275" height="92" viewBox="12 248 275 92">
+        <g class="${seated ? 'mmc-seating' : ''}">
+          ${cable(`M-90 298 H${headX-18}`)}${mmcHead(headX,274)}
+        </g>
+      </svg>
+      ${!seated ? '<path class="patch-insert" d="M199 298 H246 m-7 -5 7 5 -7 5"/>' : '<path class="mmc-seated-check" d="M233 254 l5 5 10 -12"/>'}
+      ${text(140,356,seated ? 'Seated + latched' : step === 1 ? 'Align the rails' : 'Match the head','hardware-small hardware-center')}
+      ${text(180,383,'Head serial · S747885346FWL','hardware-small hardware-center')}
+    </g>`};
 }
 
 export function loopIllustration(kind = 'direct') {
