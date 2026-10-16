@@ -73,7 +73,6 @@ test('placing a dragged tool accepts only matching reachable hardware and never 
   const place=(kind,point)=>changeCase(s,{type:'place',kind,point});
   assert.equal(place('mmc',0),s);
   assert.equal(place('lc',1),s);
-  assert.equal(place('vfl',0),s);
   assert.equal(place('mmc',3),s);
   s=place('lc',0);
   assert.equal(s.tool,'loop');
@@ -88,6 +87,24 @@ test('placing a dragged tool accepts only matching reachable hardware and never 
   assert.deepEqual(s.traces,{});
   s=changeCase(s,{type:'reach',value:1});
   assert.equal(place('vfl',2),s);
+});
+
+test('VFL at the optic-side LC traces the first fiber section and removal preserves observations', () => {
+  let s=record(createCase(),0,'pass');
+  s=changeCase(s,{type:'place',kind:'vfl',point:0});
+  assert.equal(s.tool,'vfl');
+  assert.equal(s.selected,1);
+  assert.equal(s.ready,false);
+  assert.deepEqual(s.traces,{});
+  assert.equal(changeCase(s,{type:'record',result:'seen'}),s);
+  s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'seen'});
+  assert.deepEqual(s.traces,{'1:tx':'seen'});
+  s=changeCase(s,{type:'tool',tool:'link'});
+  assert.equal(s.tool,'link');
+  assert.deepEqual(s.loops,{0:'pass'});
+  assert.deepEqual(s.traces,{'1:tx':'seen'});
+  s=changeCase(s,{type:'reach',value:0});
+  assert.equal(changeCase(s,{type:'place',kind:'vfl',point:0}),s);
 });
 
 test('an unknown fault is narrowed by observations, checking a skipped passive before tracing a broad span', () => {

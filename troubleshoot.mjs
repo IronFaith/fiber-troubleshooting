@@ -1,6 +1,6 @@
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool} from './troubleshoot-state.mjs?v=2';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=2';
-import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=1';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool} from './troubleshoot-state.mjs?v=3';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=3';
+import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=2';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -66,8 +66,8 @@ function update(actions, message='') {
   undo[view].push(cases[view]);
   if(undo[view].length>30) undo[view].shift();
   cases[view]=actions.reduce(changeCase,cases[view]);
-  save(); render();
-  if(message) document.querySelector('#workbench-status').textContent=message;
+  save(); render(true);
+  if(message) announce(message);
 }
 function announce(message) {
   document.querySelector('#workbench-status').textContent=message;
@@ -80,19 +80,21 @@ function selectTool(kind) {
     const point=Number(el.dataset.span??el.dataset.point);
     el.classList.toggle('ts-can-drop',Boolean(kind)&&(!el.hasAttribute('data-span')||kind==='vfl')&&canPlaceTool(cases[view],kind,point));
   });
-  announce(kind?`${toolNames[kind]} selected. ${kind==='lc'?'Place it on the local optic.':kind==='mmc'?'Place it on a reachable CAS.':'Place it on the fiber section you can isolate.'} Drag, or tap the target.`:'Drag a tool onto the path, or tap a tool then its target.');
+  announce(kind?`${toolNames[kind]}: ${kind==='lc'?'drop on the optic.':kind==='mmc'?'drop on a reachable CAS.':'drop by the optic’s LC leg or on a fiber section.'} You can also tap the target.`:'Drag a tool onto the path, or tap a tool then its target.');
 }
 function placeTool(kind,point) {
   if(!canPlaceTool(cases[view],kind,point)) {announce('That tool does not match this point. Choose a highlighted target.');return;}
   selectedTool=null;
   update([{type:'place',kind,point}],`${toolNames[kind]} placed. Enter the result you observed.`);
-  host.querySelector('#test-title')?.focus({preventScroll:true});
-  host.querySelector('.ts-control-card')?.scrollIntoView({block:'nearest',behavior:'instant'});
+  host.querySelector('[data-action="test-result"]')?.focus({preventScroll:true});
 }
-const toolDrag=mountToolDrag(host,{select:selectTool,place:placeTool,valid:(kind,point)=>canPlaceTool(cases[view],kind,point),announce});
+function removeTool() {
+  update([{type:'tool',tool:'link'}],'Tool removed. Recorded tests are kept.');
+}
+const toolDrag=mountToolDrag(host,{select:selectTool,place:placeTool,remove:removeTool,valid:(kind,point)=>canPlaceTool(cases[view],kind,point),announce});
 
-function tray() {
-  return `<div class="ts-tool-tray" aria-label="Test tools"><div class="ts-tool-items">${Object.entries(toolNames).map(([kind,name])=>`<button type="button" class="ts-tool-pick" data-pick-tool="${kind}" aria-pressed="${selectedTool===kind}" aria-label="Pick up ${name}">${toolArt(kind)}<span><b>${name}</b><small>${kind==='lc'?'At the optic':kind==='mmc'?'At a cassette':'Isolated fiber'}</small></span></button>`).join('')}</div><p id="ts-tool-hint">Drag a tool onto the path, or tap a tool then its target.</p></div>`;
+function tray(s) {
+  return `<div class="ts-tool-tray" aria-label="Test tools"><div class="ts-tool-items">${Object.entries(toolNames).map(([kind,name])=>`<button type="button" class="ts-tool-pick" data-pick-tool="${kind}" aria-pressed="${selectedTool===kind}" aria-label="Pick up ${name}">${toolArt(kind)}<span><b>${name}</b><small>${kind==='lc'?'At the optic':kind==='mmc'?'At a cassette':'LC leg / fiber'}</small></span></button>`).join('')}</div><div class="ts-tray-actions"><span>Drag a placed tool back here to remove.</span>${button('test-result','Enter result ↓',s.tool==='link'?'disabled':'')}${button('remove-tool','Remove placed tool',`class="ts-remove" ${s.tool==='link'?'disabled':''}`)}</div><p id="ts-tool-hint">Drag a tool onto the path, or tap a tool then its target.</p></div>`;
 }
 
 function setup(s) {
@@ -128,7 +130,7 @@ function controls(s) {
   const labels=tool==='loop'?{pass:'Yes · passes',dark:'No · no return light',weak:'Light returns, but weak'}:traceLabels;
   return `<section class="ts-control-card" aria-labelledby="test-title"><div class="ts-section-top"><div><p class="ts-test-location">${tool==='vfl'?'VFL':point===0?'LC loopback':'MMC loopback'} · ${tool==='vfl'?spanName(point):pointName(point)}</p><h2 id="test-title" tabindex="-1">${tool==='loop'?'Does the loop pass?':'Where did the red light appear?'}</h2></div>${button('link','Remove tool','class="ts-remove"')}</div>
     ${point?select('port',`CAS ${point} mapped port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[point-1]):''}
-    <p class="ts-tool-caption">${tool==='loop'?'Use the correct loop mapping and required attenuation. Check TX and returning RX against this optic’s limits.':`Trace only ${spanName(point)}. The VFL supplies its own light.`}</p>
+    <p class="ts-tool-caption">${tool==='loop'?'Use the correct loop mapping and required attenuation. Check TX and returning RX against this optic’s limits.':point===1?`Unplug the LC leg from the optic. Connect the VFL to that leg with its matching adapter, then trace to the MMC head at CAS 1. The VFL supplies the red light.`:`Trace only ${spanName(point)}. The VFL supplies its own light.`}</p>
     ${tool==='vfl'?select('strand','Strand to trace',[['tx','Normally local TX → remote RX'],['rx','Normally remote TX → local RX']],s.strand):''}
     ${s.simulated?'<p class="ts-prepared">Practice only · results come from the chosen fault.</p>':tool==='vfl'?`<label class="ts-ready"><input type="checkbox" data-field="ready" ${s.ready?'checked':''}><span>Both ends isolated from active gear; matching VFL adapter fitted.</span></label>`:''}
     <div class="ts-result-buttons">${s.simulated?button('run','Run this test','class="ts-primary"'):Object.entries(labels).map(([value,label])=>button(`result-${value}`,label,`aria-pressed="${result===value}" ${tool==='vfl'&&!s.ready?'disabled':''}`)).join('')}</div>
@@ -154,19 +156,21 @@ function results(s) {
     ${loops.length+traces.length?`<div class="ts-log-list">${[...loops,...traces].join('')}</div>`:'<p class="ts-note">No tests recorded yet. Moving a loop or VFL does not mark a section as good.</p>'}
     <p class="ts-note">Saved in this browser tab. Changing the path or mapped ports clears test results. After a repair, start a new case and retest.</p><div id="ts-copy-fallback"></div></section>`;
 }
-function render() {
+function render(preservePosition=false) {
+  const scrollLeft=host.querySelector('.ts-map')?.scrollLeft??0;
   toolDrag.reset();
   selectedTool=null;
   guided.hidden=view!=='guided'; host.hidden=view==='guided';
   document.querySelectorAll('[data-workbench-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.workbenchView===view)));
   if(view==='guided') return;
   const s=cases[view];
-  host.innerHTML=`${setup(s)}${readings(s)}${tray()}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?Object.keys(s.loops).length?'Tools removed · check the restored link':'Unknown problem · start at the optic':s.tool==='loop'?`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`:`VFL · ${spanName(s.selected)}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
+  host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?Object.keys(s.loops).length?'Tools removed · check the restored link':'Unknown problem · start at the optic':s.tool==='loop'?`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`:`VFL · ${s.selected===1?'LC leg → MMC head at CAS 1':spanName(s.selected)}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
     <div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
     <div class="ts-legend"><span>↔ Scroll to follow the path</span><span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span></div>
     </section>
     <div class="ts-work-grid">${controls(s)}${advice(s)}</div></div>${results(s)}`;
-  centerMap();
+  if(preservePosition) host.querySelector('.ts-map').scrollLeft=scrollLeft;
+  else centerMap();
 }
 
 function centerMap() {
@@ -189,6 +193,7 @@ host.addEventListener('change',event=>{
 });
 function choosePoint(point) {
   if(selectedTool) {placeTool(selectedTool,point);return;}
+  if(cases[view].tool!=='link') {announce('To move a tool, drag its handle or select it from the tray.');return;}
   update([{type:'select',point}]);
   host.querySelector(`[data-point="${point}"]`)?.focus({preventScroll:true});
 }
@@ -205,6 +210,8 @@ host.addEventListener('click',async event=>{
   if(!target) return;
   const action=target.dataset.action,s=cases[view];
   if(action==='setup') {setupOpen=!setupOpen;render();return;}
+  if(action==='remove-tool'||action==='link') {removeTool();host.querySelector('[data-pick-tool]')?.focus({preventScroll:true});return;}
+  if(action==='test-result') {host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}
   if(action==='start-loop') {placeTool('lc',0);return;}
   if(action==='motion') {
     paused=!paused;host.querySelector('.ts-map').classList.toggle('light-paused',paused);target.textContent=paused?'Play arrows':'Pause arrows';return;

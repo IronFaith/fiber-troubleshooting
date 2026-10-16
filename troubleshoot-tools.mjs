@@ -9,11 +9,12 @@ export function toolArt(kind) {
 
 // Pointer events give mouse and touch the same placement behavior. Click/Enter
 // selects a tool; the diagram's native button handlers provide a second route.
-export function mountToolDrag(host,{select,place,valid,announce}) {
+export function mountToolDrag(host,{select,place,remove,valid,announce}) {
   let drag=null,ignoreClickUntil=0;
   function destination(x,y) {
-    const el=document.elementFromPoint(x,y)?.closest('[data-span],[data-point]');
+    const el=document.elementFromPoint(x,y)?.closest('[data-span],[data-point],.ts-tool-tray');
     if(!el || !host.contains(el)) return null;
+    if(el.matches('.ts-tool-tray')) return {el,remove:true,valid:drag.mounted};
     const point=Number(el.dataset.span??el.dataset.point);
     return {el,point,valid:(!el.hasAttribute('data-span') || drag.kind==='vfl') && valid(drag.kind,point)};
   }
@@ -29,10 +30,12 @@ export function mountToolDrag(host,{select,place,valid,announce}) {
     if(!drag?.moved) return;
     const {x,y}=drag;
     const map=host.querySelector('.ts-map'),r=map?.getBoundingClientRect();
-    if(r && y>r.top && y<r.bottom && x>=r.left && x<=r.right) map.scrollLeft+=x<r.left+45?-9:x>r.right-45?9:0;
-    if(y<55 || y>innerHeight-55) window.scrollBy({top:y<55?-8:8,behavior:'instant'});
-    host.querySelectorAll('.ts-drop-over,.ts-drop-invalid').forEach(e=>e.classList.remove('ts-drop-over','ts-drop-invalid'));
     const target=destination(x,y);
+    if(!target?.valid) {
+      if(r && y>r.top && y<r.bottom && x>=r.left && x<=r.right) map.scrollLeft+=x<r.left+45?-9:x>r.right-45?9:0;
+      if(y<55 || y>innerHeight-55) window.scrollBy({top:y<55?-8:8,behavior:'instant'});
+    }
+    host.querySelectorAll('.ts-drop-over,.ts-drop-invalid').forEach(e=>e.classList.remove('ts-drop-over','ts-drop-invalid'));
     target?.el.classList.add(target.valid?'ts-drop-over':'ts-drop-invalid');
     drag.ghost.style.transform=`translate(${x-43}px,${y-42}px)`;
     drag.frame=requestAnimationFrame(paint);
@@ -43,8 +46,7 @@ export function mountToolDrag(host,{select,place,valid,announce}) {
     if(!source || event.button!==0 || !event.isPrimary) return;
     reset();
     const kind=source.dataset.pickTool??source.dataset.mountedTool;
-    select(kind);
-    drag={kind,source,pointer:event.pointerId,startX:event.clientX,startY:event.clientY,x:event.clientX,y:event.clientY,moved:false};
+    drag={kind,source,mounted:source.hasAttribute('data-mounted-tool'),pointer:event.pointerId,startX:event.clientX,startY:event.clientY,x:event.clientX,y:event.clientY,moved:false};
     source.setPointerCapture(event.pointerId);
   });
   host.addEventListener('pointermove',event=>{
@@ -54,6 +56,7 @@ export function mountToolDrag(host,{select,place,valid,announce}) {
     event.preventDefault();
     if(drag.moved) return;
     drag.moved=true;
+    select(drag.kind);
     drag.ghost=document.createElement('div'); drag.ghost.className='ts-tool-ghost';
     drag.ghost.setAttribute('aria-hidden','true');
     drag.ghost.innerHTML=toolArt(drag.kind);
@@ -65,16 +68,16 @@ export function mountToolDrag(host,{select,place,valid,announce}) {
     reset();
     if(!moved) return;
     ignoreClickUntil=Date.now()+500;
-    if(target?.valid) place(kind,target.point);
-    else {select(null);announce('Tool returned to the tray. LC goes on the optic; MMC on a reachable CAS; VFL on an isolated fiber section.');}
+    if(target?.valid) {if(target.remove) remove(); else place(kind,target.point);}
+    else {select(null);announce('Drop cancelled. Any placed tool stays where it was.');}
   });
   host.addEventListener('click',event=>{
     if(event.detail!==0 && Date.now()<ignoreClickUntil) {event.preventDefault();event.stopImmediatePropagation();return;}
-    const source=event.target.closest('[data-pick-tool]');
-    if(source) {select(source.dataset.pickTool);event.stopImmediatePropagation();}
+    const source=event.target.closest('[data-pick-tool],[data-mounted-tool]');
+    if(source) {select(source.dataset.pickTool??source.dataset.mountedTool);event.stopImmediatePropagation();}
   },true);
   host.addEventListener('pointercancel',()=>{reset();select(null);});
-  host.addEventListener('lostpointercapture',()=>reset());
+  host.addEventListener('lostpointercapture',event=>{if(drag?.source===event.target&&drag.pointer===event.pointerId) reset();});
   host.addEventListener('keydown',event=>{
     if(event.key==='Escape') {reset();select(null);announce('Tool selection cancelled.');}
   });

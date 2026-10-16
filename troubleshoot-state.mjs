@@ -22,7 +22,7 @@ const lossResult = fault => ['dirty','loose','ferrule','bend','splice'].includes
 export function canPlaceTool(state,kind,point) {
   const p=Number(point);
   return Number.isInteger(p) && p>=0 && p<=state.reach &&
-    (kind==='lc' ? p===0 : ['mmc','vfl'].includes(kind) && p>0);
+    (kind==='lc' ? p===0 : kind==='vfl' ? state.reach>=1 : kind==='mmc' && p>0);
 }
 
 export function simulatedLoop(state, point = state.selected) {
@@ -61,7 +61,10 @@ export function changeCase(state, action) {
   switch (action.type) {
     case 'place':
       if(!canPlaceTool(s,action.kind,action.point)) return state;
-      s.selected=Number(action.point); s.tool=action.kind==='vfl'?'vfl':'loop';
+      // The optic-side target is the detached LC leg. VFL results belong to
+      // its outgoing section (ending at CAS 1), never to the optic itself.
+      s.selected=action.kind==='vfl'?Math.max(1,Number(action.point)):Number(action.point);
+      s.tool=action.kind==='vfl'?'vfl':'loop';
       s.ready=false; s.service='unknown'; break;
     case 'select':
       s.selected = bounded(action.point,0,s.reach); s.ready = false;
