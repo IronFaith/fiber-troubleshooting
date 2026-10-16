@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {questions, topics, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress} from '../quiz-data.mjs';
+import {questions, topics, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from '../quiz-data.mjs';
 
 const wrongAnswer = question => Array.isArray(question.correct) ? [question.correct[0]] : (question.correct+1)%question.choices.length;
 const correctRound = topic => Object.fromEntries(questions.filter(question => question.topic === topic).map(question => [question.id,question.correct]));
@@ -122,4 +122,30 @@ test('multiple answers require a valid selection and lock a copy of the submitte
   assert.equal(recordAnswer(submitted,id,[2]),submitted);
   assert.equal(resultsFor(submitted).correct,1);
   assert.deepEqual(startAttempt([id]).answers,{});
+});
+
+test('visual selections score the observed lane, connection, mapped port and added span, locking the first answer', () => {
+  for(const [id,correct,wrong] of [['loose-connection',1,0],['match-port',27,26],['tx-rx',1,0],['all-lanes',2,3],['passive-loop',1,2]]) {
+    const initial=startAttempt([id]);
+    const passed=recordAnswer(initial,id,correct);
+    assert.equal(resultsFor(passed).correct,1,id);
+    const missed=recordAnswer(initial,id,wrong);
+    assert.equal(recordAnswer(missed,id,correct),missed);
+    assert.equal(resultsFor(missed).correct,0,id);
+  }
+});
+
+test('skills recap uses only observed answers and flags a skill when one related check was missed', () => {
+  assert.deepEqual(skillsFor(0,{}),{checked:[],review:[]});
+  const answers={'no-light':0,'dirt-blocks':1,'bend-cause':0};
+  assert.deepEqual(skillsFor(0,answers),{checked:['Read the signal'],review:['Interpret a change']});
+  assert.deepEqual(skillsFor(1,answers),{checked:[],review:[]});
+});
+
+test('retrying a missed visual question updates the skills recap while keeping the original result', () => {
+  const original=recordAnswer(startAttempt(['all-lanes']),'all-lanes',0);
+  const retry=recordAnswer(startAttempt(['all-lanes']),'all-lanes',2);
+  assert.deepEqual(skillsFor(2,original.answers).review,['Check every lane']);
+  assert.deepEqual(skillsFor(2,{...original.answers,...retry.answers}),{checked:['Check every lane'],review:[]});
+  assert.equal(resultsFor(original).correct,0);
 });

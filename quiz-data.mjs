@@ -1,156 +1,169 @@
-export const topics = ['Spot the problem', 'Simple checks', 'Understand the readings', 'Find the problem section'];
+export const topics = ['Spot the problem', 'Check the connection', 'Understand the light', 'Narrow down the problem'];
 export const roundDescriptions = [
-  'Recognize no light and the simple things that can cause it.',
-  'Choose useful checks for dirt, seating, bends and the port label.',
-  'Learn what an optic does, what TX/RX mean and how to read the numbers.',
-  'Use local loops and red test light to narrow down the problem.'
+  'Read the signs and consider what could cause them.',
+  'Inspect connections, match FIM and check your changes.',
+  'Follow TX and RX, compare limits and check every lane.',
+  'Use local loops and VFL observations to choose the next check.'
 ];
 
-// Numeric limits are training examples, not installed-optic specifications.
+// Site examples and fictional training readings, not installed-optic limits.
 export const questions = [
   {
-    id:'no-light', topic:0, visual:'simple-dark',
-    prompt:'Cable Guy shows −40 in red. What does that tell us right away?',
-    choices:['No light is being reported.', 'The connection is healthy.', 'We know exactly which part is broken.'], correct:0,
-    explanation:'−40 is your report’s no-light indication. We still need to find out why.',
-    lesson:'learn.html#readings'
+    id:'no-light', topic:0, visual:'simple-dark', skill:'Read the signal',
+    prompt:'The report shows −40 in red. What do we know so far?',
+    choices:['No light is being reported; the cause is still unknown.', 'The optic has failed and needs replacing.', 'The fiber is broken somewhere beyond the first passive.'], correct:0,
+    explanation:'In this Cable Guy example, −40 means no light is reported. It does not identify the failed part. Start checking the possible causes.',
+    reveal:'No light reported ≠ a diagnosis', lesson:'learn.html#readings'
   },
   {
-    id:'no-light-cause', topic:0, visual:'simple-rx-dark',
-    prompt:'No light is arriving. Which problems could cause this?',
-    choices:['A dirty or loose connection.', 'A badly bent or damaged fiber.', 'Normal infrared light being invisible.', 'The wrong port or fiber pairing.', 'An optic or sending port that is not producing light.'], correct:[0,1,3,4],
-    explanation:'Dirt, seating, bends, damage, patching and the light source are all possible causes. This reading alone cannot tell us which. Normal infrared light being invisible does not cause a no-light reading.',
-    lesson:'learn.html#cleaning'
+    id:'no-light-cause', topic:0, visual:'simple-rx-dark', skill:'Consider possible causes',
+    prompt:'No light is arriving. Which problems could explain it?',
+    choices:['A dirty or partly seated connection.', 'A badly bent or damaged fiber.', 'Normal infrared light being invisible to our eyes.', 'A misport or incorrect fiber pairing.', 'The far-end optic or sending port is not producing light.'], correct:[0,1,3,4],
+    explanation:'Connections, fiber, mapping and the sending source are all candidates. Invisible infrared is normal—the receiver detects it even though our eyes cannot.',
+    reveal:'Several causes fit the same symptom', lesson:'learn.html#cleaning'
   },
   {
-    id:'dirt-blocks', topic:0, visual:'light-returns',
-    prompt:'You clean and reseat a connection. Light returns. What does that suggest?',
-    choices:['The optic was definitely broken.', 'Dirt or seating likely affected the connection.', 'Every part of the link is now proven healthy.'], correct:1,
-    explanation:'Light returning points to the connection you worked on. Because you cleaned and reseated it, you cannot say which action helped. Recheck the readings and link health before calling it fixed.',
-    lesson:'learn.html#cleaning'
+    id:'dirt-blocks', topic:0, visual:'light-returns', skill:'Interpret a change',
+    prompt:'You clean and reseat one connection. Light returns. What can you conclude?',
+    choices:['Cleaning alone definitely fixed it.', 'Dirt or seating likely contributed; recheck health.', 'The whole fiber path and both optics are proven good.'], correct:1,
+    explanation:'You changed both cleanliness and seating, so either could have helped. Light returning is useful evidence; check the limits and link status before closing the issue.',
+    reveal:'The connection improved; the full link still needs checking', lesson:'learn.html#cleaning'
   },
   {
-    id:'loose-connection', topic:0, visual:'recheck',
-    prompt:'The connector is clean and fully seated, but the report still shows no light. What next?',
-    choices:['Keep isolating the possible causes, one check at a time.', 'Replace the optic: this proves it is bad.', 'Stop: a seated connector proves the fiber is good.'], correct:0,
-    explanation:'You checked one possible cause, not the whole path. Verify the mapped port and test the local optic with the approved loop setup. A passing loop helps you move outward through the fiber you can access.',
-    lesson:'learn.html#cleaning'
+    id:'loose-connection', topic:0, visual:'connections', interaction:'visual', skill:'Notice connection problems',
+    prompt:'Which connection needs a closer seating check?',
+    choices:['Connection A', 'Connection B'], correct:1,
+    explanation:'B has a visible gap at the adapter. After the required isolation and inspection, align and seat it fully, then recheck. Appearance alone does not prove optical health.',
+    reveal:'B: check the gap, seating and latch', lesson:'learn.html#cleaning'
   },
   {
-    id:'bend-cause', topic:0, visual:'bend',
-    prompt:'After you relieve a tight bend correctly, the light reading improves. What have you learned?',
-    choices:['The whole link must be healthy now.', 'The bend likely contributed; check the reading against the allowed limits.', 'The optic must be replaced anyway.'], correct:1,
-    explanation:'A tight bend can let light escape or damage the fiber. Improvement after correcting it points to the bend, but improved does not always mean within limits. Recheck health before moving on.',
-    lesson:'learn.html#cleaning'
+    id:'bend-cause', topic:0, visual:'bend-change', skill:'Interpret a change',
+    prompt:'The reading improves after a tight bend is relieved. Are you finished?',
+    choices:['Yes—the improvement proves the entire link is healthy.', 'Not yet—compare the new reading with its limits and check the link.', 'No improvement counts until the number reaches exactly zero.'], correct:1,
+    explanation:'The change suggests the bend contributed. A better reading can still be outside limits. Use the installed optic’s range; zero is not a required target.',
+    reveal:'Improved does not always mean within limits', lesson:'learn.html#cleaning'
   },
   {
-    id:'cleaning', topic:1, visual:'dirty',
-    prompt:'Inspection finds dirt on the connector. What comes next?',
-    choices:['Push it in harder.', 'Clean it with approved tools, then inspect again.', 'Wipe it on your shirt.'], correct:1,
-    explanation:'Safely isolate the connection first. Inspect, clean if needed, and inspect again before reconnecting.',
-    lesson:'learn.html#cleaning'
+    id:'cleaning', topic:1, visual:'dirty', skill:'Check connections',
+    prompt:'Inspection finds contamination. What should happen before reconnecting?',
+    choices:['Reconnect if the connector looks clean without magnification.', 'Clean with approved tools, then inspect again.', 'Clean once and reconnect without another inspection.'], correct:1,
+    explanation:'With the connection safely isolated, clean it and inspect again. A cleaning attempt alone does not confirm the end face is clean.',
+    reveal:'Inspect → clean if needed → inspect again', lesson:'learn.html#cleaning'
   },
   {
-    id:'seat-connection', topic:1, visual:'unseated',
-    prompt:'The correct, clean connector is loose. What should you do?',
-    choices:['Force it in at any angle.', 'Leave it partly connected.', 'Align it correctly and seat it fully.'], correct:2,
-    explanation:'Follow the connector’s alignment and latch. Don’t force it. After reconnecting, check whether the light reading improves.',
-    lesson:'patching.html#fim-path'
+    id:'seat-connection', topic:1, visual:'seated-dark', skill:'Check connections',
+    prompt:'Clean and fully seated, but still −40. What is the useful next step?',
+    choices:['Replace the optic immediately; the fiber is ruled out.', 'Keep reseating the same connector until the reading changes.', 'Verify the FIM mapping, then use the approved local optic test.'], correct:2,
+    explanation:'A clean, seated connector rules out neither a mispatch nor a source problem. Confirm the mapping and isolate the local optic using the correct approved loop setup.',
+    reveal:'One checked connection does not prove the whole path', lesson:'learn.html#loopbacks'
   },
   {
-    id:'bend-check', topic:1, visual:'bend',
-    prompt:'You find a very tight bend in the fiber. What should you do?',
-    choices:['Carefully restore the allowed bend radius and check for damage.', 'Pull it tight to straighten it.', 'Ignore it if the jacket looks intact.'], correct:0,
-    explanation:'Give the fiber a gentle route that meets the cable’s bend limit. Follow site handling procedures, then check the light again.',
-    lesson:'learn.html#cleaning'
+    id:'bend-check', topic:1, visual:'bend', skill:'Handle fiber carefully',
+    prompt:'A cable is pinched at the manager. Its jacket looks intact. What next?',
+    choices:['Restore the allowed bend radius, inspect for damage and recheck.', 'Leave it because an intact jacket proves the fiber inside is fine.', 'Swap the optic first; the cable cannot affect a power reading.'], correct:0,
+    explanation:'An intact jacket does not prove the fiber is undamaged. Follow the cable’s bend limit and site handling procedure, then check the effect of that change.',
+    reveal:'Check the route and the result', lesson:'learn.html#cleaning'
   },
   {
-    id:'match-port', topic:1, visual:'port-label',
-    prompt:'The record says CAS 1 Port 12. Is a nearby empty port just as good?',
-    choices:['Yes, any empty port will work.', 'No, match the exact port and fiber labels.'], correct:1,
-    explanation:'A neighboring port can lead somewhere else. Match the device, fiber and passive port to the connection record in FIM.',
-    lesson:'patching.html#fim-path'
+    id:'match-port', topic:1, visual:'cassette', interaction:'visual', skill:'Match the FIM destination',
+    prompt:'FIM calls for CAS 2, Port 28. Select that port.',
+    choices:Array.from({length:32},(_,i)=>`CAS 2 Port ${i+1}`), correct:27,
+    explanation:'Port 28 is on the bottom row, which runs 17–32. Match the exact CAS, port and fiber labels; the nearest empty port may lead elsewhere.',
+    reveal:'CAS 2 / 28: the mapped destination', lesson:'patching.html#fim-path'
   },
   {
-    id:'one-change', topic:1, visual:'recheck',
-    prompt:'You fix one connection. What should you do before changing something else?',
-    choices:['Replace every remaining part.', 'Assume the whole link is fixed.', 'Check the health report again and note what changed.'], correct:2,
-    explanation:'One change at a time helps you learn what made a difference. Keep track of what you checked and the result.',
-    lesson:'learn.html#cleaning'
+    id:'one-change', topic:1, visual:'recheck', skill:'Verify a change',
+    prompt:'You reseat the mapped connector. What should you do before changing another part?',
+    choices:['Replace the next jumper so two possible causes are covered.', 'Mark it fixed because the latch is now engaged.', 'Recheck the report and record what changed.'], correct:2,
+    explanation:'Check the result after each change. That connects an action to its effect and helps you decide whether another check is needed.',
+    reveal:'One change → observe → decide', lesson:'learn.html#cleaning'
   },
   {
-    id:'optic-purpose', topic:2, visual:'optic',
-    prompt:'What does the optic do for the device?',
-    choices:['Turns device data into light, and arriving light back into data.', 'Cleans the fiber automatically.', 'Only holds the cable in place.'], correct:0,
-    explanation:'Think of the optic as a translator. It lets the device send and receive data through fiber using light that is usually invisible. Never look into an optic or fiber end.',
-    lesson:'learn.html#optics'
+    id:'optic-purpose', topic:2, visual:'optic', skill:'Understand the optic',
+    prompt:'What job does the optic do between the device and fiber?',
+    choices:['Converts device data to light, and received light back to data.', 'Only strengthens light coming from the passive cassette.', 'Sends the visible red tracing light used by a VFL.'], correct:0,
+    explanation:'The optic translates between electrical data and optical signals. A passive connects paths; a VFL is a separate red-light test tool.',
+    reveal:'Device data ↔ optic ↔ light in fiber', lesson:'learn.html#optics'
   },
   {
-    id:'tx-rx', topic:2, visual:'link',
-    prompt:'What do TX and RX mean?',
-    choices:['TX receives; RX sends.', 'TX sends light; RX receives light.'], correct:1,
-    explanation:'TX is light leaving this optic. RX is light arriving at it. That tells you which direction a missing-light reading refers to.',
-    lesson:'learn.html#optics'
+    id:'tx-rx', topic:2, visual:'directions', interaction:'visual', skill:'Follow TX and RX',
+    prompt:'You are at the local device. Which path is its RX?',
+    choices:['A · light leaving the local device', 'B · light arriving at the local device'], correct:1,
+    explanation:'RX receives light from the other end. TX sends light outward. The remote TX feeds the local RX; blue arrows illustrate invisible infrared light.',
+    reveal:'B: remote TX → local RX', lesson:'learn.html#optics'
   },
   {
-    id:'healthy-readings', topic:2, visual:'healthy',
-    prompt:'These readings are inside the example limits. Do they need to be exactly zero?',
-    choices:['Yes, only zero is healthy.', 'Yes, TX and RX must match.', 'No, they need to be within the allowed range.'], correct:2,
-    explanation:'Healthy power is between the optic’s low and high limits. +0.25 is your good example, not a target for every optic. Too little or too much light can be a problem.',
-    lesson:'learn.html#readings'
+    id:'healthy-readings', topic:2, visual:'healthy', skill:'Compare readings with limits',
+    prompt:'Use the limits shown. Which statement fits these readings?',
+    choices:['RX must reach exactly zero before it is acceptable.', 'TX and RX must match each other.', 'Both are within these limits; they do not need to match.'], correct:2,
+    explanation:'Each reading is compared with its own lower and upper limits. These powers are within the example range; also check required lanes and link status.',
+    reveal:'Within range—not an exact-zero target', lesson:'learn.html#readings'
   },
   {
-    id:'low-reading', topic:2, visual:'weak',
-    prompt:'The example’s lowest allowed RX is −3.00. Is −4.20 too weak?',
-    choices:['Yes, −4.20 is below the allowed minimum.', 'No, only −40 can be a problem.'], correct:0,
-    explanation:'More negative means less light power: −4.20 is weaker than −3.00. These dBm numbers describe light power. Check the actual optic’s limits at work.',
-    lesson:'learn.html#readings'
+    id:'low-reading', topic:2, visual:'weak', skill:'Compare readings with limits',
+    prompt:'RX is −4.20. The example allows −3.00 to +3.00. What does that mean?',
+    choices:['Some light is present, but RX is below this allowed range.', 'It is acceptable because it is not −40.', 'It is too strong because 4.20 is greater than 3.00.'], correct:0,
+    explanation:'−4.20 is more negative, so it is weaker than −3.00. Investigate why the received power is low; the reading alone does not locate the cause.',
+    reveal:'Below the lower limit; cause still unknown', lesson:'learn.html#readings'
   },
   {
-    id:'all-lanes', topic:2, visual:'lanes',
-    prompt:'Three readings look good, but one lane shows −40. Are you finished checking?',
-    choices:['Yes, most of them are good.', 'No, check the lane that still has no light.'], correct:1,
-    explanation:'A lane is one light channel in the optic. Check every required lane; the good ones do not prove the dark one works. Check the link status too.',
-    lesson:'learn.html#readings'
+    id:'all-lanes', topic:2, visual:'lanes', interaction:'visual', skill:'Check every lane',
+    prompt:'Which receive lane still needs a no-light check?',
+    choices:['RX lane 1: +0.25 dBm', 'RX lane 2: +0.28 dBm', 'RX lane 3: −40 dBm', 'RX lane 4: +0.21 dBm'], correct:2,
+    explanation:'Lane 3 still reports no light. The other lanes cannot prove that this lane works. Follow its mapped path and check the link status too.',
+    reveal:'Lane 3: −40 needs investigation', lesson:'learn.html#readings'
   },
   {
-    id:'direct-loop', topic:3, visual:'direct-loop',
-    prompt:'How can you test this local optic without the long fiber route?',
-    choices:['Send VFL light into the live optic.', 'Use the correct LC loopback at the optic.', 'Move the cable to any open port.'], correct:1,
-    explanation:'The loop brings the optic’s own light back to it. Follow the approved setup, lane mapping and any required light reduction (attenuation). If it fails, verify the setup and clean connections before blaming the optic.',
-    lesson:'learn.html#loopbacks'
+    id:'direct-loop', topic:3, visual:'direct-loop', skill:'Interpret local loop results',
+    prompt:'The approved direct optic loop passes. The restored link still fails. What next?',
+    choices:['Mark the remote optic healthy because the local loop passed.', 'Extend the test to the next accessible passive using the mapped loop.', 'Replace the local optic before checking any connected fiber.'], correct:1,
+    explanation:'The local optic passed this test. Extend outward through the fiber and connections you can reach. A direct loop does not test the long route or remote optic.',
+    reveal:'Checked locally; extend the tested path', lesson:'learn.html#loopbacks'
   },
   {
-    id:'passive-loop', topic:3, visual:'passive-loop',
-    prompt:'A correct loop at the next accessible passive passes. What have you checked?',
-    choices:['The local optic and the path up to that loop.', 'Every fiber and the remote optic too.', 'Only the remote device.'], correct:0,
-    explanation:'The MMC loop returns light from that passive. Work through the passives you can reach and record the last passing point. Beyond the loop remains untested.',
-    lesson:'learn.html#loopbacks'
+    id:'passive-loop', topic:3, visual:'sections', interaction:'visual', skill:'Interpret local loop results',
+    prompt:'Read the loop results. Which section should you investigate next?',
+    choices:['A · local optic to CAS 1', 'B · CAS 1 to CAS 2, including its connections', 'C · beyond CAS 2 toward the remote device'], correct:1,
+    explanation:'The direct loop and CAS 1 loop passed. The CAS 2 loop failed, so first verify that loop setup, then investigate the added span and its connections. This does not locate a break. Beyond CAS 2 is untested.',
+    reveal:'B is suspect. Verify the loop setup, then isolate this span.', lesson:'learn.html#loopbacks'
   },
   {
-    id:'vfl-setup', topic:3, visual:'vfl',
-    prompt:'A VFL sends red test light. How do you connect it to a fiber section?',
-    choices:['Leave the section connected to live optics.', 'Look into the other end while it is on.', 'Isolate both ends from active gear and use the correct adapter.'], correct:2,
-    explanation:'The VFL is a separate tracing tool. Verify the source works, follow site isolation steps and use the safe viewing method. Never look directly into a fiber end.',
-    lesson:'learn.html#vfl'
+    id:'vfl-setup', topic:3, visual:'vfl-setup', skill:'Use VFL observations',
+    prompt:'You need to trace a fiber with a VFL. Which setup is ready?',
+    choices:['The local end is isolated, but the far end is still on active gear.', 'The adapter fits, but the far-end connection has not been checked.', 'Both ends are isolated from active gear, with the correct adapter.'], correct:2,
+    explanation:'Follow site isolation steps at both ends and verify the VFL and adapter before tracing. Use the approved detection method; never look into a fiber or optic.',
+    reveal:'Isolate both ends before tracing', lesson:'learn.html#vfl'
   },
   {
-    id:'wrong-port', topic:3, visual:'wrong-port',
-    prompt:'Red test light appears at the wrong passive port. What should you check?',
-    choices:['Whether the optic is the wrong color.', 'The fiber labels, patching and FIM port record.'], correct:1,
-    explanation:'The fiber reaches a different place from the one expected. Check for a mispatch or a mismatch in the record before correcting it.',
-    lesson:'patching.html#fim-path'
+    id:'wrong-port', topic:3, visual:'wrong-port', skill:'Use VFL observations',
+    prompt:'FIM expects Port 12. VFL light is detected at Port 13. What next?',
+    choices:['Replace the optic because the light reached the wrong port.', 'Compare fiber labels, actual patching and the FIM record.', 'Update FIM to Port 13 immediately without checking the route.'], correct:1,
+    explanation:'The observation and expected route disagree. Check the labels and actual path before deciding whether the patch or record needs correction.',
+    reveal:'Observed 13 ≠ expected 12: verify the mapping', lesson:'patching.html#fim-path'
   },
   {
-    id:'vfl-limits', topic:3, visual:'vfl-seen',
-    prompt:'Red light reaches the correct port. Does that prove every health check will pass?',
-    choices:['No, it confirms a path; loss and optic health still need checking.', 'Yes, visible red light proves the whole link is healthy.'], correct:0,
-    explanation:'A VFL shows where the fiber connects. It does not measure whether enough network light gets through. Use the appropriate loss test, restore the mapped connection and recheck health.',
-    lesson:'learn.html#vfl'
+    id:'vfl-limits', topic:3, visual:'vfl-seen', skill:'Use VFL observations',
+    prompt:'VFL light reaches the expected port. What still needs checking?',
+    choices:['Optical loss and link health after restoring the mapped connection.', 'Nothing—the visible light proves every network lane is healthy.', 'Only the remote device; this proves all local fiber loss is acceptable.'], correct:0,
+    explanation:'VFL supports continuity and mapping. It does not measure acceptable network-light loss. Use the appropriate loss test when needed, restore the path and recheck optic and link health.',
+    reveal:'Path found. Loss and link health remain unverified.', lesson:'learn.html#vfl'
   }
 ];
 
 export const roundQuestionIds = topic => questions.filter(question => question.topic === topic).map(question => question.id);
+
+export function skillsFor(topic, answers) {
+  const skills=new Map();
+  for(const question of questions.filter(item=>item.topic===topic)) {
+    if(!Object.hasOwn(answers,question.id)) continue;
+    const correct=isCorrectAnswer(question,answers[question.id]);
+    skills.set(question.skill,(skills.get(question.skill) ?? true) && correct);
+  }
+  return {
+    checked:[...skills].filter(([,correct])=>correct).map(([skill])=>skill),
+    review:[...skills].filter(([,correct])=>!correct).map(([skill])=>skill)
+  };
+}
 
 export function startAttempt(ids = roundQuestionIds(0)) {
   return { ids:[...new Set(ids)].filter(id => questions.some(question => question.id === id)), answers:{} };
