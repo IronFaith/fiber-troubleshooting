@@ -1,6 +1,6 @@
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool} from './troubleshoot-state.mjs?v=5';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=5';
-import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=3';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey} from './troubleshoot-state.mjs?v=6';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=6';
+import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -44,14 +44,15 @@ function restore(raw,simulated) {
     if(!Object.hasOwn(loopLabels,raw.loops?.[p])) continue;
     for(const action of [{type:'select',point:p},{type:'tool',tool:'loop'},{type:'ready',value:true},{type:'record',result:raw.loops[p]}]) s=changeCase(s,action);
   }
-  for(let p=1;p<=s.reach;p++) for(const strand of ['tx','rx']) {
-    const result=raw.traces?.[`${p}:${strand}`];
-    if(!Object.hasOwn(traceLabels,result)) continue;
-    for(const action of [{type:'select',point:p},{type:'strand',value:strand},{type:'tool',tool:'vfl'},{type:'ready',value:true},{type:'record',result}]) s=changeCase(s,action);
+  for(const [key,result] of Object.entries(raw.traces??{})) {
+    const route=parseTraceKey(key);
+    if(!route || route.from>s.reach || route.to>s.reach || !Object.hasOwn(traceLabels,result)) continue;
+    for(const action of [{type:'trace',from:route.from,to:route.to},{type:'strand',value:route.strand},{type:'ready',value:true},{type:'record',result}]) s=changeCase(s,action);
   }
   s=changeCase(s,{type:'select',point:raw.selected});
   s=changeCase(s,{type:'strand',value:raw.strand});
   s=changeCase(s,{type:'tool',tool:raw.tool});
+  if(raw.tool==='vfl') s=changeCase(s,{type:'trace',from:raw.vflFrom??Math.max(0,raw.selected-1),to:raw.selected});
   if(s.tool==='link' && Array.isArray(raw.disconnected)) s.disconnected=[...new Set(raw.disconnected.filter(p=>Number.isInteger(p)&&p>=0&&p<=s.reach))];
   return changeCase(s,{type:'service',value:raw.service});
 }
@@ -81,12 +82,12 @@ function selectTool(kind) {
     const point=Number(el.dataset.span??el.dataset.point);
     el.classList.toggle('ts-can-drop',Boolean(kind)&&(!el.hasAttribute('data-span')||kind==='vfl')&&canPlaceTool(cases[view],kind,point));
   });
-  announce(kind?`${toolNames[kind]}: ${kind==='lc'?'drop on the optic.':kind==='mmc'?'drop on a reachable CAS.':'drop by the optic’s LC leg or on a fiber section.'} You can also tap the target.`:'Drag a tool onto the path, or tap a tool then its target.');
+  announce(kind?`${toolNames[kind]}: ${kind==='lc'?'drop on the optic.':kind==='mmc'?'drop on a reachable CAS.':'drop at the LC leg or CAS where the VFL starts, then choose where to check for light.'} You can also tap the target.`:'Drag a tool onto the path, or tap a tool then its target.');
 }
-function placeTool(kind,point) {
+function placeTool(kind,point,atSource=false) {
   if(!canPlaceTool(cases[view],kind,point)) {announce('That tool does not match this point. Choose a highlighted target.');return;}
   selectedTool=null;
-  update([{type:'place',kind,point}],`${toolNames[kind]} placed. Enter the result you observed.`);
+  update([{type:'place',kind,point,atSource}],kind==='vfl'?'VFL placed. Choose its source and where you expect light, then enter your observation.':`${toolNames[kind]} placed. Enter the result you observed.`);
   host.querySelector('[data-action="test-result"]')?.focus({preventScroll:true});
 }
 function removeTool() {
@@ -124,18 +125,23 @@ function readings(s) {
   const badge=(name,value)=>`<span class="ts-reading ${value}">${name}<b>${value==='good'?'Light present':value==='weak'?'Weak':'No light'}</b></span>`;
   return `<div class="ts-readings"><span>Expected with service path restored:</span>${badge('Local TX',r.tx)}${badge('Local RX',r.rx)}${badge('Remote RX',r.farRx)}<small>Remote shown for simulation only.</small></div>`;
 }
+function vflRouteControls(s) {
+  if(s.tool!=='vfl') return '';
+  const from=traceFrom(s),points=Array.from({length:s.reach+1},(_,p)=>[p,p===0?'Optic-side LC leg':`CAS ${p} · Port ${s.ports[p-1]}`]);
+  return `<div class="ts-vfl-route" aria-label="VFL source and viewing point">${select('vfl-from','VFL starts at',points.filter(([p])=>p!==s.selected),from)}<span class="ts-vfl-direction" aria-hidden="true">→</span>${select('vfl-to','Expect light at',points.filter(([p])=>p!==from),s.selected)}<div class="ts-vfl-route-footer"><p>Keep intermediate passives patched. Tap a CAS in the diagram to check there.</p>${button('swap-trace','Swap ends')}</div></div>`;
+}
 function controls(s) {
   const point=s.selected, tool=s.tool;
   const hasResults=Object.keys(s.loops).length+Object.keys(s.traces).length>0;
-  const result=tool==='loop'?s.loops[point]:s.traces[`${point}:${s.strand}`];
+  const result=tool==='loop'?s.loops[point]:s.traces[traceKey(s)];
   if(tool==='link' && s.disconnected?.length) return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">Reconnect the service path</h2><p class="ts-tool-caption">The tool is off. The highlighted LC legs or MMC heads are still unplugged.</p>${button('normalize','Normalize','class="ts-primary"')}<p class="ts-note">Reconnects the illustration and keeps recorded tests. Confirm the real connections before checking health.</p></section>`;
   if(tool==='link') return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">${s.loops[s.reach]==='pass'?'Check the restored link':hasResults?'Choose the next test':'Place your first test'}</h2>
     ${s.loops[s.reach]==='pass'&&!s.simulated?`<p class="ts-tool-caption">Remove the loop, restore the mapped connections, then check required local readings and link status. Is the link working now?</p><div class="ts-result-buttons">${button('service-good','Yes · link working',`aria-pressed="${s.service==='good'}"`)}${button('service-bad','No · still a problem',`aria-pressed="${s.service==='bad'}"`)}</div>`:
       hasResults?'<p class="ts-tool-caption">Place a tool for your next check. Earlier observations stay on the path and in Recorded tests.</p>':`<p class="ts-tool-caption">Drag LC onto the optic to start. If you already have a test set up, place that tool at its matching point.</p>`}</section>`;
   const labels=tool==='loop'?{pass:'Yes · passes',dark:'No · no return light',weak:'Light returns, but weak'}:traceLabels;
-  return `<section class="ts-control-card" aria-labelledby="test-title"><div class="ts-section-top"><div><p class="ts-test-location">${tool==='vfl'?'VFL':point===0?'LC loopback':'MMC loopback'} · ${tool==='vfl'?spanName(point):pointName(point)}</p><h2 id="test-title" tabindex="-1">${tool==='loop'?'Does the loop pass?':'Where did the red light appear?'}</h2></div>${button('link','Remove tool','class="ts-remove"')}</div>
-    ${point?select('port',`CAS ${point} mapped port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[point-1]):''}
-    <p class="ts-tool-caption">${tool==='loop'?'Use the correct loop mapping and required attenuation. Check TX and returning RX against this optic’s limits.':point===1?`Unplug the LC leg from the optic. Connect the VFL to that leg with its matching adapter, then trace to the MMC head at CAS 1. The VFL supplies the red light.`:`Trace only ${spanName(point)}. The VFL supplies its own light.`}</p>
+  return `<section class="ts-control-card" aria-labelledby="test-title"><div class="ts-section-top"><div><p class="ts-test-location">${tool==='vfl'?'VFL':point===0?'LC loopback':'MMC loopback'} · ${tool==='vfl'?traceName(s):pointName(point)}</p><h2 id="test-title" tabindex="-1">${tool==='loop'?'Does the loop pass?':`What did you see at ${fiberPointName(point)}?`}</h2></div>${button('link','Remove tool','class="ts-remove"')}</div>
+    <div class="ts-fields">${tool==='vfl'&&traceFrom(s)>0?select('vfl-source-port',`CAS ${traceFrom(s)} source port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[traceFrom(s)-1]):''}${point?select('port',`CAS ${point} ${tool==='vfl'?'expected':'mapped'} port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[point-1]):''}</div>
+    <p class="ts-tool-caption">${tool==='loop'?'Use the correct loop mapping and required attenuation. Check TX and returning RX against this optic’s limits.':`The VFL supplies red light at ${fiberPointName(traceFrom(s))}. Check the isolated fiber end at ${fiberPointName(point)}. ${traceFrom(s)===0||point===0?'The optic-side LC leg is unplugged; the optic itself is not part of this trace.':''}`}</p>
     ${tool==='vfl'?select('strand','Strand to trace',[['tx','Normally local TX → remote RX'],['rx','Normally remote TX → local RX']],s.strand):''}
     ${s.simulated?'<p class="ts-prepared">Practice only · results come from the chosen fault.</p>':tool==='vfl'?`<label class="ts-ready"><input type="checkbox" data-field="ready" ${s.ready?'checked':''}><span>Both ends isolated from active gear; matching VFL adapter fitted.</span></label>`:''}
     <div class="ts-result-buttons">${s.simulated?button('run','Run this test','class="ts-primary"'):Object.entries(labels).map(([value,label])=>button(`result-${value}`,label,`aria-pressed="${result===value}" ${tool==='vfl'&&!s.ready?'disabled':''}`)).join('')}</div>
@@ -143,8 +149,8 @@ function controls(s) {
 }
 function advice(s) {
   const a=assessment(s);
-  const pending=s.tool==='loop'&&!s.loops[s.selected] || s.tool==='vfl'&&!s.traces[`${s.selected}:${s.strand}`];
-  if(pending) return `<section class="ts-advice" aria-labelledby="finding-title"><h2 id="finding-title">Waiting for your result</h2><p>${s.tool==='loop'?s.selected===0?'This test checks the optic with the external fiber bypassed.':`This loop includes the optic and its fiber path to CAS ${s.selected}.`:`This trace checks one isolated strand from ${spanName(s.selected)}.`}</p>${a.lastPass>=0?`<p class="ts-note">✓ Last passing loop: ${pointName(a.lastPass)}. The next section remains unverified.</p>`:''}</section>`;
+  const pending=s.tool==='loop'&&!s.loops[s.selected] || s.tool==='vfl'&&!s.traces[traceKey(s)];
+  if(pending) return `<section class="ts-advice" aria-labelledby="finding-title"><h2 id="finding-title">Waiting for your result</h2><p>${s.tool==='loop'?s.selected===0?'This test checks the optic with the external fiber bypassed.':`This loop includes the optic and its fiber path to CAS ${s.selected}.`:`This trace checks one isolated strand along ${traceName(s)}.`}</p>${a.lastPass>=0?`<p class="ts-note">✓ Last passing loop: ${pointName(a.lastPass)}. The next section remains unverified.</p>`:''}</section>`;
   return `<section class="ts-advice ${a.tone}" aria-labelledby="finding-title"><p class="ts-eyebrow">What your ${s.simulated?'simulated ':''}tests tell us</p><h2 id="finding-title">${a.title}</h2>
     <p>${a.why}</p><div class="ts-next"><b>Next check</b><p>${a.next}</p></div>
     ${a.suggestion&&!pending?button('next',a.suggestion.tool==='loop'?`Next: ${a.suggestion.point?'MMC':'LC'} loop at ${pointName(a.suggestion.point)}`:a.suggestion.tool==='vfl'?`Trace ${spanName(a.suggestion.point)} with VFL`:'Normalize','class="ts-next-button"'):''}
@@ -154,8 +160,8 @@ function advice(s) {
 function results(s) {
   const loops=Object.entries(s.loops).map(([p,result])=>button(`review-loop-${p}`,`${pointName(Number(p))} <b>${loopLabels[result]}</b>`,`class="ts-log-entry ${result}"`));
   const traces=Object.entries(s.traces).map(([id,result])=>{
-    const [p,strand]=id.split(':');
-    return button(`review-vfl-${p}-${strand}`,`VFL → CAS ${p} · ${strand.toUpperCase()} strand <b>${traceLabels[result]}</b>`,'class="ts-log-entry"');
+    const {from,to,strand}=parseTraceKey(id);
+    return button(`review-vfl-${from}-${to}-${strand}`,`VFL · ${fiberPointName(from)} → ${fiberPointName(to)} · ${strand.toUpperCase()} strand <b>${traceLabels[result]}</b>`,'class="ts-log-entry"');
   });
   return `<section class="ts-log" aria-label="Recorded tests"><div class="ts-section-top"><h3>${s.simulated?'Simulated':'Recorded'} tests</h3><div class="ts-small-actions">${button('undo','Undo',undo[view].length?'':'disabled')}${button('copy','Copy findings')}${button('reset','New case')}</div></div>
     ${loops.length+traces.length?`<div class="ts-log-list">${[...loops,...traces].join('')}</div>`:'<p class="ts-note">No tests recorded yet. Moving a loop or VFL does not mark a section as good.</p>'}
@@ -169,7 +175,7 @@ function render(preservePosition=false) {
   document.querySelectorAll('[data-workbench-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.workbenchView===view)));
   if(view==='guided') return;
   const s=cases[view];
-  host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normal patching · health not confirmed':s.tool==='loop'?`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`:`VFL · ${s.selected===1?'LC leg → MMC head at CAS 1':spanName(s.selected)}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
+  host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normal patching · health not confirmed':s.tool==='loop'?`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`:`VFL · ${traceName(s)}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>${vflRouteControls(s)}
     <div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
     <div class="ts-legend"><span>↔ Scroll to follow the path</span><span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span></div>
     </section>
@@ -178,11 +184,11 @@ function render(preservePosition=false) {
   else centerMap();
 }
 
-function centerMap() {
+function centerMap(focusPoint) {
   const s=cases[view],map=host.querySelector('.ts-map');
   if(!map) return;
   const scale=map.querySelector('svg').getBoundingClientRect().width/(270+(s.count+1)*290);
-  const point=s.tool==='vfl'?s.selected-.5:s.selected;
+  const point=focusPoint??s.selected;
   map.scrollLeft=Math.max(0,(135+point*290)*scale-map.clientWidth/2);
 }
 
@@ -190,14 +196,19 @@ document.querySelectorAll('[data-workbench-view]').forEach(b=>b.addEventListener
 host.addEventListener('change',event=>{
   const field=event.target.dataset.field;
   if(!field) return;
-  const value=event.target.value;
-  const action=field==='ready'?{type:'ready',value:event.target.checked}:field==='point'?{type:'select',point:value}:
+  const value=event.target.value,s=cases[view];
+  const action=field==='vfl-from'?{type:'trace',from:value,to:s.selected}:field==='vfl-to'?{type:'trace',from:traceFrom(s),to:value}:field==='vfl-source-port'?{type:'port',point:traceFrom(s),value}:field==='ready'?{type:'ready',value:event.target.checked}:field==='point'?{type:'select',point:value}:
     ['tx','rx'].includes(field)?{type:'health',signal:field,value}:field.startsWith('fault-')?{type:'fault',value:{[field.slice(6)]:value}}:{type:field,value};
-  update([action],['count','reach','port'].includes(field)?'Path updated. Previous test results cleared.':'');
+  update([action],['count','reach','port','vfl-source-port'].includes(field)?'Path updated. Previous test results cleared.':['vfl-from','vfl-to'].includes(field)?'Trace route updated. Confirm this setup before recording a result.':'');
+  if(['vfl-from','vfl-to'].includes(field)) centerMap(Number(value));
   host.querySelector(`[data-field="${field}"]`)?.focus({preventScroll:true});
 });
 function choosePoint(point) {
-  if(selectedTool) {placeTool(selectedTool,point);return;}
+  if(selectedTool) {placeTool(selectedTool,point,true);return;}
+  if(cases[view].tool==='vfl') {
+    if(point===traceFrom(cases[view])) {announce('The VFL starts here. Choose a different point to check for light.');return;}
+    update([{type:'trace',from:traceFrom(cases[view]),to:point}],'Viewing point changed. Confirm the setup, then record what you see.');return;
+  }
   if(cases[view].tool!=='link') {announce('To move a tool, drag its handle or select it from the tray.');return;}
   update([{type:'select',point}]);
   host.querySelector(`[data-point="${point}"]`)?.focus({preventScroll:true});
@@ -216,6 +227,7 @@ host.addEventListener('click',async event=>{
   const action=target.dataset.action,s=cases[view];
   if(action==='setup') {setupOpen=!setupOpen;render();return;}
   if(action==='normalize') {normalizeSetup();return;}
+  if(action==='swap-trace') {update([{type:'trace',from:s.selected,to:traceFrom(s)}],'VFL direction reversed. Confirm the new setup before recording a result.');centerMap(traceFrom(cases[view]));host.querySelector('[data-action="swap-trace"]')?.focus({preventScroll:true});return;}
   if(action==='remove-tool'||action==='link') {removeTool();host.querySelector('[data-pick-tool]')?.focus({preventScroll:true});return;}
   if(action==='test-result') {host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}
   if(action==='start-loop') {placeTool('lc',0);return;}
@@ -229,7 +241,7 @@ host.addEventListener('click',async event=>{
       `Mapped ports: ${s.ports.slice(0,s.count).map((p,i)=>`CAS ${i+1} / ${p}`).join(', ')}`,
       ...(!s.simulated?[`Starting local TX: ${statusLabels[s.tx]}; RX: ${s.rx==='good'?'Within optic limits':statusLabels[s.rx]}`]:[`Fault: ${faults[s.fault.kind]}; section ${s.fault.at}`]),
       ...Object.entries(s.loops).map(([p,r])=>`Loop at ${pointName(Number(p))}: ${loopLabels[r]}`),
-      ...Object.entries(s.traces).map(([id,r])=>`VFL segment / strand ${id}: ${traceLabels[r]}`),
+      ...Object.entries(s.traces).map(([id,r])=>{const {from,to,strand}=parseTraceKey(id);return `VFL ${fiberPointName(from)} → ${fiberPointName(to)} / ${strand.toUpperCase()}: ${traceLabels[r]}`;}),
       ...(!s.simulated&&s.service!=='unknown'?[`Restored link: ${s.service==='good'?'Required local readings and link normal':'Still has a problem'}`]:[]),
       a.title,a.why,`Next: ${a.next}`,'Remote and untested lanes remain unverified.'].join('\n');
     try {await navigator.clipboard.writeText(text);target.textContent='Copied';}
@@ -243,7 +255,8 @@ host.addEventListener('click',async event=>{
   else if(action.startsWith('service-')) update([{type:'service',value:action.slice(8)}],'Restored link observation recorded.');
   else if(action.startsWith('result-')) update([...(s.tool==='loop'?[{type:'ready',value:true}]:[]),{type:'record',result:action.slice(7)}],'Observation recorded.');
   else if(action==='next') {const next=assessment(s).suggestion;if(next){if(next.tool==='link')normalizeSetup();else placeTool(next.tool==='vfl'?'vfl':next.point?'mmc':'lc',next.point);}}
-  else if(action.startsWith('review-')) {const [,tool,p,strand]=action.split('-');update([{type:'select',point:p},{type:'tool',tool},...(strand?[{type:'strand',value:strand}]:[])]);}
+  else if(action.startsWith('review-vfl-')) {const [,,from,to,strand]=action.split('-');update([{type:'trace',from,to},{type:'strand',value:strand}]);}
+  else if(action.startsWith('review-loop-')) update([{type:'select',point:action.slice(12)},{type:'tool',tool:'loop'}]);
   host.querySelector(`[data-action="${action}"]`)?.focus({preventScroll:true});
 });
 render();

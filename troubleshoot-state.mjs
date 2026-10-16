@@ -10,10 +10,23 @@ export const loopLabels = { pass: 'Pass', weak: 'Weak return', dark: 'No return 
 export const traceLabels = { seen: 'Expected port + strand', wrong: 'Different port', swapped: 'Other strand', dark: 'No light seen' };
 export const pointName = point => point === 0 ? 'Local optic' : `CAS ${point}`;
 export const spanName = point => `${pointName(point - 1)} → CAS ${point}`;
+export const fiberPointName = point => point === 0 ? 'Optic-side LC leg' : pointName(point);
+export const traceFrom = state => state.vflFrom ?? Math.max(0,state.selected-1);
+export const traceName = state => `${fiberPointName(traceFrom(state))} → ${fiberPointName(state.selected)}`;
+// Keep adjacent legacy keys so existing saved observations still belong to
+// exactly the same section. Longer / reverse routes include both endpoints.
+export const traceKey = state => `${traceFrom(state)===state.selected-1?'':`${traceFrom(state)}>`}${state.selected}:${state.strand}`;
+export function parseTraceKey(key) {
+  const match=/^(?:(\d+)>)?(\d+):(tx|rx)$/.exec(key);
+  if(!match) return null;
+  const to=Number(match[2]),from=match[1]===undefined?to-1:Number(match[1]);
+  return from<0 || from===to ? null : {from,to,strand:match[3]};
+}
+const validTrace = (state,from,to) => [from,to].every(p=>Number.isInteger(p)&&p>=0&&p<=state.reach) && from!==to;
 
 export function createCase(simulated = false) {
   return { simulated, count: 2, reach: 2, selected: 0, ports: [12,12,12,12], tool: 'link',
-    strand: 'tx', ready: false, loops: {}, traces: {}, tx: 'unknown', rx: 'unknown', service:'unknown', disconnected:[],
+    strand: 'tx', vflFrom:0, ready: false, loops: {}, traces: {}, tx: 'unknown', rx: 'unknown', service:'unknown', disconnected:[],
     fault: { kind: 'break', at: 2, strand: 'tx', severity: 'dark' } };
 }
 const bounded = (value, min, max) => Math.max(min, Math.min(max, Number.isFinite(Number(value)) ? Math.trunc(Number(value)) : min));
@@ -28,7 +41,7 @@ export function canPlaceTool(state,kind,point) {
 // Physical setup is separate from earlier optical observations.
 export function connectionAt(state,point) {
   if(state.tool==='loop' && point===state.selected) return 'loop';
-  if(state.tool==='vfl' && point===state.selected-1) return 'vfl';
+  if(state.tool==='vfl' && point===traceFrom(state)) return 'vfl';
   if(state.tool==='vfl' && point===state.selected) return 'unplugged';
   return state.disconnected?.includes(point)?'unplugged':'plugged';
 }
@@ -43,9 +56,10 @@ export function simulatedLoop(state, point = state.selected) {
   if (f.kind === 'polarity') return 'pass';
   return lossResult(f);
 }
-export function simulatedTrace(state, segment = state.selected, strand = state.strand) {
+export function simulatedTrace(state, segment, strand = state.strand) {
   const f = state.fault;
-  if (f.kind === 'none' || f.kind.startsWith('optic_') || f.at !== segment) return 'seen';
+  const to=segment??state.selected, from=segment===undefined?traceFrom(state):segment-1;
+  if (f.kind === 'none' || f.kind.startsWith('optic_') || f.at<=Math.min(from,to) || f.at>Math.max(from,to)) return 'seen';
   if (f.kind === 'polarity') return 'swapped';
   if (!affects(f, strand)) return 'seen';
   if (f.kind === 'misport') return 'wrong';
@@ -69,19 +83,31 @@ export function changeCase(state, action) {
   switch (action.type) {
     case 'place':
       if(!canPlaceTool(s,action.kind,action.point)) return state;
-      // The optic-side target is the detached LC leg. VFL results belong to
-      // its outgoing section (ending at CAS 1), never to the optic itself.
-      s.selected=action.kind==='vfl'?Math.max(1,Number(action.point)):Number(action.point);
+      if(action.kind==='vfl' && action.atSource) {
+        const from=Number(action.point);
+        s.selected=s.tool==='vfl' && s.selected!==from?s.selected:from<s.reach?from+1:from-1;
+        s.vflFrom=from;
+      } else {
+        // Fiber-section shortcuts retain their original adjacent route.
+        s.selected=action.kind==='vfl'?Math.max(1,Number(action.point)):Number(action.point);
+        s.vflFrom=Math.max(0,s.selected-1);
+      }
       s.tool=action.kind==='vfl'?'vfl':'loop';
       s.ready=false; s.service='unknown'; s.disconnected=[]; break;
+    case 'trace': {
+      const from=Number(action.from),to=Number(action.to);
+      if(!validTrace(s,from,to)) return state;
+      s.vflFrom=from; s.selected=to; s.tool='vfl';
+      s.ready=false; s.service='unknown'; s.disconnected=[]; break;
+    }
     case 'remove':
       if(s.tool==='link') return state;
-      s.disconnected=s.tool==='vfl'?[s.selected-1,s.selected]:[s.selected];
+      s.disconnected=s.tool==='vfl'?[traceFrom(s),s.selected]:[s.selected];
       s.tool='link'; s.ready=false; s.service='unknown'; break;
     case 'normalize':
       s.tool='link'; s.disconnected=[]; s.ready=false; s.service='unknown'; break;
     case 'select':
-      s.selected = bounded(action.point,0,s.reach); s.ready = false;
+      s.selected = bounded(action.point,0,s.reach); s.vflFrom=Math.max(0,s.selected-1); s.ready = false;
       if (s.selected === 0 && s.tool === 'vfl') s.tool = 'link';
       break;
     case 'tool':
@@ -102,9 +128,11 @@ export function changeCase(state, action) {
       s.count = bounded(action.value,1,4); s.reach = Math.min(s.reach,s.count);
       s.selected = Math.min(s.selected,s.reach); s.fault.at = Math.min(s.fault.at,s.count+1); clear(); break;
     case 'reach': s.reach = bounded(action.value,0,s.count); s.selected = Math.min(s.selected,s.reach); clear(); break;
-    case 'port':
-      if (s.selected < 1) return state;
-      s.ports[s.selected-1] = bounded(action.value,1,32); clear(); break;
+    case 'port': {
+      const point=action.point===undefined?s.selected:Number(action.point);
+      if (!Number.isInteger(point) || point<1 || point>s.reach) return state;
+      s.ports[point-1] = bounded(action.value,1,32); clear(); break;
+    }
     case 'fault':
       s.fault = { ...s.fault, ...action.value };
       if (!Object.hasOwn(faults,s.fault.kind)) return state;
@@ -128,14 +156,17 @@ export function changeCase(state, action) {
       } else {
         const result = s.simulated ? simulatedTrace(s) : action.result;
         if (!Object.hasOwn(traceLabels,result)) return state;
-        s.traces[`${s.selected}:${s.strand}`] = result;
+        s.traces[traceKey(s)] = result;
       }
       break;
     }
     case 'clear': clear(); break;
     default: return state;
   }
-  if (s.tool === 'vfl' && s.selected === 0) s.tool = 'link';
+  if (s.tool === 'vfl' && !validTrace(s,traceFrom(s),s.selected)) {
+    if(s.reach===0) s.tool='link';
+    else s.vflFrom=s.selected===0?1:s.selected-1;
+  }
   return s;
 }
 
@@ -144,7 +175,7 @@ export function assessment(s) {
   const passed = pairs.filter(([,r]) => r === 'pass').map(([p]) => p);
   const lastPass = passed.length ? Math.max(...passed) : -1;
   const fail = pairs.find(([p,r]) => r !== 'pass' && p > lastPass);
-  const trace = s.tool === 'vfl' && s.traces[`${s.selected}:${s.strand}`];
+  const trace = s.tool === 'vfl' && s.traces[traceKey(s)];
   const result = (title, why, next, extra = {}) => ({ title, why, next, tone:'neutral', from:null, to:null, lastPass, ...extra });
   if(s.tool==='link' && s.disconnected?.length) return result('Connections are still unplugged',
     'Removing the tool leaves the test connections open in the diagram. Earlier results are kept.',
@@ -158,13 +189,14 @@ export function assessment(s) {
     'Verify FIM ports and TX-to-RX pairing. Trace accessible strands if needed; leave the onward path and remote device unverified.',
     {tone:'suspect',suggestion:s.reach>0?{point:1,tool:'vfl'}:null});
   if (trace) {
-    const shared = { from:s.selected-1, to:s.selected, tone:trace === 'seen' ? 'trace' : 'suspect' };
+    const from=traceFrom(s),longRoute=Math.abs(s.selected-from)>1;
+    const shared = { from:Math.min(from,s.selected), to:Math.max(from,s.selected), tone:trace === 'seen' ? 'trace' : 'suspect' };
     if (trace === 'wrong' || trace === 'swapped') return result(trace === 'wrong' ? 'Light reached a different port' : 'Light reached the other strand',
       'There is a route, but it does not match the expected port / TX–RX pairing.',
       'Check the FIM destination, leader / follower mapping and polarity. Correct the route, then trace again.', shared);
     if (trace === 'dark') return result('Trace this section more closely',
-      'No visible light here does not identify a break or its exact position.',
-      'Verify the VFL and adapter. Check nearby ports, seating, end faces, bends and damage; use a loss test / OTDR if needed.', shared);
+      `No visible light at ${fiberPointName(s.selected)} does not identify a break or its exact position along ${traceName(s)}.`,
+      `Verify the VFL and adapter. ${longRoute?'Choose an intermediate CAS to check a shorter route. ':''}Check nearby ports, seating, end faces, bends and damage; use a loss test / OTDR if needed.`, shared);
     return result('This strand has visible continuity',
       'Red light reached the expected destination. This does not prove acceptable IR loss or optic health.',
       'Trace the other strand, then remove the VFL, restore the mapped path and recheck RX against the optic limits.', shared);

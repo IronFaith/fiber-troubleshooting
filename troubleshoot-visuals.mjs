@@ -1,16 +1,18 @@
 import {cassetteFront} from './loop-visuals.mjs?v=3';
 import {lightFlow} from './light-visuals.mjs?v=1';
-import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,connectionAt} from './troubleshoot-state.mjs?v=5';
+import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,connectionAt,traceFrom,traceKey,parseTraceKey} from './troubleshoot-state.mjs?v=6';
 
-function opticFace(mode='plugged',strand='tx',trace) {
+function opticFace(mode='plugged',strand='tx',trace,receiving=false) {
   const loop=mode==='loop', plugged=mode==='plugged';
   const legs=[81,127].map((y,i)=>{
     const tip=plugged?168:52, boot=tip-40, bend=plugged?22+i*12:4+i*12, bottom=184+i*18;
     const cable=`M${boot} ${y} H${bend+12} Q${bend} ${y} ${bend} ${y+12} V${bottom-12} Q${bend} ${bottom} ${bend+12} ${bottom} H292`;
-    const lit=mode==='vfl'&&trace&&trace!=='dark'&&(i===0?strand==='tx':strand==='rx');
+    const litStrand=receiving&&trace==='swapped'?(strand==='tx'?'rx':'tx'):strand;
+    const lit=(mode==='vfl'||receiving&&trace!=='wrong')&&trace&&trace!=='dark'&&(i===0?litStrand==='tx':litStrand==='rx');
+    const signal=receiving?`M292 ${bottom} H${bend+12} Q${bend} ${bottom} ${bend} ${bottom-12} V${y+12} Q${bend} ${y} ${bend+12} ${y} H63`:`M63 ${y} H${boot} ${cable.slice(cable.indexOf(' H')+1)}`;
     return `<path class="loop-jacket" d="${cable}"/><path class="loop-cord" d="${cable}"/>
       <g class="ts-lc-leg" data-connection="${plugged?'seated':'unplugged'}"><rect class="hardware-boot" x="${boot}" y="${y-6}" width="12" height="12" rx="2"/><rect class="hardware-plug" x="${tip-29}" y="${y-9}" width="29" height="18" rx="2"/>${!plugged?`<rect class="hardware-metal" x="${tip}" y="${y-4}" width="11" height="8"/>`:''}<path class="hardware-grip" d="M${tip-23} ${y-5} v10 m6 -10 v10"/></g>
-      ${lit?lightFlow(`M63 ${y} H${boot} ${cable.slice(cable.indexOf(' H')+1)}`,'red'):''}`;
+      ${lit?lightFlow(signal,'red')+(receiving?`<circle class="ts-red-dot" cx="63" cy="${y}" r="5"/>`:''):''}`;
   }).join('');
   const vflY=strand==='tx'?81:127;
   return `<g class="hardware-art"><g transform="translate(80 0)">
@@ -22,7 +24,7 @@ function opticFace(mode='plugged',strand='tx',trace) {
     ${loop ? `<path class="loop-jacket" d="M88 81 H29 Q9 81 9 104 Q9 127 29 127 H88"/><path class="loop-cord" d="M88 81 H29 Q9 81 9 104 Q9 127 29 127 H88"/>
       ${[81,127].map(y => `<rect class="hardware-plug" x="59" y="${y-9}" width="29" height="18" rx="2"/><rect class="hardware-boot" x="48" y="${y-6}" width="12" height="12" rx="2"/>`).join('')}` : ''}
     </g>${legs}
-    ${mode==='vfl'?`<g data-mounted-tool="vfl" data-span="1"><rect class="hardware-metal" x="62" y="${vflY-6}" width="10" height="12"/><rect class="ts-vfl" x="70" y="${vflY-14}" width="51" height="28" rx="5"/><text class="ts-vfl-text" x="95" y="${vflY+5}">VFL</text><rect class="ts-tool-handle" x="28" y="${vflY-49}" width="98" height="98" rx="8"><title>VFL attached to the unplugged LC leg. Drag to move or remove.</title></rect></g>`:''}
+    ${mode==='vfl'?`<g data-mounted-tool="vfl" data-point="0"><rect class="hardware-metal" x="62" y="${vflY-6}" width="10" height="12"/><rect class="ts-vfl" x="70" y="${vflY-14}" width="51" height="28" rx="5"/><text class="ts-vfl-text" x="95" y="${vflY+5}">VFL</text><rect class="ts-tool-handle" x="28" y="${vflY-49}" width="98" height="98" rx="8"><title>VFL attached to the unplugged LC leg. Drag to move or remove.</title></rect></g>`:''}
     </g>`;
 }
 
@@ -36,7 +38,7 @@ export function workbenchDiagram(s) {
   const width = centers.at(-1)+135;
   const looping = s.tool === 'loop', tracing = s.tool === 'vfl';
   const loop = s.loops[s.selected];
-  const trace = s.traces[`${s.selected}:${s.strand}`];
+  const from=traceFrom(s),trace = s.traces[traceKey(s)];
   const x = centers[s.selected], start = centers[0], end = centers.at(-1);
   let drawing = '';
   for (let i=0;i<centers.length;i++) {
@@ -44,14 +46,14 @@ export function workbenchDiagram(s) {
     const mode=connectionAt(s,i), isLoop=mode==='loop';
     const handleX=i===0?cx-50:cx-121+(31.5+((s.ports[i-1]-1)%16)*19.8)*242/360-32;
     const handleY=i===0?117:81+(s.ports[i-1]<=16?59:137)*140/208-7;
-    drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${!accessible ? ' ts-inaccessible' : ''}${s.loops[i]?' ts-observed-'+s.loops[i]:''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="Select ${pointName(i)}${i ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
+    drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${tracing&&from===i?' ts-vfl-source':''}${!accessible ? ' ts-inaccessible' : ''}${s.loops[i]?' ts-observed-'+s.loops[i]:''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="${tracing&&i!==from?'Check light at':'Select'} ${i===0&&tracing?'optic-side LC leg':pointName(i)}${i ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
       <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="218" rx="12"/>
       <text class="ts-node-title" x="${cx}" y="59">${remote ? 'Remote device' : i===0 ? 'Local optic' : `CAS ${i} · Port ${s.ports[i-1]}`}</text>
-      ${i===0 || remote ? `<svg x="${cx-107}" y="68" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace)}</svg>` :
+      ${i===0 || remote ? `<svg x="${cx-107}" y="68" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,tracing&&i===0&&s.selected===0)}</svg>` :
         `<svg x="${cx-121}" y="81" width="242" height="140" viewBox="0 0 360 208">${passiveFace(s,i,mode)}</svg>`}
       ${isLoop?`<rect class="ts-tool-handle" data-mounted-tool="${i===0?'lc':'mmc'}" x="${handleX}" y="${handleY}" width="72" height="72" rx="9"><title>Drag this loop to move it, or return it to the tray</title></rect>`:''}
       <text class="ts-connection-label ${mode==='plugged'?'':'open'}" x="${cx}" y="230">${mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?i===0?'VFL on LC leg · optic empty':'VFL on unplugged fiber':mode==='unplugged'?i===0?'LC legs unplugged · optic empty':'MMC head unplugged · port empty':i===0||remote?'LC legs plugged into optic':'MMC head plugged into CAS'}</text>
-      <text class="ts-node-caption" x="${cx}" y="247">${remote ? 'Remote · unverified' : !accessible ? 'Outside your reach' : s.loops[i]?`Earlier loop: ${loopLabels[s.loops[i]]}`:isLoop?'Enter your loop result':'Not tested yet'}</text>
+      <text class="ts-node-caption" x="${cx}" y="247">${tracing&&i===from?'VFL source':tracing&&i===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):remote ? 'Remote · unverified' : !accessible ? 'Outside your reach' : s.loops[i]?`Earlier loop: ${loopLabels[s.loops[i]]}`:isLoop?'Enter your loop result':'Not tested yet'}</text>
     </g>`;
   }
   drawing += `<text class="ts-lane-label" x="10" y="278">TX →</text><text class="ts-lane-label" x="10" y="338">RX ←</text>
@@ -70,18 +72,18 @@ export function workbenchDiagram(s) {
     if (loop==='pass' || loop==='weak') drawing += `<g class="${loop==='weak' ? 'ts-weak-flow' : ''}">${lightFlow(out)}${lightFlow(back,'return-ir')}</g>`;
     drawing += `<text class="ts-route-note" x="${Math.min(x+152,width-140)}" y="308">Beyond loop: bypassed</text>`;
   } else if (tracing) {
-    const sx=centers[s.selected-1], sy=s.strand==='tx' ? 274 : 334;
+    const sx=centers[from], sy=s.strand==='tx' ? 274 : 334, direction=Math.sign(x-sx);
     const targetY=trace==='swapped' ? (sy===274 ? 334 : 274) : trace==='wrong' ? 304 : sy;
-    const source=s.selected===1?`M${sx+101.2933} ${68+(s.strand==='tx'?184:202)*214/300} V${sy-12} Q${sx+101.2933} ${sy} ${sx+113.2933} ${sy}`:`M${sx+86} ${sy}`;
-    const path=`${source} H${x-55} Q${x-36} ${sy} ${x-36} ${targetY} H${x}`;
-    drawing += (s.selected===1?'':`<g class="hardware-art"><rect class="hardware-plug" x="${sx+52}" y="${sy-9}" width="28" height="18" rx="2"/><rect class="hardware-boot" x="${sx+79}" y="${sy-5}" width="10" height="10" rx="2"/></g>
-      <text class="ts-route-note" x="${sx+81}" y="${sy-20}">${s.selected===1?'LC leg':'Adapter'}</text>
-      ${s.selected===1?`<text class="ts-route-note" x="${x-34}" y="${sy-20}">MMC head</text>`:''}
-      <g data-mounted-tool="vfl" data-span="${s.selected}"><rect class="ts-vfl" x="${sx+3}" y="${sy-14}" width="49" height="28" rx="5"/><text class="ts-vfl-text" x="${sx+28}" y="${sy+5}">VFL</text><rect class="ts-tool-handle" x="${sx-10}" y="${sy-36}" width="72" height="72" rx="8"><title>Drag the VFL to move it, or return it to the tray</title></rect></g>`)+`
-      <path class="ts-bypass" d="M${sx-13} ${sy-10} l10 20 M${x+12} ${sy-10} l10 20"/>
+    const source=from===0?`M${sx+101.2933} ${68+(s.strand==='tx'?184:202)*214/300} V${sy-12} Q${sx+101.2933} ${sy} ${sx+113.2933} ${sy}`:`M${sx+direction*86} ${sy}`;
+    const target=s.selected===0&&trace!=='wrong'?`H${x+113.2933} Q${x+101.2933} ${sy} ${x+101.2933} ${sy-12} V${68+(targetY===274?184:202)*214/300}`:`H${x-direction*55} Q${x-direction*36} ${sy} ${x-direction*36} ${targetY} H${x}`;
+    const path=source+' '+target;
+    drawing += (from===0?'':`<g class="hardware-art"><rect class="hardware-plug" x="${direction>0?sx+52:sx-80}" y="${sy-9}" width="28" height="18" rx="2"/><rect class="hardware-boot" x="${direction>0?sx+79:sx-89}" y="${sy-5}" width="10" height="10" rx="2"/></g>
+      <text class="ts-route-note" x="${direction>0?sx+63:sx-100}" y="${sy-20}">Adapter</text>
+      <g data-mounted-tool="vfl" data-point="${from}"><rect class="ts-vfl" x="${direction>0?sx+3:sx-52}" y="${sy-14}" width="49" height="28" rx="5"/><text class="ts-vfl-text" x="${sx+direction*28}" y="${sy+5}">VFL</text><rect class="ts-tool-handle" x="${direction>0?sx-10:sx-62}" y="${sy-36}" width="72" height="72" rx="8"><title>Drag the VFL to move it, or return it to the tray</title></rect></g>`)+`
+      <path class="ts-bypass" d="M${sx-direction*13} ${sy-10} l10 20 M${x+direction*12} ${sy-10} l10 20"/>
       <path class="ts-trace-route ${trace || 'unknown'}" d="${path}"/>
       <text class="ts-result-label" x="${(sx+x)/2}" y="${sy===274 ? 306 : 371}">${trace ? traceLabels[trace] : 'Isolated span · result unknown'}</text>`;
-    if (trace && trace!=='dark') drawing += lightFlow(path,'red')+`<circle class="ts-red-dot" cx="${x}" cy="${targetY}" r="7"/>`;
+    if (trace && trace!=='dark') drawing += lightFlow(path,'red')+(s.selected===0&&trace!=='wrong'?'':`<circle class="ts-red-dot" cx="${x}" cy="${targetY}" r="7"/>`);
     if (trace==='wrong') drawing += `<text class="ts-route-note" x="${x+12}" y="308">Other port</text>`;
   } else {
     drawing += `<text class="ts-result-label" x="${width/2}" y="309">${s.disconnected?.length?'Connectors unplugged · Normalize':s.simulated?'Simulated service path · fault position is illustrative':'Normal patching · health still needs checking'}</text>`;
@@ -107,7 +109,7 @@ export function workbenchDiagram(s) {
     const boundary=a.tone==='suspect'&&a.from!==null?a:loopAssessment;
     const suspect=boundary.from!==null && i>boundary.from && i<=boundary.to && boundary.tone==='suspect';
     const passed=i<=loopAssessment.lastPass;
-    const traced=s.traces[`${i}:tx`]==='seen' || s.traces[`${i}:rx`]==='seen';
+    const traced=Object.entries(s.traces).some(([key,result])=>{const route=parseTraceKey(key);return result==='seen'&&route&&i>Math.min(route.from,route.to)&&i<=Math.max(route.from,route.to);});
     drawing += `<g class="ts-fiber-target" ${i<=s.reach?`data-span="${i}" role="button" tabindex="0" aria-label="VFL on fiber from ${pointName(i-1)} to CAS ${i}"`:''}><rect class="ts-fiber-hit" x="${cx-127}" y="382" width="254" height="69" rx="8"/><text class="ts-span-name" x="${cx}" y="405">${i===1 ? 'LC leg → MMC head' : `CAS ${i-1} → CAS ${i}`}</text>
       <rect class="ts-span-badge ${suspect ? 'suspect' : passed ? 'pass' : traced ? 'traced' : ''}" x="${cx-67}" y="416" width="134" height="26" rx="13"/>
       <text class="ts-span-status" x="${cx}" y="434">${suspect ? 'Investigate here' : passed ? 'Loop passed' : traced ? 'Traced only' : 'Unverified'}</text></g>`;

@@ -162,3 +162,52 @@ test('removal leaves test connections open; normalization reconnects without cla
   assert.equal(s.service,'unknown');
   assert.notEqual(assessment(s).complete,true);
 });
+
+test('VFL source stays on the LC leg while the viewing point moves through multiple passives',()=> {
+  let s=changeCase(createCase(),{type:'trace',from:0,to:1});
+  assert.equal(s.tool,'vfl');
+  s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'seen'});
+  s=changeCase(s,{type:'trace',from:0,to:2});
+  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['vfl','plugged','unplugged']);
+  assert.equal(s.ready,false);
+  assert.equal(changeCase(s,{type:'record',result:'dark'}),s);
+  s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'dark'});
+  assert.deepEqual(s.traces,{'1:tx':'seen','0>2:tx':'dark'});
+  assert.deepEqual([assessment(s).from,assessment(s).to],[0,2]);
+  s=changeCase(s,{type:'trace',from:1,to:2});
+  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','vfl','unplugged']);
+  assert.equal(assessment(s).tone,'neutral');
+});
+
+test('VFL can start at a passive and trace backward, while invalid routes and normalization remain safe',()=> {
+  let s=changeCase(createCase(),{type:'place',kind:'vfl',point:2,atSource:true});
+  assert.deepEqual([s.vflFrom,s.selected],[2,1]);
+  s=changeCase(s,{type:'trace',from:2,to:0});
+  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['unplugged','plugged','vfl']);
+  assert.equal(changeCase(s,{type:'trace',from:2,to:2}),s);
+  assert.equal(changeCase(s,{type:'trace',from:0,to:3}),s);
+  s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'seen'});
+  assert.deepEqual(s.traces,{'2>0:tx':'seen'});
+  s=changeCase(s,{type:'remove'});
+  assert.deepEqual(s.disconnected,[2,0]);
+  s=changeCase(s,{type:'normalize'});
+  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','plugged','plugged']);
+  assert.deepEqual(s.traces,{'2>0:tx':'seen'});
+  assert.equal(s.service,'unknown');
+});
+
+test('simulated VFL checks the selected route rather than only the last segment',()=> {
+  let s=changeCase(createCase(true),{type:'fault',value:{kind:'break',at:1,strand:'tx'}});
+  s=changeCase(s,{type:'trace',from:0,to:2});
+  assert.equal(simulatedTrace(s),'dark');
+  s=changeCase(s,{type:'trace',from:2,to:0});
+  assert.equal(simulatedTrace(s),'dark');
+  s=changeCase(s,{type:'trace',from:1,to:2});
+  assert.equal(simulatedTrace(s),'seen');
+  s=changeCase(s,{type:'trace',from:0,to:2});
+  s=changeCase(s,{type:'strand',value:'rx'});
+  assert.equal(simulatedTrace(s),'seen');
+  s=changeCase(s,{type:'reach',value:0});
+  assert.equal(s.tool,'link');
+  assert.equal(changeCase(s,{type:'trace',from:0,to:1}),s);
+});

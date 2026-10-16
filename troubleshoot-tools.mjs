@@ -16,7 +16,7 @@ export function mountToolDrag(host,{select,place,remove,valid,announce,getSelect
     if(!el || !host.contains(el)) return null;
     if(el.matches('.ts-tool-tray')) return {el,remove:true,valid:drag.mounted};
     const point=Number(el.dataset.span??el.dataset.point);
-    return {el,point,valid:(!el.hasAttribute('data-span') || drag.kind==='vfl') && valid(drag.kind,point)};
+    return {el,point,atSource:!el.hasAttribute('data-span'),valid:(!el.hasAttribute('data-span') || drag.kind==='vfl') && valid(drag.kind,point)};
   }
   function reset() {
     if(!drag) return;
@@ -68,7 +68,7 @@ export function mountToolDrag(host,{select,place,remove,valid,announce,getSelect
     reset();
     if(!moved) return;
     ignoreClickUntil=Date.now()+500;
-    if(target?.valid) {if(target.remove) remove(); else place(kind,target.point);}
+    if(target?.valid) {if(target.remove) remove(); else place(kind,target.point,target.atSource);}
     else {select(null);announce('Drop cancelled. Any placed tool stays where it was.');}
   });
   host.addEventListener('click',event=>{
