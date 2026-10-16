@@ -1,6 +1,6 @@
 import {cassetteFront} from './loop-visuals.mjs?v=3';
 import {lightFlow} from './light-visuals.mjs?v=1';
-import {assessment,pointName,loopLabels,traceLabels,simulatedReadings} from './troubleshoot-state.mjs?v=1';
+import {assessment,pointName,loopLabels,traceLabels,simulatedReadings} from './troubleshoot-state.mjs?v=2';
 
 function opticFace(loop = false) {
   return `<g class="hardware-art">
@@ -15,7 +15,7 @@ function opticFace(loop = false) {
 }
 
 export function workbenchDiagram(s) {
-  const a = assessment(s), centers = Array.from({length:s.count+2},(_,i) => 135+i*290);
+  const a = assessment(s), loopAssessment=assessment({...s,tool:'link',service:'unknown'}), centers = Array.from({length:s.count+2},(_,i) => 135+i*290);
   const width = centers.at(-1)+135;
   const looping = s.tool === 'loop', tracing = s.tool === 'vfl';
   const loop = s.loops[s.selected];
@@ -25,12 +25,12 @@ export function workbenchDiagram(s) {
   for (let i=0;i<centers.length;i++) {
     const cx = centers[i], remote = i === s.count+1, accessible = i <= s.reach;
     const isLoop = looping && i === s.selected;
-    drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${!accessible ? ' ts-inaccessible' : ''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="Select ${pointName(i)}${i ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
+    drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${!accessible ? ' ts-inaccessible' : ''}${s.loops[i]?' ts-observed-'+s.loops[i]:''}" ${isLoop?`data-mounted-tool="${i===0?'lc':'mmc'}"`:''} ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="Select ${pointName(i)}${i ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
       <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="208" rx="12"/>
       <text class="ts-node-title" x="${cx}" y="59">${remote ? 'Remote device' : i===0 ? 'Local optic' : `CAS ${i} · Port ${s.ports[i-1]}`}</text>
       ${i===0 || remote ? `<svg x="${cx-82}" y="68" width="164" height="133" viewBox="0 0 240 195">${opticFace(isLoop)}</svg>` :
         `<svg x="${cx-121}" y="81" width="242" height="140" viewBox="0 0 360 208">${cassetteFront({name:`CAS ${i}`,port:s.ports[i-1],inserted:isLoop,patched:!isLoop})}</svg>`}
-      <text class="ts-node-caption" x="${cx}" y="226">${remote ? 'Other room / building · unverified' : !accessible ? 'Outside your reach' : isLoop ? `${i===0 ? 'LC' : 'MMC'} loopback inserted` : i===0 ? tracing&&s.selected===1 ? 'Isolate optic from VFL test' : 'One duplex pair shown below' : 'MMC head · mapped pair'}</text>
+      <text class="ts-node-caption" x="${cx}" y="226">${remote ? 'Other room / building · unverified' : !accessible ? 'Outside your reach' : s.loops[i]?`${s.loops[i]==='pass'?'✓':'!'} ${loopLabels[s.loops[i]]}${isLoop?' · loop inserted':''}`:isLoop?`${i===0?'LC':'MMC'} loop · enter result`:i===0&&tracing&&s.selected===1?'Isolate optic from VFL test':'Not tested yet'}</text>
     </g>`;
   }
   drawing += `<text class="ts-lane-label" x="10" y="278">TX →</text><text class="ts-lane-label" x="10" y="338">RX ←</text>
@@ -52,7 +52,7 @@ export function workbenchDiagram(s) {
     const sx=centers[s.selected-1], sy=s.strand==='tx' ? 274 : 334;
     const targetY=trace==='swapped' ? (sy===274 ? 334 : 274) : trace==='wrong' ? 304 : sy;
     const path=`M${sx+52} ${sy} H${x-55} Q${x-36} ${sy} ${x-36} ${targetY} H${x}`;
-    drawing += `<rect class="ts-vfl" x="${sx+3}" y="${sy-14}" width="49" height="28" rx="5"/><text class="ts-vfl-text" x="${sx+28}" y="${sy+5}">VFL</text>
+    drawing += `<g data-mounted-tool="vfl"><rect class="ts-vfl" x="${sx+3}" y="${sy-14}" width="49" height="28" rx="5"/><text class="ts-vfl-text" x="${sx+28}" y="${sy+5}">VFL</text></g>
       <path class="ts-bypass" d="M${sx-13} ${sy-10} l10 20 M${x+12} ${sy-10} l10 20"/>
       <path class="ts-trace-route ${trace || 'unknown'}" d="${path}"/>
       <text class="ts-result-label" x="${(sx+x)/2}" y="${sy===274 ? 306 : 371}">${trace ? traceLabels[trace] : 'Isolated span · result unknown'}</text>`;
@@ -79,12 +79,13 @@ export function workbenchDiagram(s) {
   }
   for (let i=1;i<=s.count;i++) {
     const cx=(centers[i-1]+centers[i])/2;
-    const suspect=a.from!==null && i>a.from && i<=a.to && a.tone==='suspect';
-    const passed=i<=a.lastPass;
+    const boundary=a.tone==='suspect'&&a.from!==null?a:loopAssessment;
+    const suspect=boundary.from!==null && i>boundary.from && i<=boundary.to && boundary.tone==='suspect';
+    const passed=i<=loopAssessment.lastPass;
     const traced=s.traces[`${i}:tx`]==='seen' || s.traces[`${i}:rx`]==='seen';
-    drawing += `<text class="ts-span-name" x="${cx}" y="405">${i===1 ? 'LC leg → MMC head' : `CAS ${i-1} → CAS ${i}`}</text>
+    drawing += `<g class="ts-fiber-target" ${i<=s.reach?`data-span="${i}" role="button" tabindex="0" aria-label="VFL on fiber from ${pointName(i-1)} to CAS ${i}"`:''}><rect class="ts-fiber-hit" x="${cx-127}" y="382" width="254" height="69" rx="8"/><text class="ts-span-name" x="${cx}" y="405">${i===1 ? 'LC leg → MMC head' : `CAS ${i-1} → CAS ${i}`}</text>
       <rect class="ts-span-badge ${suspect ? 'suspect' : passed ? 'pass' : traced ? 'traced' : ''}" x="${cx-67}" y="416" width="134" height="26" rx="13"/>
-      <text class="ts-span-status" x="${cx}" y="434">${suspect ? 'Investigate here' : passed ? 'Loop passed' : traced ? 'Traced only' : 'Unverified'}</text>`;
+      <text class="ts-span-status" x="${cx}" y="434">${suspect ? 'Investigate here' : passed ? 'Loop passed' : traced ? 'Traced only' : 'Unverified'}</text></g>`;
   }
   if (s.simulated && s.fault.kind!=='none') {
     const at = s.fault.at, fx=at===0 ? centers[0] : (centers[at-1]+centers[at])/2;

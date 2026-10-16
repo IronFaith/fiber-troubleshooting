@@ -7,17 +7,17 @@
   <meta name="description" content="Visually troubleshoot optics and fiber. Place LC or MMC loops, trace isolated fiber with VFL, and narrow down a problem using your observations or a simulated fault.">
   <title>Troubleshoot · Optic & fiber</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=37">
+  <link rel="stylesheet" href="./styles.css?v=38">
   <script type="module" src="./app.mjs?v=10"></script>
   <script type="module" src="./learning.mjs?v=32"></script>
-  <script type="module" src="./troubleshoot.mjs?v=1"></script>
+  <script type="module" src="./troubleshoot.mjs?v=2"></script>
 </head>
 <body>
   <main class="ts-main">
-    <header><div class="brand"><img src="./icon.svg" width="30" height="30" alt=""><div><h1>Troubleshoot</h1><p>Optic & fiber · place a test, follow the light, narrow it down.</p></div></div></header>
+    <header><div class="brand"><img src="./icon.svg" width="30" height="30" alt=""><div><h1>Troubleshoot</h1><p>Place a tool. Record the result. Find the next check.</p></div></div></header>
     <nav class="ts-view-tabs" aria-label="Troubleshooting mode">
-      <button type="button" data-workbench-view="actual" aria-pressed="true">My situation</button>
-      <button type="button" data-workbench-view="simulation" aria-pressed="false">Simulate a fault</button>
+      <button type="button" data-workbench-view="actual" aria-pressed="true">Find my problem</button>
+      <button type="button" data-workbench-view="simulation" aria-pressed="false">Practice a known fault</button>
       <button type="button" data-workbench-view="guided" aria-pressed="false">Guided check</button>
     </nav>
     <div id="troubleshoot-workbench"></div>

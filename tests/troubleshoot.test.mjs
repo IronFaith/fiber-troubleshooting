@@ -67,3 +67,49 @@ test('changed topology and contradictory retests discard stale results; inaccess
   assert.deepEqual(changeCase(simulation,{type:'fault',value:{kind:'none'}}).loops,{});
   assert.deepEqual(createCase().loops,{});
 });
+
+test('placing a dragged tool accepts only matching reachable hardware and never supplies a result', () => {
+  let s=createCase();
+  const place=(kind,point)=>changeCase(s,{type:'place',kind,point});
+  assert.equal(place('mmc',0),s);
+  assert.equal(place('lc',1),s);
+  assert.equal(place('vfl',0),s);
+  assert.equal(place('mmc',3),s);
+  s=place('lc',0);
+  assert.equal(s.tool,'loop');
+  assert.deepEqual(s.loops,{});
+  assert.equal(s.ready,false);
+  s=record(s,0,'pass');
+  s=place('mmc',1);
+  assert.equal(s.selected,1);
+  assert.deepEqual(s.loops,{0:'pass'});
+  s=place('vfl',2);
+  assert.equal(s.tool,'vfl');
+  assert.deepEqual(s.traces,{});
+  s=changeCase(s,{type:'reach',value:1});
+  assert.equal(place('vfl',2),s);
+});
+
+test('an unknown fault is narrowed by observations, checking a skipped passive before tracing a broad span', () => {
+  let s=record(record(createCase(),0,'pass'),2,'dark');
+  assert.deepEqual(assessment(s).suggestion,{point:1,tool:'loop'});
+  s=record(s,1,'pass');
+  assert.deepEqual([assessment(s).from,assessment(s).to],[1,2]);
+  assert.deepEqual(assessment(s).suggestion,{point:2,tool:'vfl'});
+  assert.equal(s.simulated,false);
+});
+
+test('restored-link observations distinguish local loop success from a resolved link and reset on the next test', () => {
+  let s=record(record(record(createCase(),0,'pass'),1,'pass'),2,'pass');
+  s=changeCase(s,{type:'tool',tool:'link'});
+  s=changeCase(s,{type:'service',value:'bad'});
+  assert.equal(s.service,'bad');
+  assert.equal(assessment(s).tone,'suspect');
+  assert.deepEqual(assessment(s).suggestion,{point:1,tool:'vfl'});
+  s=changeCase(s,{type:'service',value:'good'});
+  assert.equal(assessment(s).complete,true);
+  s=changeCase(s,{type:'place',kind:'mmc',point:1});
+  assert.equal(s.service,'unknown');
+  assert.notEqual(assessment(s).complete,true);
+  assert.equal(changeCase(createCase(),{type:'service',value:'good'}).service,'unknown');
+});

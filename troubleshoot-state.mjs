@@ -13,12 +13,17 @@ export const spanName = point => `${pointName(point - 1)} → CAS ${point}`;
 
 export function createCase(simulated = false) {
   return { simulated, count: 2, reach: 2, selected: 0, ports: [12,12,12,12], tool: 'link',
-    strand: 'tx', ready: false, loops: {}, traces: {}, tx: 'unknown', rx: 'unknown',
+    strand: 'tx', ready: false, loops: {}, traces: {}, tx: 'unknown', rx: 'unknown', service:'unknown',
     fault: { kind: 'break', at: 2, strand: 'tx', severity: 'dark' } };
 }
 const bounded = (value, min, max) => Math.max(min, Math.min(max, Number.isFinite(Number(value)) ? Math.trunc(Number(value)) : min));
 const affects = (fault, strand) => fault.strand === 'both' || fault.strand === strand;
 const lossResult = fault => ['dirty','loose','ferrule','bend','splice'].includes(fault.kind) ? fault.severity : 'dark';
+export function canPlaceTool(state,kind,point) {
+  const p=Number(point);
+  return Number.isInteger(p) && p>=0 && p<=state.reach &&
+    (kind==='lc' ? p===0 : ['mmc','vfl'].includes(kind) && p>0);
+}
 
 export function simulatedLoop(state, point = state.selected) {
   const f = state.fault;
@@ -52,15 +57,23 @@ export function simulatedReadings(state) {
 
 export function changeCase(state, action) {
   const s = structuredClone(state);
-  const clear = () => { s.loops = {}; s.traces = {}; s.ready = false; };
+  const clear = () => { s.loops = {}; s.traces = {}; s.ready = false; s.service='unknown'; };
   switch (action.type) {
+    case 'place':
+      if(!canPlaceTool(s,action.kind,action.point)) return state;
+      s.selected=Number(action.point); s.tool=action.kind==='vfl'?'vfl':'loop';
+      s.ready=false; s.service='unknown'; break;
     case 'select':
       s.selected = bounded(action.point,0,s.reach); s.ready = false;
       if (s.selected === 0 && s.tool === 'vfl') s.tool = 'link';
       break;
     case 'tool':
       if (!['link','loop','vfl'].includes(action.tool) || (action.tool === 'vfl' && s.selected === 0)) return state;
-      s.tool = action.tool; s.ready = false; break;
+      s.tool = action.tool; s.ready = false;
+      if(s.tool!=='link') s.service='unknown'; break;
+    case 'service':
+      if(s.simulated || s.tool!=='link' || s.loops[s.reach]!=='pass' || !['good','bad'].includes(action.value)) return state;
+      s.service=action.value; break;
     case 'ready': s.ready = Boolean(action.value); break;
     case 'strand':
       if (!['tx','rx'].includes(action.value)) return state;
@@ -83,6 +96,7 @@ export function changeCase(state, action) {
       s.fault.severity = s.fault.severity === 'weak' ? 'weak' : 'dark'; clear(); break;
     case 'record': {
       if (!s.ready || s.tool === 'link') return state;
+      s.service='unknown';
       if (s.tool === 'loop') {
         const result = s.simulated ? simulatedLoop(s) : action.result;
         if (!Object.hasOwn(loopLabels,result)) return state;
@@ -115,6 +129,13 @@ export function assessment(s) {
   const fail = pairs.find(([p,r]) => r !== 'pass' && p > lastPass);
   const trace = s.tool === 'vfl' && s.traces[`${s.selected}:${s.strand}`];
   const result = (title, why, next, extra = {}) => ({ title, why, next, tone:'neutral', from:null, to:null, lastPass, ...extra });
+  if(s.tool==='link' && s.service==='good') return result('Restored link is working',
+    'You confirmed the required local readings and link status after removing the tools.',
+    'Record the work and readings. This does not identify the original cause or verify every other channel.',{tone:'pass',complete:true});
+  if(s.tool==='link' && s.service==='bad') return result('Local loops passed; the service path still needs checking',
+    'A return loop does not prove end-to-end pairing or the remote source and receiver.',
+    'Verify FIM ports and TX-to-RX pairing. Trace accessible strands if needed; leave the onward path and remote device unverified.',
+    {tone:'suspect',suggestion:s.reach>0?{point:1,tool:'vfl'}:null});
   if (trace) {
     const shared = { from:s.selected-1, to:s.selected, tone:trace === 'seen' ? 'trace' : 'suspect' };
     if (trace === 'wrong' || trace === 'swapped') return result(trace === 'wrong' ? 'Light reached a different port' : 'Light reached the other strand',
@@ -133,8 +154,8 @@ export function assessment(s) {
     { tone:'suspect',from:0,to:0 });
   if (fail) return result(lastPass >= 0 ? `Narrowed to ${pointName(lastPass)} → ${pointName(fail[0])}` : `Not isolated yet: loop at ${pointName(fail[0])} failed`,
     lastPass >= 0 ? `The loop passed at ${pointName(lastPass)} but ${fail[1] === 'weak' ? 'returned weak light' : 'had no return light'} at ${pointName(fail[0])}.` : 'A failed passive loop includes the optic, fiber, connections and loop setup.',
-    lastPass >= 0 ? 'Recheck the loop setup, then inspect the added section and its connections. Use VFL for routing / continuity; measure loss for attenuation.' : 'Try a valid LC loop directly at the optic to separate the optic / setup from the external path.',
-    {tone:'suspect',from:Math.max(0,lastPass),to:fail[0], suggestion:lastPass < 0 ? {point:0,tool:'loop'} : {point:Math.min(lastPass+1,s.reach),tool:'vfl'}});
+    lastPass >= 0 ? fail[0]>lastPass+1?`Recheck the failed loop setup. Then loop at ${pointName(lastPass+1)} to narrow this larger section before tracing.`:'Recheck the loop setup, then inspect the added section and its connections. Use VFL for routing / continuity; measure loss for attenuation.' : 'Try a valid LC loop directly at the optic to separate the optic / setup from the external path.',
+    {tone:'suspect',from:Math.max(0,lastPass),to:fail[0], suggestion:lastPass < 0 ? {point:0,tool:'loop'} : {point:Math.min(lastPass+1,s.reach),tool:fail[0]>lastPass+1?'loop':'vfl'}});
   if (lastPass >= 0) return result(`Loop passed to ${pointName(lastPass)}`,
     'The tested pair returned light within the limits you checked. This does not verify the live link, all MMC fibers or end-to-end polarity.',
     lastPass < s.reach ? `Move the loop to ${pointName(lastPass+1)}. Compare the result with this passed test.` : 'Remove the loop and restore the mapped link. Recheck local health; leave the onward path and remote device unverified.',
