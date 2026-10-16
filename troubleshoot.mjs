@@ -1,5 +1,5 @@
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool} from './troubleshoot-state.mjs?v=4';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=4';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool} from './troubleshoot-state.mjs?v=5';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=5';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=3';
 
 const host=document.querySelector('#troubleshoot-workbench');
@@ -93,12 +93,12 @@ function removeTool() {
   update([{type:'remove'}],'Tool removed; connectors left unplugged. Results kept.');
 }
 function normalizeSetup() {
-  update([{type:'normalize'}],'Normal patching restored in the diagram. Recheck actual health.');
+  update([{type:'normalize'}],'Setup normalized in the diagram. Recheck actual health.');
 }
 const toolDrag=mountToolDrag(host,{select:selectTool,place:placeTool,remove:removeTool,valid:(kind,point)=>canPlaceTool(cases[view],kind,point),announce,getSelected:()=>selectedTool});
 
 function tray(s) {
-  return `<div class="ts-tool-tray" aria-label="Test tools"><div class="ts-tool-items">${Object.entries(toolNames).map(([kind,name])=>`<button type="button" class="ts-tool-pick" data-pick-tool="${kind}" aria-pressed="${selectedTool===kind}" aria-label="Pick up ${name}">${toolArt(kind)}<span><b>${name}</b><small>${kind==='lc'?'At the optic':kind==='mmc'?'At a cassette':'LC leg / fiber'}</small></span></button>`).join('')}</div><div class="ts-tray-actions"><span>Drag a placed tool back here to remove.</span>${button('test-result','Enter result ↓',s.tool==='link'?'disabled':'')}${button('remove-tool','Remove tool',`class="ts-remove" aria-label="Remove placed tool" ${s.tool==='link'?'disabled':''}`)}${button('normalize','Restore normal setup',`class="ts-normalize" ${s.tool==='link'&&!s.disconnected?.length?'disabled':''}`)}</div><p id="ts-tool-hint">Drag a tool onto the path, or tap a tool then its target.</p></div>`;
+  return `<div class="ts-tool-tray" aria-label="Test tools"><div class="ts-tool-items">${Object.entries(toolNames).map(([kind,name])=>`<button type="button" class="ts-tool-pick" data-pick-tool="${kind}" aria-pressed="${selectedTool===kind}" aria-label="Pick up ${name}">${toolArt(kind)}<span><b>${name}</b><small>${kind==='lc'?'At the optic':kind==='mmc'?'At a cassette':'LC leg / fiber'}</small></span></button>`).join('')}</div><div class="ts-tray-actions"><span>Drag a placed tool back here to remove.</span>${button('test-result','Enter result ↓',s.tool==='link'?'disabled':'')}${button('remove-tool','Remove tool',`class="ts-remove" aria-label="Remove placed tool" ${s.tool==='link'?'disabled':''}`)}${button('normalize','Normalize',`class="ts-normalize" ${s.tool==='link'&&!s.disconnected?.length?'disabled':''}`)}</div><p id="ts-tool-hint">Drag a tool onto the path, or tap a tool then its target.</p></div>`;
 }
 
 function setup(s) {
@@ -128,7 +128,7 @@ function controls(s) {
   const point=s.selected, tool=s.tool;
   const hasResults=Object.keys(s.loops).length+Object.keys(s.traces).length>0;
   const result=tool==='loop'?s.loops[point]:s.traces[`${point}:${s.strand}`];
-  if(tool==='link' && s.disconnected?.length) return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">Reconnect the service path</h2><p class="ts-tool-caption">The tool is off. The highlighted LC legs or MMC heads are still unplugged.</p>${button('normalize','Restore normal setup','class="ts-primary"')}<p class="ts-note">Reconnects the illustration and keeps recorded tests. Confirm the real connections before checking health.</p></section>`;
+  if(tool==='link' && s.disconnected?.length) return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">Reconnect the service path</h2><p class="ts-tool-caption">The tool is off. The highlighted LC legs or MMC heads are still unplugged.</p>${button('normalize','Normalize','class="ts-primary"')}<p class="ts-note">Reconnects the illustration and keeps recorded tests. Confirm the real connections before checking health.</p></section>`;
   if(tool==='link') return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">${s.loops[s.reach]==='pass'?'Check the restored link':hasResults?'Choose the next test':'Place your first test'}</h2>
     ${s.loops[s.reach]==='pass'&&!s.simulated?`<p class="ts-tool-caption">Remove the loop, restore the mapped connections, then check required local readings and link status. Is the link working now?</p><div class="ts-result-buttons">${button('service-good','Yes · link working',`aria-pressed="${s.service==='good'}"`)}${button('service-bad','No · still a problem',`aria-pressed="${s.service==='bad'}"`)}</div>`:
       hasResults?'<p class="ts-tool-caption">Place a tool for your next check. Earlier observations stay on the path and in Recorded tests.</p>':`<p class="ts-tool-caption">Drag LC onto the optic to start. If you already have a test set up, place that tool at its matching point.</p>`}</section>`;
@@ -147,7 +147,7 @@ function advice(s) {
   if(pending) return `<section class="ts-advice" aria-labelledby="finding-title"><h2 id="finding-title">Waiting for your result</h2><p>${s.tool==='loop'?s.selected===0?'This test checks the optic with the external fiber bypassed.':`This loop includes the optic and its fiber path to CAS ${s.selected}.`:`This trace checks one isolated strand from ${spanName(s.selected)}.`}</p>${a.lastPass>=0?`<p class="ts-note">✓ Last passing loop: ${pointName(a.lastPass)}. The next section remains unverified.</p>`:''}</section>`;
   return `<section class="ts-advice ${a.tone}" aria-labelledby="finding-title"><p class="ts-eyebrow">What your ${s.simulated?'simulated ':''}tests tell us</p><h2 id="finding-title">${a.title}</h2>
     <p>${a.why}</p><div class="ts-next"><b>Next check</b><p>${a.next}</p></div>
-    ${a.suggestion&&!pending?button('next',a.suggestion.tool==='loop'?`Next: ${a.suggestion.point?'MMC':'LC'} loop at ${pointName(a.suggestion.point)}`:a.suggestion.tool==='vfl'?`Trace ${spanName(a.suggestion.point)} with VFL`:'Restore normal setup','class="ts-next-button"'):''}
+    ${a.suggestion&&!pending?button('next',a.suggestion.tool==='loop'?`Next: ${a.suggestion.point?'MMC':'LC'} loop at ${pointName(a.suggestion.point)}`:a.suggestion.tool==='vfl'?`Trace ${spanName(a.suggestion.point)} with VFL`:'Normalize','class="ts-next-button"'):''}
     ${a.tone==='suspect'&&s.tool!=='vfl'&&a.from!==0?'<p class="ts-note">Possible causes: contamination, seating, misport, ferrule damage, broken / bent fiber, polarity or a splice. Test results narrow the location; they do not identify a cause by themselves.</p>':''}
   </section>`;
 }

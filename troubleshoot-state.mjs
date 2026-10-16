@@ -148,7 +148,7 @@ export function assessment(s) {
   const result = (title, why, next, extra = {}) => ({ title, why, next, tone:'neutral', from:null, to:null, lastPass, ...extra });
   if(s.tool==='link' && s.disconnected?.length) return result('Connections are still unplugged',
     'Removing the tool leaves the test connections open in the diagram. Earlier results are kept.',
-    'Restore normal setup to reconnect the service path, then check actual readings and link status.',
+    'Select Normalize to reconnect the service path, then check actual readings and link status.',
     {suggestion:{point:s.selected,tool:'link'}});
   if(s.tool==='link' && s.service==='good') return result('Restored link is working',
     'You confirmed the required local readings and link status after removing the tools.',

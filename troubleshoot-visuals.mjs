@@ -1,6 +1,6 @@
 import {cassetteFront} from './loop-visuals.mjs?v=3';
 import {lightFlow} from './light-visuals.mjs?v=1';
-import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,connectionAt} from './troubleshoot-state.mjs?v=4';
+import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,connectionAt} from './troubleshoot-state.mjs?v=5';
 
 function opticFace(mode='plugged',strand='tx',trace) {
   const loop=mode==='loop', plugged=mode==='plugged';
@@ -84,7 +84,7 @@ export function workbenchDiagram(s) {
     if (trace && trace!=='dark') drawing += lightFlow(path,'red')+`<circle class="ts-red-dot" cx="${x}" cy="${targetY}" r="7"/>`;
     if (trace==='wrong') drawing += `<text class="ts-route-note" x="${x+12}" y="308">Other port</text>`;
   } else {
-    drawing += `<text class="ts-result-label" x="${width/2}" y="309">${s.disconnected?.length?'Connectors unplugged · restore normal setup':s.simulated?'Simulated service path · fault position is illustrative':'Normal patching · health still needs checking'}</text>`;
+    drawing += `<text class="ts-result-label" x="${width/2}" y="309">${s.disconnected?.length?'Connectors unplugged · Normalize':s.simulated?'Simulated service path · fault position is illustrative':'Normal patching · health still needs checking'}</text>`;
     if(s.simulated && !s.disconnected?.length) {
       const f=s.fault,r=simulatedReadings(s),fx=f.at===0?start:(centers[f.at-1]+centers[f.at])/2;
       for(const strand of ['tx','rx']) {
