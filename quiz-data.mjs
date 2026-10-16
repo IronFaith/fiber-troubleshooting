@@ -1,3 +1,4 @@
+import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=1';
 export const topics = ['Spot the problem', 'Check the connection', 'Understand the light', 'Narrow down the problem'];
 export const roundDescriptions = [
   'Read the signs and consider what could cause them.',
@@ -5,6 +6,10 @@ export const roundDescriptions = [
   'Follow TX and RX, compare limits and check every lane.',
   'Use local loops and VFL observations to choose the next check.'
 ];
+export const allTopics = [...topics,...appliedTopics];
+export const allDescriptions = [...roundDescriptions,...appliedDescriptions];
+export const levelFor = topic => topic >= topics.length ? 'intermediate' : 'beginner';
+export const roundsForLevel = level => level === 'intermediate' ? [4,5] : [0,1,2,3];
 
 // Site examples and fictional training readings, not installed-optic limits.
 export const questions = [
@@ -118,14 +123,14 @@ export const questions = [
     prompt:'The approved direct optic loop passes. The restored link still fails. What next?',
     choices:['Mark the remote optic healthy because the local loop passed.', 'Extend the test to the next accessible passive using the mapped loop.', 'Replace the local optic before checking any connected fiber.'], correct:1,
     explanation:'The local optic passed this test. Extend outward through the fiber and connections you can reach. A direct loop does not test the long route or remote optic.',
-    reveal:'Checked locally; extend the tested path', lesson:'learn.html#trace-loops'
+    reveal:'Checked locally; extend the tested path', lesson:'learn.html#loopbacks'
   },
   {
     id:'passive-loop', topic:3, visual:'sections', interaction:'visual', skill:'Interpret local loop results',
     prompt:'Read the loop results. Which section should you investigate next?',
     choices:['A · local optic to CAS 1', 'B · CAS 1 to CAS 2, including its connections', 'C · beyond CAS 2 toward the remote device'], correct:1,
     explanation:'The direct loop and CAS 1 loop passed. The CAS 2 loop failed, so first verify that loop setup, then investigate the added span and its connections. This does not locate a break. Beyond CAS 2 is untested.',
-    reveal:'B is suspect. Verify the loop setup, then isolate this span.', lesson:'learn.html#trace-loops'
+    reveal:'B is suspect. Verify the loop setup, then isolate this span.', lesson:'learn.html#compare-loops'
   },
   {
     id:'vfl-setup', topic:3, visual:'vfl-setup', skill:'Use VFL observations',
@@ -150,6 +155,7 @@ export const questions = [
   }
 ];
 
+questions.push(...appliedQuestions);
 export const roundQuestionIds = topic => questions.filter(question => question.topic === topic).map(question => question.id);
 
 export function skillsFor(topic, answers) {
@@ -196,7 +202,8 @@ export function resultsFor(attempt) {
 export function roundProgress(topic, answers) {
   const result = resultsFor({ids:roundQuestionIds(topic),answers});
   const passed = result.complete && result.total === 5 && result.correct >= 4;
-  return {...result, passed, nextRound:passed && topic < topics.length-1 ? topic+1 : null};
+  const rounds = roundsForLevel(levelFor(topic));
+  return {...result, passed, nextRound:passed ? rounds[rounds.indexOf(topic)+1] ?? null : null};
 }
 
 export function rookieRank(scores) {
@@ -205,29 +212,31 @@ export function rookieRank(scores) {
   return {level, title:`Fiber Rookie${numeral ? ` ${numeral}` : ''}`, complete:level === topics.length};
 }
 
-const progressKey = 'fiber-quiz-progress-v1';
-const emptyScores = () => topics.map(() => null);
+const progressKey = level => level === 'intermediate' ? 'fiber-applied-progress-v1' : 'fiber-quiz-progress-v1';
+const emptyScores = level => roundsForLevel(level).map(() => null);
 
-export function loadQuizProgress(storage) {
+export function loadQuizProgress(storage, level = 'beginner') {
   let raw;
-  try { raw = storage.getItem(progressKey); }
-  catch { return {scores:emptyScores(),canSave:false}; }
+  try { raw = storage.getItem(progressKey(level)); }
+  catch { return {scores:emptyScores(level),canSave:false}; }
   let saved;
   try { saved = JSON.parse(raw); } catch { /* An unreadable record starts fresh. */ }
-  const scores = topics.map((_,i) => {
+  const scores = roundsForLevel(level).map((_,i) => {
     const score = saved?.scores?.[i];
     return Number.isInteger(score) && score >= 0 && score <= 5 ? score : null;
   });
   return {scores,canSave:true};
 }
 
-export function saveQuizProgress(storage, scores) {
-  try { storage.setItem(progressKey,JSON.stringify({scores})); return true; }
+export function saveQuizProgress(storage, scores, level = 'beginner') {
+  try { storage.setItem(progressKey(level),JSON.stringify({scores})); return true; }
   catch { return false; }
 }
 
-export function recordRoundProgress(scores, topic, answers) {
+export function recordRoundProgress(scores, topic, answers, {practice = false} = {}) {
+  if (practice && levelFor(topic) === 'intermediate') return scores;
   const result = roundProgress(topic,answers);
   if (!result.complete || result.total !== 5) return scores;
-  return scores.map((score,i) => i === topic ? Math.max(score ?? 0,result.correct) : score);
+  const index = roundsForLevel(levelFor(topic)).indexOf(topic);
+  return scores.map((score,i) => i === index ? Math.max(score ?? 0,result.correct) : score);
 }

@@ -1,6 +1,7 @@
-import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=3';
+import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=4';
 
-import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=8';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=9';
+import {loadPatchBest} from './patch-practice-data.mjs?v=1';
 
 const host = document.querySelector('#quiz');
 let attempt;
@@ -13,6 +14,10 @@ let motionPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 let progressStorage;
 try { progressStorage = window.localStorage; } catch { /* Quizzes still work without storage. */ }
 let {scores:savedScores,canSave} = loadQuizProgress(progressStorage);
+let {scores:appliedScores} = loadQuizProgress(progressStorage,'intermediate');
+let selectedLevel=['beginner','intermediate'].includes(location.hash.slice(1))?location.hash.slice(1):null;
+const levelTitle=level=>level==='intermediate'?'Intermediate':'Beginner';
+const activeScores=()=>selectedLevel==='intermediate'?appliedScores:savedScores;
 
 function focusTitle() {
   const title = host.querySelector('h2');
@@ -26,6 +31,7 @@ function begin(ids, isRetry = false) {
 }
 
 function beginRound(topic) {
+  selectedLevel=levelFor(topic);
   currentRound = topic;
   roundAnswers = {};
   firstScore = 0;
@@ -33,25 +39,48 @@ function beginRound(topic) {
 }
 
 function renderIntro() {
+  host.classList.remove('light-paused');
+  const patchBest=loadPatchBest(progressStorage).best;
+  if(!selectedLevel) {
+    const counts=[savedScores.filter(s=>s>=4).length+(patchBest>=4?1:0),appliedScores.filter(s=>s>=4).length];
+    host.innerHTML=`<h2 id="quiz-title" tabindex="-1">Exams</h2><p class="lesson-intro">Choose a level. Every exam has five questions and draws from the chapters.</p>
+      <div class="exam-levels">${['beginner','intermediate'].map((level,i)=>`<button type="button" class="exam-level" data-level="${level}">
+        ${quizThumbnail(i===0?2:3)}<span><strong>${levelTitle(level)}</strong><b>${i===0?'Foundations':'Applied troubleshooting'}</b><span>${i===0?'Recognize parts, read the signs and make the basic checks.':'Combine observations, explain the limits of a test and choose your next check.'}</span><small>${counts[i]} of ${i===0?5:2} exams passed · choose any exam</small><em>Open ${levelTitle(level)} →</em></span></button>`).join('')}</div>
+      <p class="picture-note">Beginner includes four knowledge exams and hands-on patching. Intermediate combines those ideas in mixed scenarios. Choose any exam; there is no required order.</p>
+      <a class="quiz-lesson-link" href="./learn.html">Explore the chapters</a>`;
+    host.querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>chooseLevel(b.dataset.level)));
+    return;
+  }
+  const beginner=selectedLevel==='beginner', scores=activeScores();
   const rank = rookieRank(savedScores);
-  host.innerHTML = `<p class="chapter-count">Beginner level · 5 questions per exam</p>
-    <h2 id="quiz-title" tabindex="-1">Exams</h2>
-    <p class="lesson-intro">Look at the evidence. Choose your next check. Five questions at a time, in any order.</p>
-    ${rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Get 4/5 to earn a Fiber Rookie stripe. Each different exam you pass adds one stripe.</p>'}
-    <div class="quiz-picker">${topics.map((topic,i) => {
-      const score = savedScores[i];
+  host.innerHTML = `<button type="button" class="quiz-picker-back" id="exam-levels">← Exam levels</button><p class="chapter-count">5 questions per exam · choose freely</p>
+    <h2 id="quiz-title" tabindex="-1">${levelTitle(selectedLevel)} · ${beginner?'Foundations':'Applied troubleshooting'}</h2>
+    <p class="lesson-intro">${beginner?'Understand the parts, interpret a clear observation and choose a sensible first check.':'Use the same chapter knowledge in situations with several clues. Separate what is known from what still needs checking.'}</p>
+    ${beginner?(rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Get 4/5 to earn a Fiber Rookie stripe in each knowledge exam. Patching has its own result.</p>'):appliedCard()}
+    <div class="quiz-picker">${roundsForLevel(selectedLevel).map((topic,i) => {
+      const score = scores[i];
       const passed = score !== null && score >= 4;
-      return `<button type="button" class="quiz-pick${passed ? ' quiz-pick-passed' : ''}" data-round="${i}">
-        ${quizThumbnail(i)}<span class="quiz-pick-content">
-          <strong>${topic}</strong><span class="quiz-pick-description">${roundDescriptions[i]}</span>
+      return `<button type="button" class="quiz-pick${passed ? ' quiz-pick-passed' : ''}" data-round="${topic}">
+        ${quizThumbnail(beginner?topic:i===0?3:2)}<span class="quiz-pick-content">
+          <strong>${allTopics[topic]}</strong><span class="quiz-pick-description">${allDescriptions[topic]}</span>
           <span class="quiz-pick-status">${score === null ? 'Not taken' : `${passed ? '✓ Passed' : 'Keep practicing'} · Best result ${score}/5`}</span>
           <span class="quiz-pick-action">${score === null ? 'Start exam' : 'Retake exam'} →</span>
         </span></button>`;
-    }).join('')}</div>
-    <p class="picture-note">${canSave ? 'Completed exam results and stripes stay in this browser on this device. Best results include retries.' : 'This browser cannot save progress. You can still choose any exam; results last for this visit.'}</p>
-    <a class="quiz-lesson-link" href="./simulations.html">Simulations · hands-on patching & 5-question exam →</a>
-    <a class="quiz-lesson-link" href="./learn.html">Learn the basics first</a>`;
-  host.querySelectorAll('.quiz-pick').forEach(button => button.addEventListener('click',() => beginRound(Number(button.dataset.round))));
+    }).join('')}${beginner?`<a class="quiz-pick${patchBest>=4?' quiz-pick-passed':''}" href="./simulations.html?exam=patching#practice">${quizThumbnail(1)}<span class="quiz-pick-content"><strong>Hands-on patching</strong><span class="quiz-pick-description">Place LC and MMC connectors from a mock FIM ticket, including a flipped optic.</span><span class="quiz-pick-status">${patchBest===null?'Not taken':`${patchBest>=4?'✓ Passed':'Keep practicing'} · Best result ${patchBest}/5`}</span><span class="quiz-pick-action">Open patching exam →</span></span></a>`:''}</div>
+    <p class="picture-note">${canSave ? `Scores stay in this browser on this device. ${beginner?'Knowledge-exam best results include retries.':'Intermediate best scores use complete exam attempts; practice retries do not replace them.'}` : 'This browser cannot save progress. You can still choose any exam; results last for this visit.'}</p>
+    <a class="quiz-lesson-link" href="./learn.html${beginner?'':'#compare-loops'}">${beginner?'Learn the basics first':'Review the worked examples'}</a>`;
+  host.querySelectorAll('[data-round]').forEach(button => button.addEventListener('click',() => beginRound(Number(button.dataset.round))));
+  host.querySelector('#exam-levels').addEventListener('click',()=>chooseLevel(null));
+}
+
+function chooseLevel(level) {
+  selectedLevel=level;
+  history.replaceState(null,'',`${location.pathname}${level?`#${level}`:''}`);
+  showQuizPicker();
+}
+function appliedCard() {
+  const count=appliedScores.filter(score=>score>=4).length;
+  return `<section class="exam-applied-progress" aria-label="Intermediate progress"><b>${count} of 2 Intermediate exams passed</b><p>Pass with 4/5 on a complete attempt. Review feedback and practice missed questions, then retake the full exam to improve your saved score.</p></section>`;
 }
 
 function showQuizPicker() {
@@ -64,16 +93,16 @@ function renderQuestion() {
   const multiple = Array.isArray(question.correct);
   const visual = question.interaction==='visual';
   host.classList.toggle('light-paused',motionPaused);
-  host.innerHTML = `<div class="q-question-tools"><button class="quiz-picker-back" type="button" id="quiz-all">← All exams</button><button class="q-motion" type="button" id="quiz-motion" aria-label="${motionPaused ? 'Play' : 'Pause'} explanation animations">${motionPaused ? 'Play' : 'Pause'} motion</button></div>
-    <div class="quiz-progress-label"><span>${retry ? 'Retry' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>Round ${currentRound+1} · ${topics[question.topic]}</span></div>
+  host.innerHTML = `<div class="q-question-tools"><button class="quiz-picker-back" type="button" id="quiz-all">← ${levelTitle(selectedLevel)} exams</button><button class="q-motion" type="button" id="quiz-motion" aria-label="${motionPaused ? 'Play' : 'Pause'} explanation animations">${motionPaused ? 'Play' : 'Pause'} motion</button></div>
+    <div class="quiz-progress-label"><span>${retry ? 'Practice' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>${levelTitle(selectedLevel)} · ${allTopics[question.topic]}</span></div>
     <progress class="quiz-progress" value="${index}" max="${attempt.ids.length}" aria-label="Questions answered"></progress>
     <h2 id="quiz-title" class="quiz-question" tabindex="-1">${question.prompt}</h2>
     ${visual ? '<p class="q-tap-hint">Tap your answer in the picture. Keyboard: Tab, then Enter.</p>' : ''}
     <div id="quiz-scene">${quizVisual(question)}</div>
     <div id="quiz-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
-    ${multiple ? '<p class="quiz-selection-hint" id="quiz-selection-hint">Select all that could cause it, then check your answers.</p>' : ''}
+    ${multiple ? `<p class="quiz-selection-hint" id="quiz-selection-hint">${selectedLevel==='intermediate'?'Select all supported answers.':'Select all that could cause it.'} Then check your answers.</p>` : ''}
     ${visual ? '' : `<div class="quiz-answers" role="group" aria-labelledby="quiz-title"${multiple ? ' aria-describedby="quiz-selection-hint"' : ''}>${question.choices.map((choice,i) => multiple
-      ? `<label class="quiz-answer quiz-multiple"><input type="checkbox" value="${i}"><span>${choice}<span class="quiz-answer-state"></span></span></label>`
+      ? `<label class="quiz-answer quiz-multiple"><input type="checkbox" value="${i}"><span>${selectedLevel==='intermediate'?`<b>${String.fromCharCode(65+i)}.</b> `:''}${choice}<span class="quiz-answer-state"></span></span></label>`
       : `<button type="button" class="quiz-answer" data-choice="${i}"><span class="quiz-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span>${choice}<span class="quiz-answer-state"></span></span></button>`).join('')}</div>`}
     ${multiple ? '<button class="quiz-primary" type="button" id="quiz-check" disabled>Check answers</button>' : ''}
     <button class="quiz-primary" type="button" id="quiz-next" hidden>${index === attempt.ids.length-1 ? 'Finish this round' : 'Next question'}</button>`;
@@ -115,9 +144,9 @@ function choose(question,choice) {
     const status = card.querySelector('.quiz-answer-state');
     if (expected.includes(i)) {
       card.classList.add('answer-correct');
-      status.textContent = selected.includes(i) ? 'Your answer · correct' : multiple ? 'Also a possible cause · not selected' : 'Correct answer';
+      status.textContent = selected.includes(i) ? 'Your answer · correct' : multiple ? 'Also correct · not selected' : 'Correct answer';
     } else if (selected.includes(i)) {
-      card.classList.add('answer-missed'); status.textContent = multiple ? 'Your answer · not a cause' : 'Your answer';
+      card.classList.add('answer-missed'); status.textContent = multiple ? 'Your answer · not supported' : 'Your answer';
     }
   });
   const check = host.querySelector('#quiz-check');
@@ -127,7 +156,10 @@ function choose(question,choice) {
   if(host.querySelector('.q-cas-scroll')) host.querySelector('.q-cas-scroll').scrollLeft=cassetteScroll;
   const feedback = host.querySelector('#quiz-feedback');
   feedback.className = `quiz-feedback ${correct ? 'feedback-correct' : 'feedback-missed'}`;
-  feedback.innerHTML = `<strong>${correct ? '✓ Good call. Here’s why.' : 'Here’s what the evidence tells us.'}</strong><p>${question.explanation}</p><a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review the illustrated lesson <span class="sr-only">(opens in a new tab)</span>↗</a>`;
+  feedback.innerHTML = `<strong>${correct ? '✓ Good call. Here’s why.' : 'Here’s what the evidence tells us.'}</strong><p>${question.explanation}</p>
+    ${question.choiceReasons?`<ol class="exam-choice-reasons">${question.choiceReasons.map((reason,i)=>`<li><b>${String.fromCharCode(65+i)} · ${expected.includes(i)?'Supported':'Not supported'}</b><span>${reason}</span></li>`).join('')}</ol>`:''}
+    <a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review the illustrated lesson <span class="sr-only">(opens in a new tab)</span>↗</a>
+    ${(question.relatedLessons??[]).map(([title,href])=>`<a class="exam-related" href="./${href}" target="_blank" rel="noopener noreferrer">${title} ↗</a>`).join('')}`;
   host.querySelector('.quiz-progress').value = index+1;
   const next = host.querySelector('#quiz-next'); next.hidden = false;
   next.focus({preventScroll:true});
@@ -135,7 +167,7 @@ function choose(question,choice) {
 }
 
 function rankCard(rank, earnedNow, passed) {
-  const note = rank.complete ? 'All four beginner rounds passed.'
+  const note = rank.complete ? 'All four knowledge exams passed. Hands-on patching has its own result.'
     : !passed && (savedScores[currentRound] ?? 0) < 4 ? 'Get 4/5 in this round to earn your next stripe.'
     : !passed ? 'Your earned stripe stays while you practice.'
     : 'One stripe for each beginner round passed.';
@@ -146,7 +178,7 @@ function rankCard(rank, earnedNow, passed) {
     </svg>
     <div><p class="quiz-rank-label">Beginner · ${earnedNow ? 'Stripe earned' : rank.level ? 'Your earned rank' : 'Your first stripe is next'}</p>
       <h3 id="quiz-rank-title">${rank.title}</h3>
-      <p class="quiz-rank-count">${rank.level} of 4 stripes${rank.complete ? ' · Beginner complete' : ''}</p>
+      <p class="quiz-rank-count">${rank.level} of 4 knowledge stripes${rank.complete ? ' · Knowledge rounds complete' : ''}</p>
       <p class="quiz-rank-note">${note}</p>
     </div>
   </section>`;
@@ -158,24 +190,26 @@ function renderResults() {
   const progress = roundProgress(currentRound,roundAnswers);
   const nextRound = progress.nextRound;
   const previousRank = rookieRank(savedScores);
-  savedScores = recordRoundProgress(savedScores,currentRound,roundAnswers);
-  canSave = saveQuizProgress(progressStorage,savedScores);
+  const beginner=selectedLevel==='beginner';
+  const updated=recordRoundProgress(activeScores(),currentRound,roundAnswers,{practice:retry});
+  if(beginner) savedScores=updated; else appliedScores=updated;
+  canSave = saveQuizProgress(progressStorage,updated,selectedLevel);
   const rank = rookieRank(savedScores);
   const skills=skillsFor(currentRound,roundAnswers);
   const earnedNow = rank.level > previousRank.level;
-  const title = !progress.passed ? 'A little more practice' : rank.complete ? 'Beginner basics complete' : earnedNow ? 'You earned a stripe' : 'Round complete';
-  host.innerHTML = `<p class="chapter-count">Round ${currentRound+1} ${retry ? 'practice complete' : 'complete'} · ${topics[currentRound]}</p>
+  const title = !beginner&&retry?'Practice complete':!progress.passed ? 'A little more practice' : !beginner?'Intermediate exam passed':rank.complete ? 'Knowledge rounds complete' : earnedNow ? 'You earned a stripe' : 'Round complete';
+  host.innerHTML = `<p class="chapter-count">${levelTitle(selectedLevel)} · ${allTopics[currentRound]} · ${retry?'practice':'exam'} complete</p>
     <h2 id="quiz-title" tabindex="-1">${title}</h2>
-    ${rankCard(rank,earnedNow,progress.passed)}
+    ${beginner?rankCard(rank,earnedNow,progress.passed):appliedCard()}
     <p class="quiz-score"><strong>${progress.correct}<span> / 5</span></strong> ${retry ? 'answered correctly after practice' : 'correct on your first answer'}</p>
-    ${retry ? `<p class="picture-note">First try: ${firstScore}/5. This retry: ${result.correct}/${result.total}.</p>` : ''}
+    ${retry ? `<p class="picture-note">Full exam: ${firstScore}/5. This retry: ${result.correct}/${result.total}.${!beginner?' Practice does not change the saved exam score.':''}</p>` : ''}
     <section class="q-skill-recap" aria-label="Skills from this round">
       ${skills.checked.length ? `<div><h3>What you showed</h3><ul>${skills.checked.map(skill=>`<li>✓ ${skill}</li>`).join('')}</ul></div>` : ''}
       ${skills.review.length ? `<div><h3>Practice next</h3><ul>${skills.review.map(skill=>`<li>${skill}</li>`).join('')}</ul></div>` : ''}
     </section>
     <p class="section-intro">${progress.passed ? 'You can revisit an idea or choose any other exam.' : 'Review the ideas below and retry the missed questions. Aim for four correct answers out of five.'}</p>
     ${!canSave ? '<p class="picture-note">Progress could not be saved in this browser. It will last for this visit.</p>' : ''}
-    ${nextRound !== null ? `<p class="quiz-next-round"><strong>Next: ${topics[nextRound]}</strong><span>${roundDescriptions[nextRound]}</span></p>` : ''}
+    ${nextRound !== null ? `<p class="quiz-next-round"><strong>Next: ${allTopics[nextRound]}</strong><span>${allDescriptions[nextRound]}</span></p>` : ''}
     <div class="quiz-result-actions">
       ${nextRound !== null ? '<button type="button" class="quiz-primary" id="quiz-continue">Try the next 5 questions</button>' : ''}
       ${progress.missed.length ? `<button type="button" class="${progress.passed ? 'quiz-secondary' : 'quiz-primary'}" id="quiz-retry">Retry ${progress.missed.length} missed ${progress.missed.length === 1 ? 'question' : 'questions'}</button>` : ''}
@@ -188,7 +222,7 @@ function renderResults() {
       const answerText = answer => (Array.isArray(answer) ? answer : [answer]).map(choice => question.choices[choice]).join(' ');
       return `<li><h4>${question.prompt}</h4><p class="quiz-review-choice">Your answer: ${answerText(roundAnswers[id])}</p><p><b>Correct:</b> ${answerText(question.correct)}</p><p>${question.explanation}</p><a href="./${question.lesson}" target="_blank" rel="noopener noreferrer">Review lesson ↗<span class="sr-only"> (opens in a new tab)</span></a></li>`;
     }).join('')}</ol>` : ''}
-    <a class="lesson-return" href="./index.html">Use the optic / fiber health check →</a>`;
+    <a class="lesson-return" href="./index.html">Use Troubleshoot →</a>`;
   host.querySelector('#quiz-continue')?.addEventListener('click',() => beginRound(nextRound));
   host.querySelector('#quiz-retry')?.addEventListener('click',() => begin(progress.missed,true));
   host.querySelector('#quiz-restart').addEventListener('click',() => beginRound(currentRound));

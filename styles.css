@@ -872,3 +872,100 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
   .ts-tool-buttons button { flex:1; padding:8px; }
   .ts-log > .ts-section-top { align-items:flex-start; flex-direction:column; }
 }
+/* Exam levels, scenario evidence and the worked examples that teach their reasoning. */
+.exam-levels { display:grid; gap:16px; margin:24px 0; }
+.exam-level { display:flex; align-items:center; gap:22px; width:100%; text-align:left; padding:23px; background:#fff; border:1px solid #b7cbd9; border-left:5px solid #245b91; border-radius:8px; color:#234a65; }
+.exam-level[data-level=intermediate] { border-left-color:#756197; }
+.exam-level:hover { background:#f0f5f8; }
+.exam-level > span:last-child { display:grid; gap:7px; }
+.exam-level strong { font-size:25px; letter-spacing:-.5px; }
+.exam-level b { font-size:14px; font-weight:650; }
+.exam-level span span { font-size:14px; line-height:1.5; color:#547082; }
+.exam-level small { color:#657b89; font-size:12px; }
+.exam-level em { font-style:normal; font-size:13px; font-weight:650; margin-top:4px; }
+.exam-applied-progress { margin:18px 0; padding:16px; border-left:4px solid #756197; background:#f2f0f6; border-radius:5px; }
+.exam-applied-progress b { font-size:14px; color:#594671; }
+.exam-applied-progress p { font-size:13px; margin:7px 0 0; color:#5b6476; }
+.quiz-pick { text-decoration:none; }
+.exam-choice-reasons { list-style:none; padding:0; margin:15px 0; display:grid; gap:10px; }
+.exam-choice-reasons li { display:grid; gap:3px; font-size:13px; line-height:1.5; }
+.exam-choice-reasons b { font-size:12px; }
+.exam-related { display:block; margin-top:8px; }
+.case-facts { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-bottom:14px; }
+.case-fact { padding:12px; background:#fff; border:1px solid #c7d5df; border-radius:5px; display:grid; gap:5px; }
+.case-fact span { font-size:12px; color:#63798a; }
+.case-fact b { font-size:14px; font-weight:650; color:#274f6c; }
+.case-loop-stops { display:flex; align-items:center; gap:8px; }
+.case-loop-stops figure { min-width:0; flex:1; margin:0; }
+.case-loop-stops figure > svg { height:120px; width:100%; }
+.case-loop-stops figcaption { display:grid; gap:4px; font-size:12px; text-align:center; justify-content:stretch; }
+.case-loop-stops figcaption span { color:#4b6578; }
+.case-arrow { font-size:22px; color:#7892a4; }
+.case-device { fill:#f5f8fa; stroke:#b5c8d5; stroke-width:1.5; }
+.case-path { fill:none; stroke:#708da2; stroke-width:3; }
+.case-vfl { fill:#fde9ed; stroke:#ad3a52; stroke-width:2; }
+.case-red { fill:none; stroke:#cf3048; stroke-width:4; }
+.case-red-dot { fill:#cf3048; }
+.case-log { display:flex; gap:10px; align-items:center; }
+.case-log > div { flex:1; }
+.case-log-action { font-size:13px; text-align:center; padding:12px; border-block:1px solid #c0d0db; }
+.case-log-action small { display:block; color:#6a7e8c; margin-top:7px; }
+.reason-example { padding:16px; margin:15px 0 0; background:#edf3f7; border:1px solid #ccdae3; border-radius:7px; }
+.reason-example svg { display:block; width:100%; height:auto; overflow:visible; }
+.reason-example svg text { font:500 15px 'Segoe UI',sans-serif; fill:#345a73; }
+.reason-example .hardware-label { font-size:14px; }
+.reason-example .cassette-number { font-size:10px; }
+.reason-example .hardware-tiny { font-size:9px; }
+.reason-example .cassette-case { fill:#21563f; stroke:#153e2c; }
+.reason-example .cassette-seam { stroke:#638c72; }
+.reason-example .hardware-art .cassette-number { fill:#e6f4e9; }
+.reason-example .hardware-art .cassette-selected .cassette-number { fill:#673c10; }
+#readings .reason-example svg text { font-size:23px; }
+.reason-example h4 { font-size:15px; margin:0 0 8px; }
+.reason-example p { font-size:14px; margin:12px 0 0; color:#436176; }
+.reason-caption { margin:0 0 8px !important; font-weight:650; }
+.reason-range { fill:#c5e4d4; }
+.reason-axis { stroke:#7893a5; stroke-width:2; }
+.reason-pointer { stroke:#245b91; stroke-width:3; }
+.reason-device { fill:#fff; stroke:#a6bac9; stroke-width:2; }
+.reason-ir,.reason-return { fill:none; stroke:#2679b7; stroke-width:4; }
+.reason-return { stroke:#318779; }
+.reason-two-up { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.reason-two-up .reason-example { min-width:0; }
+.reason-two-up svg text { font-size:19px; }
+.reason-fiber { fill:none; stroke:#cbaf3e; stroke-width:12; }
+.reason-splice { fill:#f5fbff44; stroke:#819caf; stroke-width:3; }
+.reason-sequence { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:9px; font-size:13px; }
+.reason-sequence span { background:white; padding:9px; border-radius:4px; border:1px solid #c3d2dc; }
+.reason-vfl { fill:#fff0f3; stroke:#bb3852; stroke-width:3; }
+.reason-red { stroke:#d83550; stroke-width:5; }
+.reason-red-dot { fill:#d83550; }
+.reason-power { display:flex; align-items:baseline; justify-content:center; gap:10px; margin:22px 0; }
+.reason-power b { font-size:36px; color:#a55328; }
+.reason-power small { font-size:12px; }
+.reason-ticket { display:flex; flex-wrap:wrap; gap:10px 22px; padding:15px; border:1px solid #b9cad8; background:#fff; border-radius:6px; margin:15px 0; }
+.reason-ticket span { display:grid; gap:4px; font-size:12px; color:#687c8b; }
+.reason-ticket b { font-size:14px; color:#244f6e; }
+.reason-example ol { padding-left:20px; font-size:14px; color:#436176; }
+.reason-example li { margin-bottom:10px; }
+.reason-unverified { fill:none; stroke:#a5b8c6; stroke-width:3; stroke-dasharray:7 7; }
+.reason-loop { fill:none; stroke:#89bdac; stroke-width:6; }
+.reason-suspect { fill:none; stroke:#a57b49; stroke-width:4; stroke-dasharray:7 5; }
+.reason-suspect-area { fill:#f9c66c33; stroke:#b68435; stroke-width:2; }
+#worked-loop figcaption { display:grid; gap:7px; font-size:14px; line-height:1.5; }
+@media(max-width:540px) {
+  .exam-level { gap:12px; padding:17px 12px; }
+  .exam-level .q-quiz-thumb { width:64px; }
+  .exam-level strong { font-size:22px; }
+  .case-loop-stops { flex-direction:column; }
+  .case-loop-stops figure { width:100%; display:flex; align-items:center; gap:12px; }
+  .case-loop-stops figure > svg { width:48%; height:105px; }
+  .case-loop-stops figcaption { text-align:left; }
+  .case-arrow { transform:rotate(90deg); line-height:18px; }
+  .case-log { flex-direction:column; align-items:stretch; }
+  .reason-two-up { grid-template-columns:1fr; gap:0; }
+  .reason-two-up svg { max-height:145px; }
+  .reason-example { padding:12px; }
+  .reason-example svg text { font-size:18px; }
+  .reason-example .cassette-number { font-size:10px; }
+}

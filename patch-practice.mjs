@@ -9,7 +9,7 @@ function connectorArt(kind) {
 }
 
 export function mountPatchPractice(host) {
-  let mode='practice', index=0, answers={}, selected=null, placement=null, finished=false;
+  let mode=new URLSearchParams(location.search).get('exam')==='patching'?'quiz':'practice', index=0, answers={}, selected=null, placement=null, finished=false;
   let storage;
   try { storage=window.localStorage; } catch { /* Works without saved progress. */ }
   let {best,canSave}=loadPatchBest(storage);
@@ -170,7 +170,7 @@ export function mountPatchPractice(host) {
     cable.clear();
     const current=task();
     const result=patchResult(answers);
-    host.innerHTML=`<div class="lab-modes" role="group" aria-label="Patching activity">
+    host.innerHTML=`<a class="quiz-picker-back" href="./quiz.html#beginner">← Beginner exams</a><div class="lab-modes" role="group" aria-label="Patching activity">
         <button type="button" data-mode="practice" aria-pressed="${mode==='practice'}">Practice · retry freely</button>
         <button type="button" data-mode="quiz" aria-pressed="${mode==='quiz'}">Take the 5-question exam</button>
       </div>

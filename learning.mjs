@@ -1,9 +1,10 @@
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration, localRemoteIllustration } from './rack-visuals.mjs?v=6';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
-import { mountPatchPractice } from './patch-practice.mjs?v=3';
+import { mountPatchPractice } from './patch-practice.mjs?v=4';
 import { mountLightJourney } from './loop-lesson.mjs?v=3';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=1';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -57,7 +58,7 @@ function renderLesson() {
     <h2 id="lesson-title">Optics, fiber & light</h2>
     <p class="lesson-intro">Follow the light from the optic, through the fiber, to the test.</p>
     <nav class="lesson-jumps" aria-label="In this chapter">
-      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#trace-loops">Device communication</a><a href="#loopbacks">Loopbacks</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
+      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#trace-loops">Device communication</a><a href="#loopbacks">Loopbacks</a><a href="#readings">Reading limits</a><a href="#compare-loops">Compare tests</a><a href="#polarity-checks">Polarity</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
     </nav>
     <section id="optics" class="lesson-section" aria-labelledby="light-title">
       <h3 id="light-title">Two light sources, different jobs</h3>
@@ -83,21 +84,24 @@ function renderLesson() {
       <h3 id="loop-title">Bring TX light back to RX</h3>
       <p class="section-intro">Move the loop to see what you are testing.</p>
       <div id="loop-picture"></div>
-      <div id="readings" class="learning-readings"><span><b>RX +0.25</b> your good example</span><span><b>RX −40</b> your no-light indication</span></div>
+      <div class="learning-readings"><span><b>RX +0.25</b> your good example</span><span><b>RX −40</b> your no-light indication</span></div>
       <p class="picture-note">dBm examples. Check every lane against the optic’s limits. Use the correct loop mapping and any required attenuation.</p>
     </section>
+    ${readingLesson()}${loopReasoningLesson()}
     <section id="cleaning" class="lesson-section" aria-labelledby="fault-title">
       <h3 id="fault-title">What can interrupt the light?</h3>
       <p class="section-intro">Change the connection to see a possible effect.</p>
       <div id="fault-picture"></div>
       <p class="lesson-takeaway">Isolate → inspect → clean if needed → inspect again → seat fully. Keep bends within the cable’s allowed radius.</p>
     </section>
+    ${faultReasoningLesson()}
     <section id="vfl" class="lesson-section" aria-labelledby="vfl-title">
       <h3 id="vfl-title">Follow red light to the next passive</h3>
       <p class="section-intro">Isolate both ends of the accessible section from active equipment. Connect the VFL with the correct adapter.</p>
       <div id="vfl-picture"></div>
       <p class="lesson-takeaway">VFL helps trace continuity and mapping. Measure optical loss separately with a source and power meter or loss test set.</p>
     </section>
+    ${vflReasoningLesson()}
     <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>
     <a class="next-chapter" href="./quiz.html">Open Exams →</a>
     <a class="next-chapter" href="./devices.html">Next chapter: Device locations & links →</a>
@@ -110,6 +114,7 @@ function renderLesson() {
   mountLightJourney(document.getElementById('light-journey'));
   example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
   example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
+  mountReasoningLessons(lesson);
 }
 
 function setupLesson() {
@@ -255,6 +260,7 @@ function renderDevicesLesson() {
       <div class="endpoint-locations"><p><strong>Device A · your example</strong><span>QNO5.5C.16f.17.30</span></p><p><strong>Device B · the other end</strong><span>Find its own position in the connection record.</span></p></div>
       <p class="picture-note">One pair enlarged: blue A → B, teal B → A. IR is invisible. The rack layouts, CAS 1 / 12 and onward route are examples; use FIM for the actual passives and lane map.</p>
     </section>
+    ${perspectiveLesson()}
     <section id="ports" class="lesson-section" aria-labelledby="ports-title">
       <h3 id="ports-title">Match the device and its port</h3>
       <div class="port-route" aria-label="Connection checks"><span>Rack position</span><b aria-hidden="true">↓</b><span>Device + exact port</span><b aria-hidden="true">↓</b><span>Optic + mapped passive ports</span><b aria-hidden="true">↓</b><span>Remote device + exact port</span></div>
@@ -372,6 +378,7 @@ function renderPatchingLesson() {
       <div id="mmc-patch-picture"></div>
       <p class="lesson-takeaway">The serial identifies the fanout. FIM identifies its destination passive and port. Then match each follower to its assigned optic port.</p>
     </section>
+    ${patchTicketLesson()}
     <a class="next-chapter" href="./simulations.html">Practice LC & MMC patching in Simulations →</a>
     <p class="lesson-sources">Port mapping and fanout: your site examples. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
     <a class="next-chapter" href="./quiz.html">Open Exams →</a>

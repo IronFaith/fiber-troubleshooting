@@ -1,6 +1,7 @@
 import {cassetteFront, loopIllustration} from './loop-visuals.mjs?v=3';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {lightFlow} from './light-visuals.mjs?v=1';
+import {caseVisual} from './exam-evidence.mjs?v=1';
 
 const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const text=(x,y,value,extra='')=>`<text x="${x}" y="${y}" ${extra}>${value}</text>`;
@@ -113,7 +114,8 @@ function bendChange(answered) {
 export function quizVisual(question,{answered=false,choice=null}={}) {
   const kind=question.visual;
   let body='';
-  if(['simple-dark','simple-rx-dark','light-returns','healthy','weak'].includes(kind)) body=readings(kind,answered);
+  if(kind.startsWith('case-')) body=caseVisual(question,answered);
+  else if(['simple-dark','simple-rx-dark','light-returns','healthy','weak'].includes(kind)) body=readings(kind,answered);
   else if(kind==='connections') body=`<p class="q-observation">Side views · tap a connection</p><div class="q-connection-choices">${[0,1].map(i=>target(question,i,`<strong>Connection ${i===0 ? 'A' : 'B'}</strong>${connector(i===0)}`,answered,choice)).join('')}</div>`;
   else if(kind==='seated-dark') body=`<div class="q-report-label">Connector after inspection and reseating</div>${connector(true)}<div class="quiz-reading reading-alert"><span>RX after reseating</span><strong>−40</strong><small>dBm</small></div>`;
   else if(kind==='dirty') body=svg(`<circle class="scope-face" cx="180" cy="104" r="80"/><circle class="scope-core" cx="180" cy="104" r="23"/><g class="q-contamination"><circle class="dirt" cx="171" cy="96" r="12"/><circle class="dirt" cx="199" cy="119" r="7"/><circle class="dirt" cx="142" cy="135" r="5"/></g>${answered ? '<circle class="q-inspection-ring" cx="180" cy="104" r="36"/>' : ''}${text(180,213,'Inspection image · isolated connector','text-anchor="middle"')}`,235,'Inspection view showing particles on the connector end face.');
