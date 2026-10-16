@@ -1,9 +1,10 @@
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
-import { mountCommunicationRoute } from './communication-route.mjs?v=1';
+import { mountCommunicationRoute } from './communication-route.mjs?v=2';
+import { mountCourse } from './course.mjs?v=1';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=4';
-import { mountLightJourney } from './loop-lesson.mjs?v=4';
+import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=1';
 
@@ -27,13 +28,11 @@ menuButton.setAttribute('aria-label', 'Learn');
 const menuPanel = el('div', 'learn-menu');
 menuPanel.id = 'learn-links'; menuPanel.hidden = true;
 menuPanel.append(el('p', '', 'Learning resources'));
-const chapterLink = link('Chapter 1 · Optics, fiber & light', './learn.html');
-const devicesLink = link('Chapter 2 · Device locations & links', './devices.html');
-const patchingLink = link('Chapter 3 · FIM, LC & MMC patching', './patching.html');
+const courseLink = link('Learn · Fiber basics', './learn.html');
 const simulationsLink = link('Simulations · hands-on practice', './simulations.html');
 const quizLink = link('Exams', './quiz.html');
 if (document.querySelector('#quiz')) quizLink.setAttribute('aria-current', 'page');
-menuPanel.append(chapterLink, devicesLink, patchingLink, simulationsLink, quizLink, link('Troubleshoot', './index.html', 'menu-return'));
+menuPanel.append(courseLink, simulationsLink, quizLink, link('Troubleshoot', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {
@@ -52,11 +51,9 @@ document.addEventListener('keydown', event => {
 
 const lesson = document.querySelector('#lesson');
 
-function renderLesson() {
-  chapterLink.setAttribute('aria-current', 'page');
+function renderLesson(lesson) {
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 1</p><button type="button" class="lesson-motion"></button></div>
-    <h2 id="lesson-title">Optics, fiber & light</h2>
     <p class="lesson-intro">Follow the light from the optic, through the fiber, to the test.</p>
     <nav class="lesson-jumps" aria-label="In this chapter">
       <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#trace-loops">Device communication</a><a href="#loopbacks">Loopbacks</a><a href="#readings">Reading limits</a><a href="#compare-loops">Compare tests</a><a href="#polarity-checks">Polarity</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
@@ -104,11 +101,8 @@ function renderLesson() {
       <p class="lesson-takeaway">VFL helps trace continuity and mapping. Measure optical loss separately with a source and power meter or loss test set.</p>
     </section>
     ${vflReasoningLesson()}
-    <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>
-    <a class="next-chapter" href="./quiz.html">Open Exams →</a>
-    <a class="next-chapter" href="./devices.html">Next chapter: Device locations & links →</a>
-    <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
-  setupLesson();
+    <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>`;
+  setupLesson(lesson);
   example('ir-picture', 'Optic infrared light', [], opticPicture);
   example('red-picture', 'Visible red VFL light', [], redPicture);
   example('path-picture', 'Fiber route', [], pathPicture);
@@ -119,18 +113,20 @@ function renderLesson() {
   mountReasoningLessons(lesson);
 }
 
-function setupLesson() {
+function setupLesson(lesson) {
   let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const motion = lesson.querySelector('.lesson-motion');
   function updateMotion() {
-    lesson.classList.toggle('light-paused', paused);
+    lesson.classList.toggle('light-paused', paused || lesson.hidden);
     const patching = ['patching', 'simulations'].includes(lesson.dataset.chapter);
     motion.textContent = paused ? (patching ? 'Play animation' : 'Play light') : (patching ? 'Pause animation' : 'Pause light');
     motion.setAttribute('aria-label', paused ? 'Play all animations' : 'Pause all animations');
   }
   motion.addEventListener('click', () => { paused = !paused; updateMotion(); });
   updateMotion();
-  // Old chapter links now land on the matching part of this single chapter.
+  lesson.addEventListener('coursevisibility', updateMotion);
+  if (lesson.classList.contains('course-chapter-body')) return;
+  // Standalone simulations retain their section links.
   function scrollToSection() {
     const target = document.getElementById(location.hash.slice(1));
     if (target && lesson.contains(target)) target.scrollIntoView({block:'start'});
@@ -234,11 +230,9 @@ function vflPicture(selected) {
     text(180,347,seen ? 'Light reaches port 12 ✓' : wrong ? 'Light reaches port 13 · check mapping' : 'Port 12 dark · location unknown','class="small" text-anchor="middle"')};
 }
 
-function renderDevicesLesson() {
-  devicesLink.setAttribute('aria-current', 'page');
+function renderDevicesLesson(lesson) {
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 2</p><button type="button" class="lesson-motion"></button></div>
-    <h2 id="lesson-title">Device locations & links</h2>
     <p class="lesson-intro">Find the device. Confirm the port. Follow its connection.</p>
     <nav class="lesson-jumps" aria-label="In this chapter"><a href="#position">Read the position</a><a href="#ends">Local & remote</a><a href="#ports">Confirm the ports</a></nav>
     <section id="position" class="lesson-section" aria-labelledby="position-title">
@@ -270,10 +264,8 @@ function renderDevicesLesson() {
       <p class="lesson-takeaway">Check what you can reach: loop the local optic, then extend through accessible passives. A passing local loop leaves the path beyond it unverified.</p>
     </section>
     <p class="lesson-sources">Position format and rack connection: your site examples. References: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC gender and polarity</a>.</p>
-    <a class="next-chapter" href="./patching.html">Next chapter: FIM, LC & MMC patching →</a>
-    <a class="next-chapter" href="./learn.html">← Chapter 1: Optics, fiber & light</a>
-    <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
-  setupLesson();
+`;
+  setupLesson(lesson);
   const positionFigure = document.querySelector('#position-picture');
   const positionCaption = el('figcaption'); positionCaption.setAttribute('aria-live', 'polite');
   const parts = [...lesson.querySelectorAll('[data-position]')];
@@ -335,11 +327,9 @@ function positionPicture(selected) {
   return {caption:captions[selected],drawing};
 }
 
-function renderPatchingLesson() {
-  patchingLink.setAttribute('aria-current', 'page');
+function renderPatchingLesson(lesson) {
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 3</p><button type="button" class="lesson-motion"></button></div>
-    <h2 id="lesson-title">FIM, LC & MMC patching</h2>
     <p class="lesson-intro">Match the optic position, the follower and its MMC head.</p>
     <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">LC position</a><a href="#rack-path">Rack view</a><a href="#fim-path">FIM path</a><a href="#mmc-fanout">MMC head & followers</a><a href="./simulations.html">Try the simulation →</a></nav>
     <section id="lc-position" class="lesson-section" aria-labelledby="lc-position-title">
@@ -384,9 +374,8 @@ function renderPatchingLesson() {
     <a class="next-chapter" href="./simulations.html">Practice LC & MMC patching in Simulations →</a>
     <p class="lesson-sources">Port mapping and fanout: your site examples. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
     <a class="next-chapter" href="./quiz.html">Open Exams →</a>
-    <a class="next-chapter" href="./devices.html">← Chapter 2: Device locations & links</a>
     <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
-  setupLesson();
+  setupLesson(lesson);
   setupPatchExample();
   setupRackExample();
   example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture);
@@ -408,7 +397,7 @@ function renderSimulations() {
     </section>
     <a class="next-chapter" href="./patching.html">Review Chapter 3: FIM, LC & MMC patching →</a>
     <a class="next-chapter" href="./quiz.html">Exams →</a>`;
-  setupLesson();
+  setupLesson(lesson);
   mountPatchPractice(document.getElementById('patch-lab'));
 }
 
@@ -485,8 +474,11 @@ function mmcPatchPicture(selected) {
 
 if (lesson) {
   if (lesson.dataset.chapter === 'patching' && location.hash === '#patch-practice') location.replace('./simulations.html#patch-practice');
-  else if (lesson.dataset.chapter === 'patching') renderPatchingLesson();
-  else if (lesson.dataset.chapter === 'simulations') renderSimulations();
-  else if (lesson.dataset.chapter === 'devices') renderDevicesLesson();
-  else renderLesson();
+  else if (['devices', 'patching'].includes(lesson.dataset.chapter)) {
+    location.replace('./learn.html' + (location.hash || (lesson.dataset.chapter === 'devices' ? '#chapter-2' : '#chapter-3')));
+  } else if (lesson.dataset.chapter === 'simulations') renderSimulations();
+  else {
+    courseLink.setAttribute('aria-current', 'page');
+    mountCourse(lesson, [renderLesson, renderDevicesLesson, renderPatchingLesson]);
+  }
 }

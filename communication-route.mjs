@@ -156,7 +156,7 @@ export function mountCommunicationRoute(host) {
     <div class="comm-detail"><div><p class="comm-counter"></p><h4></h4><p class="comm-copy"></p></div><svg viewBox="0 0 420 205" role="img" class="hardware-art"></svg></div>
     <p class="comm-status" role="status"></p>
     <p class="picture-note">One mapped strand is highlighted at a time. Both devices can transmit at once on separate strands. The other fanout legs are omitted for clarity. Rear/front geometry is opened out in the close-up; the overview shows connection order.</p>`;
-  const panel=host.closest('#lesson'), map=host.querySelector('.comm-map'), play=host.querySelector('.comm-play');
+  const panel=host.closest('.course-chapter-body, #lesson'), map=host.querySelector('.comm-map'), play=host.querySelector('.comm-play');
   function stop() { running=false; cancelAnimationFrame(frame); play.textContent='Follow light'; }
   function draw() {
     route=communicationRoute(reverse);
