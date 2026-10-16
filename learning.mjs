@@ -1,8 +1,8 @@
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
-import { rackIllustration, localRemoteIllustration } from './rack-visuals.mjs?v=4';
+import { rackIllustration, localRemoteIllustration } from './rack-visuals.mjs?v=5';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=3';
-import { mountLoopLesson, passiveThroughPicture } from './loop-lesson.mjs?v=1';
+import { mountLightJourney } from './loop-lesson.mjs?v=2';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 
 function el(tag, className = '', text = '') {
@@ -57,7 +57,7 @@ function renderLesson() {
     <h2 id="lesson-title">Optics, fiber & light</h2>
     <p class="lesson-intro">Follow the light from the optic, through the fiber, to the test.</p>
     <nav class="lesson-jumps" aria-label="In this chapter">
-      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#loopbacks">Loopbacks</a><a href="#trace-loops">Follow loop results</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
+      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#trace-loops">Rack-to-rack light</a><a href="#loopbacks">Loopbacks</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
     </nav>
     <section id="optics" class="lesson-section" aria-labelledby="light-title">
       <h3 id="light-title">Two light sources, different jobs</h3>
@@ -74,21 +74,17 @@ function renderLesson() {
       <p><a href="./patching.html#rack-path">See this fiber path inside a rack →</a></p>
       <p class="lesson-takeaway">A passive routes light; it does not make it. Follow the mapped port, strand and TX → RX pairing.</p>
     </section>
+    <section id="trace-loops" class="lesson-section" aria-labelledby="trace-loops-title">
+      <h3 id="trace-loops-title">Follow the light from rack to rack</h3>
+      <p class="section-intro">Optic → LC leg → MMC head → CAS 1 → onward fiber → CAS 2 → receiving optic.</p>
+      <div id="light-journey"></div>
+    </section>
     <section id="loopbacks" class="lesson-section" aria-labelledby="loop-title">
       <h3 id="loop-title">Bring TX light back to RX</h3>
       <p class="section-intro">Move the loop to see what you are testing.</p>
       <div id="loop-picture"></div>
       <div id="readings" class="learning-readings"><span><b>RX +0.25</b> your good example</span><span><b>RX −40</b> your no-light indication</span></div>
       <p class="picture-note">dBm examples. Check every lane against the optic’s limits. Use the correct loop mapping and any required attenuation.</p>
-    </section>
-    <section id="trace-loops" class="lesson-section" aria-labelledby="trace-loops-title">
-      <h3 id="trace-loops-title">Follow the light. Narrow down the problem.</h3>
-      <p class="section-intro">The optic makes the light. A CAS is a passive cassette: it connects the mapped fibers so light can continue through.</p>
-      ${passiveThroughPicture()}
-      <h4>Move the loop one step farther</h4>
-      <p class="section-intro">Follow this example in order. Each loop brings the local optic’s TX light back to its RX, without needing the remote optic.</p>
-      <div id="loop-walkthrough"></div>
-      <p class="picture-note">Pass means the tested lanes meet the approved loop-test criteria for this setup. Use the correct loop mapping and any required attenuation. A passing loop does not certify the entire link.</p>
     </section>
     <section id="cleaning" class="lesson-section" aria-labelledby="fault-title">
       <h3 id="fault-title">What can interrupt the light?</h3>
@@ -111,7 +107,7 @@ function renderLesson() {
   example('red-picture', 'Visible red VFL light', [], redPicture);
   example('path-picture', 'Fiber route', [], pathPicture);
   example('loop-picture', 'Loop location', ['LC at optic', 'MMC at passive'], loopPicture);
-  mountLoopLesson(document.getElementById('loop-walkthrough'));
+  mountLightJourney(document.getElementById('light-journey'));
   example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
   example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
 }

@@ -24,9 +24,9 @@ function device(elevation,selected=false) {
   return drawing;
 }
 
-function casPanel(rear) {
+function casPanel(rear,name='CAS 1') {
   let drawing = '<rect class="rack-cas" x="81" y="50" width="205" height="49" rx="2"/>'+
-    label(91,61,'CAS 1','rack-on-dark rack-small')+label(280,61,'32 ports','rack-on-dark rack-small rack-end');
+    label(91,61,name,'rack-on-dark rack-small')+label(280,61,'32 ports','rack-on-dark rack-small rack-end');
   for(let port=1; port<=32; port++) {
     const x = 92+((port-1)%16)*12;
     const y = port<=16 ? 70 : 86;
@@ -59,14 +59,7 @@ function casCutaway(rear) {
   </g>`;
 }
 
-export function rackIllustration(side=0,elevation=30) {
-  const rear = side === 1;
-  const deviceY = levelY(elevation+1);
-  const sourceY = deviceY+15;
-  // The LC exits the selected optic, follows the side manager, then reaches CAS 1.
-  const leg = `M140 ${sourceY} V${sourceY+13} Q140 ${sourceY+23} 127 ${sourceY+23} H80 Q67 ${sourceY+23} 67 ${sourceY+10} V133`;
-  const cas = 'Q67 122 82 122 H204 Q223 122 223 104 V76';
-  const fullPath = `${leg} ${cas}`;
+function rackBody(rear,elevation,casName='CAS 1') {
   let drawing = '<g class="rack-art">'+label(180,18,'Example rack · front view','rack-center')+
     '<rect class="rack-shadow" x="51" y="29" width="273" height="467" rx="5"/>'+
     '<rect class="rack-frame" x="43" y="25" width="271" height="467" rx="4"/>'+
@@ -86,7 +79,18 @@ export function rackIllustration(side=0,elevation=30) {
     const y=levelY(position)+5;
     drawing += `<path class="rack-background-fiber" d="M94 ${y} Q94 ${y+14} 77 ${y+14} Q61 ${y+14} 61 ${y-7} V121 Q61 111 78 111 H116 V91"/>`;
   }
-  drawing += casPanel(rear);
+  return drawing+casPanel(rear,casName)+'</g>';
+}
+
+export function rackIllustration(side=0,elevation=30) {
+  const rear = side === 1;
+  const deviceY = levelY(elevation+1);
+  const sourceY = deviceY+15;
+  // The LC exits the selected optic, follows the side manager, then reaches CAS 1.
+  const leg = `M140 ${sourceY} V${sourceY+13} Q140 ${sourceY+23} 127 ${sourceY+23} H80 Q67 ${sourceY+23} 67 ${sourceY+10} V133`;
+  const cas = 'Q67 122 82 122 H204 Q223 122 223 104 V76';
+  const fullPath = `${leg} ${cas}`;
+  let drawing = '<g class="rack-art">'+rackBody(rear,elevation);
   drawing += route(leg)+route(`M67 133 ${cas}`,rear);
   for(const y of [142,202,262,322,382,442]) drawing += `<path class="rack-manager" d="M59 ${y} h17 v7 H59"/>`;
   const upArrowY = (sourceY+133)/2;
@@ -101,6 +105,50 @@ export function rackIllustration(side=0,elevation=30) {
     casCutaway(rear)+'</g>';
   return {height:708,hardware:true,drawing,
     caption:`TX starts at optic 5, elevation ${elevation}: LC leg → MMC head → CAS 1 Port 12 (${rear ? 'rear' : 'front'}) → onward fiber. IR light is invisible; blue arrows illustrate its direction.`};
+}
+
+// One continuous TX-to-RX path, split only so a lesson can highlight each stage.
+// Rear connections are shown schematically; this is not a surveyed cassette map.
+export const rackJourneySegments = [
+  'M140 245 V258 Q140 268 127 268 H100',
+  'M100 268 H80 Q67 268 67 255 V203 Q67 192 82 192 H204 Q223 192 223 174 V152',
+  'M223 152 V146 H231 V132',
+  'M231 132 V64 Q231 38 257 38 H645 Q671 38 671 64 V132',
+  'M671 132 V146 H663 V174 Q663 204 641 204 H522 Q507 204 507 226 V258 Q507 268 522 268 H565 Q580 268 580 248'
+];
+
+export function rackJourneyIllustration() {
+  let drawing=`<g class="rack-art journey-racks">
+    <g transform="translate(0 70)">${rackBody(false,30,'CAS 1')}</g></g>
+    <g class="rack-art journey-racks"><g transform="translate(440 70)">${rackBody(false,30,'CAS 2')}</g></g>
+    <g class="rack-art">
+    ${label(178,16,'LOCAL RACK · optic sends','rack-center journey-rack-title')}
+    ${label(618,16,'NEXT RACK · optic receives','rack-center journey-rack-title')}
+    ${label(451,64,'Fiber between cassettes','rack-center')}`;
+  rackJourneySegments.forEach((path,index)=> {
+    drawing+=`<g data-journey-segment="${index}">${route(path)}<path class="journey-lit-path" d="${path}"/></g>`;
+  });
+  for(const offset of [0,440]) {
+    drawing+=`<g transform="translate(${offset} 70)">
+      <rect class="hardware-plug" x="219" y="69" width="8" height="17" rx="1"/>
+      <rect class="hardware-boot" x="220" y="85" width="6" height="6" rx="1"/>
+      <path class="rack-manager" d="M59 142 h17 v7 H59 M59 202 h17 v7 H59"/>
+      <rect class="rack-optic-focus" x="133" y="165" width="15" height="16" rx="2"/>
+      ${label(279,205,offset ? 'RX · light arrives here' : 'TX · light starts here','rack-on-dark rack-small rack-end')}
+      </g>`;
+  }
+  drawing+=`<g data-journey-focus="0"><circle class="journey-hardware-halo" cx="140" cy="245" r="18"/></g>
+    <g data-journey-focus="1"><rect class="journey-hardware-halo" x="56" y="185" width="176" height="91" rx="12"/></g>
+    <g data-journey-focus="2"><rect class="journey-hardware-halo" x="208" y="125" width="36" height="48" rx="7"/></g>
+    <g data-journey-focus="3"><rect class="journey-hardware-halo" x="217" y="26" width="468" height="113" rx="16"/></g>
+    <g data-journey-focus="4"><circle class="journey-hardware-halo" cx="580" cy="248" r="18"/></g>
+    ${lightSource(140,245)}
+    <circle class="journey-rx" cx="580" cy="248" r="4"/>
+    <path class="journey-measure" d="${rackJourneySegments.join(' ')}"/>
+    <g class="journey-pulse" aria-hidden="true"><circle r="13"/><path d="M-9 -6 L5 0 L-9 6 L-5 0 Z"/></g>
+    ${label(178,585,'Device at elevation 30','rack-center')}${label(618,585,'Device at elevation 30','rack-center')}
+    </g>`;
+  return {height:605,width:800,drawing};
 }
 
 // Compact rack faces keep both ends of one duplex pair visible together.

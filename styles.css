@@ -333,37 +333,40 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 }
 @media (prefers-reduced-motion:reduce) { .q-explained .q-visual-takeaway { animation:none; } }
 #lesson { border:1px solid #c4d3dc; border-radius:8px; background:#fff; padding:22px; }
-.passive-through { margin:14px 0 24px; padding:14px; background:#edf3f7; border-radius:6px; }
-.passive-through svg { display:block; width:100%; max-width:460px; margin:auto; }
-.passive-through text { font:600 12px 'Segoe UI',sans-serif; fill:#264c69; }
-.passive-through figcaption { font-size:12px; line-height:1.5; color:#526d80; margin-top:10px; }
-.loop-walk-result { padding:14px 16px; background:#edf3f7; border-left:4px solid #39799d; margin:14px 0; }
-.loop-walk-result h4 { margin:0 0 8px; font-size:18px; }
-.loop-walk-result p { margin:8px 0 0; font-size:14px; line-height:1.55; }
-.loop-route { max-width:500px; margin:0 auto; }
-.loop-route-node { display:flex; align-items:center; gap:14px; padding:10px 0; }
-.loop-route-art { flex:0 0 160px; }
-.loop-route-art svg { display:block; width:160px; height:105px; }
-.loop-route-node strong, .loop-route-node span, .loop-route-span strong, .loop-route-span span { display:block; }
-.loop-route-node strong, .loop-route-span strong { font-size:14px; }
-.loop-route-node span, .loop-route-span span { font-size:12px; line-height:1.5; margin-top:5px; color:#526d80; }
-.loop-route-span { display:flex; align-items:center; gap:14px; padding:0 14px; border:1px dashed #a5b6c0; border-radius:5px; background:#f5f7f9; }
-.loop-route-span > svg { flex:0 0 70px; width:70px; height:84px; }
-.loop-route-wire { fill:none; stroke:#8d9eab; stroke-width:3; stroke-dasharray:5 5; }
-.loop-route-span.passing, .loop-route-span.checked { border:1px solid #6e9d84; background:#edf7f0; }
-.loop-route-span.passing .loop-route-wire, .loop-route-span.checked .loop-route-wire { stroke:#578e70; stroke-dasharray:none; }
-.loop-route-span.suspect { border:2px dashed #b07b31; background:#fff4db; }
-.loop-route-span.suspect .loop-route-wire { stroke:#b07b31; }
-.loop-route-remote { border:1px dashed #a5b6c0; padding:15px; font-size:13px; color:#526d80; text-align:center; margin-top:12px; }
-.loop-route .cassette-case { fill:#21563f; stroke:#153e2c; }
-.loop-route .hardware-art .cassette-number { fill:#e6f4e9; }
-.loop-route .hardware-art .cassette-selected .cassette-number { fill:#673c10; }
-@media (max-width:440px) {
-  .loop-route-node { gap:10px; }
-  .loop-route-art { flex-basis:120px; }
-  .loop-route-art svg { width:120px; height:92px; }
-  .loop-route-span { gap:6px; padding:0 8px; }
-  .loop-route-span > svg { flex-basis:55px; width:55px; }
+/* Chapter 1: the physical light path through the rack hardware. */
+.journey-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 12px; }
+.journey-toolbar button { min-height:44px; border:1px solid #a6bccb; border-radius:5px; padding:10px 14px; background:white; color:#245b91; font:600 13px 'Segoe UI',sans-serif; }
+.journey-toolbar .journey-play { background:#173b59; border-color:#173b59; color:white; }
+.journey-map { width:100%; overflow-x:auto; border:1px solid #c5d3dc; border-radius:6px; background:#edf2f4; }
+.journey-map > svg { display:block; width:100%; height:auto; }
+.journey-map.journey-enlarged > svg { width:max(100%,800px); max-width:none; }
+.journey-map:focus-visible { outline:3px solid #347cbc; outline-offset:2px; }
+.journey-rack-title { font-weight:700; }
+.journey-lit-path { fill:none; stroke:#59cbff; stroke-width:3; opacity:0; stroke-linejoin:round; }
+.journey-reached .journey-lit-path { opacity:1; }
+.journey-hardware-halo { fill:none; stroke:#fbba48; stroke-width:3; opacity:0; }
+.journey-current .journey-hardware-halo { opacity:1; }
+.journey-measure { fill:none; stroke:none; pointer-events:none; }
+.journey-pulse circle { fill:#3aafff; opacity:.3; }
+.journey-pulse path { fill:#177eca; stroke:white; stroke-width:1.5; stroke-linejoin:round; }
+.journey-rx { fill:#d6f3ff; stroke:#2583ce; stroke-width:2; }
+.journey-steps { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; margin:12px 0; }
+.journey-steps button { display:flex; flex-direction:column; align-items:center; gap:7px; min-height:74px; padding:10px 5px; border:1px solid #b7cbd8; border-radius:5px; color:#173b59; background:#fff; font:600 12px 'Segoe UI',sans-serif; }
+.journey-steps button span { display:grid; place-items:center; border-radius:50%; width:22px; height:22px; background:#e5edf3; }
+.journey-steps button[aria-pressed="true"] { background:#173b59; color:white; border-color:#173b59; }
+.journey-steps button[aria-pressed="true"] span { background:white; color:#173b59; }
+.journey-detail { display:grid; grid-template-columns:1fr 1.1fr; align-items:center; gap:15px; padding:16px; background:#edf3f7; border-left:4px solid #39799d; }
+.journey-description h4 { font-size:17px; margin:0 0 8px; }
+.journey-description p { font-size:14px; line-height:1.55; margin:0; }
+.journey-closeup { display:block; width:100%; overflow:visible; }
+.journey-closeup text { font:600 12px 'Segoe UI',sans-serif; fill:#294a60; }
+.journey-closeup .hardware-art .cassette-number { font-size:10px; }
+.journey-fanout-leg { fill:none; stroke:#b8a672; stroke-width:2.3; opacity:.55; }
+.journey-chosen-leg { stroke:#e4bc42; opacity:1; stroke-width:5; }
+.journey-status { min-height:2.8em; margin:10px 0; font-size:12px; line-height:1.5; color:#526d80; }
+@media (max-width:520px) {
+  .journey-detail { grid-template-columns:1fr; padding:13px; }
+  .journey-steps button { font-size:11px; padding:8px 3px; }
 }
 .chapter-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; padding:8px 0; position:sticky; top:0; z-index:1; background:#fff; }
 .chapter-count { color:#617382; font-size:13px; margin:0; }
