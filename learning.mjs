@@ -31,7 +31,7 @@ const patchingLink = link('Chapter 3 · FIM, LC & MMC patching', './patching.htm
 const simulationsLink = link('Simulations · hands-on practice', './simulations.html');
 const quizLink = link('Exams', './quiz.html');
 if (document.querySelector('#quiz')) quizLink.setAttribute('aria-current', 'page');
-menuPanel.append(chapterLink, devicesLink, patchingLink, simulationsLink, quizLink, link('Back to troubleshooting', './index.html', 'menu-return'));
+menuPanel.append(chapterLink, devicesLink, patchingLink, simulationsLink, quizLink, link('Troubleshoot', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {

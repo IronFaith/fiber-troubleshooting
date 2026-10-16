@@ -4,16 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#173b59">
-  <meta name="description" content="Loop the optic, choose the result, and follow a simple fiber troubleshooting diagram.">
-  <title>Optic / fiber health</title>
+  <meta name="description" content="Visually troubleshoot optics and fiber. Place LC or MMC loops, trace isolated fiber with VFL, and narrow down a problem using your observations or a simulated fault.">
+  <title>Troubleshoot · Optic & fiber</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=35">
+  <link rel="stylesheet" href="./styles.css?v=36">
   <script type="module" src="./app.mjs?v=10"></script>
-  <script type="module" src="./learning.mjs?v=30"></script>
+  <script type="module" src="./learning.mjs?v=31"></script>
+  <script type="module" src="./troubleshoot.mjs?v=1"></script>
 </head>
 <body>
-  <main>
-    <header><div class="brand"><img src="./icon.svg" width="30" height="30" alt=""><div><h1>Optic / fiber health</h1><p>Loop the optic. Follow the result.</p></div></div></header>
+  <main class="ts-main">
+    <header><div class="brand"><img src="./icon.svg" width="30" height="30" alt=""><div><h1>Troubleshoot</h1><p>Optic & fiber · place a test, follow the light, narrow it down.</p></div></div></header>
+    <nav class="ts-view-tabs" aria-label="Troubleshooting mode">
+      <button type="button" data-workbench-view="actual" aria-pressed="true">My situation</button>
+      <button type="button" data-workbench-view="simulation" aria-pressed="false">Simulate a fault</button>
+      <button type="button" data-workbench-view="guided" aria-pressed="false">Guided check</button>
+    </nav>
+    <div id="troubleshoot-workbench"></div>
+    <p id="workbench-status" class="sr-only" role="status" aria-live="polite"></p>
+    <section id="guided-check" aria-label="Guided yes or no check" hidden>
     <fieldset class="loop-choice"><legend>Starting loop location</legend><div>
       <button type="button" data-mode="direct" aria-pressed="true">LC at the optic</button>
       <button type="button" data-mode="passive" aria-pressed="false">MMC at the passive</button>
@@ -21,8 +30,10 @@
     <nav class="toolbar" aria-label="Troubleshooting controls"><span id="step-label">Step 1</span><div><button id="back" type="button" disabled>← Back</button><button id="restart" type="button" disabled>Restart</button></div></nav>
     <div id="diagram" aria-label="Your troubleshooting path"></div>
     <p id="status" class="sr-only" role="status"></p>
+    </section>
     <noscript>Enable JavaScript to use this diagram.</noscript>
     <p class="safety">Never look into a fiber. Use site-approved tests. Answer only after a valid test.</p>
+    <p class="lesson-sources">References: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco · optical TX/RX</a> · <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke · VFL & loss testing</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/performance" target="_blank" rel="noopener noreferrer">US Conec · MMC ferrules</a></p>
   </main>
 </body>
 </html>
