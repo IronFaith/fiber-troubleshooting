@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCase,changeCase,simulatedLoop,simulatedTrace,simulatedReadings,assessment} from '../troubleshoot-state.mjs';
+import {createCase,changeCase,simulatedLoop,simulatedTrace,simulatedReadings,assessment,connectionAt} from '../troubleshoot-state.mjs';
 const record = (s,point,result,tool='loop') => [
   {type:'select',point},{type:'tool',tool},{type:'ready',value:true},{type:'record',result}
 ].reduce(changeCase,s);
@@ -129,4 +129,36 @@ test('restored-link observations distinguish local loop success from a resolved 
   assert.equal(s.service,'unknown');
   assert.notEqual(assessment(s).complete,true);
   assert.equal(changeCase(createCase(),{type:'service',value:'good'}).service,'unknown');
+});
+
+test('the displayed connections follow the active LC, MMC and VFL setup', () => {
+  let s=createCase();
+  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','plugged','plugged']);
+  s=changeCase(s,{type:'place',kind:'lc',point:0});
+  assert.equal(connectionAt(s,0),'loop');
+  s=changeCase(s,{type:'place',kind:'mmc',point:1});
+  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','loop','plugged']);
+  s=changeCase(s,{type:'place',kind:'vfl',point:0});
+  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['vfl','unplugged','plugged']);
+  s=changeCase(s,{type:'place',kind:'vfl',point:2});
+  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','vfl','unplugged']);
+});
+
+test('removal leaves test connections open; normalization reconnects without claiming health or losing evidence', () => {
+  let s=record(record(record(createCase(),0,'pass'),1,'pass'),2,'pass');
+  s=record(s,1,'seen','vfl');
+  s=changeCase(s,{type:'remove'});
+  assert.deepEqual(s.disconnected,[0,1]);
+  assert.equal(connectionAt(s,0),'unplugged');
+  assert.equal(changeCase(s,{type:'service',value:'good'}),s);
+  const loops=s.loops, traces=s.traces;
+  s=changeCase(s,{type:'normalize'});
+  assert.deepEqual(s.disconnected,[]);
+  assert.equal(s.tool,'link');
+  assert.equal(connectionAt(s,0),'plugged');
+  assert.equal(connectionAt(s,1),'plugged');
+  assert.deepEqual(s.loops,loops);
+  assert.deepEqual(s.traces,traces);
+  assert.equal(s.service,'unknown');
+  assert.notEqual(assessment(s).complete,true);
 });

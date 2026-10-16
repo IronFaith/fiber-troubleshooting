@@ -13,7 +13,7 @@ export const spanName = point => `${pointName(point - 1)} → CAS ${point}`;
 
 export function createCase(simulated = false) {
   return { simulated, count: 2, reach: 2, selected: 0, ports: [12,12,12,12], tool: 'link',
-    strand: 'tx', ready: false, loops: {}, traces: {}, tx: 'unknown', rx: 'unknown', service:'unknown',
+    strand: 'tx', ready: false, loops: {}, traces: {}, tx: 'unknown', rx: 'unknown', service:'unknown', disconnected:[],
     fault: { kind: 'break', at: 2, strand: 'tx', severity: 'dark' } };
 }
 const bounded = (value, min, max) => Math.max(min, Math.min(max, Number.isFinite(Number(value)) ? Math.trunc(Number(value)) : min));
@@ -23,6 +23,14 @@ export function canPlaceTool(state,kind,point) {
   const p=Number(point);
   return Number.isInteger(p) && p>=0 && p<=state.reach &&
     (kind==='lc' ? p===0 : kind==='vfl' ? state.reach>=1 : kind==='mmc' && p>0);
+}
+
+// Physical setup is separate from earlier optical observations.
+export function connectionAt(state,point) {
+  if(state.tool==='loop' && point===state.selected) return 'loop';
+  if(state.tool==='vfl' && point===state.selected-1) return 'vfl';
+  if(state.tool==='vfl' && point===state.selected) return 'unplugged';
+  return state.disconnected?.includes(point)?'unplugged':'plugged';
 }
 
 export function simulatedLoop(state, point = state.selected) {
@@ -57,7 +65,7 @@ export function simulatedReadings(state) {
 
 export function changeCase(state, action) {
   const s = structuredClone(state);
-  const clear = () => { s.loops = {}; s.traces = {}; s.ready = false; s.service='unknown'; };
+  const clear = () => { s.loops = {}; s.traces = {}; s.ready = false; s.service='unknown'; s.disconnected=[]; };
   switch (action.type) {
     case 'place':
       if(!canPlaceTool(s,action.kind,action.point)) return state;
@@ -65,17 +73,23 @@ export function changeCase(state, action) {
       // its outgoing section (ending at CAS 1), never to the optic itself.
       s.selected=action.kind==='vfl'?Math.max(1,Number(action.point)):Number(action.point);
       s.tool=action.kind==='vfl'?'vfl':'loop';
-      s.ready=false; s.service='unknown'; break;
+      s.ready=false; s.service='unknown'; s.disconnected=[]; break;
+    case 'remove':
+      if(s.tool==='link') return state;
+      s.disconnected=s.tool==='vfl'?[s.selected-1,s.selected]:[s.selected];
+      s.tool='link'; s.ready=false; s.service='unknown'; break;
+    case 'normalize':
+      s.tool='link'; s.disconnected=[]; s.ready=false; s.service='unknown'; break;
     case 'select':
       s.selected = bounded(action.point,0,s.reach); s.ready = false;
       if (s.selected === 0 && s.tool === 'vfl') s.tool = 'link';
       break;
     case 'tool':
       if (!['link','loop','vfl'].includes(action.tool) || (action.tool === 'vfl' && s.selected === 0)) return state;
-      s.tool = action.tool; s.ready = false;
+      s.tool = action.tool; s.ready = false; s.disconnected=[];
       if(s.tool!=='link') s.service='unknown'; break;
     case 'service':
-      if(s.simulated || s.tool!=='link' || s.loops[s.reach]!=='pass' || !['good','bad'].includes(action.value)) return state;
+      if(s.simulated || s.tool!=='link' || s.disconnected?.length || s.loops[s.reach]!=='pass' || !['good','bad'].includes(action.value)) return state;
       s.service=action.value; break;
     case 'ready': s.ready = Boolean(action.value); break;
     case 'strand':
@@ -132,6 +146,10 @@ export function assessment(s) {
   const fail = pairs.find(([p,r]) => r !== 'pass' && p > lastPass);
   const trace = s.tool === 'vfl' && s.traces[`${s.selected}:${s.strand}`];
   const result = (title, why, next, extra = {}) => ({ title, why, next, tone:'neutral', from:null, to:null, lastPass, ...extra });
+  if(s.tool==='link' && s.disconnected?.length) return result('Connections are still unplugged',
+    'Removing the tool leaves the test connections open in the diagram. Earlier results are kept.',
+    'Restore normal setup to reconnect the service path, then check actual readings and link status.',
+    {suggestion:{point:s.selected,tool:'link'}});
   if(s.tool==='link' && s.service==='good') return result('Restored link is working',
     'You confirmed the required local readings and link status after removing the tools.',
     'Record the work and readings. This does not identify the original cause or verify every other channel.',{tone:'pass',complete:true});

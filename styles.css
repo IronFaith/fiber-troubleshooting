@@ -971,6 +971,9 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .ts-tray-actions span { margin-right:auto; font-size:12px; color:#536f82; }
 .ts-tray-actions button { padding:8px 10px; min-height:44px; border:1px solid #a9c0d0; background:#fff; border-radius:6px; color:#345e79; font-size:12px; }
 .ts-tray-actions button:disabled { opacity:.45; cursor:default; }
+.ts-tray-actions .ts-normalize:not(:disabled) { border-color:#427c68; color:#265d48; background:#eef6f1; }
+.ts-connection-label { fill:#365e72; font-size:12px; font-weight:650; text-anchor:middle; }
+.ts-connection-label.open { fill:#9a582a; }
 .ts-tool-tray.ts-drop-over { background:#e0f2e8; box-shadow:inset 0 0 0 2px #20704f; }
 .ts-tool-handle { fill:transparent; stroke:#7a9aaa; stroke-width:1.5; stroke-dasharray:4 4; }
 .ts-tool-handle:hover { fill:#ffffff24; stroke:#245b91; stroke-width:3; }
@@ -1029,7 +1032,7 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 @media(max-width:540px) {
   .ts-control-card { scroll-margin-top:230px; }
   .ts-tray-actions span { display:none; }
-  .ts-tray-actions button { flex:1; }
+  .ts-tray-actions button { flex:1; white-space:normal; padding:6px; }
   .exam-level { gap:12px; padding:17px 12px; }
   .exam-level .q-quiz-thumb { width:64px; }
   .exam-level strong { font-size:22px; }

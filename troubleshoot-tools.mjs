@@ -9,7 +9,7 @@ export function toolArt(kind) {
 
 // Pointer events give mouse and touch the same placement behavior. Click/Enter
 // selects a tool; the diagram's native button handlers provide a second route.
-export function mountToolDrag(host,{select,place,remove,valid,announce}) {
+export function mountToolDrag(host,{select,place,remove,valid,announce,getSelected}) {
   let drag=null,ignoreClickUntil=0;
   function destination(x,y) {
     const el=document.elementFromPoint(x,y)?.closest('[data-span],[data-point],.ts-tool-tray');
@@ -74,6 +74,9 @@ export function mountToolDrag(host,{select,place,remove,valid,announce}) {
   host.addEventListener('click',event=>{
     if(event.detail!==0 && Date.now()<ignoreClickUntil) {event.preventDefault();event.stopImmediatePropagation();return;}
     const source=event.target.closest('[data-pick-tool],[data-mounted-tool]');
+    // A selected tray tool should replace an installed tool at this target,
+    // rather than the installed handle stealing that tap as a new selection.
+    if(source?.hasAttribute('data-mounted-tool') && getSelected()) return;
     if(source) {select(source.dataset.pickTool??source.dataset.mountedTool);event.stopImmediatePropagation();}
   },true);
   host.addEventListener('pointercancel',()=>{reset();select(null);});
