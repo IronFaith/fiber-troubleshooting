@@ -27,9 +27,10 @@ menuPanel.append(el('p', '', 'Learning resources'));
 const chapterLink = link('Chapter 1 · Optics, fiber & light', './learn.html');
 const devicesLink = link('Chapter 2 · Device locations & links', './devices.html');
 const patchingLink = link('Chapter 3 · FIM, LC & MMC patching', './patching.html');
+const simulationsLink = link('Simulations · hands-on practice', './simulations.html');
 const quizLink = link('Beginner knowledge check', './quiz.html');
 if (document.querySelector('#quiz')) quizLink.setAttribute('aria-current', 'page');
-menuPanel.append(chapterLink, devicesLink, patchingLink, quizLink, link('Back to troubleshooting', './index.html', 'menu-return'));
+menuPanel.append(chapterLink, devicesLink, patchingLink, simulationsLink, quizLink, link('Back to troubleshooting', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {
@@ -109,7 +110,7 @@ function setupLesson() {
   const motion = lesson.querySelector('.lesson-motion');
   function updateMotion() {
     lesson.classList.toggle('light-paused', paused);
-    const patching = lesson.dataset.chapter === 'patching';
+    const patching = ['patching', 'simulations'].includes(lesson.dataset.chapter);
     motion.textContent = paused ? (patching ? 'Play animation' : 'Play light') : (patching ? 'Pause animation' : 'Pause light');
     motion.setAttribute('aria-label', paused ? 'Play all animations' : 'Pause all animations');
   }
@@ -325,7 +326,7 @@ function renderPatchingLesson() {
     <div class="chapter-heading"><p class="chapter-count">Chapter 3</p><button type="button" class="lesson-motion"></button></div>
     <h2 id="lesson-title">FIM, LC & MMC patching</h2>
     <p class="lesson-intro">Match the optic position, the follower and its MMC head.</p>
-    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">LC position</a><a href="#rack-path">Rack view</a><a href="#fim-path">FIM path</a><a href="#mmc-fanout">MMC head & followers</a><a href="#patch-practice">Practice & quiz</a></nav>
+    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">LC position</a><a href="#rack-path">Rack view</a><a href="#fim-path">FIM path</a><a href="#mmc-fanout">MMC head & followers</a><a href="./simulations.html">Try the simulation →</a></nav>
     <section id="lc-position" class="lesson-section" aria-labelledby="lc-position-title">
       <h3 id="lc-position-title">Same optic. Two LC positions.</h3>
       <p class="section-intro">Choose the Ethernet port shown in FIM.</p>
@@ -364,12 +365,7 @@ function renderPatchingLesson() {
       <div id="mmc-patch-picture"></div>
       <p class="lesson-takeaway">The serial identifies the fanout. FIM identifies its destination passive and port. Then match each follower to its assigned optic port.</p>
     </section>
-    <section id="patch-practice" class="lesson-section" aria-labelledby="practice-title">
-      <h3 id="practice-title">Your turn: patch the connection</h3>
-      <p class="section-intro">Read a mock FIM ticket, pick the connector, and place it in the port.</p>
-      <div id="patch-lab" class="patch-lab"></div>
-      <p class="picture-note">Each ticket is a separate training example using your site's 1 / 5 mapping. Matching a port does not prove light or link health. On site: confirm FIM, inspect/clean, seat fully, and check optic health.</p>
-    </section>
+    <a class="next-chapter" href="./simulations.html">Practice LC & MMC patching in Simulations →</a>
     <p class="lesson-sources">Port mapping and fanout: your site examples. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
     <a class="next-chapter" href="./quiz.html">Try the beginner knowledge check →</a>
     <a class="next-chapter" href="./devices.html">← Chapter 2: Device locations & links</a>
@@ -380,6 +376,23 @@ function renderPatchingLesson() {
   example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture);
   example('fanout-picture', 'Choose a fanout follower', Array.from({length:12}, (_, index) => `Leg ${index+1}`), fanoutPicture);
   example('mmc-patch-picture', 'MMC patching steps', ['1 · Match', '2 · Prepare', '3 · Seat'], mmcPatchPicture);
+}
+
+function renderSimulations() {
+  simulationsLink.setAttribute('aria-current', 'page');
+  lesson.innerHTML = `
+    <div class="chapter-heading"><p class="chapter-count">Hands-on practice</p><button type="button" class="lesson-motion"></button></div>
+    <h2 id="lesson-title">Simulations</h2>
+    <p class="lesson-intro">Move the cable. Match the port. Build confidence on mock hardware.</p>
+    <section id="patch-practice" class="lesson-section" aria-labelledby="practice-title">
+      <h3 id="practice-title">LC & MMC patching</h3>
+      <p class="section-intro">Read a mock FIM ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question quiz.</p>
+      <div id="patch-lab" class="patch-lab"></div>
+      <p class="picture-note">Each ticket is a separate training example using your site's 1 / 5 mapping. Matching a port does not prove light or link health. On site: confirm FIM, inspect/clean, seat fully, and check optic health.</p>
+    </section>
+    <a class="next-chapter" href="./patching.html">Review Chapter 3: FIM, LC & MMC patching →</a>
+    <a class="next-chapter" href="./quiz.html">Beginner knowledge check →</a>`;
+  setupLesson();
   mountPatchPractice(document.getElementById('patch-lab'));
 }
 
@@ -455,7 +468,9 @@ function mmcPatchPicture(selected) {
 }
 
 if (lesson) {
-  if (lesson.dataset.chapter === 'patching') renderPatchingLesson();
+  if (lesson.dataset.chapter === 'patching' && location.hash === '#patch-practice') location.replace('./simulations.html#patch-practice');
+  else if (lesson.dataset.chapter === 'patching') renderPatchingLesson();
+  else if (lesson.dataset.chapter === 'simulations') renderSimulations();
   else if (lesson.dataset.chapter === 'devices') renderDevicesLesson();
   else renderLesson();
 }

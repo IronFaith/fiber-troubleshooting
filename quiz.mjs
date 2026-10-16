@@ -49,7 +49,7 @@ function renderIntro() {
         </span></button>`;
     }).join('')}</div>
     <p class="picture-note">${canSave ? 'Completed quiz results and stripes stay in this browser on this device. Best results include retries.' : 'This browser cannot save progress. You can still choose any quiz; results last for this visit.'}</p>
-    <a class="quiz-lesson-link" href="./patching.html#patch-practice">Hands-on patching · practice & 5-question quiz →</a>
+    <a class="quiz-lesson-link" href="./simulations.html">Simulations · hands-on patching & 5-question quiz →</a>
     <a class="quiz-lesson-link" href="./learn.html">Learn the basics first</a>`;
   host.querySelectorAll('.quiz-pick').forEach(button => button.addEventListener('click',() => beginRound(Number(button.dataset.round))));
 }
