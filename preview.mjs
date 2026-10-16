@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 
 const files = { '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/styles.css': ['styles.css', 'text/css'], '/app.mjs': ['app.mjs', 'text/javascript'], '/flow.mjs': ['flow.mjs', 'text/javascript'], '/icon.svg': ['icon.svg', 'image/svg+xml'] };
+files['/assets/fiber-preview-v1.png'] = ['assets/fiber-preview-v1.png', 'image/png'];
 files['/learn.html'] = ['learn.html', 'text/html'];
 files['/devices.html'] = ['devices.html', 'text/html'];
 files['/patching.html'] = ['patching.html', 'text/html'];

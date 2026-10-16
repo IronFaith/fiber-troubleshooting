@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<title>Optic and fiber — Troubleshoot, Learn, Practice</title>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#183d59"/><stop offset="1" stop-color="#0c253a"/></linearGradient><radialGradient id="paper"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#e2ebf0"/></radialGradient></defs>
+<style>.patch-socket { fill:#a7a7ae; stroke:#74747d; stroke-width:1.5; }
+.patch-socket-active { fill:#b7bfca; stroke:#1b75b4; stroke-width:3; }
+.patch-opening { fill:#282536; stroke:#6b6875; stroke-width:1.5; }
+.patch-module-face { fill:url(#patch-metal-face); stroke:#7c7d84; stroke-width:2; }
+.patch-face-lip { fill:#d3d4d8; stroke:#ececef; stroke-width:1; }
+.patch-module-seam { fill:none; stroke:#85858d; stroke-width:1.4; }
+.patch-pull-tab { fill:url(#patch-pull-purple); stroke:#554184; stroke-width:2; }
+.patch-keyway { fill:#393447; stroke:#696472; stroke-width:1; }
+.patch-ferrule { fill:#c5c4ca; stroke:#83818b; stroke-width:2; }
+.patch-ferrule-core { fill:#292737; } text {font-family:'Segoe UI',Arial,sans-serif;}</style>
+<rect width="1200" height="630" fill="url(#bg)"/>
+<circle cx="922" cy="300" r="350" fill="url(#paper)"/>
+<path d="M0 575 H188 Q250 575 250 514 V473" fill="none" stroke="#76c6d1" stroke-width="3" opacity=".3"/>
+<circle cx="250" cy="473" r="7" fill="#76c6d1" opacity=".5"/>
+<text x="70" y="126" font-size="21" font-weight="650" letter-spacing="3" fill="#8bd1d8">FIBER BASICS</text>
+<text x="65" y="262" font-size="87" font-weight="750" letter-spacing="-3" fill="#ffffff">Optic &amp;</text>
+<text x="65" y="356" font-size="87" font-weight="750" letter-spacing="-3" fill="#ffffff">fiber</text>
+<rect x="70" y="398" width="65" height="5" rx="2" fill="#9b80cc"/>
+<text x="70" y="461" font-size="27" font-weight="500" fill="#dbe8ef">Troubleshoot. Learn. Practice.</text>
+<g transform="translate(590 -30) scale(1.55)"><defs>
+      <linearGradient id="preview-metal-face" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#97989c"/><stop offset=".2" stop-color="#dedfe1"/><stop offset=".48" stop-color="#b6b7bb"/><stop offset=".75" stop-color="#e6e7e9"/><stop offset="1" stop-color="#999a9f"/></linearGradient>
+      <linearGradient id="preview-pull-purple" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#51417d"/><stop offset="1" stop-color="#8063bb"/></linearGradient>
+    </defs><g class="patch-assembly" transform="rotate(0 180 197)"><g transform="translate(0 394) scale(1 -1)"><path class="patch-pull-tab" style="fill:url(#preview-pull-purple)" d="M49 102 H70 V270 Q70 279 80 279 H280 Q290 279 290 270 V102 H311 V292 Q311 312 291 312 H69 Q49 312 49 292 Z"/><rect class="patch-module-face" style="fill:url(#preview-metal-face)" x="62" y="82" width="236" height="153" rx="5"/><path class="patch-face-lip" d="M66 86 H294 V105 H66 Z"/><path class="patch-module-seam" d="M69 112 V226 H291 V112 M180 111 V227"/><rect class="patch-socket" x="91" y="111" width="74" height="112" rx="3"/><rect class="patch-opening" x="105" y="118" width="46" height="40" rx="2"/><rect class="patch-opening" x="105" y="176" width="46" height="40" rx="2"/><rect class="patch-keyway" x="97" y="138" width="8" height="58" rx="1"/><circle class="patch-ferrule" cx="128" cy="138" r="11"/><circle class="patch-ferrule" cx="128" cy="196" r="11"/><circle class="patch-ferrule-core" cx="128" cy="138" r="5"/><circle class="patch-ferrule-core" cx="128" cy="196" r="5"/><rect class="patch-socket" x="195" y="111" width="74" height="112" rx="3"/><rect class="patch-opening" x="209" y="118" width="46" height="40" rx="2"/><rect class="patch-opening" x="209" y="176" width="46" height="40" rx="2"/><rect class="patch-keyway" x="255" y="138" width="8" height="58" rx="1"/><circle class="patch-ferrule" cx="232" cy="138" r="11"/><circle class="patch-ferrule" cx="232" cy="196" r="11"/><circle class="patch-ferrule-core" cx="232" cy="138" r="5"/><circle class="patch-ferrule-core" cx="232" cy="196" r="5"/></g></g></g>
+<g transform="translate(783 466)"><path d="M25 80 C25 168 260 120 410 190" fill="none" stroke="#a88027" stroke-width="15"/><path d="M25 80 C25 168 260 120 410 190" fill="none" stroke="#f4cf62" stroke-width="10"/><rect x="14" y="0" width="22" height="20" rx="3" fill="#cbd5dc" stroke="#8295a1" stroke-width="2"/><rect x="3" y="17" width="44" height="52" rx="5" fill="#a5c6d8" stroke="#355a71" stroke-width="3"/><path d="M9 31 H41 M9 40 H41 M9 49 H41" stroke="#e5f2f8" stroke-width="3"/><path d="M18 17 V57 H28 V17" fill="#cee2ed" stroke="#597b8c" stroke-width="2"/><rect x="13" y="66" width="24" height="27" rx="5" fill="#557d94"/></g><g transform="translate(875 466)"><path d="M25 80 C25 150 202 112 318 190" fill="none" stroke="#a88027" stroke-width="15"/><path d="M25 80 C25 150 202 112 318 190" fill="none" stroke="#f4cf62" stroke-width="10"/><rect x="14" y="0" width="22" height="20" rx="3" fill="#cbd5dc" stroke="#8295a1" stroke-width="2"/><rect x="3" y="17" width="44" height="52" rx="5" fill="#a5c6d8" stroke="#355a71" stroke-width="3"/><path d="M9 31 H41 M9 40 H41 M9 49 H41" stroke="#e5f2f8" stroke-width="3"/><path d="M18 17 V57 H28 V17" fill="#cee2ed" stroke="#597b8c" stroke-width="2"/><rect x="13" y="66" width="24" height="27" rx="5" fill="#557d94"/></g>
+</svg>
