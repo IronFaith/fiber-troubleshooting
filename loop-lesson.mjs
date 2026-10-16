@@ -1,4 +1,4 @@
-import {rackJourneyIllustration} from './rack-visuals.mjs?v=6';
+import {rackJourneyIllustration} from './rack-visuals.mjs?v=7';
 import {mmcHead, cassetteFront} from './loop-visuals.mjs?v=3';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';

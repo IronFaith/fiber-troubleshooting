@@ -7,6 +7,7 @@ files['/devices.html'] = ['devices.html', 'text/html'];
 files['/patching.html'] = ['patching.html', 'text/html'];
 files['/simulations.html'] = ['simulations.html', 'text/html'];
 files['/learning.mjs'] = ['learning.mjs', 'text/javascript'];
+files['/communication-route.mjs'] = ['communication-route.mjs', 'text/javascript'];
 files['/quiz.html'] = ['quiz.html', 'text/html'];
 files['/quiz.mjs'] = ['quiz.mjs', 'text/javascript'];
 files['/quiz-data.mjs'] = ['quiz-data.mjs', 'text/javascript'];

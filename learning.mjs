@@ -1,8 +1,9 @@
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
-import { rackIllustration, localRemoteIllustration } from './rack-visuals.mjs?v=6';
+import { rackIllustration } from './rack-visuals.mjs?v=7';
+import { mountCommunicationRoute } from './communication-route.mjs?v=1';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=4';
-import { mountLightJourney } from './loop-lesson.mjs?v=3';
+import { mountLightJourney } from './loop-lesson.mjs?v=4';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=1';
 
@@ -79,6 +80,7 @@ function renderLesson() {
       <h3 id="trace-loops-title">How two devices communicate through fiber</h3>
       <p class="section-intro">Device A’s data → optic → fiber and CAS connections → optic → Device B.</p>
       <div id="light-journey"></div>
+      <p class="picture-note">This is a simplified overview. <a href="./devices.html#ends">Follow the full example through rack, distribution and room-passage passives in Chapter 2 →</a></p>
     </section>
     <section id="loopbacks" class="lesson-section" aria-labelledby="loop-title">
       <h3 id="loop-title">Bring TX light back to RX</h3>
@@ -254,11 +256,11 @@ function renderDevicesLesson() {
       <p class="picture-note">Your naming format. Drawings are illustrative; use the site labels and layout to locate the actual device.</p>
     </section>
     <section id="ends" class="lesson-section" aria-labelledby="ends-title">
-      <h3 id="ends-title">Local and remote are the two ends</h3>
-      <p class="section-intro">Local is where you are checking. Remote is the connected device, possibly in another room or building. Choose your side below.</p>
+      <h3 id="ends-title">From your rack to the other room</h3>
+      <p class="section-intro">The devices exchange data through a chain of fiber connections. Follow the optic’s light through three passives on each side of this example. Local is where you are checking; remote is the other device.</p>
       <div id="ends-picture"></div>
       <div class="endpoint-locations"><p><strong>Device A · your example</strong><span>QNO5.5C.16f.17.30</span></p><p><strong>Device B · the other end</strong><span>Find its own position in the connection record.</span></p></div>
-      <p class="picture-note">One pair enlarged: blue A → B, teal B → A. IR is invisible. The rack layouts, CAS 1 / 12 and onward route are examples; use FIM for the actual passives and lane map.</p>
+      <p class="picture-note">A1–A3 and B1–B3, Port 12 and the room layouts are teaching examples. The rear female / front male MMC arrangement at the rack CAS follows your site example; connector gender depends on the assembly. Use FIM and the actual labels for the route, mating connectors and lane map.</p>
     </section>
     ${perspectiveLesson()}
     <section id="ports" class="lesson-section" aria-labelledby="ports-title">
@@ -267,7 +269,7 @@ function renderDevicesLesson() {
       <p class="lesson-takeaway">The position tells you where to go. The connection record tells you which ports and passives join the two devices.</p>
       <p class="lesson-takeaway">Check what you can reach: loop the local optic, then extend through accessible passives. A passing local loop leaves the path beyond it unverified.</p>
     </section>
-    <p class="lesson-sources">Position format: your site example. Optical link reference: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing and fiber links</a>.</p>
+    <p class="lesson-sources">Position format and rack connection: your site examples. References: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC gender and polarity</a>.</p>
     <a class="next-chapter" href="./patching.html">Next chapter: FIM, LC & MMC patching →</a>
     <a class="next-chapter" href="./learn.html">← Chapter 1: Optics, fiber & light</a>
     <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
@@ -283,7 +285,7 @@ function renderDevicesLesson() {
   }
   parts.forEach((button, index) => button.addEventListener('click', () => selectPosition(index)));
   selectPosition(0);
-  example('ends-picture', 'Choose the device you are checking', ['At device A', 'At device B'], localRemoteIllustration);
+  mountCommunicationRoute(document.getElementById('ends-picture'));
 }
 
 function positionPicture(selected) {

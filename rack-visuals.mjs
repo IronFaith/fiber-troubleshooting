@@ -171,7 +171,7 @@ export function rackJourneyIllustration(reverse=false) {
 
 // Compact rack faces keep both ends of one duplex pair visible together.
 // Connector positions are enlarged for teaching, not a lane or rear-wiring map.
-function linkRack(offset,name,local) {
+function linkRack(offset,name,local,casName='CAS 1') {
   let drawing = `<g class="link-rack${local ? ' link-rack-local' : ''}" data-device="${name}" transform="translate(${offset} 0)">
     <rect class="link-role-badge" x="10" y="4" width="152" height="28" rx="5"/>
     ${label(86,23,local ? 'LOCAL · YOU ARE HERE' : 'REMOTE','rack-center link-role')}
@@ -181,7 +181,7 @@ function linkRack(offset,name,local) {
     <rect class="rack-frame" x="10" y="182" width="152" height="264" rx="4"/>
     <rect class="rack-interior" x="18" y="212" width="136" height="221"/>
     <path class="rack-rail" d="M17 213 V432 M155 213 V432"/>
-    ${label(68,195,'CAS 1','rack-center rack-on-dark link-location')}
+    ${label(68,195,casName,'rack-center rack-on-dark link-location')}
     ${label(68,209,'Port 12','rack-center rack-on-dark link-location')}
     <rect class="rack-cas" x="30" y="214" width="118" height="39" rx="2"/>`;
   for(let port=1;port<=32;port++) {
@@ -214,6 +214,10 @@ function linkRack(offset,name,local) {
     <rect class="rack-foot" x="132" y="446" width="24" height="6" rx="2"/>
     </g>`;
   return drawing;
+}
+
+export function communicationRack(name,local) {
+  return linkRack(0,name,local,`${name}1 · rack CAS`);
 }
 
 export function localRemoteIllustration(selected=0) {

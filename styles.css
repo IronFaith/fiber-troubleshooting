@@ -716,6 +716,55 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 @keyframes mmc-seat { from { transform:translateX(-99px); } to { transform:translateX(0); } }
 @keyframes mmc-latched { from { opacity:0; } to { opacity:1; } }
 .endpoint-locations { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:13px; }
+
+/* Full physical route: a rack, distribution point and room passage on each side. */
+.communication-route { --comm-light:#177eca; }
+.communication-route.comm-reverse { --comm-light:#137c6d; }
+.comm-controls { display:flex; flex-wrap:wrap; justify-content:space-between; gap:14px; }
+.comm-controls > div > span { display:block; font-size:12px; color:#526d80; margin-bottom:6px; }
+.comm-controls [role="group"] { display:flex; gap:5px; }
+.comm-controls button, .comm-steps button { min-height:44px; border:1px solid #afc4d2; border-radius:5px; background:white; color:#173b59; padding:8px 13px; font:600 13px 'Segoe UI',sans-serif; }
+.comm-controls button[aria-pressed="true"], .comm-steps button[aria-pressed="true"] { color:white; background:#173b59; border-color:#173b59; }
+.communication-route .comm-play { background:#173b59; border-color:#173b59; color:white; }
+.communication-route button:disabled { opacity:.4; cursor:default; }
+.comm-map { width:100%; overflow:auto; border:1px solid #b7cbd8; border-radius:8px; background:#e8eef2; }
+.comm-map > svg { display:block; width:100%; height:auto; }
+.comm-map.comm-enlarged > svg { width:max(100%,1040px); max-width:none; }
+.comm-map:focus-visible { outline:3px solid #347cbc; outline-offset:3px; }
+.comm-map text { font:600 16px 'Segoe UI',sans-serif; fill:#294a60; }
+.comm-map .comm-room-title { font-size:18px; font-weight:700; letter-spacing:2px; }
+.comm-center { text-anchor:middle; }
+.comm-end { text-anchor:end; }
+.comm-map .comm-small { font-size:14px; }
+.comm-cassette > .hardware-art > .hardware-label { display:none; }
+.comm-room { fill:#f7f9fa; stroke:#d0dce3; }
+.comm-lit { fill:none; stroke:var(--comm-light); stroke-width:3; opacity:0; stroke-linejoin:round; }
+.comm-reached .comm-lit { opacity:1; }
+.comm-electrical .comm-lit { stroke:#9b6fc6; stroke-width:4; stroke-dasharray:5 4; opacity:.55; }
+.comm-electrical.comm-reached .comm-lit { opacity:1; }
+.comm-measure { fill:none; stroke:none; }
+.comm-focus circle { fill:none; stroke:var(--comm-light); stroke-width:3; }
+.comm-focus circle:first-child { stroke-width:8; opacity:.14; }
+.comm-pulse circle { fill:var(--comm-light); opacity:.25; }
+.comm-pulse path { fill:var(--comm-light); stroke:white; stroke-width:1.5; stroke-linejoin:round; }
+.comm-pulse.comm-data path { fill:#7951ac; }
+.comm-key { font-size:12px; color:#526d80; margin:8px 0; }
+.comm-steps { display:flex; flex-wrap:wrap; gap:5px; margin:14px 0; }
+.comm-steps button { flex:1 0 55px; display:flex; flex-direction:column; align-items:center; gap:4px; padding:7px 5px; font-size:12px; }
+.comm-steps button span { opacity:.7; font-size:10px; }
+.comm-detail { padding:18px; background:#edf3f7; border-left:4px solid var(--comm-light); }
+.comm-counter { font-size:11px; color:#526d80; text-transform:uppercase; letter-spacing:1px; margin:0 0 6px; }
+.comm-detail h4 { margin:0 0 7px; font-size:18px; }
+.comm-copy { margin:0; font-size:14px; line-height:1.55; }
+.comm-detail > svg { display:block; width:100%; max-width:460px; margin:16px auto 0; }
+.comm-detail text { fill:#294a60; font:600 13px 'Segoe UI',sans-serif; }
+.comm-detail .comm-on-dark { fill:#e7eff3; }
+.comm-status { font-size:12px; line-height:1.5; color:#526d80; margin:10px 0; }
+@media(max-width:520px) {
+  .comm-controls { gap:12px; }
+  .comm-steps button { flex-basis:48px; }
+  .comm-detail { padding:13px; }
+}
 .endpoint-locations p { margin:0; font-size:13px; color:#526a7d; }
 .endpoint-locations strong, .endpoint-locations span { display:block; overflow-wrap:anywhere; }
 .endpoint-locations strong { color:#173b59; margin-bottom:5px; }
