@@ -1,8 +1,8 @@
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
-import { rackIllustration, localRemoteIllustration } from './rack-visuals.mjs?v=5';
+import { rackIllustration, localRemoteIllustration } from './rack-visuals.mjs?v=6';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=3';
-import { mountLightJourney } from './loop-lesson.mjs?v=2';
+import { mountLightJourney } from './loop-lesson.mjs?v=3';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 
 function el(tag, className = '', text = '') {
@@ -57,7 +57,7 @@ function renderLesson() {
     <h2 id="lesson-title">Optics, fiber & light</h2>
     <p class="lesson-intro">Follow the light from the optic, through the fiber, to the test.</p>
     <nav class="lesson-jumps" aria-label="In this chapter">
-      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#trace-loops">Rack-to-rack light</a><a href="#loopbacks">Loopbacks</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
+      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#trace-loops">Device communication</a><a href="#loopbacks">Loopbacks</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
     </nav>
     <section id="optics" class="lesson-section" aria-labelledby="light-title">
       <h3 id="light-title">Two light sources, different jobs</h3>
@@ -75,8 +75,8 @@ function renderLesson() {
       <p class="lesson-takeaway">A passive routes light; it does not make it. Follow the mapped port, strand and TX → RX pairing.</p>
     </section>
     <section id="trace-loops" class="lesson-section" aria-labelledby="trace-loops-title">
-      <h3 id="trace-loops-title">Follow the light from rack to rack</h3>
-      <p class="section-intro">Optic → LC leg → MMC head → CAS 1 → onward fiber → CAS 2 → receiving optic.</p>
+      <h3 id="trace-loops-title">How two devices communicate through fiber</h3>
+      <p class="section-intro">Device A’s data → optic → fiber and CAS connections → optic → Device B.</p>
       <div id="light-journey"></div>
     </section>
     <section id="loopbacks" class="lesson-section" aria-labelledby="loop-title">

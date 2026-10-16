@@ -117,36 +117,54 @@ export const rackJourneySegments = [
   'M671 132 V146 H663 V174 Q663 204 641 204 H522 Q507 204 507 226 V258 Q507 268 522 268 H565 Q580 268 580 248'
 ];
 
-export function rackJourneyIllustration() {
+const rackReturnSegments = [
+  'M580 245 V253 Q580 261 568 261 H540',
+  'M540 261 H520 Q514 261 514 251 V225 Q514 211 529 211 H645 Q665 211 665 175 V152',
+  'M665 152 V146 H673 V132',
+  'M673 132 V76 Q673 52 651 52 H263 Q233 52 233 76 V132',
+  'M233 132 V146 H225 V174 Q225 199 205 199 H88 Q74 199 74 213 V251 Q74 261 86 261 H124 Q140 261 140 248'
+];
+
+export function rackJourneyIllustration(reverse=false) {
+  const fibers=reverse ? rackReturnSegments : rackJourneySegments;
+  const otherFibers=reverse ? rackJourneySegments : rackReturnSegments;
+  const sourceX=reverse ? 580 : 140, receiverX=reverse ? 140 : 580;
+  const electrical=[`M${sourceX+130} 245 H${sourceX}`,`M${receiverX} 248 H${receiverX+130}`];
+  const measures=fibers.map((path,i)=>i===0 ? `${electrical[0]} ${path}` : i===4 ? `${path} ${electrical[1]}` : path);
   let drawing=`<g class="rack-art journey-racks">
     <g transform="translate(0 70)">${rackBody(false,30,'CAS 1')}</g></g>
     <g class="rack-art journey-racks"><g transform="translate(440 70)">${rackBody(false,30,'CAS 2')}</g></g>
     <g class="rack-art">
-    ${label(178,16,'LOCAL RACK · optic sends','rack-center journey-rack-title')}
-    ${label(618,16,'NEXT RACK · optic receives','rack-center journey-rack-title')}
+    ${label(178,16,`DEVICE A · ${reverse ? 'receives' : 'sends'} data`,'rack-center journey-rack-title')}
+    ${label(618,16,`DEVICE B · ${reverse ? 'sends' : 'receives'} data`,'rack-center journey-rack-title')}
     ${label(451,64,'Fiber between cassettes','rack-center')}`;
-  rackJourneySegments.forEach((path,index)=> {
-    drawing+=`<g data-journey-segment="${index}">${route(path)}<path class="journey-lit-path" d="${path}"/></g>`;
+  drawing+=`<g class="journey-other-fiber">${otherFibers.map(path=>route(path)).join('')}</g>`;
+  fibers.forEach((path,index)=> {
+    drawing+=`<g data-journey-segment="${index}">${route(path)}<path class="journey-lit-path" d="${path}"/><path class="journey-stage-measure" d="${measures[index]}"/></g>`;
   });
   for(const offset of [0,440]) {
+    const sending=reverse ? offset===440 : offset===0;
     drawing+=`<g transform="translate(${offset} 70)">
       <rect class="hardware-plug" x="219" y="69" width="8" height="17" rx="1"/>
       <rect class="hardware-boot" x="220" y="85" width="6" height="6" rx="1"/>
       <path class="rack-manager" d="M59 142 h17 v7 H59 M59 202 h17 v7 H59"/>
+      <rect class="journey-device-outline" x="78" y="157" width="211" height="27" rx="3"/>
       <rect class="rack-optic-focus" x="133" y="165" width="15" height="16" rx="2"/>
-      ${label(279,205,offset ? 'RX · light arrives here' : 'TX · light starts here','rack-on-dark rack-small rack-end')}
+      ${label(279,213,`Device ${offset ? 'B' : 'A'} · ${sending ? 'data → TX' : 'RX → data'}`,'rack-on-dark rack-small rack-end')}
       </g>`;
   }
-  drawing+=`<g data-journey-focus="0"><circle class="journey-hardware-halo" cx="140" cy="245" r="18"/></g>
-    <g data-journey-focus="1"><rect class="journey-hardware-halo" x="56" y="185" width="176" height="91" rx="12"/></g>
-    <g data-journey-focus="2"><rect class="journey-hardware-halo" x="208" y="125" width="36" height="48" rx="7"/></g>
+  drawing+=`<path class="journey-electrical journey-electrical-send" d="${electrical[0]}"/>
+    <path class="journey-electrical journey-electrical-receive" d="${electrical[1]}"/>
+    <g data-journey-focus="0"><rect class="journey-hardware-halo" x="${reverse ? 518 : 78}" y="227" width="211" height="27" rx="3"/></g>
+    <g data-journey-focus="1"><rect class="journey-hardware-halo" x="${reverse ? 500 : 56}" y="185" width="176" height="91" rx="12"/></g>
+    <g data-journey-focus="2"><rect class="journey-hardware-halo" x="${reverse ? 654 : 208}" y="125" width="36" height="48" rx="7"/></g>
     <g data-journey-focus="3"><rect class="journey-hardware-halo" x="217" y="26" width="468" height="113" rx="16"/></g>
-    <g data-journey-focus="4"><circle class="journey-hardware-halo" cx="580" cy="248" r="18"/></g>
-    ${lightSource(140,245)}
-    <circle class="journey-rx" cx="580" cy="248" r="4"/>
-    <path class="journey-measure" d="${rackJourneySegments.join(' ')}"/>
+    <g data-journey-focus="4"><rect class="journey-hardware-halo" x="${reverse ? 78 : 518}" y="227" width="211" height="27" rx="3"/></g>
+    ${lightSource(sourceX,245)}
+    <circle class="journey-rx" cx="${receiverX}" cy="248" r="4"/>
+    <path class="journey-measure" d="${measures.join(' ')}"/>
     <g class="journey-pulse" aria-hidden="true"><circle r="13"/><path d="M-9 -6 L5 0 L-9 6 L-5 0 Z"/></g>
-    ${label(178,585,'Device at elevation 30','rack-center')}${label(618,585,'Device at elevation 30','rack-center')}
+    ${label(178,585,'Device A · elevation 30','rack-center')}${label(618,585,'Device B · elevation 30','rack-center')}
     </g>`;
   return {height:605,width:800,drawing};
 }
