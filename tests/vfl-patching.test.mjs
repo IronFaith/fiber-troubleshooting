@@ -16,7 +16,7 @@ test('unplugging the incoming MMC moves the observation to its loose head; recon
   s=changeCase(s,{type:'patch',point:1,side:'rear',connected:true});
   assert.equal(vflEndpoint(s).incomingSeated,true);
   assert.equal(vflEndpoint(s).emitting,false);
-  assert.deepEqual(s.traces,{});
+  assert.deepEqual(s.traces,{'1:tx:head':'seen'});
   s=changeCase(s,{type:'normalize'});
   assert.deepEqual(s.patches,{});
 });

@@ -1,16 +1,19 @@
 import {cassetteFront} from './loop-visuals.mjs?v=3';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop} from './troubleshoot-state.mjs?v=7';
+import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop} from './troubleshoot-state.mjs?v=8';
 
 // At the observation cassette, open the onward connection, not the MMC
 // carrying light from the source. The selected port is the viewing face.
-export function vflEndpoint(s) {
+export function vflEndpoint(s,{preview=false}={}) {
   const stop=traceStop(s);
-  if(!stop || stop.point===0) return null;
-  const {point,port,kind,side,blocked,closed,incomingSeated}=stop, result=s.traces[traceKey(s)];
+  if(!stop || stop.point===0&&!preview) return null;
+  const {point,port,kind,side,blocked,closed,incomingSeated}=stop;
+  const atOpening=preview?{...s,selected:point}:s;
+  const result=preview&&s.simulated?simulatedTrace(atOpening):s.traces[traceKey(atOpening)];
   return {point,port,result,face:side,kind,blocked,closed,
     x:kind==='head'?63:31.5+((port-1)%16)*19.8,y:kind==='head'?194:(port<=16?59:137)+12,
-    incomingSeated,emitting:!blocked&&!closed&&(result==='seen'||result==='swapped')};
+    incomingSeated,emitting:!closed&&(!blocked||preview)&&(result==='seen'||result==='swapped'||preview&&result===undefined),
+    ...(preview?{mode:s.simulated?'simulation':result?'observation':'expected',outputStrand:result==='swapped'?(s.strand==='tx'?'rx':'tx'):s.strand}:{})};
 }
 
 function opticFace(mode='plugged',strand='tx',trace,receiving=false) {

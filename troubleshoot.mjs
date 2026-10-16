@@ -1,7 +1,8 @@
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop} from './troubleshoot-state.mjs?v=7';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=8';
-import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=4';
-import {patchingPanel,mountPatchDrag} from './troubleshoot-patching.mjs?v=1';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop} from './troubleshoot-state.mjs?v=8';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=9';
+import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=5';
+import {mountPatchDrag} from './troubleshoot-patching.mjs?v=2';
+import {simpleVfl} from './vfl-simple.mjs?v=1';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -103,16 +104,17 @@ function removeTool() {
 function normalizeSetup() {
   update([{type:'normalize'}],'Setup normalized in the diagram. Recheck actual health.');
 }
-const toolDrag=mountToolDrag(host,{select:selectTool,place:placeTool,remove:removeTool,valid:(kind,point)=>canPlaceTool(cases[view],kind,point),announce,getSelected:()=>selectedTool});
+const toolDrag=mountToolDrag(host,{select:selectTool,activate:kind=>kind==='vfl'?placeTool('vfl',0,true):selectTool(kind),place:placeTool,remove:removeTool,valid:(kind,point)=>canPlaceTool(cases[view],kind,point),announce,getSelected:()=>selectedTool});
 function patchConnection(action) {
   update([action],`CAS ${action.point}: ${action.side} ${action.connected?'connected':'unplugged'}. Recheck the affected section.`);
   centerMap(action.point);
   centerPatch();
-  host.querySelector(`.ts-patch-actions button[data-patch-side="${action.side}"]`)?.focus({preventScroll:true});
+  host.querySelector(`.vfl-connect-actions button[data-patch-side="${action.side}"]`)?.focus({preventScroll:true});
 }
 const patchDrag=mountPatchDrag(host,patchConnection,announce);
 
 function tray(s) {
+  if(s.tool==='vfl') return `<div class="ts-tool-tray vfl-active-tray" aria-label="Test tools"><b>VFL on fiber</b>${button('remove-tool','Remove VFL')}${button('normalize','Normalize')}</div>`;
   return `<div class="ts-tool-tray" aria-label="Test tools"><div class="ts-tool-items">${Object.entries(toolNames).map(([kind,name])=>`<button type="button" class="ts-tool-pick" data-pick-tool="${kind}" aria-pressed="${selectedTool===kind}" aria-label="Pick up ${name}">${toolArt(kind)}<span><b>${name}</b><small>${kind==='lc'?'At the optic':kind==='mmc'?'At a cassette':'LC leg / fiber'}</small></span></button>`).join('')}</div><div class="ts-tray-actions"><span>Drag a placed tool back here to remove.</span>${button('test-result','Enter result ↓',s.tool==='link'?'disabled':'')}${button('remove-tool','Remove tool',`class="ts-remove" aria-label="Remove placed tool" ${s.tool==='link'?'disabled':''}`)}${button('normalize','Normalize',`class="ts-normalize" ${s.tool==='link'&&!s.disconnected?.length?'disabled':''}`)}</div><p id="ts-tool-hint">Drag a tool onto the path, or tap a tool then its target.</p></div>`;
 }
 
@@ -138,23 +140,6 @@ function readings(s) {
   const r=simulatedReadings(s);
   const badge=(name,value)=>`<span class="ts-reading ${value}">${name}<b>${value==='good'?'Light present':value==='weak'?'Weak':'No light'}</b></span>`;
   return `<div class="ts-readings"><span>Expected with service path restored:</span>${badge('Local TX',r.tx)}${badge('Local RX',r.rx)}${badge('Remote RX',r.farRx)}<small>Remote shown for simulation only.</small></div>`;
-}
-function vflRouteControls(s) {
-  if(s.tool!=='vfl') return '';
-  const from=traceFrom(s),points=Array.from({length:s.reach+1},(_,p)=>[p,p===0?'Optic-side LC leg':`CAS ${p} · Port ${s.ports[p-1]}`]);
-  return `<div class="ts-vfl-route" aria-label="VFL source and viewing point">${select('vfl-from','VFL starts at',points.filter(([p])=>p!==s.selected),from)}<span class="ts-vfl-direction" aria-hidden="true">→</span>${select('vfl-to','Expect light at',points.filter(([p])=>p!==from),s.selected)}<div class="ts-vfl-route-footer"><p>${from===0?'VFL feeds the loose LC leg; the optic is disconnected. ':''}${s.selected?'Use the close-up below to unplug or patch the MMC.':'Check the disconnected optic-side LC leg.'}</p>${button('swap-trace','Swap ends')}</div></div>`;
-}
-function vflObservationControls(s) {
-  const result=s.traces[traceKey(s)], point=s.selected,stop=traceStop(s),blocked=stop?.blocked||stop?.closed;
-  const destination=point?stop?.kind==='head'?`the loose MMC head at CAS ${point}`:`CAS ${point} · Port ${patchAt(s,point).port}`:'the disconnected LC leg';
-  const labels={seen:'Yes, light passes',dark:'No light',wrong:'Light at a different port',swapped:'Light on the other strand'};
-  return `<section class="ts-vfl-observation" aria-labelledby="test-title">
-    <div class="ts-section-top"><h2 id="test-title" tabindex="-1">Does red light reach ${destination}?</h2>${button('link','Remove VFL','class="ts-remove"')}</div>
-    <div class="ts-fields">${point?select('port',`FIM port at CAS ${point}`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[point-1]):''}${traceFrom(s)>0?select('vfl-source-port',`CAS ${traceFrom(s)} source port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[traceFrom(s)-1]):''}${select('strand','Trace this strand',[['tx','Normally local TX'],['rx','Normally local RX']],s.strand)}</div>
-    ${s.simulated?'<p class="ts-note">Practice · run the test to show its result.</p>':`<label class="ts-ready"><input type="checkbox" data-field="ready" aria-describedby="vfl-setup-help" ${s.ready?'checked':''}><span>I’ve disconnected this test section from the optics.</span></label><p class="ts-note" id="vfl-setup-help">Confirm your real setup: disconnect the paths toward the optics at both test ends. Leave connections between your test ends seated. Use the matching VFL adapter and approved viewing method.</p>`}
-    <div class="ts-result-buttons">${s.simulated?button('run','Run this test',`class="ts-primary" ${blocked?'disabled':''}`):Object.entries(labels).filter(([value])=>stop?.kind!=='head'||value!=='wrong').map(([value,label])=>button(`result-${value}`,label,`aria-pressed="${result===value}" ${!s.ready||blocked?'disabled':''}`)).join('')}</div>
-    <p class="ts-vfl-feedback" role="status">${blocked?stop.blocked?`The illustrated path is open at CAS ${stop.point}. Check there first or reconnect it.`:'The viewing port is connected onward. Unplug that connection or choose the next CAS.':result?({seen:`Red light shown at ${destination}, based on ${s.simulated?'the simulated result':'your result'}. Continuity only; loss is not measured.`,dark:`${destination} stays dark. Check the setup and narrow the route; the cause and location are still unknown.`,wrong:'Red is shown off the expected route. Confirm the actual port against FIM.',swapped:`Red reaches ${destination} on the other strand. Check the strand mapping.`}[result]):s.ready?'Choose your observation to update the red light in the picture.':s.simulated?'Run this test to show the simulated result.':'Tick the checkbox after checking your real connections, then choose what you see.'}</p>
-  </section>`;
 }
 function controls(s) {
   const point=s.selected, tool=s.tool;
@@ -204,12 +189,15 @@ function render(preservePosition=false) {
   document.querySelectorAll('[data-workbench-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.workbenchView===view)));
   if(view==='guided') return;
   const s=cases[view];
-  host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}<div class="ts-live-grid ${s.tool==='vfl'?'ts-tracing':''}"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normal patching · health not confirmed':s.tool==='loop'?`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`:`VFL · ${traceName(s)}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>${vflRouteControls(s)}
+  if(s.tool==='vfl') {
+    host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${results(s)}`;
+    return;
+  }
+  host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normal patching · health not confirmed':`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
     <div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
     <div class="ts-legend"><span>↔ Scroll to follow the path</span><span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span></div>
-    ${s.tool==='vfl'?patchingPanel(s,paused)+vflObservationControls(s):''}
     </section>
-    <div class="ts-work-grid">${s.tool==='vfl'?'':controls(s)}${advice(s)}</div></div>${results(s)}`;
+    <div class="ts-work-grid">${controls(s)}${advice(s)}</div></div>${results(s)}`;
   if(preservePosition) host.querySelector('.ts-map').scrollLeft=scrollLeft;
   else centerMap();
   if(preservePosition&&host.querySelector('.ts-patch-scroll'))host.querySelector('.ts-patch-scroll').scrollLeft=patchScroll;
@@ -236,6 +224,7 @@ host.addEventListener('change',event=>{
   const field=event.target.dataset.field;
   if(!field) return;
   const value=event.target.value,s=cases[view];
+  if(field==='vfl-patch-port') {const stop=traceStop(s);patchConnection({type:'patch',point:stop.point,side:traceFrom(s)<s.selected?'rear':'front',connected:Boolean(patchAt(s,stop.point)[traceFrom(s)<s.selected?'rear':'front']),port:Number(value)});host.querySelector('[data-field="vfl-patch-port"]')?.focus({preventScroll:true});return;}
   if(field==='patch-port') {patchConnection({type:'patch',point:Number(event.target.dataset.patchPoint),side:event.target.dataset.patchSide,connected:true,port:Number(value)});host.querySelector('[data-field="patch-port"]')?.focus({preventScroll:true});return;}
   const action=field==='vfl-from'?{type:'trace',from:value,to:s.selected}:field==='vfl-to'?{type:'trace',from:traceFrom(s),to:value}:field==='vfl-source-port'?{type:'port',point:traceFrom(s),value}:field==='ready'?{type:'ready',value:event.target.checked}:field==='point'?{type:'select',point:value}:
     ['tx','rx'].includes(field)?{type:'health',signal:field,value}:field.startsWith('fault-')?{type:'fault',value:{[field.slice(6)]:value}}:{type:field,value};
@@ -254,12 +243,16 @@ function choosePoint(point) {
   host.querySelector(`[data-point="${point}"]`)?.focus({preventScroll:true});
 }
 host.addEventListener('keydown',event=>{
+  const strand=event.target.closest('[data-vfl-strand]');
+  if(strand&&strand.tagName.toLowerCase()!=='button'&&['Enter',' '].includes(event.key)){event.preventDefault();update([{type:'strand',value:strand.dataset.vflStrand}]);host.querySelector(`.vfl-strands [data-vfl-strand="${strand.dataset.vflStrand}"]`)?.focus({preventScroll:true});return;}
   const patch=event.target.closest('[data-patch-point]');
   if(patch&&['Enter',' '].includes(event.key)&&patch.tagName.toLowerCase()!=='button'&&patch.tagName.toLowerCase()!=='select') {event.preventDefault();patchConnection({type:'patch',point:Number(patch.dataset.patchPoint),side:patch.dataset.patchSide,connected:patch.dataset.patchConnected==='true',...(patch.dataset.patchPort?{port:Number(patch.dataset.patchPort)}:{})});return;}
   const point=event.target.closest('[data-point],[data-span]');
   if(point&&['Enter',' '].includes(event.key)){event.preventDefault();if(point.hasAttribute('data-span')){if(!selectedTool||selectedTool==='vfl')placeTool('vfl',Number(point.dataset.span));else announce('Place this loop on its matching hardware.');}else choosePoint(Number(point.dataset.point));}
 });
 host.addEventListener('click',async event=>{
+  const strand=event.target.closest('[data-vfl-strand]');
+  if(strand){const value=strand.dataset.vflStrand;update([{type:'strand',value}]);host.querySelector(`.vfl-strands [data-vfl-strand="${value}"]`)?.focus({preventScroll:true});return;}
   const patch=event.target.closest('[data-patch-connected]');
   if(patch){patchConnection({type:'patch',point:Number(patch.dataset.patchPoint),side:patch.dataset.patchSide,connected:patch.dataset.patchConnected==='true',...(patch.dataset.patchPort?{port:Number(patch.dataset.patchPort)}:{})});return;}
   const span=event.target.closest('[data-span]');
@@ -272,13 +265,14 @@ host.addEventListener('click',async event=>{
   if(action==='setup') {setupOpen=!setupOpen;render();return;}
   if(action==='normalize') {normalizeSetup();return;}
   if(action==='check-opening') {update([{type:'trace',from:traceFrom(s),to:traceStop(s).point}],'Check the open end here, then enter your observation.');centerMap();return;}
-  if(action==='continue-trace') {const forward=traceFrom(s)<s.selected;update([{type:'patch',point:s.selected,side:forward?'front':'rear',connected:true},{type:'trace',from:traceFrom(s),to:s.selected+(forward?1:-1)}],'Onward connection seated. Check the next opening.');centerMap();return;}
+  if(action==='continue-trace') {const forward=traceFrom(s)<s.selected,point=traceStop(s).point;update([{type:'patch',point,side:forward?'rear':'front',connected:true},{type:'patch',point,side:forward?'front':'rear',connected:true},{type:'trace',from:traceFrom(s),to:point+(forward?1:-1)}],'Onward connection seated. Check the next opening.');return;}
+  if(action==='open-vfl-end') {patchConnection({type:'patch',point:traceStop(s).point,side:traceFrom(s)<s.selected?'front':'rear',connected:false});return;}
   if(action==='swap-trace') {update([{type:'trace',from:s.selected,to:traceFrom(s)}],'VFL direction reversed. Confirm the new setup before recording a result.');centerMap(traceFrom(cases[view]));host.querySelector('[data-action="swap-trace"]')?.focus({preventScroll:true});return;}
   if(action==='remove-tool'||action==='link') {removeTool();host.querySelector('[data-pick-tool]')?.focus({preventScroll:true});return;}
-  if(action==='test-result') {host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.ts-vfl-observation, .ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}
+  if(action==='test-result') {host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.vfl-observe, .ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}
   if(action==='start-loop') {placeTool('lc',0);return;}
   if(action==='motion') {
-    paused=!paused;host.querySelectorAll('.ts-map,.ts-patch-scroll').forEach(el=>el.classList.toggle('light-paused',paused));target.textContent=paused?'Play arrows':'Pause arrows';return;
+    paused=!paused;host.querySelectorAll('.ts-map,.vfl-view').forEach(el=>el.classList.toggle('light-paused',paused));target.textContent=paused?'Play arrows':'Pause arrows';return;
   }
   if(action==='show-path') {centerMap();host.querySelector('.ts-map-card').scrollIntoView({block:'start',behavior:'instant'});host.querySelector('.ts-map').focus({preventScroll:true});return;}
   if(action==='copy') {
@@ -298,16 +292,16 @@ host.addEventListener('click',async event=>{
   if(action==='undo') {if(undo[view].length){cases[view]=undo[view].pop();save();render();}}
   else if(action==='reset') {undo[view].push(s);cases[view]=createCase(s.simulated);save();render();}
   else if(['loop','vfl','link'].includes(action)) update([{type:'tool',tool:action}]);
-  else if(action==='run') update([{type:'ready',value:true},{type:'record'}],'Simulated test recorded.');
+  else if(action==='run') update([...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record'}],'Simulated test recorded.');
   else if(action.startsWith('service-')) update([{type:'service',value:action.slice(8)}],'Restored link observation recorded.');
-  else if(action.startsWith('result-')) update([...(s.tool==='loop'?[{type:'ready',value:true}]:[]),{type:'record',result:action.slice(7)}],'Observation recorded.');
+  else if(action.startsWith('result-')) update([...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record',result:action.slice(7)}],'Observation recorded.');
   else if(action==='next') {const next=assessment(s).suggestion;if(next){if(next.tool==='link')normalizeSetup();else placeTool(next.tool==='vfl'?'vfl':next.point?'mmc':'lc',next.point);}}
   else if(action.startsWith('review-vfl-')) {const [,,from,to,strand,head]=action.split('-');const review=[{type:'trace',from,to},{type:'strand',value:strand}];update(review);if(Boolean(head)!==(traceStop(cases[view])?.kind==='head'))announce('The connections changed. Set up this recorded test again before rechecking.');}
   else if(action.startsWith('review-loop-')) update([{type:'select',point:action.slice(12)},{type:'tool',tool:'loop'}]);
   if(s.tool==='vfl' && (action.startsWith('result-') || action==='run')) {
     centerMap();
     centerPatch();
-    (host.querySelector('.ts-patch-panel')??host.querySelector('.ts-map')).scrollIntoView({block:'start',behavior:'instant'});
+    host.querySelector('.vfl-view')?.scrollIntoView({block:'start',behavior:'instant'});
   }
   host.querySelector(`[data-action="${action}"]`)?.focus({preventScroll:true});
 });

@@ -151,6 +151,9 @@ export function changeCase(state, action) {
       for(const key of Object.keys(s.loops)) if(Number(key)>=point) delete s.loops[key];
       for(const key of Object.keys(s.traces)) {
         const route=parseTraceKey(key);
+        // Seating the same head does not invalidate the check up to its loose
+        // end. Retain it for comparison with a fresh check through the CAS.
+        if(route?.head&&point===route.to&&port===current.port) continue;
         if(route&&point>=Math.min(route.from,route.to)&&point<=Math.max(route.from,route.to)) delete s.traces[key];
       }
       break;
