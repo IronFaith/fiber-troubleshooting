@@ -1,7 +1,8 @@
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration, localRemoteIllustration } from './rack-visuals.mjs?v=4';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
-import { mountPatchPractice } from './patch-practice.mjs?v=2';
+import { mountPatchPractice } from './patch-practice.mjs?v=3';
+import { mountLoopLesson, passiveThroughPicture } from './loop-lesson.mjs?v=1';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 
 function el(tag, className = '', text = '') {
@@ -28,7 +29,7 @@ const chapterLink = link('Chapter 1 · Optics, fiber & light', './learn.html');
 const devicesLink = link('Chapter 2 · Device locations & links', './devices.html');
 const patchingLink = link('Chapter 3 · FIM, LC & MMC patching', './patching.html');
 const simulationsLink = link('Simulations · hands-on practice', './simulations.html');
-const quizLink = link('Beginner knowledge check', './quiz.html');
+const quizLink = link('Exams', './quiz.html');
 if (document.querySelector('#quiz')) quizLink.setAttribute('aria-current', 'page');
 menuPanel.append(chapterLink, devicesLink, patchingLink, simulationsLink, quizLink, link('Back to troubleshooting', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
@@ -56,7 +57,7 @@ function renderLesson() {
     <h2 id="lesson-title">Optics, fiber & light</h2>
     <p class="lesson-intro">Follow the light from the optic, through the fiber, to the test.</p>
     <nav class="lesson-jumps" aria-label="In this chapter">
-      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#loopbacks">Loopbacks</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
+      <a href="#optics">Light sources</a><a href="#path">Fiber path</a><a href="#loopbacks">Loopbacks</a><a href="#trace-loops">Follow loop results</a><a href="#cleaning">Faults</a><a href="#vfl">VFL tracing</a>
     </nav>
     <section id="optics" class="lesson-section" aria-labelledby="light-title">
       <h3 id="light-title">Two light sources, different jobs</h3>
@@ -80,6 +81,15 @@ function renderLesson() {
       <div id="readings" class="learning-readings"><span><b>RX +0.25</b> your good example</span><span><b>RX −40</b> your no-light indication</span></div>
       <p class="picture-note">dBm examples. Check every lane against the optic’s limits. Use the correct loop mapping and any required attenuation.</p>
     </section>
+    <section id="trace-loops" class="lesson-section" aria-labelledby="trace-loops-title">
+      <h3 id="trace-loops-title">Follow the light. Narrow down the problem.</h3>
+      <p class="section-intro">The optic makes the light. A CAS is a passive cassette: it connects the mapped fibers so light can continue through.</p>
+      ${passiveThroughPicture()}
+      <h4>Move the loop one step farther</h4>
+      <p class="section-intro">Follow this example in order. Each loop brings the local optic’s TX light back to its RX, without needing the remote optic.</p>
+      <div id="loop-walkthrough"></div>
+      <p class="picture-note">Pass means the tested lanes meet the approved loop-test criteria for this setup. Use the correct loop mapping and any required attenuation. A passing loop does not certify the entire link.</p>
+    </section>
     <section id="cleaning" class="lesson-section" aria-labelledby="fault-title">
       <h3 id="fault-title">What can interrupt the light?</h3>
       <p class="section-intro">Change the connection to see a possible effect.</p>
@@ -93,7 +103,7 @@ function renderLesson() {
       <p class="lesson-takeaway">VFL helps trace continuity and mapping. Measure optical loss separately with a source and power meter or loss test set.</p>
     </section>
     <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>
-    <a class="next-chapter" href="./quiz.html">Try the beginner knowledge check →</a>
+    <a class="next-chapter" href="./quiz.html">Open Exams →</a>
     <a class="next-chapter" href="./devices.html">Next chapter: Device locations & links →</a>
     <a class="lesson-return" href="./index.html">Use the troubleshooting diagram →</a>`;
   setupLesson();
@@ -101,6 +111,7 @@ function renderLesson() {
   example('red-picture', 'Visible red VFL light', [], redPicture);
   example('path-picture', 'Fiber route', [], pathPicture);
   example('loop-picture', 'Loop location', ['LC at optic', 'MMC at passive'], loopPicture);
+  mountLoopLesson(document.getElementById('loop-walkthrough'));
   example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
   example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
 }
@@ -367,7 +378,7 @@ function renderPatchingLesson() {
     </section>
     <a class="next-chapter" href="./simulations.html">Practice LC & MMC patching in Simulations →</a>
     <p class="lesson-sources">Port mapping and fanout: your site examples. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
-    <a class="next-chapter" href="./quiz.html">Try the beginner knowledge check →</a>
+    <a class="next-chapter" href="./quiz.html">Open Exams →</a>
     <a class="next-chapter" href="./devices.html">← Chapter 2: Device locations & links</a>
     <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
   setupLesson();
@@ -386,12 +397,12 @@ function renderSimulations() {
     <p class="lesson-intro">Move the cable. Match the port. Build confidence on mock hardware.</p>
     <section id="patch-practice" class="lesson-section" aria-labelledby="practice-title">
       <h3 id="practice-title">LC & MMC patching</h3>
-      <p class="section-intro">Read a mock FIM ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question quiz.</p>
+      <p class="section-intro">Read a mock FIM ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question exam.</p>
       <div id="patch-lab" class="patch-lab"></div>
       <p class="picture-note">Each ticket is a separate training example using your site's 1 / 5 mapping. Matching a port does not prove light or link health. On site: confirm FIM, inspect/clean, seat fully, and check optic health.</p>
     </section>
     <a class="next-chapter" href="./patching.html">Review Chapter 3: FIM, LC & MMC patching →</a>
-    <a class="next-chapter" href="./quiz.html">Beginner knowledge check →</a>`;
+    <a class="next-chapter" href="./quiz.html">Exams →</a>`;
   setupLesson();
   mountPatchPractice(document.getElementById('patch-lab'));
 }

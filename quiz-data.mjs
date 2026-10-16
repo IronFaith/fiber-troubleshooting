@@ -38,9 +38,9 @@ export const questions = [
   },
   {
     id:'bend-cause', topic:0, visual:'bend-change', skill:'Interpret a change',
-    prompt:'The reading improves after a tight bend is relieved. Are you finished?',
-    choices:['Yes—the improvement proves the entire link is healthy.', 'Not yet—compare the new reading with its limits and check the link.', 'No improvement counts until the number reaches exactly zero.'], correct:1,
-    explanation:'The change suggests the bend contributed. A better reading can still be outside limits. Use the installed optic’s range; zero is not a required target.',
+    prompt:'You give a tightly bent fiber a wider curve, and its light reading improves. What should you check before calling the issue fixed?',
+    choices:['Nothing else—any improvement means the link is healthy.', 'Check that the new reading is within the optic’s allowed range and the link is working.', 'Keep adjusting the cable until the reading is exactly zero.'], correct:1,
+    explanation:'A better reading means more light is getting through, but it may still be too weak. Recheck the required lanes against the optic’s limits and confirm the link is working. Exactly zero is not the goal.',
     reveal:'Improved does not always mean within limits', lesson:'learn.html#cleaning'
   },
   {
@@ -59,9 +59,9 @@ export const questions = [
   },
   {
     id:'bend-check', topic:1, visual:'bend', skill:'Handle fiber carefully',
-    prompt:'A cable is pinched at the manager. Its jacket looks intact. What next?',
-    choices:['Restore the allowed bend radius, inspect for damage and recheck.', 'Leave it because an intact jacket proves the fiber inside is fine.', 'Swap the optic first; the cable cannot affect a power reading.'], correct:0,
-    explanation:'An intact jacket does not prove the fiber is undamaged. Follow the cable’s bend limit and site handling procedure, then check the effect of that change.',
+    prompt:'A fiber cable is squeezed under a cable-management clip. Its outer covering is not torn. What should you do first?',
+    choices:['Carefully relieve the pressure, check the cable for damage, and recheck the light reading.', 'Leave it—the outside looks fine, so the fiber inside must be fine.', 'Replace the optic—the squeezed cable cannot affect the light.'], correct:0,
+    explanation:'The jacket is the cable’s outer covering. It can look fine while pressure or a sharp bend affects the fiber inside. Follow site handling procedures: release the pressure, route the cable with a wide enough curve for its bend limit, inspect for damage, and retest.',
     reveal:'Check the route and the result', lesson:'learn.html#cleaning'
   },
   {
@@ -118,21 +118,21 @@ export const questions = [
     prompt:'The approved direct optic loop passes. The restored link still fails. What next?',
     choices:['Mark the remote optic healthy because the local loop passed.', 'Extend the test to the next accessible passive using the mapped loop.', 'Replace the local optic before checking any connected fiber.'], correct:1,
     explanation:'The local optic passed this test. Extend outward through the fiber and connections you can reach. A direct loop does not test the long route or remote optic.',
-    reveal:'Checked locally; extend the tested path', lesson:'learn.html#loopbacks'
+    reveal:'Checked locally; extend the tested path', lesson:'learn.html#trace-loops'
   },
   {
     id:'passive-loop', topic:3, visual:'sections', interaction:'visual', skill:'Interpret local loop results',
     prompt:'Read the loop results. Which section should you investigate next?',
     choices:['A · local optic to CAS 1', 'B · CAS 1 to CAS 2, including its connections', 'C · beyond CAS 2 toward the remote device'], correct:1,
     explanation:'The direct loop and CAS 1 loop passed. The CAS 2 loop failed, so first verify that loop setup, then investigate the added span and its connections. This does not locate a break. Beyond CAS 2 is untested.',
-    reveal:'B is suspect. Verify the loop setup, then isolate this span.', lesson:'learn.html#loopbacks'
+    reveal:'B is suspect. Verify the loop setup, then isolate this span.', lesson:'learn.html#trace-loops'
   },
   {
     id:'vfl-setup', topic:3, visual:'vfl-setup', skill:'Use VFL observations',
-    prompt:'You need to trace a fiber with a VFL. Which setup is ready?',
-    choices:['The local end is isolated, but the far end is still on active gear.', 'The adapter fits, but the far-end connection has not been checked.', 'Both ends are isolated from active gear, with the correct adapter.'], correct:2,
-    explanation:'Follow site isolation steps at both ends and verify the VFL and adapter before tracing. Use the approved detection method; never look into a fiber or optic.',
-    reveal:'Isolate both ends before tracing', lesson:'learn.html#vfl'
+    prompt:'Before connecting a VFL (red-light tester), what must you confirm about the fiber section you will trace?',
+    choices:['Only the near end is disconnected; the far end can stay connected to an optic.', 'The VFL adapter fits; the far-end connection can remain unchecked.', 'Both ends are disconnected from active equipment, and the VFL adapter matches the connector.'], correct:2,
+    explanation:'Check both ends of the section—not just the end in your hand. Disconnect them from active equipment under your site’s procedure, then use the matching VFL adapter. The VFL supplies its own red light; do not send it into an optic. Detect it using the approved method, never by looking into a fiber end.',
+    reveal:'Both ends disconnected + matching adapter', lesson:'learn.html#vfl'
   },
   {
     id:'wrong-port', topic:3, visual:'wrong-port', skill:'Use VFL observations',

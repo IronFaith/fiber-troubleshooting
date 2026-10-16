@@ -77,6 +77,20 @@ function vfl(kind,answered) {
     ${text(180,222,active ? `Expected: 12 · detected: ${wrong ? '13' : '12'}` : 'VFL + fiber section · setup to verify','text-anchor="middle"')}`,245,active ? `On an isolated fiber, VFL light is detected at Port ${wrong ? '13' : '12'}. The expected destination is Port 12.` : 'VFL tool and a fiber section to prepare for testing.');
 }
 
+function vflSetup(answered) {
+  return `<p class="q-observation">Check the two ends of the section you plan to trace.</p>${svg(`
+    <rect class="q-rack" x="8" y="36" width="65" height="61" rx="4"/><rect class="q-rack" x="287" y="36" width="65" height="61" rx="4"/>
+    ${text(40,60,'Active','class="q-white" text-anchor="middle"')}${text(40,79,'gear','class="q-white" text-anchor="middle"')}
+    ${text(319,60,'Active','class="q-white" text-anchor="middle"')}${text(319,79,'gear','class="q-white" text-anchor="middle"')}
+    ${cord('M106 89 Q180 136 254 89')}<rect class="q-lc" x="93" y="78" width="18" height="20" rx="2"/><rect class="q-lc" x="249" y="78" width="18" height="20" rx="2"/>
+    ${text(96,27,'End A','text-anchor="middle"')}${text(264,27,'End B','text-anchor="middle"')}
+    ${text(84,73,answered ? '✓' : '?','text-anchor="middle"')}${text(277,73,answered ? '✓' : '?','text-anchor="middle"')}
+    ${text(180,146,answered ? 'Both ends disconnected from active gear' : 'Confirm how BOTH ends are connected','text-anchor="middle"')}
+    <rect class="q-vfl" x="28" y="175" width="68" height="29" rx="12"/><rect class="q-metal" x="93" y="181" width="12" height="17"/>
+    ${text(61,195,'VFL','class="q-white" text-anchor="middle"')}${text(125,193,answered ? '✓ Matching adapter' : 'Check the adapter too')}
+    ${text(180,233,answered ? 'Ready for the site-approved tracing procedure' : 'VFL stays disconnected while you verify','text-anchor="middle"')}`,250,answered ? 'Both ends of the fiber section are disconnected from active equipment. The VFL adapter matches.' : 'Two fiber ends and active equipment. Question marks mean their connection status must be confirmed; the VFL is not attached.')}`;
+}
+
 export function quizVisual(question,{answered=false,choice=null}={}) {
   const kind=question.visual;
   let body='';
@@ -84,9 +98,16 @@ export function quizVisual(question,{answered=false,choice=null}={}) {
   else if(kind==='connections') body=`<p class="q-observation">Side views · tap a connection</p><div class="q-connection-choices">${[0,1].map(i=>target(question,i,`<strong>Connection ${i===0 ? 'A' : 'B'}</strong>${connector(i===0)}`,answered,choice)).join('')}</div>`;
   else if(kind==='seated-dark') body=`<div class="q-report-label">Connector after inspection and reseating</div>${connector(true)}<div class="quiz-reading reading-alert"><span>RX after reseating</span><strong>−40</strong><small>dBm</small></div>`;
   else if(kind==='dirty') body=svg(`<circle class="scope-face" cx="180" cy="104" r="80"/><circle class="scope-core" cx="180" cy="104" r="23"/><g class="q-contamination"><circle class="dirt" cx="171" cy="96" r="12"/><circle class="dirt" cx="199" cy="119" r="7"/><circle class="dirt" cx="142" cy="135" r="5"/></g>${answered ? '<circle class="q-inspection-ring" cx="180" cy="104" r="36"/>' : ''}${text(180,213,'Inspection image · isolated connector','text-anchor="middle"')}`,235,'Inspection view showing particles on the connector end face.');
-  else if(kind==='bend' || kind==='bend-change') {
-    const path=kind==='bend-change' && answered ? 'M24 70 H235 Q303 70 303 125 Q303 180 235 180 H114' : 'M24 70 H277 Q292 70 292 80 Q292 90 277 90 H143 Q114 90 114 119 V181';
-    body=svg(`${cord(path)}<rect class="q-manager" x="91" y="37" width="17" height="68" rx="3"/>${text(24,24,'Fiber at the cable manager')}${answered ? '<path class="q-inspection-ring" d="M267 45 Q329 65 325 116"/>' : ''}${text(180,222,kind==='bend-change' ? answered ? 'Route restored to the allowed bend radius' : 'Reading improves after this bend is relieved' : 'Jacket appears intact','text-anchor="middle"')}`,245,'Fiber route with a tight bend at a cable manager.');
+  else if(kind==='bend-change') {
+    body=svg(`${text(80,27,'Before · tight bend','text-anchor="middle"')}${text(270,27,'After · wider curve','text-anchor="middle"')}
+      ${cord('M18 66 H119 Q131 66 131 78 Q131 90 119 90 H18')}${cord('M207 60 H276 Q332 60 332 104 Q332 148 276 148 H207')}
+      <path class="q-data-line" d="M161 99 H193 m-8 -6 8 6 -8 6"/>
+      ${text(180,188,'More light gets through after the change','text-anchor="middle"')}`,210,'Before: a tight bend. After: a wider curve. The light reading improved.')+(answered ? '<p class="q-observation">Recheck the allowed range and link status.</p>' : '');
+  } else if(kind==='bend') {
+    body=svg(`<rect class="q-manager" x="126" y="54" width="108" height="88" rx="5"/>${cord('M18 101 H130 Q180 111 230 101 H342')}
+      <path class="q-latch" d="M139 54 H221 V99 H210 V69 H150 V99 H139Z"/>
+      ${text(180,26,'Cable-management clip','text-anchor="middle"')}<path class="q-data-line" d="M180 155 V119 m-5 7 5 -7 5 7"/>
+      ${text(180,177,'Cable squeezed under the clip','text-anchor="middle"')}${text(180,204,'No tear visible in the outer covering','text-anchor="middle"')}`,225,'Fiber cable squeezed under a management clip. Its outer covering has no visible tear.');
   } else if(kind==='cassette') {
     body=`<p class="q-fim-ticket"><span>Mock FIM destination</span><strong>CAS 2 / Port 28</strong></p><p class="q-observation">Top: 1–16 · Bottom: 17–32. Scroll to see every port.</p><div class="q-cas-scroll" tabindex="0" role="group" aria-label="CAS 2 cassette, scroll horizontally for all 32 ports"><div class="q-cas-board">${svg(cassetteFront({name:'CAS 2',port:answered ? 28 : null,patched:answered}),206)}${question.choices.map((_,i)=>target(question,i,'',answered,choice,`style="left:${(21.6+(i%16)*19.8)/360*100}%;top:${(i<16 ? 38 : 116)/206*100}%;width:5.5%;height:${52/206*100}%"`)).join('')}</div></div>`;
   } else if(kind==='recheck') body=`<div class="q-action-sequence"><span>Connector reseated</span><b aria-hidden="true">→</b><span class="${answered ? 'q-confirmed' : ''}">${answered ? 'Recheck + record' : 'Next observation?'}</span></div>${answered ? svg(`<path class="q-ir" d="M30 35 H330"/>${lightFlow('M30 35 H330')}`,70,'Observe the result after the change.') : '<p class="q-observation">No new health reading has been taken.</p>'}`;
@@ -99,6 +120,7 @@ export function quizVisual(question,{answered=false,choice=null}={}) {
     const art=loopIllustration('direct');
     body=`<p class="q-test-results"><strong>Direct loop: pass</strong><span>Restored link: still failing</span></p>${svg(art.drawing,art.height,'Approved direct LC loopback at the local optic. The loop test passed.')}<p class="q-observation">The remote device is in another room.</p>`;
   } else if(kind==='sections') body=trace(question,answered,choice);
+  else if(kind==='vfl-setup') body=vflSetup(answered);
   else body=vfl(kind,answered);
   return `<div class="quiz-evidence ${answered ? 'q-explained' : 'q-before'}">${body}${answered ? `<p class="q-visual-takeaway">${question.reveal}</p>` : ''}</div>`;
 }

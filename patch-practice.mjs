@@ -172,9 +172,9 @@ export function mountPatchPractice(host) {
     const result=patchResult(answers);
     host.innerHTML=`<div class="lab-modes" role="group" aria-label="Patching activity">
         <button type="button" data-mode="practice" aria-pressed="${mode==='practice'}">Practice · retry freely</button>
-        <button type="button" data-mode="quiz" aria-pressed="${mode==='quiz'}">Take the 5-question quiz</button>
+        <button type="button" data-mode="quiz" aria-pressed="${mode==='quiz'}">Take the 5-question exam</button>
       </div>
-      <p class="lab-best">${best===null ? 'Beginner patching · quiz available anytime' : `Beginner patching · best quiz ${best}/5`}${!canSave ? ' · progress lasts for this visit' : ''}</p>
+      <p class="lab-best">${best===null ? 'Beginner patching · exam available anytime' : `Beginner patching · best exam ${best}/5`}${!canSave ? ' · progress lasts for this visit' : ''}</p>
       ${finished ? `<div class="lab-result">
         <h4 tabindex="-1">${result.passed ? 'Patching basics passed' : 'Keep building your patching skills'}</h4>
         <p class="lab-score">${result.correct}<span> / 5</span></p><p>Correct on the first placement. ${result.passed ? 'You matched at least four of the five tickets.' : 'Aim for 4/5. Review the missed placements below.'}</p>
@@ -194,7 +194,7 @@ export function mountPatchPractice(host) {
       <div class="lab-board"></div>
       </div>
       <p class="lab-feedback" role="status" aria-live="polite" aria-atomic="true">${mode==='practice' ? current.kind==='lc' ? 'Match the Ethernet suffix to the optic position. Check which way the purple tab faces.' : 'Match the CAS and port in the ticket. The serial alone does not tell you the port.' : 'Choose your connector, then make one placement.'}</p>
-      <button type="button" class="quiz-primary lab-next" hidden>${mode==='quiz' ? index===4 ? 'See my quiz result' : 'Next question' : 'Next practice ticket'}</button>`}`;
+      <button type="button" class="quiz-primary lab-next" hidden>${mode==='quiz' ? index===4 ? 'See my exam result' : 'Next question' : 'Next practice ticket'}</button>`}`;
     host.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=> {
       if(button.dataset.mode===mode && !finished) return;
       begin(button.dataset.mode);

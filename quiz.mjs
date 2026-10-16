@@ -1,6 +1,6 @@
-import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=1';
+import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=2';
 
-import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=6';
+import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=7';
 
 const host = document.querySelector('#quiz');
 let attempt;
@@ -34,10 +34,10 @@ function beginRound(topic) {
 
 function renderIntro() {
   const rank = rookieRank(savedScores);
-  host.innerHTML = `<p class="chapter-count">Beginner practice · 5 questions per quiz</p>
-    <h2 id="quiz-title" tabindex="-1">Choose your quiz</h2>
+  host.innerHTML = `<p class="chapter-count">Beginner level · 5 questions per exam</p>
+    <h2 id="quiz-title" tabindex="-1">Exams</h2>
     <p class="lesson-intro">Look at the evidence. Choose your next check. Five questions at a time, in any order.</p>
-    ${rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Get 4/5 to earn a Fiber Rookie stripe. Each different quiz you pass adds one stripe.</p>'}
+    ${rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Get 4/5 to earn a Fiber Rookie stripe. Each different exam you pass adds one stripe.</p>'}
     <div class="quiz-picker">${topics.map((topic,i) => {
       const score = savedScores[i];
       const passed = score !== null && score >= 4;
@@ -45,11 +45,11 @@ function renderIntro() {
         ${quizThumbnail(i)}<span class="quiz-pick-content">
           <strong>${topic}</strong><span class="quiz-pick-description">${roundDescriptions[i]}</span>
           <span class="quiz-pick-status">${score === null ? 'Not taken' : `${passed ? '✓ Passed' : 'Keep practicing'} · Best result ${score}/5`}</span>
-          <span class="quiz-pick-action">${score === null ? 'Start quiz' : 'Retake quiz'} →</span>
+          <span class="quiz-pick-action">${score === null ? 'Start exam' : 'Retake exam'} →</span>
         </span></button>`;
     }).join('')}</div>
-    <p class="picture-note">${canSave ? 'Completed quiz results and stripes stay in this browser on this device. Best results include retries.' : 'This browser cannot save progress. You can still choose any quiz; results last for this visit.'}</p>
-    <a class="quiz-lesson-link" href="./simulations.html">Simulations · hands-on patching & 5-question quiz →</a>
+    <p class="picture-note">${canSave ? 'Completed exam results and stripes stay in this browser on this device. Best results include retries.' : 'This browser cannot save progress. You can still choose any exam; results last for this visit.'}</p>
+    <a class="quiz-lesson-link" href="./simulations.html">Simulations · hands-on patching & 5-question exam →</a>
     <a class="quiz-lesson-link" href="./learn.html">Learn the basics first</a>`;
   host.querySelectorAll('.quiz-pick').forEach(button => button.addEventListener('click',() => beginRound(Number(button.dataset.round))));
 }
@@ -64,7 +64,7 @@ function renderQuestion() {
   const multiple = Array.isArray(question.correct);
   const visual = question.interaction==='visual';
   host.classList.toggle('light-paused',motionPaused);
-  host.innerHTML = `<div class="q-question-tools"><button class="quiz-picker-back" type="button" id="quiz-all">← All quizzes</button><button class="q-motion" type="button" id="quiz-motion" aria-label="${motionPaused ? 'Play' : 'Pause'} explanation animations">${motionPaused ? 'Play' : 'Pause'} motion</button></div>
+  host.innerHTML = `<div class="q-question-tools"><button class="quiz-picker-back" type="button" id="quiz-all">← All exams</button><button class="q-motion" type="button" id="quiz-motion" aria-label="${motionPaused ? 'Play' : 'Pause'} explanation animations">${motionPaused ? 'Play' : 'Pause'} motion</button></div>
     <div class="quiz-progress-label"><span>${retry ? 'Retry' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>Round ${currentRound+1} · ${topics[question.topic]}</span></div>
     <progress class="quiz-progress" value="${index}" max="${attempt.ids.length}" aria-label="Questions answered"></progress>
     <h2 id="quiz-title" class="quiz-question" tabindex="-1">${question.prompt}</h2>
@@ -173,13 +173,13 @@ function renderResults() {
       ${skills.checked.length ? `<div><h3>What you showed</h3><ul>${skills.checked.map(skill=>`<li>✓ ${skill}</li>`).join('')}</ul></div>` : ''}
       ${skills.review.length ? `<div><h3>Practice next</h3><ul>${skills.review.map(skill=>`<li>${skill}</li>`).join('')}</ul></div>` : ''}
     </section>
-    <p class="section-intro">${progress.passed ? 'You can revisit an idea or choose any other quiz.' : 'Review the ideas below and retry the missed questions. Aim for four correct answers out of five.'}</p>
+    <p class="section-intro">${progress.passed ? 'You can revisit an idea or choose any other exam.' : 'Review the ideas below and retry the missed questions. Aim for four correct answers out of five.'}</p>
     ${!canSave ? '<p class="picture-note">Progress could not be saved in this browser. It will last for this visit.</p>' : ''}
     ${nextRound !== null ? `<p class="quiz-next-round"><strong>Next: ${topics[nextRound]}</strong><span>${roundDescriptions[nextRound]}</span></p>` : ''}
     <div class="quiz-result-actions">
       ${nextRound !== null ? '<button type="button" class="quiz-primary" id="quiz-continue">Try the next 5 questions</button>' : ''}
       ${progress.missed.length ? `<button type="button" class="${progress.passed ? 'quiz-secondary' : 'quiz-primary'}" id="quiz-retry">Retry ${progress.missed.length} missed ${progress.missed.length === 1 ? 'question' : 'questions'}</button>` : ''}
-      <button type="button" class="${nextRound === null && progress.passed ? 'quiz-primary' : 'quiz-secondary'}" id="quiz-all">Choose another quiz</button>
+      <button type="button" class="${nextRound === null && progress.passed ? 'quiz-primary' : 'quiz-secondary'}" id="quiz-all">Choose another exam</button>
       <button type="button" class="quiz-secondary" id="quiz-restart">Repeat these 5 questions</button>
       <a class="quiz-lesson-link" href="./learn.html">Stop here · back to lessons</a>
     </div>

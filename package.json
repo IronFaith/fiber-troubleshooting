@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check app.mjs && node --check flow.mjs && node --check learning.mjs && node --check quiz.mjs && node --check quiz-visuals.mjs && node --check quiz-data.mjs && node --check loop-visuals.mjs && node --check rack-visuals.mjs && node --check light-visuals.mjs && node --check patching-visuals.mjs && node --check patch-practice.mjs && node --check patch-practice-data.mjs && node --check patch-cable-visuals.mjs && node --test tests/*.test.mjs",
+    "check": "node --check app.mjs && node --check flow.mjs && node --check learning.mjs && node --check quiz.mjs && node --check quiz-visuals.mjs && node --check quiz-data.mjs && node --check loop-lesson.mjs && node --check loop-visuals.mjs && node --check rack-visuals.mjs && node --check light-visuals.mjs && node --check patching-visuals.mjs && node --check patch-practice.mjs && node --check patch-practice-data.mjs && node --check patch-cable-visuals.mjs && node --test tests/*.test.mjs",
     "dev": "node preview.mjs"
   }
 }
