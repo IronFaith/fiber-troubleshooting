@@ -4,7 +4,7 @@ import {lightFlow} from './light-visuals.mjs?v=1';
 
 const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const text=(x,y,value,extra='')=>`<text x="${x}" y="${y}" ${extra}>${value}</text>`;
-const svg=(drawing,height=220,label='Training illustration')=>`<svg viewBox="0 0 360 ${height}" role="img" aria-label="${escape(label)}">${drawing}</svg>`;
+const svg=(drawing,height=220,label='Training illustration',width=360)=>`<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(label)}">${drawing}</svg>`;
 const cord=path=>`<path class="q-cord-edge" d="${path}"/><path class="q-cord" d="${path}"/>`;
 const opticFace=id=>opticIllustration({labels:false,id}).drawing.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,'');
 const optic=(x=0,y=0,width=90,id='quiz-optic')=>`<svg x="${x}" y="${y}" width="${width}" height="${width}" viewBox="0 0 360 354" aria-hidden="true">${opticFace(id)}</svg>`;
@@ -91,6 +91,25 @@ function vflSetup(answered) {
     ${text(180,233,answered ? 'Ready for the site-approved tracing procedure' : 'VFL stays disconnected while you verify','text-anchor="middle"')}`,250,answered ? 'Both ends of the fiber section are disconnected from active equipment. The VFL adapter matches.' : 'Two fiber ends and active equipment. Question marks mean their connection status must be confirmed; the VFL is not attached.')}`;
 }
 
+function bendChange(answered) {
+  const states=[
+    {title:'Before · tight bend',value:'−8.00',path:'M12 82 H70 L82 33 L94 82 H208 Q232 82 232 62 V58'},
+    {title:'After · bend removed',value:'−4.00',path:'M12 82 H38 C70 82 65 30 98 30 S127 82 161 82 H208 Q232 82 232 62 V58'}
+  ];
+  return `<div class="q-bend-comparison">${states.map((state,i)=>`<figure class="q-bend-state${answered && i===1 ? ' q-bend-reviewed' : ''}">
+    <figcaption>${state.title}</figcaption><div class="q-bend-row">
+      ${svg(`<svg x="200" y="-6" width="90" height="88.5" viewBox="0 0 360 354" aria-hidden="true">${opticFace(`bend-${i}`)}</svg>
+        ${cord(state.path)}${i===0 ? '<circle class="q-bend-focus" cx="82" cy="33" r="16"/>' : ''}
+        <path class="q-ir" d="M155 76 H184 m-6 -4 6 4 -6 4"/>
+        <rect class="q-lc" x="228" y="57" width="8" height="13" rx="1"/>
+        ${text(47,112,'Fiber')}${text(244,112,'Optic · RX','text-anchor="middle"')}`,124,`${state.title}. Fiber leads into the receiving optic. RX reads ${state.value} dBm.`,300)}
+      <div class="q-bend-reading"><span>RX</span><strong>${state.value}</strong><small>dBm</small></div>
+    </div></figure>`).join('')}</div>
+    <p class="q-bend-limit"><span>Allowed RX in this example</span><strong>−3.00 to +3.00 dBm</strong></p>
+    ${answered ? '<p class="q-bend-result">−4.00 is below the −3.00 minimum. Keep checking.</p>' : ''}
+    <p class="q-observation">Training readings and limits. RX measures the light arriving at the optic.</p>`;
+}
+
 export function quizVisual(question,{answered=false,choice=null}={}) {
   const kind=question.visual;
   let body='';
@@ -98,12 +117,8 @@ export function quizVisual(question,{answered=false,choice=null}={}) {
   else if(kind==='connections') body=`<p class="q-observation">Side views · tap a connection</p><div class="q-connection-choices">${[0,1].map(i=>target(question,i,`<strong>Connection ${i===0 ? 'A' : 'B'}</strong>${connector(i===0)}`,answered,choice)).join('')}</div>`;
   else if(kind==='seated-dark') body=`<div class="q-report-label">Connector after inspection and reseating</div>${connector(true)}<div class="quiz-reading reading-alert"><span>RX after reseating</span><strong>−40</strong><small>dBm</small></div>`;
   else if(kind==='dirty') body=svg(`<circle class="scope-face" cx="180" cy="104" r="80"/><circle class="scope-core" cx="180" cy="104" r="23"/><g class="q-contamination"><circle class="dirt" cx="171" cy="96" r="12"/><circle class="dirt" cx="199" cy="119" r="7"/><circle class="dirt" cx="142" cy="135" r="5"/></g>${answered ? '<circle class="q-inspection-ring" cx="180" cy="104" r="36"/>' : ''}${text(180,213,'Inspection image · isolated connector','text-anchor="middle"')}`,235,'Inspection view showing particles on the connector end face.');
-  else if(kind==='bend-change') {
-    body=svg(`${text(80,27,'Before · tight bend','text-anchor="middle"')}${text(270,27,'After · wider curve','text-anchor="middle"')}
-      ${cord('M18 66 H119 Q131 66 131 78 Q131 90 119 90 H18')}${cord('M207 60 H276 Q332 60 332 104 Q332 148 276 148 H207')}
-      <path class="q-data-line" d="M161 99 H193 m-8 -6 8 6 -8 6"/>
-      ${text(180,188,'More light gets through after the change','text-anchor="middle"')}`,210,'Before: a tight bend. After: a wider curve. The light reading improved.')+(answered ? '<p class="q-observation">Recheck the allowed range and link status.</p>' : '');
-  } else if(kind==='bend') {
+  else if(kind==='bend-change') body=bendChange(answered);
+  else if(kind==='bend') {
     body=svg(`<rect class="q-manager" x="126" y="54" width="108" height="88" rx="5"/>${cord('M18 101 H130 Q180 111 230 101 H342')}
       <path class="q-latch" d="M139 54 H221 V99 H210 V69 H150 V99 H139Z"/>
       ${text(180,26,'Cable-management clip','text-anchor="middle"')}<path class="q-data-line" d="M180 155 V119 m-5 7 5 -7 5 7"/>

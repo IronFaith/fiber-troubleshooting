@@ -38,10 +38,10 @@ export const questions = [
   },
   {
     id:'bend-cause', topic:0, visual:'bend-change', skill:'Interpret a change',
-    prompt:'You give a tightly bent fiber a wider curve, and its light reading improves. What should you check before calling the issue fixed?',
-    choices:['Nothing else—any improvement means the link is healthy.', 'Check that the new reading is within the optic’s allowed range and the link is working.', 'Keep adjusting the cable until the reading is exactly zero.'], correct:1,
-    explanation:'A better reading means more light is getting through, but it may still be too weak. Recheck the required lanes against the optic’s limits and confirm the link is working. Exactly zero is not the goal.',
-    reveal:'Improved does not always mean within limits', lesson:'learn.html#cleaning'
+    prompt:'You remove a tight bend from the fiber. RX improves, as shown below. Is the problem fixed?',
+    choices:['Yes. The reading improved, so the link is healthy.', 'Not yet. RX is still below the allowed range; keep checking the fiber path and connections.', 'No. This proves the optic is faulty and must be replaced.'], correct:1,
+    explanation:'Removing the bend helped: more light now reaches RX. But −4.00 is still below this example’s minimum of −3.00 dBm. Keep checking for remaining problems, then confirm all required readings are within the installed optic’s limits and the link works. This result alone does not prove the optic is faulty.',
+    reveal:'The bend was part of the problem. The reading is still too low.', lesson:'learn.html#cleaning'
   },
   {
     id:'cleaning', topic:1, visual:'dirty', skill:'Check connections',

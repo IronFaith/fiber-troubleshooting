@@ -1,6 +1,6 @@
-import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=2';
+import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=3';
 
-import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=7';
+import {questions, topics, roundDescriptions, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=8';
 
 const host = document.querySelector('#quiz');
 let attempt;
