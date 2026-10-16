@@ -1148,3 +1148,28 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .ts-port-glow { fill:#ff285c44; stroke:#e22950; stroke-width:2; }
 .ts-port-emission { fill:#f9376344; stroke:#e22950; stroke-width:1.5; }
 @media(max-width:700px) { .ts-vfl-observation .ts-result-buttons { grid-template-columns:1fr 1fr; } .ts-vfl-observation .ts-section-top { align-items:flex-start; } .ts-vfl-observation .ts-remove { flex-shrink:0; } }
+
+.ts-patch-panel { border-top:1px solid #d5e0e8; padding-top:18px; margin-top:18px; scroll-margin-top:190px; }
+.ts-patch-panel h3 { margin:0 0 5px; color:#173b59; font-size:19px; }
+.ts-patch-target { flex-shrink:0; padding:8px 10px; color:#22533f; background:#eaf4ed; border-radius:5px; font-size:12px; font-weight:700; }
+.ts-patch-scroll { overflow-x:auto; margin:10px 0; border:1px solid #d8e3ea; border-radius:8px; background:#fbfcfd; }
+.ts-patch-bench { display:block; width:100%; min-width:680px; max-height:340px; }
+.ts-patch-bench .cassette-case { fill:#21563f; stroke:#153e2c; }
+.ts-patch-bench .cassette-number { fill:#e6f4e9; }
+.ts-patch-bench .cassette-selected .cassette-number { fill:#673c10; }
+.ts-patch-bench [data-patch-port],.ts-patch-head { cursor:pointer; }
+.ts-patch-head { touch-action:none; }
+.ts-patch-head:focus-visible { outline:3px solid #347fba; outline-offset:4px; }
+.ts-patch-bench [data-patch-port]:hover .cassette-port-focus,.ts-patch-bench [data-patch-port]:focus-visible .cassette-port-focus,.ts-patch-bench .ts-patch-over .cassette-port-focus { fill:#f4da6b; stroke:#8a6420; stroke-width:2; }
+.ts-unplug-zone { fill:#f1f5f8; stroke:#adbcc7; stroke-dasharray:6 5; }
+.ts-unplug-zone.ts-patch-over { fill:#fff0d3; stroke:#b37b29; stroke-width:3; }
+.ts-patch-guide { fill:none; stroke:#bda5af; stroke-width:2; stroke-dasharray:5 6; pointer-events:none; }
+.ts-patch-bench .light-flow,.ts-patch-bench .light-source,.ts-patch-bench .ts-port-emission { pointer-events:none; }
+.ts-patch-actions { display:grid; grid-template-columns:1fr 1fr 1fr; align-items:end; gap:10px; }
+.ts-patch-actions button,.ts-patch-next { min-height:44px; padding:10px 13px; border:1px solid #7192a8; border-radius:6px; background:white; color:#214e6b; font:600 13px 'Segoe UI',sans-serif; cursor:pointer; }
+.ts-patch-actions select { width:100%; }
+.ts-patch-next { border-color:#246b53; color:#215d47; background:#eef7f1; }
+.ts-patch-status { color:#456174; font-size:13px; line-height:1.6; margin:12px 0; }
+.ts-patch-ghost { position:fixed; z-index:10002; left:0; top:0; width:105px; height:50px; pointer-events:none; filter:drop-shadow(0 5px 5px #163b5938); }
+.ts-patch-drag-cable { position:fixed; inset:0; width:100vw; height:100vh; z-index:10001; pointer-events:none; }
+@media(max-width:700px) { .ts-patch-actions { grid-template-columns:1fr 1fr; } .ts-patch-actions .ts-field { grid-column:1/-1; grid-row:2; } .ts-patch-panel .ts-section-top { align-items:flex-start; } .ts-patch-panel h3 { font-size:17px; } }

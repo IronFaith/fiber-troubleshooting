@@ -7,7 +7,7 @@ test('LC-to-CAS observation keeps the incoming MMC seated and lights the chosen 
   let s=changeCase(createCase(),{type:'trace',from:0,to:2});
   s=changeCase(s,{type:'port',value:32});
   assert.equal(connectionAt(s,1),'plugged');
-  assert.deepEqual(vflEndpoint(s),{point:2,port:32,result:undefined,face:'front',x:328.5,y:149,incomingSeated:true,emitting:false});
+  assert.deepEqual(vflEndpoint(s),{point:2,port:32,result:undefined,face:'front',kind:'port',blocked:false,closed:false,x:328.5,y:149,incomingSeated:true,emitting:false});
   s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'seen'});
   assert.equal(vflEndpoint(s).emitting,true);
   assert.equal(vflEndpoint(s).port,32);
