@@ -1130,3 +1130,21 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .course-continue { display:block; width:100%; margin-top:22px; min-height:48px; padding:13px; border:0; border-radius:6px; background:#173b59; color:white; text-align:left; font-size:14px; }
 .course-continue:hover { background:#245b91; }
 @media (max-width:480px) { .course-toggle { gap:9px; } .course-toggle strong { font-size:17px; } .course-chapter-body .chapter-count { font-size:12px; } }
+
+/* VFL observations belong beside the path they update. */
+.ts-live-grid.ts-tracing { grid-template-columns:minmax(0,1fr); }
+.ts-tracing .ts-map-card { position:static; margin-bottom:0; }
+.ts-tracing .ts-map { scroll-margin-top:230px; }
+.ts-tracing .ts-work-grid { grid-template-columns:1fr; }
+.ts-vfl-observation { padding:16px 0 0; margin-top:12px; border-top:1px solid #d5e0e8; scroll-margin-top:230px; }
+.ts-vfl-observation h2 { font-size:20px; }
+.ts-vfl-observation .ts-fields { margin-top:14px; }
+.ts-vfl-observation .ts-ready { margin:12px 0; }
+.ts-vfl-observation .ts-result-buttons { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
+.ts-vfl-observation [data-action=result-seen],.ts-vfl-observation [data-action=result-dark] { font-weight:700; border-width:2px; }
+.ts-vfl-observation [data-action=result-seen] { border-color:#b83c56; color:#9b2641; }
+.ts-vfl-observation [data-action=result-seen][aria-pressed=true] { background:#b83c56; color:white; }
+.ts-vfl-feedback { margin:12px 0 0; font-size:13px; color:#536f82; }
+.ts-port-glow { fill:#ff285c44; stroke:#e22950; stroke-width:2; }
+.ts-port-emission { fill:#f9376344; stroke:#e22950; stroke-width:1.5; }
+@media(max-width:700px) { .ts-vfl-observation .ts-result-buttons { grid-template-columns:1fr 1fr; } .ts-vfl-observation .ts-section-top { align-items:flex-start; } .ts-vfl-observation .ts-remove { flex-shrink:0; } }
