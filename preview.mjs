@@ -19,7 +19,7 @@ files['/light-visuals.mjs'] = ['light-visuals.mjs', 'text/javascript'];
 files['/loop-lesson.mjs'] = ['loop-lesson.mjs', 'text/javascript'];
 for(const name of ['patching-visuals.mjs','patch-practice.mjs','patch-practice-data.mjs','patch-cable-visuals.mjs','quiz-visuals.mjs']) files[`/${name}`]=[name,'text/javascript'];
 for(const name of ['troubleshoot.mjs','troubleshoot-state.mjs','troubleshoot-visuals.mjs','troubleshoot-tools.mjs','troubleshoot-patching.mjs','vfl-simple.mjs']) files[`/${name}`]=[name,'text/javascript'];
-for(const name of ['applied-exams.mjs','exam-evidence.mjs','reasoning-lessons.mjs']) files[`/${name}`]=[name,'text/javascript'];
+for(const name of ['applied-exams.mjs','exam-evidence.mjs','reasoning-lessons.mjs','polarity-lesson.mjs']) files[`/${name}`]=[name,'text/javascript'];
 createServer(async (request, response) => {
   const file = files[new URL(request.url, 'http://localhost').pathname];
   if (!file) { response.writeHead(404); response.end('Not found'); return; }

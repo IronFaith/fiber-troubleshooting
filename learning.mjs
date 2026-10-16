@@ -1,3 +1,4 @@
+import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
 import { mountCommunicationRoute } from './communication-route.mjs?v=2';
@@ -6,7 +7,7 @@ import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=4';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=1';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=2';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -86,7 +87,7 @@ function renderLesson(lesson) {
       <div class="learning-readings"><span><b>RX +0.25</b> your good example</span><span><b>RX −40</b> your no-light indication</span></div>
       <p class="picture-note">dBm examples. Check every lane against the optic’s limits. Use the correct loop mapping and any required attenuation.</p>
     </section>
-    ${readingLesson()}${loopReasoningLesson()}
+    ${readingLesson()}${loopReasoningLesson()}${polarityLesson()}
     <section id="cleaning" class="lesson-section" aria-labelledby="fault-title">
       <h3 id="fault-title">What can interrupt the light?</h3>
       <p class="section-intro">Change the connection to see a possible effect.</p>
@@ -111,6 +112,7 @@ function renderLesson(lesson) {
   example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
   example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
   mountReasoningLessons(lesson);
+  mountPolarityLesson(lesson);
 }
 
 function setupLesson(lesson) {

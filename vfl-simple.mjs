@@ -100,6 +100,7 @@ export function simpleVfl(s,paused) {
       ${light.closed?'<p>Unplug the onward connection to check this port.</p><button type="button" data-action="open-vfl-end">Unplug onward MMC</button>':s.simulated?'<button type="button" data-action="run">Record this check</button>':`<div class="vfl-observe-buttons"><button type="button" data-action="result-${s.strand==='tx'?'seen':'swapped'}" aria-pressed="${light.result===(s.strand==='tx'?'seen':'swapped')}">Light at A</button><button type="button" data-action="result-${s.strand==='rx'?'seen':'swapped'}" aria-pressed="${light.result===(s.strand==='rx'?'seen':'swapped')}">Light at B</button><button type="button" data-action="result-dark" aria-pressed="${light.result==='dark'}">No light</button></div><p>Optional: record the real result. The initial glow only shows the expected path.</p>`}
     </div>
     ${point?pairChecks(s,point):''}
+    <p class="vfl-hint"><a href="./learn.html#polarity-checks">Learn polarity: see TX / RX and trace both strands →</a></p>
     <p class="vfl-fine">A / B illustrate one pair, not MMC pin numbers. Follow your actual channel map. Use isolated fiber and the matching VFL adapter; view light indirectly.</p>
   </section>`;
 }

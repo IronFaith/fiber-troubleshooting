@@ -23,16 +23,7 @@ export function loopReasoningLesson() {
     <div class="lesson-options" role="group" aria-label="Worked loop sequence"><button type="button" data-worked-loop="0">1 · Direct loop</button><button type="button" data-worked-loop="1">2 · Loop at CAS 1</button><button type="button" data-worked-loop="2">3 · Loop at CAS 2</button></div>
     <figure id="worked-loop" class="reason-example" aria-live="polite"></figure>
     <p class="lesson-takeaway">Compare the last passing test with the next failure. Investigate the added fiber <b>and its connections</b>. Recheck the failed loop setup first. A failure does not prove a break or name its exact position.</p>
-    <p class="picture-note">Only extend to passives you can access. Beyond the loop and the remote optic remain unverified; one pair does not prove every channel.</p></section>
-    <section id="polarity-checks" class="lesson-section" aria-labelledby="pairing-title"><h3 id="pairing-title">A return loop is not the whole service path</h3>
-    <p class="section-intro">For the illustrated duplex link, each transmitter must reach the other device’s receiver.</p>
-    <div class="reason-example">${svg(`<rect class="reason-device" x="15" y="26" width="130" height="148" rx="8"/><rect class="reason-device" x="475" y="26" width="130" height="148" rx="8"/>
-      ${label(80,53,'Device A','text-anchor="middle"')}${label(540,53,'Device B','text-anchor="middle"')}
-      ${label(80,92,'TX','text-anchor="middle"')}${label(80,145,'RX','text-anchor="middle"')}${label(540,92,'RX','text-anchor="middle"')}${label(540,145,'TX','text-anchor="middle"')}
-      <path class="reason-ir" d="M120 88 H500 m-10 -6 10 6 -10 6"/><path class="reason-return" d="M500 141 H120 m10 -6 -10 6 10 6"/>
-      ${lightFlow('M120 88 H500')}${lightFlow('M500 141 H120','return-ir')}${label(310,72,'One strand each way','text-anchor="middle"')}`,195,'Correct duplex pairing: A TX reaches B RX; B TX reaches A RX.')}
-      <p>If the end-to-end pair is swapped, TX can land on TX and leave RX dark. A loop that joins the pair can still return light. After removing it, verify the FIM strand mapping and restored link.</p></div>
-    <p><b>TX and RX answer different questions.</b> A polarity mismatch alone does not explain missing local TX output. If both report −40, verify the report and lane, port / laser state and optic seating; then use the approved local test. VFL has its own source and does not measure optic TX output.</p></section>`;
+    <p class="picture-note">Only extend to passives you can access. Beyond the loop and the remote optic remain unverified; one pair does not prove every channel.</p></section>`;
 }
 
 export function faultReasoningLesson() {

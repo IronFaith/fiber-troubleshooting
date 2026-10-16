@@ -2,7 +2,7 @@ import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,tr
 import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=9';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=5';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=2';
-import {simpleVfl} from './vfl-simple.mjs?v=1';
+import {simpleVfl} from './vfl-simple.mjs?v=2';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
