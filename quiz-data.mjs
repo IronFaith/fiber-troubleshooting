@@ -206,10 +206,10 @@ export function roundProgress(topic, answers) {
   return {...result, passed, nextRound:passed ? rounds[rounds.indexOf(topic)+1] ?? null : null};
 }
 
-export function rookieRank(scores) {
+export function apprenticeRank(scores) {
   const level = scores.filter(score => score >= 4).length;
   const numeral = ['','I','II','III','IV'][level];
-  return {level, title:`Fiber Rookie${numeral ? ` ${numeral}` : ''}`, complete:level === topics.length};
+  return {level, title:numeral ? `Fiber Apprentice ${numeral}` : 'Fiber Learner', complete:level === topics.length};
 }
 
 const progressKey = level => level === 'intermediate' ? 'fiber-applied-progress-v1' : 'fiber-quiz-progress-v1';

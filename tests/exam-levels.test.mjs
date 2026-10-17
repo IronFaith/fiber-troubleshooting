@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {questions,roundsForLevel,roundQuestionIds,startAttempt,recordAnswer,resultsFor,roundProgress,loadQuizProgress,saveQuizProgress,recordRoundProgress,rookieRank} from '../quiz-data.mjs';
+import {questions,roundsForLevel,roundQuestionIds,startAttempt,recordAnswer,resultsFor,roundProgress,loadQuizProgress,saveQuizProgress,recordRoundProgress,apprenticeRank} from '../quiz-data.mjs';
 const complete=(topic,miss=0)=>{
   let attempt=startAttempt(roundQuestionIds(topic));
   for(const [index,id] of attempt.ids.entries()) {
@@ -11,7 +11,7 @@ const complete=(topic,miss=0)=>{
   return attempt;
 };
 
-test('level progress preserves existing beginner scores and stripes independently of Intermediate',()=>{
+test('level progress preserves existing beginner scores and levels independently of Intermediate',()=>{
   const values=new Map([['fiber-quiz-progress-v1',JSON.stringify({scores:[4,5,null,4]})]]);
   const storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
   assert.deepEqual(loadQuizProgress(storage).scores,[4,5,null,4]);
@@ -21,7 +21,7 @@ test('level progress preserves existing beginner scores and stripes independentl
   saveQuizProgress(storage,scores,'intermediate');
   assert.deepEqual(loadQuizProgress(storage,'intermediate').scores,[null,5]);
   assert.deepEqual(loadQuizProgress(storage).scores,[4,5,null,4]);
-  assert.equal(rookieRank(loadQuizProgress(storage).scores).level,3);
+  assert.equal(apprenticeRank(loadQuizProgress(storage).scores).level,3);
   assert.deepEqual(loadQuizProgress({getItem(){throw Error('blocked');}},'intermediate'),{scores:[null,null],canSave:false});
 });
 

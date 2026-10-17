@@ -1,7 +1,7 @@
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=5';
 import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=4';
 
-import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=9';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=10';
 import {loadPatchBest} from './patch-practice-data.mjs?v=1';
 
 const host = document.querySelector('#quiz');
@@ -54,11 +54,11 @@ function renderIntro() {
     return;
   }
   const beginner=selectedLevel==='beginner', scores=activeScores();
-  const rank = rookieRank(savedScores);
+  const rank = apprenticeRank(savedScores);
   host.innerHTML = `<button type="button" class="quiz-picker-back" id="exam-levels">← Exam levels</button><p class="chapter-count">5 questions per exam · choose freely</p>
     <h2 id="quiz-title" tabindex="-1">${levelTitle(selectedLevel)} · ${beginner?'Foundations':'Applied troubleshooting'}</h2>
     <p class="lesson-intro">${beginner?'Understand the parts, interpret a clear observation and choose a sensible first check.':'Use the same chapter knowledge in situations with several clues. Separate what is known from what still needs checking.'}</p>
-    ${beginner?(rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Get 4/5 to earn a Fiber Rookie stripe in each knowledge exam. Patching has its own result.</p>'):appliedCard()}
+    ${beginner?(rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Pass each knowledge exam with 4/5 to advance from Fiber Learner through Fiber Apprentice I–IV. Patching has its own result.</p>'):appliedCard()}
     <div class="quiz-picker">${roundsForLevel(selectedLevel).map((topic,i) => {
       const score = scores[i];
       const passed = score !== null && score >= 4;
@@ -170,17 +170,17 @@ function choose(question,choice) {
 
 function rankCard(rank, earnedNow, passed) {
   const note = rank.complete ? 'All four knowledge exams passed. Hands-on patching has its own result.'
-    : !passed && (savedScores[currentRound] ?? 0) < 4 ? 'Get 4/5 in this round to earn your next stripe.'
-    : !passed ? 'Your earned stripe stays while you practice.'
-    : 'One stripe for each beginner round passed.';
+    : !passed && (savedScores[currentRound] ?? 0) < 4 ? 'Get 4/5 in this exam to earn your next Apprentice level.'
+    : !passed ? 'Your earned level stays while you practice.'
+    : 'One Apprentice level for each beginner knowledge exam passed.';
   return `<section class="quiz-rank${rank.complete ? ' rank-complete' : ''}" aria-labelledby="quiz-rank-title">
     <svg class="quiz-rank-badge" viewBox="0 0 88 100" aria-hidden="true" focusable="false">
       <path class="rank-shield" d="M8 7 Q44 -1 80 7 V59 Q80 78 44 96 Q8 78 8 59 Z"/>
       ${Array.from({length:4},(_,i) => `<path class="rank-stripe${i < rank.level ? ' stripe-earned' : ''}" d="M23 ${21+i*14} L44 ${28+i*14} L65 ${21+i*14} V${28+i*14} L44 ${35+i*14} L23 ${28+i*14} Z"/>`).join('')}
     </svg>
-    <div><p class="quiz-rank-label">Beginner · ${earnedNow ? 'Stripe earned' : rank.level ? 'Your earned rank' : 'Your first stripe is next'}</p>
+    <div><p class="quiz-rank-label">Beginner · ${earnedNow ? 'Apprentice level earned' : rank.level ? 'Your earned rank' : 'Your first Apprentice level is next'}</p>
       <h3 id="quiz-rank-title">${rank.title}</h3>
-      <p class="quiz-rank-count">${rank.level} of 4 knowledge stripes${rank.complete ? ' · Knowledge rounds complete' : ''}</p>
+      <p class="quiz-rank-count">${rank.level} of 4 knowledge exams passed${rank.complete ? ' · Knowledge rounds complete' : ''}</p>
       <p class="quiz-rank-note">${note}</p>
     </div>
   </section>`;
@@ -192,15 +192,15 @@ function renderResults() {
   if (!retry) firstScore = result.correct;
   const progress = roundProgress(currentRound,roundAnswers);
   const nextRound = progress.nextRound;
-  const previousRank = rookieRank(savedScores);
+  const previousRank = apprenticeRank(savedScores);
   const beginner=selectedLevel==='beginner';
   const updated=recordRoundProgress(activeScores(),currentRound,roundAnswers,{practice:retry});
   if(beginner) savedScores=updated; else appliedScores=updated;
   canSave = saveQuizProgress(progressStorage,updated,selectedLevel);
-  const rank = rookieRank(savedScores);
+  const rank = apprenticeRank(savedScores);
   const skills=skillsFor(currentRound,roundAnswers);
   const earnedNow = rank.level > previousRank.level;
-  const title = !beginner&&retry?'Practice complete':!progress.passed ? 'A little more practice' : !beginner?'Intermediate exam passed':rank.complete ? 'Knowledge rounds complete' : earnedNow ? 'You earned a stripe' : 'Round complete';
+  const title = !beginner&&retry?'Practice complete':!progress.passed ? 'A little more practice' : !beginner?'Intermediate exam passed':rank.complete ? 'Knowledge rounds complete' : earnedNow ? 'Apprentice level earned' : 'Round complete';
   host.innerHTML = `<p class="chapter-count">${levelTitle(selectedLevel)} · ${allTopics[currentRound]} · ${retry?'practice':'exam'} complete</p>
     <h2 id="quiz-title" tabindex="-1">${title}</h2>
     ${beginner?rankCard(rank,earnedNow,progress.passed):appliedCard()}

@@ -1,24 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {questions, topics, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from '../quiz-data.mjs';
+import {questions, topics, roundQuestionIds, startAttempt, recordAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from '../quiz-data.mjs';
 
 const wrongAnswer = question => Array.isArray(question.correct) ? [question.correct[0]] : (question.correct+1)%question.choices.length;
 const correctRound = topic => Object.fromEntries(questions.filter(question => question.topic === topic).map(question => [question.id,question.correct]));
 
-test('rookie stripes count different passed quizzes in any order through beginner completion', () => {
+test('apprentice levels count different passed quizzes in any order through beginner completion', () => {
   let scores = topics.map(() => null);
   for (const [index,topic] of [3,1,0,2].entries()) {
     const answers = correctRound(topic);
     const first = questions.find(question => question.topic === topic);
     answers[first.id] = wrongAnswer(first);
     scores = recordRoundProgress(scores,topic,answers);
-    const rank = rookieRank(scores);
-    assert.deepEqual(rank,{level:index+1,title:`Fiber Rookie ${['I','II','III','IV'][index]}`,complete:index === 3});
+    const rank = apprenticeRank(scores);
+    assert.deepEqual(rank,{level:index+1,title:`Fiber Apprentice ${['I','II','III','IV'][index]}`,complete:index === 3});
     if (index === 0) assert.deepEqual(scores,[null,null,null,4]);
   }
 });
 
-test('practice can earn a stripe, without duplicating or removing an earned stripe', () => {
+test('practice can earn a level, without duplicating or removing an earned level', () => {
   const answers = correctRound(0);
   const first = questions[0], second = questions[1];
   answers[first.id] = wrongAnswer(first);
@@ -26,12 +26,12 @@ test('practice can earn a stripe, without duplicating or removing an earned stri
   let scores = topics.map(() => null);
   assert.equal(recordRoundProgress(scores,0,{[first.id]:first.correct}),scores);
   scores = recordRoundProgress(scores,0,answers);
-  assert.deepEqual(rookieRank(scores),{level:0,title:'Fiber Rookie',complete:false});
+  assert.deepEqual(apprenticeRank(scores),{level:0,title:'Fiber Learner',complete:false});
   const practiced = {...answers,[first.id]:first.correct};
   scores = recordRoundProgress(scores,0,practiced);
-  assert.equal(rookieRank(scores).level,1);
+  assert.equal(apprenticeRank(scores).level,1);
   scores = recordRoundProgress(scores,0,correctRound(0));
-  assert.equal(rookieRank(scores).level,1);
+  assert.equal(apprenticeRank(scores).level,1);
   assert.deepEqual(recordRoundProgress(scores,0,answers),[5,null,null,null]);
 });
 
@@ -42,7 +42,7 @@ test('saved quiz results survive loading again and invalid or unavailable storag
   const scores = [4,null,2,5];
   assert.equal(saveQuizProgress(storage,scores),true);
   assert.deepEqual(loadQuizProgress(storage),{scores,canSave:true});
-  assert.equal(rookieRank(loadQuizProgress(storage).scores).level,2);
+  assert.equal(apprenticeRank(loadQuizProgress(storage).scores).level,2);
   assert.deepEqual(loadQuizProgress({getItem:() => '{bad json'}).scores,[null,null,null,null]);
   assert.deepEqual(loadQuizProgress({getItem:() => '{"scores":[6,"5",-1,4]}'}).scores,[null,null,null,4]);
   const blocked = {getItem:() => {throw Error('blocked');},setItem:() => {throw Error('blocked');}};
