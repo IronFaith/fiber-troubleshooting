@@ -2,7 +2,8 @@ import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
 import { mountCommunicationRoute } from './communication-route.mjs?v=2';
-import { mountCourse } from './course.mjs?v=2';
+import { mountCourse } from './course.mjs?v=3';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=1';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=4';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
@@ -30,16 +31,18 @@ const menuPanel = el('div', 'learn-menu');
 menuPanel.id = 'learn-links'; menuPanel.hidden = true;
 menuPanel.append(el('p', '', 'Learning resources'));
 const courseLink = link('Learn · Fiber Optics Fundamentals', './learn.html');
+const contentsLink = link('Table of contents', './learn.html#contents');
 const simulationsLink = link('Simulations · hands-on practice', './simulations.html');
 const quizLink = link('Exams', './quiz.html');
 if (document.querySelector('#quiz')) quizLink.setAttribute('aria-current', 'page');
-menuPanel.append(courseLink, simulationsLink, quizLink, link('Troubleshoot', './index.html', 'menu-return'));
+menuPanel.append(courseLink, contentsLink, simulationsLink, quizLink, link('Troubleshoot', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {
   menuPanel.hidden = true; menuButton.setAttribute('aria-expanded', 'false');
   if (restoreFocus) menuButton.focus();
 }
+mountReference(menuPanel, closeMenu, menuButton);
 menuButton.addEventListener('click', () => {
   menuPanel.hidden = !menuPanel.hidden;
   menuButton.setAttribute('aria-expanded', String(!menuPanel.hidden));
@@ -481,6 +484,6 @@ if (lesson) {
   } else if (lesson.dataset.chapter === 'simulations') renderSimulations();
   else {
     courseLink.setAttribute('aria-current', 'page');
-    mountCourse(lesson, [renderLesson, renderDevicesLesson, renderPatchingLesson]);
+    mountCourse(lesson, [renderLesson, renderDevicesLesson, renderPatchingLesson], linkLessonTerms);
   }
 }
