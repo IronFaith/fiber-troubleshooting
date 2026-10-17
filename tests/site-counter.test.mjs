@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {randomUUID} from 'node:crypto';
-import {createSiteCounter} from '../site-counter.mjs';
+import {createSiteCounter,createLearningClock} from '../site-counter.mjs';
 import worker, {CourseCounter} from '../counter/worker.mjs';
 
 const event = kind => ({id:randomUUID(),kind,at:Date.now()});
@@ -88,5 +88,63 @@ test('public API accepts only bounded, valid events from the configured course o
     allowed=false; assert.equal((await send(event('exam'))).status,429); allowed=true;
     const totals=await (await worker.fetch(new Request('https://counter.test/stats'),env)).json();
     assert.equal(totals.visits,1); assert.equal(totals.exams,0,'rejected writes do not change totals');
+  } finally { db.close(); }
+});
+
+test('learning time pauses in the background and after idle time, then resumes without counting the gap', () => {
+  let time=0;
+  const clock=createLearningClock({now:()=>time,active:false});
+  time=60000; assert.equal(clock.takeSeconds(),0);
+  clock.setActive(true);
+  time+=30500; assert.equal(clock.takeSeconds(),30);
+  time+=30500; clock.setActive(false); assert.equal(clock.takeSeconds(),31);
+  time+=600000; assert.equal(clock.takeSeconds(),0);
+  clock.setActive(true);
+  time+=600000; assert.equal(clock.takeSeconds(),120,'idle or sleeping tabs stop at two minutes');
+  clock.interact(); assert.equal(clock.takeSeconds(),0,'returning activity does not backfill the idle gap');
+  time+=45000; clock.interact(); time+=45000;
+  assert.equal(clock.takeSeconds(),90,'reading between interactions counts');
+  assert.equal(clock.takeSeconds(),0,'flushing twice cannot repeat time');
+});
+
+test('learning time preserves existing totals and retries across navigation without double counting', async () => {
+  const db=new DatabaseSync(':memory:');
+  try {
+    db.exec("CREATE TABLE totals (id INTEGER PRIMARY KEY, visits INTEGER NOT NULL, exams INTEGER NOT NULL, since TEXT); INSERT INTO totals VALUES (1,17,8,'2026-10-17')");
+    const serverStorage=storageFor(db); let counter=new CourseCounter({storage:serverStorage});
+    const values=new Map(), storage={getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)};
+    let loseResponse=true;
+    const fetchImpl=async (url,options) => {
+      assert.equal(options.keepalive,true,'navigation flushes can finish after leaving the page');
+      const response=await counter.fetch(new Request('https://counter.test/',options));
+      if(loseResponse) { loseResponse=false; throw Error('Response lost after write'); }
+      return response;
+    };
+    const setup=()=>createSiteCounter({endpoint:'https://counter.test',storage,fetchImpl,newId:randomUUID});
+    await setup().recordTime(60);
+    counter=new CourseCounter({storage:serverStorage});
+    const nextPage=setup(); await nextPage.recordTime(30); await nextPage.recordTime();
+    assert.deepEqual({...counter.totals()},{visits:17,exams:8,since:'2026-10-17',learningSeconds:90});
+    await nextPage.recordTime(0); await nextPage.recordTime(-10);
+    assert.equal(counter.totals().learningSeconds,90);
+  } finally { db.close(); }
+});
+
+test('the API accepts bounded seconds only on learning-time events', async () => {
+  const db=new DatabaseSync(':memory:');
+  try {
+    const counter=new CourseCounter({storage:storageFor(db)});
+    const env={ALLOWED_ORIGIN:'https://ironfaith.github.io',COUNTER:{getByName:()=>counter}};
+    const send=value=>worker.fetch(new Request('https://counter.test/events',{method:'POST',
+      headers:{Origin:env.ALLOWED_ORIGIN,'Content-Type':'application/json'},body:JSON.stringify(value)}),env);
+    for(const seconds of [0,-1,121,1.5,'60',null])
+      assert.equal((await send({...event('time'),seconds})).status,400);
+    assert.equal((await send(event('time'))).status,400);
+    assert.equal((await send({...event('exam'),seconds:60})).status,400);
+    const minute={...event('time'),seconds:60};
+    assert.equal((await send(minute)).status,200); await send(minute);
+    await send({...event('time'),seconds:120});
+    assert.equal(counter.totals().learningSeconds,180);
+    assert.equal(counter.totals().visits,0); assert.equal(counter.totals().exams,0);
   } finally { db.close(); }
 });

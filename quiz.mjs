@@ -1,4 +1,4 @@
-import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=1';
+import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=2';
 import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=4';
 
 import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=9';

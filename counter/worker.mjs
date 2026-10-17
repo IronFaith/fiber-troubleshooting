@@ -30,8 +30,11 @@ export default {
       }
       try { event = JSON.parse(await new Blob(chunks).text()); } catch { return json({error:'Invalid JSON'}, 400, headers); }
       const now = Date.now();
-      if (!event || !['visit','exam'].includes(event.kind) || !uuid.test(event.id) || !Number.isSafeInteger(event.at)
-        || event.at < now - DAY || event.at > now + 300000 || Object.keys(event).some(key => !['id','kind','at'].includes(key)))
+      const timeEvent = event?.kind === 'time';
+      if (!event || !['visit','exam','time'].includes(event.kind) || !uuid.test(event.id) || !Number.isSafeInteger(event.at)
+        || event.at < now - DAY || event.at > now + 300000
+        || (timeEvent && (!Number.isInteger(event.seconds) || event.seconds < 1 || event.seconds > 120))
+        || Object.keys(event).some(key => !(timeEvent ? ['id','kind','at','seconds'] : ['id','kind','at']).includes(key)))
         return json({error:'Invalid or expired event'}, 400, headers);
     }
     const counter = env.COUNTER.getByName('fiber-fundamentals');
@@ -45,10 +48,12 @@ export class CourseCounter {
     this.storage = ctx.storage;
     this.sql = ctx.storage.sql;
     this.sql.exec('CREATE TABLE IF NOT EXISTS totals (id INTEGER PRIMARY KEY CHECK(id=1), visits INTEGER NOT NULL, exams INTEGER NOT NULL, since TEXT)');
+    if (!this.sql.exec('PRAGMA table_info(totals)').toArray().some(column => column.name === 'learningSeconds'))
+      this.sql.exec('ALTER TABLE totals ADD COLUMN learningSeconds INTEGER NOT NULL DEFAULT 0');
     this.sql.exec('CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, kind TEXT NOT NULL, recorded INTEGER NOT NULL)');
     this.sql.exec('CREATE INDEX IF NOT EXISTS event_age ON events(recorded)');
   }
-  totals() { return this.sql.exec('SELECT visits, exams, since FROM totals WHERE id=1').toArray()[0] || {visits:0,exams:0,since:null}; }
+  totals() { return this.sql.exec('SELECT visits, exams, since, learningSeconds FROM totals WHERE id=1').toArray()[0] || {visits:0,exams:0,since:null,learningSeconds:0}; }
   async fetch(request) {
     if (request.method !== 'POST') return json(this.totals());
     const event = await request.json();
@@ -59,7 +64,8 @@ export class CourseCounter {
       this.sql.exec('DELETE FROM events WHERE id IN (SELECT id FROM events WHERE recorded < ? LIMIT 100)', now - 14 * DAY);
       this.sql.exec('INSERT INTO events (id,kind,recorded) VALUES (?,?,?)', event.id, event.kind, now);
       this.sql.exec('INSERT OR IGNORE INTO totals (id,visits,exams,since) VALUES (1,0,0,?)', new Date(now).toISOString());
-      this.sql.exec(event.kind === 'visit' ? 'UPDATE totals SET visits=visits+1 WHERE id=1' : 'UPDATE totals SET exams=exams+1 WHERE id=1');
+      if (event.kind === 'time') this.sql.exec('UPDATE totals SET learningSeconds=learningSeconds+? WHERE id=1', event.seconds);
+      else this.sql.exec(event.kind === 'visit' ? 'UPDATE totals SET visits=visits+1 WHERE id=1' : 'UPDATE totals SET exams=exams+1 WHERE id=1');
       return json(this.totals());
     });
   }
