@@ -1,4 +1,4 @@
-import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=6';
+import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
 import {cassetteFront, mmcHead} from './loop-visuals.mjs?v=3';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {patchCableVisual} from './patch-cable-visuals.mjs?v=1';

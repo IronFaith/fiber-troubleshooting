@@ -30,7 +30,7 @@ export function createLearningClock({now = Date.now, active = true} = {}) {
 }
 
 export function createSiteCounter({endpoint, storage, identityStorage, withIdentityLock = work => work(), fetchImpl = fetch, now = Date.now, newId = () => crypto.randomUUID(), onCounts = () => {}}) {
-  let timeMemory = [], timeRequest;
+  let timeMemory = [], timeRequest, statsRequest;
   const pending = new Map(), completed = new Set();
   const newEvent = kind => ({id:newId(),kind,at:now()});
   async function request(event) {
@@ -81,6 +81,7 @@ export function createSiteCounter({endpoint, storage, identityStorage, withIdent
     return timeRequest;
   }
   return {
+    refresh() { return statsRequest ??= request().finally(() => { statsRequest = null; }); },
     startExam:() => newEvent('exam'),
     completeExam:complete,
     recordTime,
@@ -150,6 +151,8 @@ export function mountSiteCounter() {
   const clock = createLearningClock({active:isActive()});
   const flush = () => { void sharedCounter().recordTime(clock.takeSeconds()); };
   const updateActivity = () => { clock.setActive(isActive()); if (!isActive()) flush(); };
+  // Other browsers can change the shared totals even while this learner is idle.
+  const refreshCounts = () => { if (document.visibilityState === 'visible') void sharedCounter().refresh(); };
   for (const name of ['pointerdown','keydown','scroll'])
     document.addEventListener(name, () => clock.interact(), {passive:true});
   document.addEventListener('visibilitychange', updateActivity);
@@ -157,6 +160,10 @@ export function mountSiteCounter() {
   window.addEventListener('blur', updateActivity);
   window.addEventListener('pagehide', () => { clock.setActive(false); flush(); });
   window.addEventListener('pageshow', updateActivity);
+  document.addEventListener('visibilitychange', refreshCounts);
+  window.addEventListener('focus', refreshCounts);
+  window.addEventListener('pageshow', refreshCounts);
+  setInterval(refreshCounts, 30000);
   setInterval(flush, 60000);
   flush();
 }

@@ -210,3 +210,37 @@ test('unique visitors start separately from old visits and remain deduplicated a
     assert.equal(counter.totals().uniqueVisitors,2);
   } finally { db.close(); }
 });
+
+
+test('separate browsers refresh one shared visitor total without registering another visitor', async () => {
+  const db=new DatabaseSync(':memory:');
+  try {
+    const counter=new CourseCounter({storage:storageFor(db)});
+    const registrations=[];
+    let unavailable=false;
+    const fetchImpl=async (url,options)=>{
+      if(unavailable) throw Error('offline');
+      if(options.body) registrations.push(JSON.parse(options.body));
+      return counter.fetch(new Request('https://counter.test/',options));
+    };
+    const browser=()=>{
+      const values=new Map(), observed=[];
+      const identityStorage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
+      const client=createSiteCounter({endpoint:'https://counter.test',identityStorage,fetchImpl,newId:randomUUID,onCounts:value=>observed.push(value)});
+      return {client,observed};
+    };
+    const first=browser(), second=browser();
+    assert.equal((await first.client.visit()).uniqueVisitors,1);
+    assert.equal((await second.client.visit()).uniqueVisitors,2);
+    assert.equal(first.observed.at(-1).uniqueVisitors,1,'an open page initially has an older snapshot');
+    await Promise.all([first.client.refresh(),first.client.refresh(),second.client.refresh()]);
+    assert.equal(first.observed.at(-1).uniqueVisitors,2);
+    assert.equal(second.observed.at(-1).uniqueVisitors,2);
+    assert.equal(registrations.length,2,'refreshing the shared total only reads stats');
+    assert.notEqual(registrations[0].id,registrations[1].id);
+    await first.client.visit(); await second.client.visit();
+    assert.equal(counter.totals().uniqueVisitors,2,'returning browsers do not add another visitor');
+    unavailable=true; assert.equal(await first.client.refresh(),null);
+    unavailable=false; assert.equal((await first.client.refresh()).uniqueVisitors,2,'refresh resumes after a temporary failure');
+  } finally { db.close(); }
+});
