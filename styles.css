@@ -5,6 +5,10 @@ button { font:inherit; cursor:pointer; touch-action:manipulation; }
 button:focus-visible { outline:3px solid #347cbc; outline-offset:4px; }
 button:disabled { opacity:.35; cursor:default; }
 main { max-width:740px; padding:20px 24px; margin:auto; }
+.site-credit { max-width:692px; margin:12px auto 0; border-top:1px solid #d4dfe7; padding:20px 24px 28px; text-align:center; color:#526b7c; font-size:13px; }
+.site-credit p { margin:0; }
+.site-credit p + p { margin-top:5px; font-size:12px; }
+.site-credit strong { color:#173b59; font-weight:650; }
 header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
 .brand { display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
 .brand img { flex-shrink:0; }
