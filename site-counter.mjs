@@ -120,8 +120,8 @@ function paintCounts(counts) {
   statsHost.querySelector('[data-hours]').title = lastCounts ? `${Math.floor(lastCounts.learningSeconds / 60).toLocaleString()} min ${lastCounts.learningSeconds % 60} sec combined` : '';
   statsHost.querySelector('[data-visit-label]').textContent = lastCounts?.visits === 1 ? 'visit' : 'visits';
   statsHost.querySelector('[data-exam-label]').textContent = lastCounts?.exams === 1 ? 'exam completed' : 'exams completed';
-  statsHost.querySelector('.counter-note').textContent = lastCounts
-    ? 'Visits count browsing sessions. Completed exams include full retakes.' : 'Shared counts are temporarily unavailable.';
+  if (lastCounts) statsHost.querySelector('.counter-note')?.remove();
+  else statsHost.querySelector('.counter-note').textContent = 'Shared counts are temporarily unavailable.';
 }
 export function startExamCount() { return sharedCounter().startExam(); }
 export function recordExamCompletion(event, options) { void sharedCounter().completeExam(event, options); }
@@ -132,7 +132,7 @@ export function mountSiteCounter() {
   if (!local && !PRODUCTION_ENDPOINT) return;
   statsHost = document.createElement('div'); statsHost.className = 'site-stats';
   statsHost.setAttribute('aria-label','Course activity');
-  statsHost.innerHTML = '<p><span><strong data-visits>—</strong> <span data-visit-label>visits</span></span><span><strong data-exams>—</strong> <span data-exam-label>exams completed</span></span><span><strong data-hours>—</strong> learning hours</span></p><small class="counter-note">Loading shared counts…</small><small class="counter-note">Combined learning time, estimated. Hidden tabs pause; idle gaps of 3 minutes or more are excluded.</small>';
+  statsHost.innerHTML = '<p><span><strong data-visits>—</strong> <span data-visit-label>visits</span></span><span><strong data-exams>—</strong> <span data-exam-label>exams completed</span></span><span><strong data-hours>—</strong> learning hours</span></p><small class="counter-note">Loading shared counts…</small>';
   footer.append(statsHost);
   void sharedCounter().visit();
   const isActive = () => document.visibilityState === 'visible' && document.hasFocus();
