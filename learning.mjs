@@ -3,13 +3,13 @@ import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
 import { mountCommunicationRoute } from './communication-route.mjs?v=2';
-import { mountCourse } from './course.mjs?v=5';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=1';
+import { mountCourse } from './course.mjs?v=6';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=2';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=11';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=2';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=3';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -240,7 +240,7 @@ function renderDevicesLesson(lesson) {
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 2</p><button type="button" class="lesson-motion"></button></div>
     <p class="lesson-intro">Find the device. Confirm the port. Follow its connection.</p>
-    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#position">Read the position</a><a href="#ends">Local & remote</a><a href="#ports">Confirm the ports</a></nav>
+    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#position">Read the position</a><a href="#ends">Local & remote</a><a href="#ports">Confirm the ports</a><a href="#lldp-neighbors">LLDP neighbors</a></nav>
     <section id="position" class="lesson-section" aria-labelledby="position-title">
       <h3 id="position-title">Every part narrows the location</h3>
       <p class="position-code">QNO5.5C.16f.17.30</p>
@@ -269,6 +269,7 @@ function renderDevicesLesson(lesson) {
       <p class="lesson-takeaway">The position tells you where to go. The connection record tells you which ports and passives join the two devices.</p>
       <p class="lesson-takeaway">Check what you can reach: loop the local optic, then extend through accessible passives. A passing local loop leaves the path beyond it unverified.</p>
     </section>
+    ${lldpLesson()}
     <p class="lesson-sources">Position format and rack connection: your site examples. References: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC gender and polarity</a>.</p>
 `;
   setupLesson(lesson);
@@ -284,6 +285,7 @@ function renderDevicesLesson(lesson) {
   parts.forEach((button, index) => button.addEventListener('click', () => selectPosition(index)));
   selectPosition(0);
   mountCommunicationRoute(document.getElementById('ends-picture'));
+  mountLldpLesson(lesson);
 }
 
 function positionPicture(selected) {

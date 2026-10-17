@@ -1,4 +1,4 @@
-import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=1';
+import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=2';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=3';
 
@@ -32,6 +32,10 @@ function illustration(term) {
       '<path d="M251 126 H108 m8 -6 -8 6 8 6" fill="none" stroke="#178b76" stroke-width="5"/>';
     caption='Two directions · each TX connects to the other RX';
     if(art==='ir') caption='Blue / teal represents invisible infrared light.';
+  } else if(art==='lldp') {
+    drawing=box(10,20,'Device A')+box(262,20,'Device B')+'<path d="M251 40 H108 m8 -6 -8 6 8 6" fill="none" stroke="#277bc2" stroke-width="3"/>'+
+      box(24,90,'At A: neighbor B · port 7/1',312);
+    caption='Neighbor identity and port · not an optical power reading';
   } else if(art==='power' || art==='dark') {
     drawing=`<rect x="39" y="24" width="282" height="104" rx="10" fill="${art==='dark'?'#fff0f2':'#edf5fa'}" stroke="${art==='dark'?'#bd3450':'#718b9e'}"/>`+
       text(180,55,'RX · example report')+`<text x="180" y="99" text-anchor="middle" style="font-size:32px;font-weight:700;fill:${art==='dark'?'#b51f38':'#173b59'}">${art==='dark'?'−40':'+0.25'} dBm</text>`;
@@ -111,7 +115,7 @@ export function mountReference(menuPanel, closeMenu, menuButton) {
 }
 
 // Only short teaching paragraphs are annotated; drawings, controls and exam answers stay intact.
-const inlineTerms={optic:'optic',LC:'lc',MMC:'mmc',CAS:'cas',fanout:'fanout',follower:'follower',ferrule:'ferrule',TX:'tx',RX:'rx',IR:'ir',dBm:'dbm',attenuation:'attenuation',polarity:'polarity',loopback:'loopback',VFL:'vfl',continuity:'continuity',misport:'misport',splice:'splice',local:'local-remote',remote:'local-remote',FIM:'fim'};
+const inlineTerms={optic:'optic',LC:'lc',MMC:'mmc',CAS:'cas',fanout:'fanout',follower:'follower',ferrule:'ferrule',TX:'tx',RX:'rx',IR:'ir',dBm:'dbm',attenuation:'attenuation',polarity:'polarity',loopback:'loopback',VFL:'vfl',continuity:'continuity',misport:'misport',splice:'splice',local:'local-remote',remote:'local-remote',FIM:'fim',LLDP:'lldp'};
 const termPattern=new RegExp(`\\b(${Object.keys(inlineTerms).join('|')})\\b`,'gi');
 const termIds=Object.fromEntries(Object.entries(inlineTerms).map(([word,id])=>[word.toLowerCase(),id]));
 export function linkLessonTerms(root) {
