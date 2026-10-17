@@ -1,4 +1,6 @@
-# Troubleshoot · Optic & fiber
+# Fiber Optics Fundamentals
+
+Learn the connections. Practice the patching. Troubleshoot the path.
 
 Live site: https://ironfaith.github.io/fiber-troubleshooting/
 

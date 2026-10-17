@@ -25,7 +25,7 @@ export function mountCourse(host, renderers) {
   let saved = '';
   try { saved = localStorage.getItem(storageKey) || ''; } catch { /* Reading remains available without storage. */ }
   host.classList.add('course');
-  host.innerHTML = `<h2 id="course-title">Learn · Fiber basics</h2>
+  host.innerHTML = `<h2 id="course-title">Learn · Fiber Optics Fundamentals</h2>
     <p class="lesson-intro">One course, three chapters. Open any chapter or follow Continue. Your place is saved on this device.</p>
     <div class="course-chapters">${chapters.map((chapter,i) => `
       <section class="course-chapter" id="chapter-${i+1}">
