@@ -46,9 +46,9 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
   try { saved = localStorage.getItem(storageKey) || ''; } catch { /* Reading remains available without storage. */ }
   host.classList.add('course');
   host.innerHTML = `<h2 id="course-title">Your learning path</h2>
-    <p class="lesson-intro">Start with the parts, follow the connections, then practice patching. Choose a topic or continue where you left off.</p>
-    <details id="contents" class="course-contents">
-      <summary class="contents-toggle">Contents <span aria-hidden="true">⌄</span></summary>
+    <p class="lesson-intro">Start with the parts, follow the connections, then practice patching. Choose a chapter or continue where you left off.</p>
+    <div id="contents" class="course-contents" hidden>
+      <button type="button" class="contents-toggle">Close contents <span aria-hidden="true">×</span></button>
       <nav class="contents-panel" aria-labelledby="contents-title">
       <div class="contents-heading"><h3 id="contents-title">Table of contents</h3><button type="button" class="course-reference" data-reference="" aria-haspopup="dialog">Quick reference</button></div>
       ${chapters.map((chapter,i)=>`<details class="contents-chapter"><summary><span class="contents-number">${i+1}</span><span>${chapter.title}<small>${chapter.summary}</small></span></summary>
@@ -57,7 +57,7 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
       </details>`).join('')}
       <p class="contents-note">Dotted-underlined terms open a definition. Your chapter is saved on this device.</p>
       </nav>
-    </details>
+    </div>
     <div class="course-chapters">${chapters.map((chapter,i) => `
       <section class="course-chapter" id="chapter-${i+1}">
         <h2 class="course-chapter-heading"><button type="button" class="course-toggle" id="chapter-toggle-${i+1}" aria-expanded="false" aria-controls="chapter-body-${i+1}">
@@ -70,7 +70,7 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
   const mounted = new Set();
 
   function show(position, {scroll=false, focus=false} = {}) {
-    host.querySelector('#contents').open = false;
+    host.querySelector('#contents').hidden = true;
     const {index, anchor} = position;
     bodies.forEach((body,i) => {
       body.hidden = i !== index;
@@ -145,9 +145,10 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
   }
   function showContents() {
     const contents=host.querySelector('#contents');
-    contents.open = true;
+    contents.hidden = false;
     contents.scrollIntoView({block:'start'});contents.querySelector('.contents-toggle').focus({preventScroll:true});
   }
+  host.querySelector('.contents-toggle').addEventListener('click', () => navigate(`#${coursePosition('', saved).anchor}`, true));
   toggles.forEach((button,i) => button.addEventListener('click', () => {
     if (!bodies[i].hidden) collapse(i);
     else navigate(`#chapter-${i+1}`, true);
