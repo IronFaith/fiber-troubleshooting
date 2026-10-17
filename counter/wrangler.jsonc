@@ -1,0 +1,12 @@
+{
+  "name": "fiber-fundamentals-counter",
+  "main": "worker.mjs",
+  "account_id": "a3cb4479f82765e92beec5e4134dba59",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "vars": { "ALLOWED_ORIGIN": "https://ironfaith.github.io" },
+  "durable_objects": { "bindings": [{ "name": "COUNTER", "class_name": "CourseCounter" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["CourseCounter"] }],
+  "ratelimits": [{ "name": "REQUEST_LIMIT", "namespace_id": "1011", "simple": { "limit": 600, "period": 60 } }]
+}

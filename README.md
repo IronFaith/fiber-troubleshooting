@@ -30,6 +30,8 @@ Technical references: [Cisco optical troubleshooting](https://www.cisco.com/c/en
 
 ## Development
 
+The shared footer counter displays browsing visits and completed exams using a separate Cloudflare Worker. See [`counter/README.md`](counter/README.md) for counting rules and deployment. Local preview uses its own Worker and test totals.
+
 The top-right Learn menu links to each chapter. Chapter 1, Optics, fiber & light (`learn.html`), keeps related sections on one page, with optional jump links (including the old chapter hashes). Animated blue paths represent invisible optic IR; red paths represent VFL test light. A single play/pause control respects reduced-motion preferences. Interactive figures compare loop locations, clean/dirty/unseated connections, excessive bending and VFL outcomes. Returning to troubleshooting restores the existing session path. These are educational illustrations, not live measurements, literal jacket glow or site pin maps.
 
 Requires Node.js; no dependencies or build step.

@@ -1,10 +1,11 @@
+import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=1';
 import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=4';
 
 import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, rookieRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=9';
 import {loadPatchBest} from './patch-practice-data.mjs?v=1';
 
 const host = document.querySelector('#quiz');
-let attempt;
+let attempt, countEvent;
 let index = 0;
 let retry = false;
 let currentRound = 0;
@@ -27,6 +28,7 @@ function focusTitle() {
 
 function begin(ids, isRetry = false) {
   attempt = startAttempt(ids); index = 0; retry = isRetry;
+  countEvent = isRetry ? null : startExamCount();
   renderQuestion();
 }
 
@@ -185,6 +187,7 @@ function rankCard(rank, earnedNow, passed) {
 }
 
 function renderResults() {
+  recordExamCompletion(countEvent, {practice:retry});
   const result = resultsFor(attempt);
   if (!retry) firstScore = result.correct;
   const progress = roundProgress(currentRound,roundAnswers);

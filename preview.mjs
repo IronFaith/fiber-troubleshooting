@@ -8,6 +8,7 @@ files['/devices.html'] = ['devices.html', 'text/html'];
 files['/patching.html'] = ['patching.html', 'text/html'];
 files['/simulations.html'] = ['simulations.html', 'text/html'];
 files['/course.mjs'] = ['course.mjs', 'text/javascript'];
+files['/site-counter.mjs'] = ['site-counter.mjs', 'text/javascript'];
 files['/reference.mjs'] = ['reference.mjs', 'text/javascript'];
 files['/reference-data.mjs'] = ['reference-data.mjs', 'text/javascript'];
 files['/learning.mjs'] = ['learning.mjs', 'text/javascript'];

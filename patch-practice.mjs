@@ -1,3 +1,4 @@
+import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=1';
 import {cassetteFront, mmcHead} from './loop-visuals.mjs?v=3';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {patchCableVisual} from './patch-cable-visuals.mjs?v=1';
@@ -10,6 +11,7 @@ function connectorArt(kind) {
 
 export function mountPatchPractice(host) {
   let mode=new URLSearchParams(location.search).get('exam')==='patching'?'quiz':'practice', index=0, answers={}, selected=null, placement=null, finished=false;
+  let countEvent = mode === 'quiz' ? startExamCount() : null;
   let storage;
   try { storage=window.localStorage; } catch { /* Works without saved progress. */ }
   let {best,canSave}=loadPatchBest(storage);
@@ -152,7 +154,7 @@ export function mountPatchPractice(host) {
 
   function begin(nextMode,nextIndex=0) {
     clearDrag(); mode=nextMode; index=nextIndex; selected=null; placement=null; finished=false; ignoreClickUntil=0;
-    if(mode==='quiz') answers={};
+    if(mode==='quiz') { answers={}; countEvent=startExamCount(); }
     render(); focusTask();
   }
   function focusTask() {
@@ -160,6 +162,8 @@ export function mountPatchPractice(host) {
     host.scrollIntoView({block:'start',behavior:'instant'});
   }
   function finishQuiz() {
+    if (finished) return;
+    recordExamCompletion(countEvent);
     finished=true;
     const result=patchResult(answers);
     const saved=savePatchBest(storage,Math.max(result.correct,best ?? 0));
