@@ -1,8 +1,9 @@
 // Public aggregate endpoint; deployment credentials never belong in browser code.
 const PRODUCTION_ENDPOINT = 'https://fiber-fundamentals-counter.wolfhouse-studio.workers.dev';
-const VISIT_KEY = 'fiber-visit-v1';
+const VISITOR_KEY = 'fiber-visitor-v1';
 const TIME_KEY = 'fiber-learning-time-v1';
 const DAY = 86400000;
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 // Confirm quiet reading on the next interaction or departure. An idle gap
 // of 3 minutes is discarded before it ever reaches the shared total.
@@ -28,8 +29,8 @@ export function createLearningClock({now = Date.now, active = true} = {}) {
   };
 }
 
-export function createSiteCounter({endpoint, storage, fetchImpl = fetch, now = Date.now, newId = () => crypto.randomUUID(), onCounts = () => {}}) {
-  let visitMemory, timeMemory = [], timeRequest;
+export function createSiteCounter({endpoint, storage, identityStorage, withIdentityLock = work => work(), fetchImpl = fetch, now = Date.now, newId = () => crypto.randomUUID(), onCounts = () => {}}) {
+  let timeMemory = [], timeRequest;
   const pending = new Map(), completed = new Set();
   const newEvent = kind => ({id:newId(),kind,at:now()});
   async function request(event) {
@@ -42,6 +43,7 @@ export function createSiteCounter({endpoint, storage, fetchImpl = fetch, now = D
       if (!response.ok) throw new Error('Counter unavailable');
       const counts = await response.json();
       if (![counts.visits,counts.exams].every(value => Number.isSafeInteger(value) && value >= 0)) throw new Error('Invalid totals');
+      if (counts.uniqueVisitors !== undefined && (!Number.isSafeInteger(counts.uniqueVisitors) || counts.uniqueVisitors < 0)) throw new Error('Invalid visitors');
       if (counts.learningSeconds !== undefined && (!Number.isSafeInteger(counts.learningSeconds) || counts.learningSeconds < 0)) throw new Error('Invalid learning time');
       onCounts(counts); return counts;
     } catch { onCounts(null); return null; }
@@ -83,17 +85,24 @@ export function createSiteCounter({endpoint, storage, fetchImpl = fetch, now = D
     completeExam:complete,
     recordTime,
     async visit() {
-      let saved = visitMemory;
-      try { saved = JSON.parse(storage?.getItem(VISIT_KEY) || 'null') || saved; } catch { /* Storage is optional. */ }
-      if (!saved?.event || saved.event.kind !== 'visit' || typeof saved.event.id !== 'string'
-        || !Number.isSafeInteger(saved.event.at) || saved.event.at < now() - DAY || saved.event.at > now())
-        saved = {event:newEvent('visit'),sent:false};
-      visitMemory = saved;
-      try { storage?.setItem(VISIT_KEY,JSON.stringify(saved)); } catch { /* Retain it in memory. */ }
-      const counts = await (saved.sent ? request() : complete(saved.event));
-      if (counts) {
-        saved.sent = true;
-        try { storage?.setItem(VISIT_KEY,JSON.stringify(saved)); } catch { /* The course still works. */ }
+      let saved;
+      try {
+        saved = await withIdentityLock(() => {
+          if (!identityStorage) return null;
+          let value;
+          try { value = JSON.parse(identityStorage.getItem(VISITOR_KEY)); } catch { /* Replace an invalid record. */ }
+          if (!uuid.test(value?.id)) value = {id:newId(),sent:false};
+          // Register only an ID that can survive the next reload.
+          identityStorage.setItem(VISITOR_KEY, JSON.stringify(value));
+          return JSON.parse(identityStorage.getItem(VISITOR_KEY));
+        });
+      } catch { /* Without persistent storage, show totals without adding a visitor. */ }
+      const counts = await (!uuid.test(saved?.id) || saved.sent === true ? request() : request({id:saved.id,kind:'visitor',at:now()}));
+      if (counts && uuid.test(saved?.id)) {
+        try {
+          if (JSON.parse(identityStorage.getItem(VISITOR_KEY))?.id === saved.id)
+            identityStorage.setItem(VISITOR_KEY,JSON.stringify({id:saved.id,sent:true}));
+        } catch { /* A retry uses the same ID; the server remembers it permanently. */ }
       }
       return counts;
     }
@@ -104,21 +113,23 @@ let counter, statsHost, lastCounts;
 function sharedCounter() {
   if (!counter) {
     let storage; try { storage = window.sessionStorage; } catch { /* Private/restricted browser. */ }
+    let identityStorage; try { identityStorage = window.localStorage; } catch { /* Do not count a temporary ID as unique. */ }
+    const withIdentityLock = work => navigator.locks ? navigator.locks.request('fiber-visitor-id', work) : work();
     const local = ['localhost','127.0.0.1'].includes(location.hostname);
     const production = location.hostname === 'ironfaith.github.io' && location.pathname.startsWith('/fiber-troubleshooting/');
-    counter = createSiteCounter({endpoint:local ? 'http://127.0.0.1:8787' : production ? PRODUCTION_ENDPOINT : '', storage, onCounts:paintCounts});
+    counter = createSiteCounter({endpoint:local ? 'http://127.0.0.1:8787' : production ? PRODUCTION_ENDPOINT : '', storage, identityStorage, withIdentityLock, onCounts:paintCounts});
   }
   return counter;
 }
 function paintCounts(counts) {
   // Responses may finish out of order; aggregate totals never move backwards.
-  if (counts) lastCounts = {...counts,visits:Math.max(counts.visits,lastCounts?.visits || 0),exams:Math.max(counts.exams,lastCounts?.exams || 0),learningSeconds:Math.max(counts.learningSeconds || 0,lastCounts?.learningSeconds || 0)};
+  if (counts) lastCounts = {...counts,uniqueVisitors:Math.max(counts.uniqueVisitors || 0,lastCounts?.uniqueVisitors || 0),exams:Math.max(counts.exams,lastCounts?.exams || 0),learningSeconds:Math.max(counts.learningSeconds || 0,lastCounts?.learningSeconds || 0)};
   if (!statsHost) return;
-  statsHost.querySelector('[data-visits]').textContent = lastCounts ? lastCounts.visits.toLocaleString() : '—';
+  statsHost.querySelector('[data-visits]').textContent = lastCounts ? lastCounts.uniqueVisitors.toLocaleString() : '—';
   statsHost.querySelector('[data-exams]').textContent = lastCounts ? lastCounts.exams.toLocaleString() : '—';
   statsHost.querySelector('[data-hours]').textContent = lastCounts ? (lastCounts.learningSeconds / 3600).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1}) : '—';
   statsHost.querySelector('[data-hours]').title = lastCounts ? `${Math.floor(lastCounts.learningSeconds / 60).toLocaleString()} min ${lastCounts.learningSeconds % 60} sec combined` : '';
-  statsHost.querySelector('[data-visit-label]').textContent = lastCounts?.visits === 1 ? 'visit' : 'visits';
+  statsHost.querySelector('[data-visit-label]').textContent = lastCounts?.uniqueVisitors === 1 ? 'unique visitor' : 'unique visitors';
   statsHost.querySelector('[data-exam-label]').textContent = lastCounts?.exams === 1 ? 'exam completed' : 'exams completed';
   if (lastCounts) statsHost.querySelector('.counter-note')?.remove();
   else statsHost.querySelector('.counter-note').textContent = 'Shared counts are temporarily unavailable.';
@@ -132,7 +143,7 @@ export function mountSiteCounter() {
   if (!local && !PRODUCTION_ENDPOINT) return;
   statsHost = document.createElement('div'); statsHost.className = 'site-stats';
   statsHost.setAttribute('aria-label','Course activity');
-  statsHost.innerHTML = '<p><span><strong data-visits>—</strong> <span data-visit-label>visits</span></span><span><strong data-exams>—</strong> <span data-exam-label>exams completed</span></span><span><strong data-hours>—</strong> learning hours</span></p><small class="counter-note">Loading shared counts…</small>';
+  statsHost.innerHTML = '<p><span><strong data-visits>—</strong> <span data-visit-label>unique visitors</span></span><span><strong data-exams>—</strong> <span data-exam-label>exams completed</span></span><span><strong data-hours>—</strong> learning hours</span></p><small class="counter-note">Loading shared counts…</small>';
   footer.append(statsHost);
   void sharedCounter().visit();
   const isActive = () => document.visibilityState === 'visible' && document.hasFocus();

@@ -21,20 +21,20 @@ function storageFor(db) {
   };
 }
 
-test('visits survive navigation; only complete full exam attempts count, with duplicate-safe retry', async () => {
-  const values=new Map(), received=new Set(); let visits=0,exams=0,fail=false,time=Date.now();
+test('visitor IDs survive navigation and later returns; only full exam attempts count', async () => {
+  const values=new Map(), received=new Set(); let visits=0,uniqueVisitors=0,exams=0,fail=false,time=Date.now();
   const storage={getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)};
   const fetchImpl=async (url,options) => {
     if(options.body) {
       const value=JSON.parse(options.body);
-      if(!received.has(value.id)) { received.add(value.id); if(value.kind==='visit') visits++; else exams++; }
+      if(!received.has(value.id)) { received.add(value.id); if(value.kind==='visitor') uniqueVisitors++; else if(value.kind==='visit') visits++; else exams++; }
     }
     if(fail) { fail=false; throw new Error('Response lost after server accepted it'); }
-    return Response.json({visits,exams});
+    return Response.json({visits,uniqueVisitors,exams});
   };
-  const setup=()=>createSiteCounter({endpoint:'https://counter.test',storage,fetchImpl,now:()=>time,newId:randomUUID});
+  const setup=()=>createSiteCounter({endpoint:'https://counter.test',storage,identityStorage:storage,fetchImpl,now:()=>time,newId:randomUUID});
   let client=setup(); await client.visit(); client=setup(); await client.visit();
-  assert.equal(visits,1,'changing lessons or refreshing is not another visit');
+  assert.equal(uniqueVisitors,1,'changing lessons or refreshing is not another visitor');
   client.startExam(); assert.equal(exams,0,'starting or abandoning does not count');
   const attempt=client.startExam(); fail=true;
   assert.equal(await client.completeExam(attempt),null);
@@ -42,7 +42,8 @@ test('visits survive navigation; only complete full exam attempts count, with du
   await client.completeExam(attempt); assert.equal(exams,1);
   await client.completeExam(client.startExam(),{practice:true}); assert.equal(exams,1);
   await client.completeExam(client.startExam()); assert.equal(exams,2,'a full retake counts');
-  time+=86400001; await setup().visit(); assert.equal(visits,2,'a day-old tab starts a fresh visit');
+  time+=30*86400000; await setup().visit(); assert.equal(uniqueVisitors,1,'returning after a month keeps the same visitor');
+  assert.equal(visits,0,'new clients do not add to legacy session totals');
   const unavailable=createSiteCounter({endpoint:'https://counter.test',storage:{getItem(){throw Error();},setItem(){throw Error();}},fetchImpl:async()=>{throw Error();},newId:randomUUID});
   assert.equal(await unavailable.visit(),null,'blocked storage or service never blocks the course');
 });
@@ -129,7 +130,7 @@ test('learning time preserves existing totals and retries across navigation with
     await setup().recordTime(60);
     counter=new CourseCounter({storage:serverStorage});
     const nextPage=setup(); await nextPage.recordTime(30); await nextPage.recordTime();
-    assert.deepEqual({...counter.totals()},{visits:17,exams:8,since:'2026-10-17',learningSeconds:90});
+    assert.deepEqual({...counter.totals()},{visits:17,exams:8,since:'2026-10-17',learningSeconds:90,uniqueVisitors:0,uniqueVisitorsSince:null});
     await nextPage.recordTime(0); await nextPage.recordTime(-10);
     assert.equal(counter.totals().learningSeconds,90);
   } finally { db.close(); }
@@ -151,5 +152,61 @@ test('the API accepts bounded seconds only on learning-time events', async () =>
     await send({...event('time'),seconds:900});
     assert.equal(counter.totals().learningSeconds,960);
     assert.equal(counter.totals().visits,0); assert.equal(counter.totals().exams,0);
+  } finally { db.close(); }
+});
+
+
+test('first tabs share one persistent visitor ID, retries reuse it, and blocked storage cannot inflate visitors', async () => {
+  const db=new DatabaseSync(':memory:');
+  try {
+    const counter=new CourseCounter({storage:storageFor(db)});
+    const values=new Map(), identityStorage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
+    let tail=Promise.resolve(), loseResponse=true;
+    const withIdentityLock=fn=>{const next=tail.then(fn); tail=next.catch(()=>{}); return next;};
+    const fetchImpl=async (url,options)=>{
+      const response=await counter.fetch(new Request('https://counter.test/',options));
+      if(options.body && loseResponse) { loseResponse=false; throw Error('Response lost after registration'); }
+      return response;
+    };
+    const setup=()=>createSiteCounter({endpoint:'https://counter.test',identityStorage,withIdentityLock,fetchImpl,newId:randomUUID});
+    await Promise.all([setup().visit(),setup().visit()]);
+    await setup().visit();
+    assert.equal(counter.totals().uniqueVisitors,1);
+    const saved=JSON.parse(values.get('fiber-visitor-v1'));
+    assert.ok(saved.id); assert.equal(saved.sent,true);
+    const blocked={getItem(){throw Error('blocked');},setItem(){throw Error('blocked');}};
+    const unwritable={getItem:()=>null,setItem(){throw Error('full');}};
+    for(const store of [undefined,blocked,unwritable]) {
+      const client=createSiteCounter({endpoint:'https://counter.test',identityStorage:store,fetchImpl,newId:randomUUID});
+      assert.ok(await client.visit(),'counts remain readable when identity cannot persist');
+    }
+    assert.equal(counter.totals().uniqueVisitors,1);
+    values.clear(); await setup().visit();
+    assert.equal(counter.totals().uniqueVisitors,2,'clearing browser data creates a new identity');
+  } finally { db.close(); }
+});
+
+test('unique visitors start separately from old visits and remain deduplicated after event cleanup and restarts', async () => {
+  const db=new DatabaseSync(':memory:');
+  try {
+    db.exec("CREATE TABLE totals (id INTEGER PRIMARY KEY, visits INTEGER NOT NULL, exams INTEGER NOT NULL, since TEXT, learningSeconds INTEGER NOT NULL); INSERT INTO totals VALUES (1,42,7,'2026-10-17',180)");
+    const storage=storageFor(db); let counter=new CourseCounter({storage});
+    const env={ALLOWED_ORIGIN:'https://ironfaith.github.io',COUNTER:{getByName:()=>counter}};
+    const send=value=>worker.fetch(new Request('https://counter.test/events',{method:'POST',headers:{Origin:env.ALLOWED_ORIGIN,'Content-Type':'application/json'},body:JSON.stringify(value)}),env);
+    assert.equal(counter.totals().uniqueVisitors,0);
+    const visitor=event('visitor');
+    assert.equal((await send(visitor)).status,200);
+    await send({...visitor,at:Date.now()});
+    await send(event('visitor'));
+    db.prepare('UPDATE events SET recorded=?').run(Date.now()-15*86400000);
+    await send(event('exam'));
+    counter=new CourseCounter({storage});
+    await send({...visitor,at:Date.now()});
+    const totals=counter.totals();
+    assert.equal(totals.uniqueVisitors,2); assert.ok(totals.uniqueVisitorsSince);
+    assert.equal(totals.visits,42); assert.equal(totals.exams,8); assert.equal(totals.learningSeconds,180);
+    assert.equal((await send({...visitor,id:'not-an-id'})).status,400);
+    assert.equal((await send({...visitor,name:'Not accepted'})).status,400);
+    assert.equal(counter.totals().uniqueVisitors,2);
   } finally { db.close(); }
 });

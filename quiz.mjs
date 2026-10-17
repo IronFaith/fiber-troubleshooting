@@ -1,4 +1,4 @@
-import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=5';
+import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=6';
 import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=4';
 
 import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=10';
@@ -34,6 +34,7 @@ function begin(ids, isRetry = false) {
 
 function beginRound(topic) {
   selectedLevel=levelFor(topic);
+  history.replaceState(null,'',`${location.pathname}#${selectedLevel}`);
   currentRound = topic;
   roundAnswers = {};
   firstScore = 0;
@@ -42,10 +43,12 @@ function beginRound(topic) {
 
 function renderIntro() {
   host.classList.remove('light-paused');
+  if(location.hash==='#progress') { renderProgress(); return; }
   const patchBest=loadPatchBest(progressStorage).best;
   if(!selectedLevel) {
     const counts=[savedScores.filter(s=>s>=4).length+(patchBest>=4?1:0),appliedScores.filter(s=>s>=4).length];
     host.innerHTML=`<h2 id="quiz-title" tabindex="-1">Exams</h2><p class="lesson-intro">Choose a level. Every exam has five questions and draws from the chapters.</p>
+      <a class="quiz-lesson-link" href="#progress">My progress · ${apprenticeRank(savedScores).title}</a>
       <div class="exam-levels">${['beginner','intermediate'].map((level,i)=>`<button type="button" class="exam-level" data-level="${level}">
         ${quizThumbnail(i===0?2:3)}<span><strong>${levelTitle(level)}</strong><b>${i===0?'Foundations':'Applied troubleshooting'}</b><span>${i===0?'Recognize parts, read the signs and make the basic checks.':'Combine observations, explain the limits of a test and choose your next check.'}</span><small>${counts[i]} of ${i===0?5:2} exams passed · choose any exam</small><em>Open ${levelTitle(level)} →</em></span></button>`).join('')}</div>
       <p class="picture-note">Beginner includes four knowledge exams and hands-on patching. Intermediate combines those ideas in mixed scenarios. Choose any exam; there is no required order.</p>
@@ -79,6 +82,29 @@ function chooseLevel(level) {
   selectedLevel=level;
   history.replaceState(null,'',`${location.pathname}${level?`#${level}`:''}`);
   showQuizPicker();
+}
+function renderProgress() {
+  const rank=apprenticeRank(savedScores), patch=loadPatchBest(progressStorage);
+  const badge=(title,score,topic)=>{
+    const earned=score!==null && score>=4;
+    const content=`<svg class="progress-badge-icon" viewBox="0 0 48 56" aria-hidden="true"><path class="progress-badge-shield" d="M24 3 L44 11 V28 Q44 41 24 53 Q4 41 4 28 V11 Z"/><path class="progress-badge-mark" d="${earned?'M13 27 l7 7 15-17':'M17 24 h14 M17 32 h14'}"/></svg>
+      <span><strong>${title}</strong><small>${earned?'Earned':score===null?'Not yet earned':'Keep practicing'}${score===null?'':` · Best ${score}/5`}</small></span><span class="progress-badge-action">${score===null?'Take exam':'Retake'} →</span>`;
+    const classes=`progress-badge${earned?' badge-earned':''}`;
+    return topic===null ? `<a class="${classes}" href="./simulations.html?exam=patching#practice">${content}</a>` : `<button type="button" class="${classes}" data-round="${topic}">${content}</button>`;
+  };
+  const earned=rank.level+appliedScores.filter(score=>score>=4).length+(patch.best>=4?1:0);
+  host.innerHTML=`<button type="button" class="quiz-picker-back" id="exam-levels">← Exams</button>
+    <h2 id="quiz-title" tabindex="-1">My progress</h2>
+    ${rankCard(rank,false,true)}
+    <p class="picture-note">${canSave && patch.canSave?'Saved only in this browser. Clearing site data removes your progress.':'This browser cannot save progress. Results last for this visit.'}</p>
+    <div class="progress-badges-heading"><h3>Your badges</h3><span>${earned} of 7 earned</span></div>
+    <p class="section-intro">Earn a badge by passing its exam with 4/5 or better.</p>
+    <h4 class="progress-group-title">Beginner</h4>
+    <div class="progress-badges">${topics.map((title,i)=>badge(title,savedScores[i],i)).join('')}${badge('Hands-on patching',patch.best,null)}</div>
+    <h4 class="progress-group-title">Intermediate</h4>
+    <div class="progress-badges">${roundsForLevel('intermediate').map((topic,i)=>badge(allTopics[topic],appliedScores[i],topic)).join('')}</div>`;
+  host.querySelector('#exam-levels').addEventListener('click',()=>chooseLevel(null));
+  host.querySelectorAll('[data-round]').forEach(button=>button.addEventListener('click',()=>beginRound(Number(button.dataset.round))));
 }
 function appliedCard() {
   const count=appliedScores.filter(score=>score>=4).length;
@@ -218,6 +244,7 @@ function renderResults() {
       ${progress.missed.length ? `<button type="button" class="${progress.passed ? 'quiz-secondary' : 'quiz-primary'}" id="quiz-retry">Retry ${progress.missed.length} missed ${progress.missed.length === 1 ? 'question' : 'questions'}</button>` : ''}
       <button type="button" class="${nextRound === null && progress.passed ? 'quiz-primary' : 'quiz-secondary'}" id="quiz-all">Choose another exam</button>
       <button type="button" class="quiz-secondary" id="quiz-restart">Repeat these 5 questions</button>
+      <a class="quiz-lesson-link" href="#progress">My progress</a>
       <a class="quiz-lesson-link" href="./learn.html">Stop here · back to lessons</a>
     </div>
     ${progress.missed.length ? `<h3 class="quiz-review-title">Ideas to revisit</h3><ol class="quiz-review">${progress.missed.map(id => {
@@ -233,4 +260,21 @@ function renderResults() {
   focusTitle();
 }
 
+window.addEventListener('hashchange',()=>{
+  selectedLevel=['beginner','intermediate'].includes(location.hash.slice(1))?location.hash.slice(1):null;
+  showQuizPicker();
+});
+function refreshProgress() {
+  if(location.hash!=='#progress') return;
+  if(canSave) {
+    const beginner=loadQuizProgress(progressStorage), applied=loadQuizProgress(progressStorage,'intermediate');
+    if(beginner.canSave) savedScores=beginner.scores;
+    if(applied.canSave) appliedScores=applied.scores;
+  }
+  renderIntro();
+}
+window.addEventListener('storage',event=>{
+  if(event.key===null || ['fiber-quiz-progress-v1','fiber-applied-progress-v1','fiber-patching-best-v1'].includes(event.key)) refreshProgress();
+});
+window.addEventListener('pageshow',event=>{if(event.persisted) refreshProgress();});
 renderIntro();

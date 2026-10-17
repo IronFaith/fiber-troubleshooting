@@ -1,4 +1,4 @@
-import {mountSiteCounter} from './site-counter.mjs?v=5';
+import {mountSiteCounter} from './site-counter.mjs?v=6';
 import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
@@ -6,7 +6,7 @@ import { mountCommunicationRoute } from './communication-route.mjs?v=2';
 import { mountCourse } from './course.mjs?v=5';
 import { mountReference, linkLessonTerms } from './reference.mjs?v=1';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
-import { mountPatchPractice } from './patch-practice.mjs?v=9';
+import { mountPatchPractice } from './patch-practice.mjs?v=10';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=2';
@@ -36,7 +36,7 @@ const contentsLink = link('Table of contents', './learn.html#contents');
 const simulationsLink = link('Simulations · hands-on practice', './simulations.html');
 const quizLink = link('Exams', './quiz.html');
 if (document.querySelector('#quiz')) quizLink.setAttribute('aria-current', 'page');
-menuPanel.append(courseLink, contentsLink, simulationsLink, quizLink, link('Troubleshoot', './index.html', 'menu-return'));
+menuPanel.append(courseLink, contentsLink, simulationsLink, quizLink, link('My progress', './quiz.html#progress'), link('Troubleshoot', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
 function closeMenu(restoreFocus = false) {

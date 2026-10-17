@@ -194,6 +194,31 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .quiz-rank-count { margin:6px 0 0; font-size:13px; font-weight:600; color:#655480; }
 .quiz-rank-note { margin:7px 0 0; font-size:12px; line-height:1.5; color:#526778; }
 .quiz-rank.rank-complete { border-color:#8a80a5; background:#efecf7; }
+.progress-badges-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:28px; }
+.progress-badges-heading h3 { margin:0; }
+.progress-badges-heading span { color:#655480; font-size:13px; white-space:nowrap; }
+.progress-group-title { margin:23px 0 8px; font-size:14px; color:#526778; }
+.progress-badges { display:grid; gap:8px; }
+.progress-badge { display:flex; align-items:center; gap:12px; width:100%; min-height:82px; padding:12px; border:1px solid #c6d2dc; border-radius:7px; text-align:left; text-decoration:none; color:#173b59; background:white; }
+.progress-badge:hover { border-color:#7053a4; background:#f6f5fb; }
+.progress-badge:focus-visible { outline:3px solid #347cbc; outline-offset:3px; }
+.progress-badge > span:first-of-type { display:grid; gap:5px; flex:1; min-width:0; }
+.progress-badge strong { font-size:15px; }
+.progress-badge small { color:#526778; font-size:12px; }
+.progress-badge-action { font-size:12px; color:#245b91; white-space:nowrap; }
+.progress-badge-icon { width:42px; height:49px; flex-shrink:0; }
+.progress-badge-shield { fill:#f2f5f7; stroke:#91a5b4; stroke-width:2; }
+.progress-badge-mark { fill:none; stroke:#91a5b4; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+.badge-earned { border-color:#c9c7df; }
+.badge-earned .progress-badge-shield { fill:#7053a4; stroke:#59427f; }
+.badge-earned .progress-badge-mark { stroke:white; }
+.badge-earned small { color:#655480; font-weight:600; }
+@media (max-width:440px) {
+  .progress-badge { gap:9px; }
+  .progress-badge strong { font-size:14px; }
+  .progress-badge-action { font-size:11px; }
+  .progress-badge-icon { width:34px; }
+}
 .quiz-picker { display:grid; gap:12px; margin:20px 0; }
 .quiz-pick { display:flex; gap:14px; width:100%; padding:17px; text-align:left; color:#294e67; border:1px solid #b9cbd7; border-radius:7px; background:#fff; }
 .quiz-pick:hover { background:#f1f6fa; border-color:#245b91; }

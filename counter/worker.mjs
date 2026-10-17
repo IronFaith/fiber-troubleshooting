@@ -31,7 +31,7 @@ export default {
       try { event = JSON.parse(await new Blob(chunks).text()); } catch { return json({error:'Invalid JSON'}, 400, headers); }
       const now = Date.now();
       const timeEvent = event?.kind === 'time';
-      if (!event || !['visit','exam','time'].includes(event.kind) || !uuid.test(event.id) || !Number.isSafeInteger(event.at)
+      if (!event || !['visitor','visit','exam','time'].includes(event.kind) || !uuid.test(event.id) || !Number.isSafeInteger(event.at)
         || event.at < now - DAY || event.at > now + 300000
         || (timeEvent && (!Number.isInteger(event.seconds) || event.seconds < 1 || event.seconds > 900))
         || Object.keys(event).some(key => !(timeEvent ? ['id','kind','at','seconds'] : ['id','kind','at']).includes(key)))
@@ -50,14 +50,28 @@ export class CourseCounter {
     this.sql.exec('CREATE TABLE IF NOT EXISTS totals (id INTEGER PRIMARY KEY CHECK(id=1), visits INTEGER NOT NULL, exams INTEGER NOT NULL, since TEXT)');
     if (!this.sql.exec('PRAGMA table_info(totals)').toArray().some(column => column.name === 'learningSeconds'))
       this.sql.exec('ALTER TABLE totals ADD COLUMN learningSeconds INTEGER NOT NULL DEFAULT 0');
+    if (!this.sql.exec('PRAGMA table_info(totals)').toArray().some(column => column.name === 'uniqueVisitors'))
+      this.sql.exec('ALTER TABLE totals ADD COLUMN uniqueVisitors INTEGER NOT NULL DEFAULT 0');
+    if (!this.sql.exec('PRAGMA table_info(totals)').toArray().some(column => column.name === 'uniqueVisitorsSince'))
+      this.sql.exec('ALTER TABLE totals ADD COLUMN uniqueVisitorsSince TEXT');
+    this.sql.exec('CREATE TABLE IF NOT EXISTS visitors (id TEXT PRIMARY KEY)');
     this.sql.exec('CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, kind TEXT NOT NULL, recorded INTEGER NOT NULL)');
     this.sql.exec('CREATE INDEX IF NOT EXISTS event_age ON events(recorded)');
   }
-  totals() { return this.sql.exec('SELECT visits, exams, since, learningSeconds FROM totals WHERE id=1').toArray()[0] || {visits:0,exams:0,since:null,learningSeconds:0}; }
+  totals() { return this.sql.exec('SELECT visits, exams, since, learningSeconds, uniqueVisitors, uniqueVisitorsSince FROM totals WHERE id=1').toArray()[0] || {visits:0,exams:0,since:null,learningSeconds:0,uniqueVisitors:0,uniqueVisitorsSince:null}; }
   async fetch(request) {
     if (request.method !== 'POST') return json(this.totals());
     const event = await request.json();
     return this.storage.transactionSync(() => {
+      if (event.kind === 'visitor') {
+        if (!this.sql.exec('SELECT id FROM visitors WHERE id=?', event.id).toArray().length) {
+          const since = new Date().toISOString();
+          this.sql.exec('INSERT INTO visitors (id) VALUES (?)', event.id);
+          this.sql.exec('INSERT OR IGNORE INTO totals (id,visits,exams,since) VALUES (1,0,0,?)', since);
+          this.sql.exec('UPDATE totals SET uniqueVisitors=uniqueVisitors+1, uniqueVisitorsSince=COALESCE(uniqueVisitorsSince,?) WHERE id=1', since);
+        }
+        return json(this.totals());
+      }
       const previous = this.sql.exec('SELECT kind FROM events WHERE id=?', event.id).toArray()[0];
       if (previous) return json(previous.kind === event.kind ? this.totals() : {error:'Event ID already used'}, previous.kind === event.kind ? 200 : 409);
       const now = Date.now();

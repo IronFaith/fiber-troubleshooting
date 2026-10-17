@@ -4,12 +4,12 @@
   "deploymentMethod": "Cloudflare Worker upload API",
   "result": {
     "id": "fiber-fundamentals-counter",
-    "etag": "1d92e673e0f9d6817a1b6ee8ce60e2bb93d90dbe63d6786b044b949fc75f23ab",
-    "deployment_id": "12732fc6063248f19ca1611a82c610ff",
+    "etag": "f08b496cbc7bcea53ed4ba50d3c2ca07711a516935aff789fa670ec6514cdfec",
+    "deployment_id": "a2e642d8c918479ea0b899428ea19544",
     "migration_tag": "v1",
     "usage_model": "standard"
   },
-  "deployedUTC": "2026-10-17T02:13:15.942227+00:00",
+  "deployedUTC": "2026-10-17T10:20:10.691264+00:00",
   "statsURL": "https://fiber-fundamentals-counter.wolfhouse-studio.workers.dev/stats",
   "paidPlanEnabledByThisDeployment": false,
   "workersDevEnabled": true
