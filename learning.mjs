@@ -1,4 +1,4 @@
-import {mountSiteCounter} from './site-counter.mjs?v=3';
+import {mountSiteCounter} from './site-counter.mjs?v=4';
 import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
@@ -6,7 +6,7 @@ import { mountCommunicationRoute } from './communication-route.mjs?v=2';
 import { mountCourse } from './course.mjs?v=4';
 import { mountReference, linkLessonTerms } from './reference.mjs?v=1';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
-import { mountPatchPractice } from './patch-practice.mjs?v=7';
+import { mountPatchPractice } from './patch-practice.mjs?v=8';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=2';

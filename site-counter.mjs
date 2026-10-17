@@ -5,13 +5,13 @@ const TIME_KEY = 'fiber-learning-time-v1';
 const DAY = 86400000;
 
 // Confirm quiet reading on the next interaction or departure. An idle gap
-// of 15 minutes is discarded before it ever reaches the shared total.
+// of 3 minutes is discarded before it ever reaches the shared total.
 export function createLearningClock({now = Date.now, active = true} = {}) {
   let last = now(), activity = last, milliseconds = 0, reading = 0;
   function sample() {
     const current = now();
     if (active) {
-      if (current - activity >= 900000) reading = 0;
+      if (current - activity >= 180000) reading = 0;
       else reading += Math.max(0, current - last);
     }
     last = current;
@@ -132,7 +132,7 @@ export function mountSiteCounter() {
   if (!local && !PRODUCTION_ENDPOINT) return;
   statsHost = document.createElement('div'); statsHost.className = 'site-stats';
   statsHost.setAttribute('aria-label','Course activity');
-  statsHost.innerHTML = '<p><span><strong data-visits>—</strong> <span data-visit-label>visits</span></span><span><strong data-exams>—</strong> <span data-exam-label>exams completed</span></span><span><strong data-hours>—</strong> learning hours</span></p><small class="counter-note">Loading shared counts…</small><small class="counter-note">Combined learning time, estimated. Hidden tabs pause; idle gaps of 15 minutes or more are excluded.</small>';
+  statsHost.innerHTML = '<p><span><strong data-visits>—</strong> <span data-visit-label>visits</span></span><span><strong data-exams>—</strong> <span data-exam-label>exams completed</span></span><span><strong data-hours>—</strong> learning hours</span></p><small class="counter-note">Loading shared counts…</small><small class="counter-note">Combined learning time, estimated. Hidden tabs pause; idle gaps of 3 minutes or more are excluded.</small>';
   footer.append(statsHost);
   void sharedCounter().visit();
   const isActive = () => document.visibilityState === 'visible' && document.hasFocus();

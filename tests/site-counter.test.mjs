@@ -91,7 +91,7 @@ test('public API accepts only bounded, valid events from the configured course o
   } finally { db.close(); }
 });
 
-test('learning time confirms quiet reading but excludes hidden time and the whole 15-minute idle gap', () => {
+test('learning time confirms quiet reading but excludes hidden time and the whole 3-minute idle gap', () => {
   let time=0;
   const clock=createLearningClock({now:()=>time,active:false});
   time=60000; assert.equal(clock.takeSeconds(),0);
@@ -101,9 +101,9 @@ test('learning time confirms quiet reading but excludes hidden time and the whol
   time+=30500; clock.setActive(false); assert.equal(clock.takeSeconds(),31);
   time+=600000; assert.equal(clock.takeSeconds(),0);
   clock.setActive(true);
-  time+=600000; assert.equal(clock.takeSeconds(),0,'quiet reading has not been sent yet');
-  clock.interact(); assert.equal(clock.takeSeconds(),600,'a ten-minute read followed by interaction counts');
-  time+=900000; assert.equal(clock.takeSeconds(),0,'the entire fifteen-minute idle gap is excluded');
+  time+=120000; assert.equal(clock.takeSeconds(),0,'quiet reading has not been sent yet');
+  clock.interact(); assert.equal(clock.takeSeconds(),120,'a two-minute read followed by interaction counts');
+  time+=180000; assert.equal(clock.takeSeconds(),0,'the entire three-minute idle gap is excluded');
   time+=600000; assert.equal(clock.takeSeconds(),0,'leaving a tab open never adds idle hours');
   clock.interact(); assert.equal(clock.takeSeconds(),0,'returning activity does not backfill the idle gap');
   time+=45000; clock.interact(); time+=45000;
