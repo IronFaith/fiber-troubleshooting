@@ -5,7 +5,7 @@ export const chapters = [
     {title:'Check the path', topics:[['loopbacks','LC & MMC loopbacks'],['compare-loops','Use loops to narrow the problem'],['cleaning','Dirt, seating & tight bends'],['fault-evidence','Ferrules, fiber & splice faults'],['change-evidence','Make one change, then retest'],['vfl','Trace with red VFL light'],['test-evidence','Continuity versus optical loss']]}
   ]},
   {key:'devices', title:'How devices communicate', summary:'Find the device → follow the route → confirm the endpoints', groups:[
-    {title:'Locate & connect', topics:[['position','Read a rack position'],['ends','Local, remote & the chain of passives'],['viewpoint','See the same path from either end'],['ports','Confirm the device and ports'],['lldp-neighbors','LLDP: check the discovered neighbor']]}
+    {title:'Locate & connect', topics:[['position','Read a rack position'],['ends','Local, remote & the chain of passives'],['viewpoint','See the same path from either end'],['ports','Confirm the device and ports'],['lldp-neighbors','LLDP: did I connect to the right device?']]}
   ]},
   {key:'patching', title:'FIM & patching', summary:'Read the assignment → choose the position → match the connections', groups:[
     {title:'Map & patch', topics:[['fim-path','Read the FIM connection assignment'],['lc-position','Choose the LC optic position'],['rack-path','Follow the fiber inside the rack'],['mmc-fanout','Match the MMC head & followers'],['worked-ticket','Work through a complete ticket']]}

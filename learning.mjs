@@ -3,13 +3,13 @@ import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
 import { mountCommunicationRoute } from './communication-route.mjs?v=2';
-import { mountCourse } from './course.mjs?v=6';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=2';
+import { mountCourse } from './course.mjs?v=7';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=3';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=11';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=3';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=4';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);

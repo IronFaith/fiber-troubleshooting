@@ -52,30 +52,49 @@ export function perspectiveLesson() {
 }
 
 export function lldpLesson() {
-  const device=(name,port)=>`<div class="lldp-node lldp-device"><div class="lldp-hardware" aria-hidden="true"><svg viewBox="0 0 360 354">${opticIllustration({optic:name==='A'?25:7,labels:false,id:`lldp-${name}`}).drawing.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,'')}</svg></div><strong>Device ${name}</strong><span>Port ${port}</span></div>`;
+  const device=(name,port)=>`<div class="lldp-node lldp-device"><div class="lldp-hardware" aria-hidden="true"><div class="lldp-chassis"><i></i><svg viewBox="0 0 360 354">${opticIllustration({optic:name==='A'?25:7,labels:false,id:`lldp-${name}`}).drawing.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,'')}</svg></div></div><strong>Device ${name}</strong><span>Optic · ${port}</span></div>`;
   const passive=name=>`<div class="lldp-node"><div class="lldp-hardware hardware-art" aria-hidden="true"><svg viewBox="0 0 360 206">${cassetteFront({name,port:12,patched:true})}</svg></div><strong>${name}</strong><span>Passive</span></div>`;
   return `<section id="lldp-neighbors" class="lesson-section" aria-labelledby="lldp-title">
-    <h3 id="lldp-title">LLDP: who is at the other end?</h3>
-    <p class="section-intro">LLDP means <b>Link Layer Discovery Protocol</b>. A device advertises its identity and port. The device at the other end records that information as its <b>neighbor</b>.</p>
-    <div class="lldp-link">
-      <p class="lldp-eyebrow">Teaching example · expected connection</p>
-      <div class="lldp-path" aria-label="Device A port 25/1 connects through CAS 1 and CAS 2 to Device B port 7/1">
-        ${device('A','25/1')}${passive('CAS 1')}${passive('CAS 2')}${device('B','7/1')}
+    <h3 id="lldp-title">LLDP: did I connect to the right device?</h3>
+    <p class="section-intro">A connection can have light and still go to the wrong place. LLDP helps you check <b>which device and port are at the other end</b>, then compare that with your patching assignment.</p>
+    <p class="lldp-use"><b>When you use it:</b> after patching, or while investigating an unexpected connection. You can check the far-end identity from your local device, even when the other device is in another room.</p>
+    <div class="lldp-step">
+      <h4><span>1</span> Start with where it should go</h4>
+      <p>Your FIM assignment says:</p>
+      <div class="lldp-assignment"><span><small>Your end</small><b>Device A · 25/1</b></span><span aria-hidden="true">→</span><span><small>Expected other end</small><b>Device B · 7/1</b></span></div>
+      <p>You have patched the route. Now you need evidence that it reaches B’s port 7/1.</p>
+    </div>
+    <div class="lldp-step">
+      <h4><span>2</span> The devices introduce themselves</h4>
+      <p>LLDP is a <b>software feature on the devices</b>. When enabled, it sends small identification messages over the link. You read the results in a report; there is no extra tool to plug into the fiber.</p>
+      <div class="lldp-link">
+        <p class="lldp-eyebrow">Example: B’s message travels to A</p>
+        <div class="lldp-message"><b>Device B says:</b> “I’m Device B. I’m sending from port 7/1.”</div>
+        <div class="lldp-direction" aria-hidden="true"><span>←</span><b>Identification message carried over the link</b></div>
+        <div class="lldp-path" aria-label="Device B port 7/1 sends its identity through CAS 2 and CAS 1 to Device A port 25/1">
+          ${device('A','25/1')}${passive('CAS 1')}${passive('CAS 2')}${device('B','7/1')}
+        </div>
+        <p class="lldp-received"><b>A records:</b> “On my port 25/1, I heard Device B’s port 7/1.”</p>
+        <p class="picture-note">The optics carry the message as light. The CAS units pass the fiber paths through. B is A’s <b>neighbor</b> on this link; the CAS units are not neighbors.</p>
       </div>
-      <div class="lldp-exchange"><p><span aria-hidden="true">←</span><b>B tells A:</b> “Device B, port 7/1”</p><p><span aria-hidden="true">→</span><b>A tells B:</b> “Device A, port 25/1”</p></div>
-      <p class="picture-note">The active devices exchange LLDP messages over the link. The cassettes carry the fiber paths; they are not additional LLDP neighbors.</p>
+      <p>“Neighbor” means the next active device on that link, even across rooms. It is the remote device itself, not a third device. From B, the neighbor would be A.</p>
     </div>
-    <h4 class="lldp-report-title">Check the report at Device A / 25/1</h4>
-    <p class="section-intro">Compare the expected endpoint in your connection record with a fresh LLDP report. Try each result.</p>
-    <div class="lesson-options" role="group" aria-label="LLDP report examples">
-      <button type="button" data-lldp-case="match" aria-controls="lldp-result">Matches</button>
-      <button type="button" data-lldp-case="different" aria-controls="lldp-result">Different neighbor</button>
-      <button type="button" data-lldp-case="missing" aria-controls="lldp-result">No neighbor</button>
+    <div class="lldp-step">
+      <h4><span>3</span> Open the report and compare</h4>
+      <p>Open your site’s LLDP neighbor report for <b>Device A</b>, or ask the network team for it. Find <b>local port 25/1</b>. Compare the reported neighbor’s device name and port with FIM.</p>
+      <p class="picture-note">Local port = the port you are checking. Neighbor / remote port = the port at the other device. These are teaching examples, not a live Cable Guy report.</p>
+      <div class="lesson-options lldp-options" role="group" aria-label="Try different LLDP reports">
+        <button type="button" data-lldp-case="match" aria-controls="lldp-result">Right device + port</button>
+        <button type="button" data-lldp-case="different" aria-controls="lldp-result">Wrong device</button>
+        <button type="button" data-lldp-case="port" aria-controls="lldp-result">Wrong port</button>
+        <button type="button" data-lldp-case="missing" aria-controls="lldp-result">No neighbor</button>
+      </div>
+      <div id="lldp-result" class="lldp-result" aria-live="polite" aria-atomic="true"></div>
+      <p class="picture-note">Use a fresh report after a change. A previously learned neighbor can stay listed until its timer expires.</p>
     </div>
-    <div id="lldp-result" class="lldp-result" aria-live="polite" aria-atomic="true"></div>
-    <p class="picture-note">From Device B / 7/1, the expected neighbor is Device A / 25/1. Local and remote change with your viewpoint. Old LLDP entries can remain until their timer expires.</p>
-    <p class="lesson-takeaway">LLDP checks <b>who is connected</b>. TX/RX readings and optical tests check <b>the light path’s health</b>. Use both.</p>
-    <p class="lesson-sources">Reference: <a href="https://developer.cisco.com/docs/sonic/lldp/" target="_blank" rel="noopener noreferrer">Cisco · LLDP local ports, remote devices and neighbor ports</a>.</p>
+    <p class="lesson-takeaway"><b>Use LLDP to check the destination.</b> Use TX/RX readings, loops and fiber tests to check light and isolate faults. LLDP does not list the CAS route or locate a dirty connector or break.</p>
+    <p class="picture-note">LLDP stands for Link Layer Discovery Protocol. It helps discover connections; it is not required just to carry ordinary network data.</p>
+    <p class="lesson-sources">References: <a href="https://developer.cisco.com/docs/sonic/lldp/" target="_blank" rel="noopener noreferrer">Cisco · reading LLDP reports</a> · <a href="https://www.cisco.com/c/en/us/td/docs/switches/lan/csbms/250_/2_5_7/Admin_guide/tesla-250-ag/cb_250_chapter_07.pdf#page=31" target="_blank" rel="noopener noreferrer">Cisco · neighbor discovery</a>.</p>
   </section>`;
 }
 
@@ -83,14 +102,15 @@ export function mountLldpLesson(root) {
   const result=root.querySelector('#lldp-result');
   if(!result) return;
   const examples={
-    match:{device:'Device B',port:'Port 7/1',status:'✓ Expected endpoint found',next:'The device and port match the record. Now check the required TX/RX readings and link status; a matching neighbor alone does not prove optical health.'},
-    different:{device:'Device C',port:'Port 7/1',status:'≠ Endpoint does not match',next:'Check the actual device, exact port and mapped passive connections against the record. A misport or an incorrect record could explain this. Even the right device on the wrong port needs investigation.'},
-    missing:{device:'No neighbor',port:'No identity or port reported',status:'? Endpoint is unconfirmed',next:'Check link status and optic readings, and confirm LLDP is enabled to send and receive on the relevant interfaces. No neighbor alone does not tell you whether the fiber, optic or LLDP setup is the cause.'}
+    match:{device:'Device B',port:'7/1',status:'✓ A heard the device and port we wanted',meaning:'This supports that the connection reaches the assigned far end.',next:'Verify the required TX/RX readings and link status too. The right neighbor does not prove every optical channel is healthy.'},
+    different:{device:'Device C',port:'7/1',status:'≠ We wanted B, but A heard C',meaning:'The reported device is different, even if the connection has light.',next:'Compare the actual patching with FIM. Investigate a misport or an incorrect record before moving connections.'},
+    port:{device:'Device B',port:'7/5',status:'≠ Right device, different port',meaning:'A heard B, but on 7/5 instead of the assigned 7/1. The device name alone is not enough.',next:'Check the exact port assignment and mapped connections. Resolve the mismatch with the record before changing the patch.'},
+    missing:{device:'No neighbor',port:'Not reported',status:'? A has no neighbor identity to show',meaning:'This does not tell us why. The link may be down, or LLDP may not be sending or receiving.',next:'Check link status and optic readings. Ask the network team to confirm LLDP is enabled on the relevant ports. Do not conclude “bad fiber” from this alone.'}
   };
   function show(key) {
     const example=examples[key];
     result.dataset.state=key;
-    result.innerHTML=`<div class="lldp-compare"><div><span>Expected from the record</span><strong>Device B</strong><b>Port 7/1</b></div><div><span>LLDP reports</span><strong>${example.device}</strong><b>${example.port}</b></div></div><p class="lldp-verdict"><strong>${example.status}</strong><span>${example.next}</span></p>`;
+    result.innerHTML=`<p class="lldp-report-location">Report viewed on <b>Device A</b> · local port <b>25/1</b></p><div class="lldp-compare"><div><span>FIM says to reach</span><strong>Device B</strong><b>Port 7/1</b></div><div><span>LLDP heard</span><strong class="${key==='different'?'lldp-mismatch':''}">${example.device}</strong><b class="${key==='port'?'lldp-mismatch':''}">${key==='missing'?'':'Port '}${example.port}</b></div></div><div class="lldp-verdict"><strong>${example.status}</strong><p>${example.meaning}</p><p><b>What you do next:</b> ${example.next}</p></div>`;
     root.querySelectorAll('[data-lldp-case]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lldpCase===key)));
   }
   root.querySelectorAll('[data-lldp-case]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.lldpCase)));
