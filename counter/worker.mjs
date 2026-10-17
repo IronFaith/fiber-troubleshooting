@@ -33,7 +33,7 @@ export default {
       const timeEvent = event?.kind === 'time';
       if (!event || !['visit','exam','time'].includes(event.kind) || !uuid.test(event.id) || !Number.isSafeInteger(event.at)
         || event.at < now - DAY || event.at > now + 300000
-        || (timeEvent && (!Number.isInteger(event.seconds) || event.seconds < 1 || event.seconds > 120))
+        || (timeEvent && (!Number.isInteger(event.seconds) || event.seconds < 1 || event.seconds > 900))
         || Object.keys(event).some(key => !(timeEvent ? ['id','kind','at','seconds'] : ['id','kind','at']).includes(key)))
         return json({error:'Invalid or expired event'}, 400, headers);
     }

@@ -4,18 +4,27 @@ const VISIT_KEY = 'fiber-visit-v1';
 const TIME_KEY = 'fiber-learning-time-v1';
 const DAY = 86400000;
 
-// Keep reading time between interactions, but stop after two idle minutes.
+// Confirm quiet reading on the next interaction or departure. An idle gap
+// of 15 minutes is discarded before it ever reaches the shared total.
 export function createLearningClock({now = Date.now, active = true} = {}) {
-  let last = now(), activity = last, milliseconds = 0;
+  let last = now(), activity = last, milliseconds = 0, reading = 0;
   function sample() {
     const current = now();
-    if (active) milliseconds += Math.max(0, Math.min(current, activity + 120000) - last);
+    if (active) {
+      if (current - activity >= 900000) reading = 0;
+      else reading += Math.max(0, current - last);
+    }
     last = current;
   }
   return {
-    interact() { sample(); if (active) activity = now(); },
-    setActive(value) { sample(); if (value && !active) activity = now(); active = value; },
-    takeSeconds() { sample(); const seconds = Math.min(120, Math.floor(milliseconds / 1000)); milliseconds -= seconds * 1000; return seconds; }
+    interact() { sample(); if (active) { milliseconds += reading; reading = 0; activity = now(); } },
+    setActive(value) {
+      sample();
+      if (active && !value) { milliseconds += reading; reading = 0; }
+      if (value && !active) activity = now();
+      active = value;
+    },
+    takeSeconds() { sample(); const seconds = Math.min(900, Math.floor(milliseconds / 1000)); milliseconds -= seconds * 1000; return seconds; }
   };
 }
 
@@ -48,7 +57,7 @@ export function createSiteCounter({endpoint, storage, fetchImpl = fetch, now = D
     try { queue = JSON.parse(storage?.getItem(TIME_KEY) || 'null') || queue; } catch { /* Keep an in-memory queue when storage is unavailable. */ }
     return (Array.isArray(queue) ? queue : []).filter(event => event?.kind === 'time' && typeof event.id === 'string'
       && Number.isSafeInteger(event.at) && event.at >= now() - DAY && event.at <= now()
-      && Number.isInteger(event.seconds) && event.seconds > 0 && event.seconds <= 120).slice(-240);
+      && Number.isInteger(event.seconds) && event.seconds > 0 && event.seconds <= 900).slice(-240);
   }
   function saveTime(queue) {
     timeMemory = queue;
@@ -56,7 +65,7 @@ export function createSiteCounter({endpoint, storage, fetchImpl = fetch, now = D
   }
   function recordTime(seconds = 0) {
     const queue = timeQueue();
-    if (Number.isSafeInteger(seconds) && seconds > 0 && seconds <= 120)
+    if (Number.isSafeInteger(seconds) && seconds > 0 && seconds <= 900)
       queue.push({...newEvent('time'),seconds});
     saveTime(queue);
     if (timeRequest) return timeRequest;
@@ -123,14 +132,14 @@ export function mountSiteCounter() {
   if (!local && !PRODUCTION_ENDPOINT) return;
   statsHost = document.createElement('div'); statsHost.className = 'site-stats';
   statsHost.setAttribute('aria-label','Course activity');
-  statsHost.innerHTML = '<p><span><strong data-visits>—</strong> <span data-visit-label>visits</span></span><span><strong data-exams>—</strong> <span data-exam-label>exams completed</span></span><span><strong data-hours>—</strong> learning hours</span></p><small class="counter-note">Loading shared counts…</small><small class="counter-note">Learning hours are estimated across all learners. Pauses when the page is inactive or after 2 minutes idle.</small>';
+  statsHost.innerHTML = '<p><span><strong data-visits>—</strong> <span data-visit-label>visits</span></span><span><strong data-exams>—</strong> <span data-exam-label>exams completed</span></span><span><strong data-hours>—</strong> learning hours</span></p><small class="counter-note">Loading shared counts…</small><small class="counter-note">Combined learning time, estimated. Hidden tabs pause; idle gaps of 15 minutes or more are excluded.</small>';
   footer.append(statsHost);
   void sharedCounter().visit();
   const isActive = () => document.visibilityState === 'visible' && document.hasFocus();
   const clock = createLearningClock({active:isActive()});
   const flush = () => { void sharedCounter().recordTime(clock.takeSeconds()); };
   const updateActivity = () => { clock.setActive(isActive()); if (!isActive()) flush(); };
-  for (const name of ['pointerdown','pointermove','keydown','scroll'])
+  for (const name of ['pointerdown','keydown','scroll'])
     document.addEventListener(name, () => clock.interact(), {passive:true});
   document.addEventListener('visibilitychange', updateActivity);
   window.addEventListener('focus', updateActivity);

@@ -91,19 +91,24 @@ test('public API accepts only bounded, valid events from the configured course o
   } finally { db.close(); }
 });
 
-test('learning time pauses in the background and after idle time, then resumes without counting the gap', () => {
+test('learning time confirms quiet reading but excludes hidden time and the whole 15-minute idle gap', () => {
   let time=0;
   const clock=createLearningClock({now:()=>time,active:false});
   time=60000; assert.equal(clock.takeSeconds(),0);
   clock.setActive(true);
-  time+=30500; assert.equal(clock.takeSeconds(),30);
+  time+=30500; assert.equal(clock.takeSeconds(),0,'quiet reading stays unconfirmed until activity or departure');
+  clock.interact(); assert.equal(clock.takeSeconds(),30);
   time+=30500; clock.setActive(false); assert.equal(clock.takeSeconds(),31);
   time+=600000; assert.equal(clock.takeSeconds(),0);
   clock.setActive(true);
-  time+=600000; assert.equal(clock.takeSeconds(),120,'idle or sleeping tabs stop at two minutes');
+  time+=600000; assert.equal(clock.takeSeconds(),0,'quiet reading has not been sent yet');
+  clock.interact(); assert.equal(clock.takeSeconds(),600,'a ten-minute read followed by interaction counts');
+  time+=900000; assert.equal(clock.takeSeconds(),0,'the entire fifteen-minute idle gap is excluded');
+  time+=600000; assert.equal(clock.takeSeconds(),0,'leaving a tab open never adds idle hours');
   clock.interact(); assert.equal(clock.takeSeconds(),0,'returning activity does not backfill the idle gap');
   time+=45000; clock.interact(); time+=45000;
-  assert.equal(clock.takeSeconds(),90,'reading between interactions counts');
+  assert.equal(clock.takeSeconds(),45,'only the interval confirmed by an interaction counts yet');
+  clock.setActive(false); assert.equal(clock.takeSeconds(),45,'leaving within the reading allowance confirms the final interval');
   assert.equal(clock.takeSeconds(),0,'flushing twice cannot repeat time');
 });
 
@@ -137,14 +142,14 @@ test('the API accepts bounded seconds only on learning-time events', async () =>
     const env={ALLOWED_ORIGIN:'https://ironfaith.github.io',COUNTER:{getByName:()=>counter}};
     const send=value=>worker.fetch(new Request('https://counter.test/events',{method:'POST',
       headers:{Origin:env.ALLOWED_ORIGIN,'Content-Type':'application/json'},body:JSON.stringify(value)}),env);
-    for(const seconds of [0,-1,121,1.5,'60',null])
+    for(const seconds of [0,-1,901,1.5,'60',null])
       assert.equal((await send({...event('time'),seconds})).status,400);
     assert.equal((await send(event('time'))).status,400);
     assert.equal((await send({...event('exam'),seconds:60})).status,400);
     const minute={...event('time'),seconds:60};
     assert.equal((await send(minute)).status,200); await send(minute);
-    await send({...event('time'),seconds:120});
-    assert.equal(counter.totals().learningSeconds,180);
+    await send({...event('time'),seconds:900});
+    assert.equal(counter.totals().learningSeconds,960);
     assert.equal(counter.totals().visits,0); assert.equal(counter.totals().exams,0);
   } finally { db.close(); }
 });
