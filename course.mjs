@@ -47,14 +47,17 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
   host.classList.add('course');
   host.innerHTML = `<h2 id="course-title">Your learning path</h2>
     <p class="lesson-intro">Start with the parts, follow the connections, then practice patching. Choose a topic or continue where you left off.</p>
-    <nav id="contents" class="course-contents" aria-labelledby="contents-title" tabindex="-1">
+    <details id="contents" class="course-contents">
+      <summary class="contents-toggle">Contents <span aria-hidden="true">⌄</span></summary>
+      <nav class="contents-panel" aria-labelledby="contents-title">
       <div class="contents-heading"><h3 id="contents-title">Table of contents</h3><button type="button" class="course-reference" data-reference="" aria-haspopup="dialog">Quick reference</button></div>
       ${chapters.map((chapter,i)=>`<details class="contents-chapter"><summary><span class="contents-number">${i+1}</span><span>${chapter.title}<small>${chapter.summary}</small></span></summary>
         <a class="contents-start" href="#chapter-${i+1}">Start chapter ${i+1}</a>
         ${chapter.groups.map(group=>`<div class="contents-group"><h4>${group.title}</h4><ul>${group.topics.map(([id,label])=>`<li><a href="#${id}">${label}</a></li>`).join('')}</ul></div>`).join('')}
       </details>`).join('')}
       <p class="contents-note">Dotted-underlined terms open a definition. Your chapter is saved on this device.</p>
-    </nav>
+      </nav>
+    </details>
     <div class="course-chapters">${chapters.map((chapter,i) => `
       <section class="course-chapter" id="chapter-${i+1}">
         <h2 class="course-chapter-heading"><button type="button" class="course-toggle" id="chapter-toggle-${i+1}" aria-expanded="false" aria-controls="chapter-body-${i+1}">
@@ -67,6 +70,7 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
   const mounted = new Set();
 
   function show(position, {scroll=false, focus=false} = {}) {
+    host.querySelector('#contents').open = false;
     const {index, anchor} = position;
     bodies.forEach((body,i) => {
       body.hidden = i !== index;
@@ -141,7 +145,8 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
   }
   function showContents() {
     const contents=host.querySelector('#contents');
-    contents.scrollIntoView({block:'start'});contents.focus({preventScroll:true});
+    contents.open = true;
+    contents.scrollIntoView({block:'start'});contents.querySelector('.contents-toggle').focus({preventScroll:true});
   }
   toggles.forEach((button,i) => button.addEventListener('click', () => {
     if (!bodies[i].hidden) collapse(i);

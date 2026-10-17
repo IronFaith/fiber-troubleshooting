@@ -1275,7 +1275,12 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 @media(max-width:600px) { .pol-desktop { display:none; } .pol-mobile { display:block; } .pol-takeaways { grid-template-columns:1fr; } .pol-caption { padding:14px; } .pol-controls { align-items:stretch; } .pol-controls .lesson-options { flex:1; } .pol-swap { width:100%; } }
 
 /* Course contents and the shared visual field reference. */
-.course-contents { margin-top:20px; padding:18px; background:#f4f8fb; border:1px solid #c4d3dc; border-radius:7px; scroll-margin-top:12px; }
+.course-contents { margin-top:12px; scroll-margin-top:12px; }
+.contents-toggle { display:flex; align-items:center; gap:12px; width:fit-content; min-height:44px; padding:8px 12px; border:1px solid #bdcbd5; border-radius:5px; background:white; color:#245b91; font-size:14px; cursor:pointer; list-style:none; }
+.contents-toggle::-webkit-details-marker { display:none; }
+.contents-toggle:hover { background:#f4f8fb; }
+.course-contents[open] > .contents-toggle span { transform:rotate(180deg); }
+.contents-panel { margin-top:8px; padding:18px; background:#f4f8fb; border:1px solid #c4d3dc; border-radius:7px; }
 .contents-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
 .contents-heading h3 { margin:0; font-size:19px; }
 .course-reference { min-height:40px; border:1px solid #bdcbd5; border-radius:5px; background:white; padding:7px 10px; font-size:12px; color:#245b91; }
@@ -1329,9 +1334,9 @@ body:has(.reference-dialog[open]) { overflow:hidden; }
 .reference-lesson { display:flex; align-items:center; min-height:44px; color:#245b91; font-size:14px; font-weight:650; }
 .reference-source { display:block; padding:8px 0; color:#526b7c; font-size:12px; }
 .reference-empty { font-size:14px; line-height:1.7; }
-.contents-chapter summary:focus-visible, .reference-entry summary:focus-visible, .reference-search :is(input,select):focus-visible { outline:3px solid #347cbc; outline-offset:3px; }
+.contents-toggle:focus-visible, .contents-chapter summary:focus-visible, .reference-entry summary:focus-visible, .reference-search :is(input,select):focus-visible { outline:3px solid #347cbc; outline-offset:3px; }
 @media(max-width:480px) {
-  .course-contents { padding:12px; }
+  .contents-panel { padding:12px; }
   .contents-heading h3 { font-size:17px; }
   .contents-group { margin-left:18px; }
   .contents-start { margin-left:18px; }
