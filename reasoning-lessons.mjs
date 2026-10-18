@@ -51,27 +51,31 @@ export function perspectiveLesson() {
     <p><b>Worked example:</b> At B, TX is in range but RX is dark. Investigate A’s source → mapped fiber and interfaces → B’s receiver. B’s healthy TX report does not prove that A receives B’s outgoing light. Leave inaccessible sections unverified.</p></div></section>`;
 }
 
-function lldpDevice(name,port) {
-  return `<div class="lldp-node lldp-device"><div class="lldp-hardware" aria-hidden="true"><div class="lldp-chassis"><i></i><svg viewBox="0 0 360 354">${opticIllustration({optic:name==='A'?25:7,labels:false,id:`lldp-${name}`}).drawing.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,'')}</svg></div></div><strong>${name==='?'?'Unknown device':`Device ${name}`}</strong><span>${port?`Port ${port}`:'Not identified'}</span></div>`;
+function lldpDevice(name,port,role) {
+  return `<div class="lldp-node lldp-device"><div class="lldp-hardware" aria-hidden="true"><div class="lldp-chassis"><i></i><svg viewBox="0 0 360 354">${opticIllustration({optic:port?.startsWith('25/')?25:7,labels:false,id:`lldp-${name}`}).drawing.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,'')}</svg></div></div><strong>${name==='?'?'Unknown device':`Device ${name}`}</strong><span>${port?`Port ${port}`:'Not identified'}</span><b class="lldp-role" data-role="${role}">${role==='local'?'Local':'Neighbor'}</b></div>`;
 }
 
 export function lldpLesson() {
   const passive=name=>`<div class="lldp-node"><div class="lldp-hardware hardware-art" aria-hidden="true"><svg viewBox="0 0 360 206">${cassetteFront({name,port:12,patched:true})}</svg></div><strong>${name}</strong><span>Passes fiber</span></div>`;
   return `<section id="lldp-neighbors" class="lesson-section" aria-labelledby="lldp-title">
-    <h3 id="lldp-title">LLDP tells you who is connected</h3>
-    <p class="section-intro">The other device sends its <b>name + port</b> through your existing connection.</p>
+    <h3 id="lldp-title">Why are they called neighbors?</h3>
+    <p class="section-intro"><b>Neighbors are the active devices at the two ends of one link.</b> No other active device sits between them. Cassettes simply pass the fiber through.</p>
     <figure class="lldp-link" id="lldp-demo">
-      <div class="lldp-demo-heading"><strong>A device introduces itself</strong><span>Same fiber · no extra connection</span></div>
+      <div class="lldp-demo-heading"><strong>Whose report are you reading?</strong><span>Local = the device you’re checking</span></div>
+      <div class="lesson-options lldp-view-options" role="group" aria-label="Choose the local device">
+        <button type="button" data-lldp-view="A" aria-controls="lldp-demo lldp-result">At Device A</button>
+        <button type="button" data-lldp-view="B" aria-controls="lldp-demo lldp-result">At Device B</button>
+      </div>
       <div class="lldp-message" id="lldp-message"></div>
       <div class="lldp-path">
-        ${lldpDevice('A','25/1')}${passive('CAS 1')}${passive('CAS 2')}<div id="lldp-remote"></div>
+        <div id="lldp-left"></div>${passive('CAS 1')}${passive('CAS 2')}<div id="lldp-right"></div>
         <span class="lldp-id-tag" aria-hidden="true">ID ←</span>
       </div>
       <div class="lldp-play-row"><button type="button" id="lldp-play" aria-controls="lldp-result">▶ Follow the name</button><span>Blue tag = identity message</span></div>
       <figcaption id="lldp-caption" aria-live="polite"></figcaption>
     </figure>
     <h4 class="lldp-check-title">Does it match your assignment?</h4>
-    <p class="picture-note">Open A’s LLDP report. Find local port 25/1. Compare with FIM.</p>
+    <p class="picture-note">In Cable Guy, use the LLDP neighbor to check the far-end device + port against FIM.</p>
     <div class="lesson-options lldp-options" role="group" aria-label="Try a different neighbor report">
       <button type="button" data-lldp-case="match" aria-controls="lldp-result">Match</button>
       <button type="button" data-lldp-case="different" aria-controls="lldp-result">Other device</button>
@@ -85,7 +89,7 @@ export function lldpLesson() {
       <li><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9h22l-5-5m5 5-5 5M29 23H7l5-5m-5 5 5 5"/></svg><span>Patch changed?<b>Check the destination.</b></span></li>
       <li><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="22" height="26" rx="3"/><path d="m10 16 4 4 8-9"/></svg><span>New connection?<b>Compare with FIM.</b></span></li>
     </ul>
-    <p class="lesson-takeaway"><b>LLDP = who is connected.</b> TX/RX = light readings.<br>It adds no backup path. The link can work without LLDP.</p>
+    <p class="lesson-takeaway"><b>Neighbor = the device at the other end. LLDP tells you its identity.</b><br>Same connection, no extra cable. Check TX/RX separately for light health.</p>
     <p class="lesson-sources">LLDP: Link Layer Discovery Protocol. <a href="https://developer.cisco.com/docs/sonic/lldp/" target="_blank" rel="noopener noreferrer">Cisco reference ↗</a></p>
   </section>`;
 }
@@ -94,51 +98,66 @@ export function mountLldpLesson(root) {
   const result=root.querySelector('#lldp-result');
   if(!result) return;
   const demo=root.querySelector('#lldp-demo'), play=root.querySelector('#lldp-play'), caption=root.querySelector('#lldp-caption');
-  const examples={
-    match:{name:'B',port:'7/1',status:'✓ Device and port match',next:'Check TX/RX and link status too; identity alone does not prove optical health.'},
-    different:{name:'C',port:'7/1',status:'≠ Expected B. Heard C.',next:'Check the patching and FIM. A misport or an outdated record could explain this.'},
-    port:{name:'B',port:'7/5',status:'≠ Expected 7/1. Heard 7/5.',next:'Check the exact port and FIM before changing the patch.'},
-    missing:{name:'?',port:'',status:'? No identity reported',next:'Check link status, optic readings and LLDP settings. This alone does not prove bad fiber.'}
-  };
-  let selected='match',timer;
+  const devices={A:{name:'A',port:'25/1'},B:{name:'B',port:'7/1'}};
+  let view='A',selected='match',timer;
+  function currentReport() {
+    const local=devices[view], expected=devices[view==='A'?'B':'A'];
+    const examples={
+      match:{...expected,status:'✓ Device and port match',next:'The expected device is on this link. Check TX/RX and link status too.'},
+      different:{name:'C',port:expected.port,status:`≠ Expected ${expected.name}. Heard C.`,next:'Check the patching and FIM. A misport or an outdated record could explain this.'},
+      port:{name:expected.name,port:expected.port.replace('/1','/5'),status:`≠ Expected ${expected.port}. Heard ${expected.port.replace('/1','/5')}.`,next:'Check the exact port and FIM before changing the patch.'},
+      missing:{name:'?',port:'',status:'? No identity reported',next:'Check link status, optic readings and LLDP settings. This alone does not prove bad fiber.'}
+    };
+    return {local,expected,neighbor:examples[selected]};
+  }
   function renderReport(pending=false) {
-    const example=examples[selected];
+    const {local,expected,neighbor}=currentReport();
     result.dataset.state=selected;
     result.dataset.pending=String(pending);
-    result.innerHTML=`<p class="lldp-report-location">At Device A · local port <b>25/1</b></p><div class="lldp-compare"><div><span>FIM expects</span><strong>Device B</strong><b>Port 7/1</b></div><div><span>LLDP neighbor</span><strong class="${!pending&&selected==='different'?'lldp-mismatch':''}">${pending?'Receiving…':example.name==='?'?'Not reported':`Device ${example.name}`}</strong><b class="${!pending&&selected==='port'?'lldp-mismatch':''}">${pending?'Name + port':example.port?`Port ${example.port}`:'Cause unknown'}</b></div></div><div class="lldp-verdict"><strong>${pending?'Message traveling to A…':example.status}</strong><p>${pending?'Follow the blue ID tag on the existing fiber.':example.next}</p></div>`;
+    result.innerHTML=`<p class="lldp-report-location">Report at Device ${local.name} · local port <b>${local.port}</b></p><div class="lldp-compare"><div><span>FIM expects</span><strong>Device ${expected.name}</strong><b>Port ${expected.port}</b></div><div><span>LLDP neighbor</span><strong class="${!pending&&selected==='different'?'lldp-mismatch':''}">${pending?'Receiving…':neighbor.name==='?'?'Not reported':`Device ${neighbor.name}`}</strong><b class="${!pending&&selected==='port'?'lldp-mismatch':''}">${pending?'Name + port':neighbor.port?`Port ${neighbor.port}`:'Cause unknown'}</b></div></div><div class="lldp-verdict"><strong>${pending?`Message traveling to ${local.name}…`:neighbor.status}</strong><p>${pending?'Follow the blue ID tag on the existing fiber.':neighbor.next}</p></div>`;
   }
   function finish() {
     clearTimeout(timer);timer=undefined;
     demo.dataset.playing='false';
     play.disabled=selected==='missing';
-    const example=examples[selected];
-    caption.textContent=selected==='missing'?'No LLDP message reported. The light condition is still unknown.':`A lists ${example.name} / ${example.port} as its neighbor. The CAS units only pass the fiber.`;
+    const {local,neighbor}=currentReport();
+    caption.textContent=selected==='missing'?'No LLDP message reported. The light condition is still unknown.':`${local.name} calls ${neighbor.name} its neighbor: the next active device on this link, even across rooms or buildings.`;
     renderReport();
   }
   function show(key) {
     selected=key;
-    const example=examples[key];
-    root.querySelector('#lldp-remote').innerHTML=lldpDevice(example.name,example.port);
-    root.querySelector('#lldp-message').innerHTML=key==='missing'?'<strong>?</strong><span>No device identity received</span>':`<strong>“I’m ${example.name}”</strong><span>My port is ${example.port}</span>`;
+    const {local,neighbor}=currentReport();
+    root.querySelector('#lldp-left').innerHTML=view==='A'?lldpDevice(local.name,local.port,'local'):lldpDevice(neighbor.name,neighbor.port,'neighbor');
+    root.querySelector('#lldp-right').innerHTML=view==='B'?lldpDevice(local.name,local.port,'local'):lldpDevice(neighbor.name,neighbor.port,'neighbor');
+    root.querySelector('#lldp-message').innerHTML=key==='missing'?'<strong>?</strong><span>No device identity received</span>':`<strong>“I’m ${neighbor.name}”</strong><span>My port is ${neighbor.port}</span>`;
+    root.querySelector('.lldp-id-tag').textContent=view==='A'?'ID ←':'ID →';
+    demo.dataset.view=view;
     demo.dataset.state=key;
     play.textContent=key==='missing'?'No message to follow':'▶ Follow the name';
     root.querySelectorAll('[data-lldp-case]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lldpCase===key)));
+    root.querySelectorAll('[data-lldp-view]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lldpView===view)));
     finish();
   }
   play.addEventListener('click',()=>{
     if(selected==='missing') return;
+    const {local,neighbor}=currentReport();
     if(root.classList.contains('light-paused')) {
       finish();
-      caption.textContent=`${examples[selected].name} / ${examples[selected].port} → CAS 2 → CAS 1 → A’s neighbor report.`;
+      caption.textContent=`${neighbor.name} / ${neighbor.port} → ${view==='A'?'CAS 2 → CAS 1':'CAS 1 → CAS 2'} → ${local.name}’s neighbor report.`;
       return;
     }
     clearTimeout(timer);
     demo.dataset.playing='true';play.disabled=true;
-    caption.textContent=`${examples[selected].name} sends its name and port through the same fiber to A.`;
+    caption.textContent=`${neighbor.name} sends its name and port through the same fiber to ${local.name}.`;
     renderReport(true);
     timer=setTimeout(finish,2400);
   });
   root.querySelectorAll('[data-lldp-case]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.lldpCase)));
+  root.querySelectorAll('[data-lldp-view]').forEach(button=>button.addEventListener('click',()=>{
+    if(view===button.dataset.lldpView) return;
+    view=button.dataset.lldpView;
+    show('match');
+  }));
   root.querySelector('.lesson-motion')?.addEventListener('click',()=>{if(timer) finish();});
   root.addEventListener('coursevisibility',()=>{if(root.hidden&&timer) finish();});
   show('match');
