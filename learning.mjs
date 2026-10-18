@@ -9,7 +9,7 @@ import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=11';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=5';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=6';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
