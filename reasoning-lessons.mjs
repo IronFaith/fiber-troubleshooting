@@ -56,17 +56,22 @@ export function lldpLesson() {
   const passive=name=>`<div class="lldp-node"><div class="lldp-hardware hardware-art" aria-hidden="true"><svg viewBox="0 0 360 206">${cassetteFront({name,port:12,patched:true})}</svg></div><strong>${name}</strong><span>Passive</span></div>`;
   return `<section id="lldp-neighbors" class="lesson-section" aria-labelledby="lldp-title">
     <h3 id="lldp-title">LLDP: did I connect to the right device?</h3>
-    <p class="section-intro">A connection can have light and still go to the wrong place. LLDP helps you check <b>which device and port are at the other end</b>, then compare that with your patching assignment.</p>
-    <p class="lldp-use"><b>When you use it:</b> after patching, or while investigating an unexpected connection. You can check the far-end identity from your local device, even when the other device is in another room.</p>
+    <p class="section-intro">Picture a rack with <b>48 connected fibers</b>, all looking alike. How do you know what device each one reaches? LLDP helps your device identify <b>the device and port at the other end</b>, without you physically following every cable.</p>
+    <p class="lldp-use"><b>LLDP is an automatic identification feature.</b> Its messages travel over the connection you already have. It does not add another fiber, optic or backup connection.</p>
+    <div class="lldp-step">
+      <h4>Where this helps on the job</h4>
+      <p><b>A cable’s label is missing.</b> A current LLDP report can identify its far-end device and port, even in another room.</p>
+      <p><b>Someone changed the patching.</b> FIM says Device B, but the report identifies Device C. You have a reason to investigate the patching or an outdated record.</p>
+      <p><b>You just finished a connection.</b> Good light alone does not identify the destination. Check that LLDP reports the device and exact port your assignment calls for.</p>
+    </div>
     <div class="lldp-step">
       <h4><span>1</span> Start with where it should go</h4>
       <p>Your FIM assignment says:</p>
       <div class="lldp-assignment"><span><small>Your end</small><b>Device A · 25/1</b></span><span aria-hidden="true">→</span><span><small>Expected other end</small><b>Device B · 7/1</b></span></div>
-      <p>You have patched the route. Now you need evidence that it reaches B’s port 7/1.</p>
     </div>
     <div class="lldp-step">
       <h4><span>2</span> The devices introduce themselves</h4>
-      <p>LLDP is a <b>software feature on the devices</b>. When enabled, it sends small identification messages over the link. You read the results in a report; there is no extra tool to plug into the fiber.</p>
+      <p>When LLDP is enabled, each device periodically sends a small introduction through its existing connection. The receiving device lists the sender as its <b>neighbor</b>. You read that information in a report.</p>
       <div class="lldp-link">
         <p class="lldp-eyebrow">Example: B’s message travels to A</p>
         <div class="lldp-message"><b>Device B says:</b> “I’m Device B. I’m sending from port 7/1.”</div>
@@ -77,7 +82,7 @@ export function lldpLesson() {
         <p class="lldp-received"><b>A records:</b> “On my port 25/1, I heard Device B’s port 7/1.”</p>
         <p class="picture-note">The optics carry the message as light. The CAS units pass the fiber paths through. B is A’s <b>neighbor</b> on this link; the CAS units are not neighbors.</p>
       </div>
-      <p>“Neighbor” means the next active device on that link, even across rooms. It is the remote device itself, not a third device. From B, the neighbor would be A.</p>
+      <p>The neighbor here is the remote device itself. From B, the neighbor would be A.</p>
     </div>
     <div class="lldp-step">
       <h4><span>3</span> Open the report and compare</h4>
@@ -93,7 +98,8 @@ export function lldpLesson() {
       <p class="picture-note">Use a fresh report after a change. A previously learned neighbor can stay listed until its timer expires.</p>
     </div>
     <p class="lesson-takeaway"><b>Use LLDP to check the destination.</b> Use TX/RX readings, loops and fiber tests to check light and isolate faults. LLDP does not list the CAS route or locate a dirty connector or break.</p>
-    <p class="picture-note">LLDP stands for Link Layer Discovery Protocol. It helps discover connections; it is not required just to carry ordinary network data.</p>
+    <p class="lesson-takeaway"><b>The connection can still work without LLDP.</b> You lose this convenient way to discover who is attached. LLDP identifies the connection; it does not create or repair it.</p>
+    <p class="picture-note">LLDP stands for Link Layer Discovery Protocol.</p>
     <p class="lesson-sources">References: <a href="https://developer.cisco.com/docs/sonic/lldp/" target="_blank" rel="noopener noreferrer">Cisco · reading LLDP reports</a> · <a href="https://www.cisco.com/c/en/us/td/docs/switches/lan/csbms/250_/2_5_7/Admin_guide/tesla-250-ag/cb_250_chapter_07.pdf#page=31" target="_blank" rel="noopener noreferrer">Cisco · neighbor discovery</a>.</p>
   </section>`;
 }

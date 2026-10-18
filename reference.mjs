@@ -1,4 +1,4 @@
-import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=3';
+import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=4';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=3';
 
