@@ -52,16 +52,21 @@ export function perspectiveLesson() {
 }
 
 function lldpDevice(name,port,role) {
-  return `<div class="lldp-node lldp-device"><div class="lldp-hardware" aria-hidden="true"><div class="lldp-chassis"><i></i><svg viewBox="0 0 360 354">${opticIllustration({optic:port?.startsWith('25/')?25:7,labels:false,id:`lldp-${name}`}).drawing.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,'')}</svg></div></div><strong>${name==='?'?'Unknown device':`Device ${name}`}</strong><span>${port?`Port ${port}`:'Not identified'}</span><b class="lldp-role" data-role="${role}">${role==='local'?'Local':'Neighbor'}</b></div>`;
+  return `<div class="lldp-node lldp-device"><div class="lldp-hardware" aria-hidden="true"><div class="lldp-chassis"><i></i><svg viewBox="0 0 360 354">${opticIllustration({optic:port?.startsWith('25/')?25:7,labels:false,id:`lldp-${name}`}).drawing.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,'')}</svg></div></div><strong>${name==='?'?'Unknown device':`Device ${name}`}</strong><span>${port?`Port ${port}`:'Not identified'}</span><b class="lldp-role" data-role="${role}">${role==='local'?'Local':'Remote'}</b></div>`;
 }
 
 export function lldpLesson() {
   const passive=name=>`<div class="lldp-node"><div class="lldp-hardware hardware-art" aria-hidden="true"><svg viewBox="0 0 360 206">${cassetteFront({name,port:12,patched:true})}</svg></div><strong>${name}</strong><span>Passes fiber</span></div>`;
   return `<section id="lldp-neighbors" class="lesson-section" aria-labelledby="lldp-title">
-    <h3 id="lldp-title">Why are they called neighbors?</h3>
-    <p class="section-intro"><b>Neighbors are the active devices at the two ends of one link.</b> No other active device sits between them. Cassettes simply pass the fiber through.</p>
+    <h3 id="lldp-title">LLDP — Link Layer Discovery Protocol</h3>
+    <p class="section-intro">Devices use LLDP to announce their <b>name + port</b> over the existing connection. It helps you confirm who is connected.</p>
+    <ul class="lldp-uses" aria-label="What the LLDP acronym means">
+      <li><span>Link Layer<b>On this direct link</b></span></li>
+      <li><span>Discovery<b>Identify the other end</b></span></li>
+      <li><span>Protocol<b>Shared messaging rules</b></span></li>
+    </ul>
     <figure class="lldp-link" id="lldp-demo">
-      <div class="lldp-demo-heading"><strong>Whose report are you reading?</strong><span>Local = the device you’re checking</span></div>
+      <div class="lldp-demo-heading"><strong>Start with local and remote</strong><span>Local = the device you’re checking</span></div>
       <div class="lesson-options lldp-view-options" role="group" aria-label="Choose the local device">
         <button type="button" data-lldp-view="A" aria-controls="lldp-demo lldp-result">At Device A</button>
         <button type="button" data-lldp-view="B" aria-controls="lldp-demo lldp-result">At Device B</button>
@@ -71,11 +76,12 @@ export function lldpLesson() {
         <div id="lldp-left"></div>${passive('CAS 1')}${passive('CAS 2')}<div id="lldp-right"></div>
         <span class="lldp-id-tag" aria-hidden="true">ID ←</span>
       </div>
-      <div class="lldp-play-row"><button type="button" id="lldp-play" aria-controls="lldp-result">▶ Follow the name</button><span>Blue tag = identity message</span></div>
+      <div class="lldp-play-row"><button type="button" id="lldp-play" aria-controls="lldp-result">▶ Follow the name</button><span>Blue tag = LLDP message</span></div>
       <figcaption id="lldp-caption" aria-live="polite"></figcaption>
     </figure>
-    <h4 class="lldp-check-title">Does it match your assignment?</h4>
-    <p class="picture-note">In Cable Guy, use the LLDP neighbor to check the far-end device + port against FIM.</p>
+    <h4 class="lldp-check-title">Now read the neighbor in Cable Guy</h4>
+    <p class="picture-note"><b>LLDP calls the remote device a neighbor:</b> the next active device on this link, even in another room. The CAS units only pass the fiber through.</p>
+    <p class="picture-note">Compare the reported neighbor’s name + port with FIM. Does it match?</p>
     <div class="lesson-options lldp-options" role="group" aria-label="Try a different neighbor report">
       <button type="button" data-lldp-case="match" aria-controls="lldp-result">Match</button>
       <button type="button" data-lldp-case="different" aria-controls="lldp-result">Other device</button>
@@ -89,8 +95,8 @@ export function lldpLesson() {
       <li><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9h22l-5-5m5 5-5 5M29 23H7l5-5m-5 5 5 5"/></svg><span>Patch changed?<b>Check the destination.</b></span></li>
       <li><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="22" height="26" rx="3"/><path d="m10 16 4 4 8-9"/></svg><span>New connection?<b>Compare with FIM.</b></span></li>
     </ul>
-    <p class="lesson-takeaway"><b>Neighbor = the device at the other end. LLDP tells you its identity.</b><br>Same connection, no extra cable. Check TX/RX separately for light health.</p>
-    <p class="lesson-sources">LLDP: Link Layer Discovery Protocol. <a href="https://developer.cisco.com/docs/sonic/lldp/" target="_blank" rel="noopener noreferrer">Cisco reference ↗</a></p>
+    <p class="lesson-takeaway"><b>LLDP identifies the remote device. Your local report lists it as a neighbor.</b><br>Same connection, no extra cable. Check TX/RX separately for light health.</p>
+    <p class="lesson-sources"><a href="https://developer.cisco.com/docs/sonic/lldp/" target="_blank" rel="noopener noreferrer">Cisco · LLDP reference ↗</a></p>
   </section>`;
 }
 
@@ -121,14 +127,14 @@ export function mountLldpLesson(root) {
     demo.dataset.playing='false';
     play.disabled=selected==='missing';
     const {local,neighbor}=currentReport();
-    caption.textContent=selected==='missing'?'No LLDP message reported. The light condition is still unknown.':`${local.name} calls ${neighbor.name} its neighbor: the next active device on this link, even across rooms or buildings.`;
+    caption.textContent=selected==='missing'?'No LLDP message reported from the remote end. The light condition is still unknown.':`${local.name} is local. It hears ${neighbor.name} / ${neighbor.port} from the remote end of this link.`;
     renderReport();
   }
   function show(key) {
     selected=key;
     const {local,neighbor}=currentReport();
-    root.querySelector('#lldp-left').innerHTML=view==='A'?lldpDevice(local.name,local.port,'local'):lldpDevice(neighbor.name,neighbor.port,'neighbor');
-    root.querySelector('#lldp-right').innerHTML=view==='B'?lldpDevice(local.name,local.port,'local'):lldpDevice(neighbor.name,neighbor.port,'neighbor');
+    root.querySelector('#lldp-left').innerHTML=view==='A'?lldpDevice(local.name,local.port,'local'):lldpDevice(neighbor.name,neighbor.port,'remote');
+    root.querySelector('#lldp-right').innerHTML=view==='B'?lldpDevice(local.name,local.port,'local'):lldpDevice(neighbor.name,neighbor.port,'remote');
     root.querySelector('#lldp-message').innerHTML=key==='missing'?'<strong>?</strong><span>No device identity received</span>':`<strong>“I’m ${neighbor.name}”</strong><span>My port is ${neighbor.port}</span>`;
     root.querySelector('.lldp-id-tag').textContent=view==='A'?'ID ←':'ID →';
     demo.dataset.view=view;
@@ -143,7 +149,7 @@ export function mountLldpLesson(root) {
     const {local,neighbor}=currentReport();
     if(root.classList.contains('light-paused')) {
       finish();
-      caption.textContent=`${neighbor.name} / ${neighbor.port} → ${view==='A'?'CAS 2 → CAS 1':'CAS 1 → CAS 2'} → ${local.name}’s neighbor report.`;
+      caption.textContent=`Remote ${neighbor.name} / ${neighbor.port} → ${view==='A'?'CAS 2 → CAS 1':'CAS 1 → CAS 2'} → local ${local.name}.`;
       return;
     }
     clearTimeout(timer);
