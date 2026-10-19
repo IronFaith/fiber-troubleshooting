@@ -13,10 +13,10 @@ test('normalized coverage grows from the tested optic through passed loops, leav
   assert.equal(pathCoverage(s).spans[0].lanes.tx.status,'unknown');
   s=normal(loop(s,1,'pass'));
   assert.equal(pathCoverage(s).txThrough,1);
-  assert.deepEqual(pathCoverage(s).spans.map(p=>[p.lanes.tx.status,p.lanes.rx.status]),[['loop','loop'],['unknown','unknown']]);
+  assert.deepEqual(pathCoverage(s).spans.map(p=>[p.lanes.tx.status,p.lanes.rx.status]),[['loop','loop'],['unknown','unknown'],['unknown','unknown']]);
   s=normal(loop(s,2,'dark'));
   assert.equal(pathCoverage(s).txThrough,1);
-  assert.deepEqual(pathCoverage(s).spans.map(p=>p.lanes.tx.status),['loop','suspect']);
+  assert.deepEqual(pathCoverage(s).spans.map(p=>p.lanes.tx.status),['loop','suspect','unknown']);
   assert.deepEqual(pathCoverage(JSON.parse(JSON.stringify(s))),pathCoverage(s),'saved cases derive the same coverage');
   s=normal(loop(s,2,'pass'));
   assert.equal(pathCoverage(s).txThrough,2);
@@ -27,7 +27,7 @@ test('VFL coverage keeps strands, loose heads and suspect connections distinct f
   let s=normal(trace(loop(createCase(),0,'pass'),0,1,'tx','seen'));
   assert.equal(pathCoverage(s).optic,'pass');
   assert.equal(pathCoverage(s).txThrough,0,'VFL continuity alone must not draw a passed IR route');
-  assert.deepEqual(pathCoverage(s).spans.map(p=>[p.lanes.tx.status,p.lanes.rx.status]),[['vfl','unknown'],['unknown','unknown']]);
+  assert.deepEqual(pathCoverage(s).spans.map(p=>[p.lanes.tx.status,p.lanes.rx.status]),[['vfl','unknown'],['unknown','unknown'],['unknown','unknown']]);
   s=normal(trace(s,0,1,'rx','dark'));
   assert.equal(pathCoverage(s).spans[0].lanes.tx.status,'vfl');
   assert.equal(pathCoverage(s).spans[0].lanes.rx.status,'suspect');
@@ -40,7 +40,7 @@ test('VFL coverage keeps strands, loose heads and suspect connections distinct f
   s=normal(trace(s,0,1,'rx','seen'));
   assert.equal(pathCoverage(s).points[1].issue,false);
   const reverse=normal(trace(trace(createCase(),2,1,'rx','seen'),2,0,'rx','dark'));
-  assert.deepEqual(pathCoverage(reverse).spans.map(p=>[p.lanes.tx.status,p.lanes.rx.status]),[['unknown','suspect'],['unknown','vfl']]);
+  assert.deepEqual(pathCoverage(reverse).spans.map(p=>[p.lanes.tx.status,p.lanes.rx.status]),[['unknown','suspect'],['unknown','vfl'],['unknown','unknown']]);
   const reverseOptic=normal(trace(loop(createCase(),0,'pass'),1,0,'rx','dark'));
   assert.equal(pathCoverage(reverseOptic).optic,'pass','VFL on disconnected fiber does not mark the optic as failed');
   assert.equal(pathCoverage(reverseOptic).points[0].issue,false);

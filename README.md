@@ -87,3 +87,9 @@ The header offers English, neutral Latin American Spanish, French, and Modern St
 `locale.mjs` handles messages and preferences, while `i18n.mjs` translates displayed text and accessible labels without changing form values, equipment IDs, answers, or stored results. Inline lesson definitions and glossary search support all four languages. No translation API or external service is used.
 
 Arabic uses `dir="rtl"` for reading and navigation; hardware diagrams, physical port positions, and numeric scales retain left-to-right coordinates. `formatBidi` isolates technical runs in displayed Arabic text so signs and IDs keep their order. Switching languages restores the matching direction and preserves learning state.
+
+## Troubleshooting from both ends
+
+The workbench defaults to both devices and the full path. Use **Edit path → I can reach** to restrict access. An LC loop at either optic tests that optic directly. For an MMC loop, **Optic under test** selects the source device and the facing direction; results are stored separately for local and remote sources, even at the same CAS. VFL can start or end at either disconnected LC pair. A/B retain one route-wide identity (local TX → remote RX, and remote TX → local RX).
+
+Normalize keeps both sets of findings and shows their recorded coverage. Opposing passes can expose an untested gap; overlapping passes still require verification of the restored live link. History, reload, copy, undo and retest preserve the source of each test. Existing local-only findings remain local when loading older cases.

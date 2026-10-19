@@ -1644,3 +1644,6 @@ html[dir="rtl"] .language-picker { direction:ltr; }
 @media(max-width:650px) {
   html[dir="rtl"] header .learn-nav { margin-left:0; margin-right:auto; }
 }
+
+.ts-loop-context { display:grid; gap:5px; padding:12px; border-inline-start:3px solid #347cbc; background:#edf5fa; overflow-wrap:anywhere; }
+.ts-loop-context span { color:#4b6577; font-size:14px; }

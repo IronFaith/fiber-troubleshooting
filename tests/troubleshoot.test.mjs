@@ -180,7 +180,7 @@ test('VFL source stays on the LC leg while the viewing point moves through multi
 });
 
 test('VFL can start at a passive and trace backward, while invalid routes and normalization remain safe',()=> {
-  let s=changeCase(createCase(),{type:'place',kind:'vfl',point:2,atSource:true});
+  let s=changeCase(changeCase(createCase(),{type:'reach',value:2}),{type:'place',kind:'vfl',point:2,atSource:true});
   assert.deepEqual([s.vflFrom,s.selected],[2,1]);
   s=changeCase(s,{type:'trace',from:2,to:0});
   assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['unplugged','plugged','vfl']);

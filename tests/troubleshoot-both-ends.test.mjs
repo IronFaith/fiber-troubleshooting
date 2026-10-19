@@ -1,0 +1,72 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createCase,changeCase,canPlaceTool,caseHistory,restoreCaseHistory,pathCoverage,assessment,traceStop,simulatedLoop} from '../troubleshoot-state.mjs';
+const apply=(s,...actions)=>actions.reduce(changeCase,s);
+const loop=(s,point,result,side='local')=>apply(s,{type:'place',kind:point===0||point===s.count+1?'lc':'mmc',point},{type:'loop-side',value:side},{type:'ready',value:true},{type:'record',result});
+const trace=(s,from,to,strand,result)=>apply(s,{type:'trace',from,to},{type:'strand',value:strand},{type:'ready',value:true},{type:'record',result});
+
+test('remote loop results retain their source and never overwrite local tests at the same cassette',()=>{
+  let s=createCase();
+  assert.equal(canPlaceTool(s,'lc',3),true);
+  assert.equal(canPlaceTool(s,'mmc',3),false);
+  s=loop(loop(s,0,'pass'),3,'pass','remote');
+  s=loop(loop(s,1,'pass'),1,'dark','remote');
+  assert.deepEqual(s.loops,{0:'pass',1:'pass'});
+  assert.deepEqual(s.remoteLoops,{3:'pass',1:'dark'});
+  assert.equal(caseHistory(s).filter(e=>e.current&&e.kind==='loop').length,4);
+  assert.equal(assessment(s).tone,'suspect');
+  s=changeCase(s,{type:'normalize'});
+  const restored=restoreCaseHistory(structuredClone(s),JSON.parse(JSON.stringify(s)));
+  assert.equal(caseHistory(restored).filter(e=>e.current&&e.kind==='loop').length,4);
+  const changed=changeCase(s,{type:'patch',point:1,side:'rear',connected:true,port:13});
+  assert.deepEqual(changed.loops,{0:'pass'});
+  assert.deepEqual(changed.remoteLoops,{3:'pass'});
+  const localFailure=loop(loop(loop(createCase(),0,'pass'),2,'dark'),3,'pass','remote');
+  assert.equal(assessment(localFailure).suggestion.side,'local');
+  assert.equal(assessment(localFailure).suggestion.point,1);
+  const retest=changeCase(s,{type:'retest'});
+  assert.deepEqual(retest.remoteLoops,{});
+  assert.equal(caseHistory(retest).filter(e=>e.current).length,0);
+});
+
+test('VFL traces from either disconnected LC end preserve direction and independent strand findings',()=>{
+  let s=changeCase(createCase(),{type:'place',kind:'vfl',point:3,atSource:true});
+  assert.equal(s.vflFrom,3); assert.equal(s.selected,2);
+  s=trace(s,3,2,'tx','seen');
+  s=trace(s,3,2,'rx','dark');
+  assert.equal(assessment(s).tone,'suspect');
+  assert.deepEqual(s.traces,{'3>2:tx':'seen','3>2:rx':'dark'});
+  s=trace(s,2,3,'rx','seen');
+  assert.equal(traceStop(s).kind,'lc');
+  assert.equal(traceStop(s).point,3);
+  assert.equal(s.traces['3:rx'],'seen');
+  s=changeCase(s,{type:'normalize'});
+  assert.equal(pathCoverage(s).remoteOptic,'unknown','visible continuity does not prove the remote optic');
+  assert.equal(Object.keys(s.traces).length,3);
+  const limited=changeCase(s,{type:'reach',value:1});
+  assert.equal(canPlaceTool(limited,'lc',3),false);
+  assert.equal(changeCase(limited,{type:'trace',from:3,to:1}),limited);
+});
+
+test('opposing loops highlight the remaining gap and animate only evidence-backed coverage',()=>{
+  let s=loop(loop(loop(loop(createCase(),0,'pass'),1,'pass'),3,'pass','remote'),2,'pass','remote');
+  s=changeCase(s,{type:'normalize'});
+  const coverage=pathCoverage(s);
+  assert.deepEqual(coverage.spans.map(p=>p.lanes.tx.status),['loop','unknown','loop']);
+  assert.equal(coverage.optic,'pass'); assert.equal(coverage.remoteOptic,'pass');
+  assert.equal(coverage.txThrough,1); assert.equal(coverage.remoteTxThrough,2);
+  assert.deepEqual([assessment(s).from,assessment(s).to],[1,2]);
+  assert.notEqual(assessment(s).complete,true);
+  s=loop(s,1,'pass','remote');
+  assert.equal(pathCoverage(s).spans.every(p=>p.lanes.tx.loop),true);
+  assert.notEqual(assessment(s).complete,true,'overlapping loops do not verify the live link');
+  s=loop(s,3,'dark','remote');
+  assert.equal(assessment(s).tone,'suspect');
+  assert.equal(pathCoverage(s).optic,'pass');
+  assert.equal(pathCoverage(s).remoteOptic,'suspect');
+  let simulated=changeCase(createCase(true),{type:'fault',value:{kind:'optic_tx',at:3}});
+  simulated=changeCase(simulated,{type:'place',kind:'lc',point:3});
+  assert.equal(simulatedLoop(simulated),'dark');
+  simulated=changeCase(simulated,{type:'place',kind:'lc',point:0});
+  assert.equal(simulatedLoop(simulated),'pass');
+});
