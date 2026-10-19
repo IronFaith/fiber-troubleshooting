@@ -1,4 +1,5 @@
-import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=6';
+import {translate,getLanguage} from './locale.mjs?v=1';
+import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=7';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=3';
 
@@ -65,7 +66,7 @@ export function mountReference(menuPanel, closeMenu, menuButton) {
   dialog.setAttribute('aria-labelledby','reference-title');
   dialog.innerHTML=`<div class="reference-top"><div><h2 id="reference-title">Quick reference</h2><p>Parts, terms &amp; acronyms</p></div><button type="button" class="reference-close" aria-label="Close quick reference">Close ×</button></div>
     <div class="reference-search"><label for="reference-query">Find a term</label><input id="reference-query" type="search" placeholder="Try optic, TX, polarity or CAS" autocomplete="off">
-    <label class="reference-filter-label" for="reference-group">Show</label><select id="reference-group"><option value="">All topics</option>${referenceGroups.map(group=>`<option>${group}</option>`).join('')}</select>
+    <label class="reference-filter-label" for="reference-group">Show</label><select id="reference-group"><option value="">All topics</option>${referenceGroups.map(group=>`<option value="${group}">${group}</option>`).join('')}</select>
     <p id="reference-count" role="status" aria-live="polite"></p></div><div class="reference-results"></div>`;
   document.body.append(dialog);
   const input=dialog.querySelector('input'), select=dialog.querySelector('select'), results=dialog.querySelector('.reference-results');
@@ -111,28 +112,36 @@ export function mountReference(menuPanel, closeMenu, menuButton) {
     const button=event.target.closest('[data-reference]');
     if(button) open(button.dataset.reference,button);
   });
+  document.addEventListener('fiber:language',()=>{if(dialog.open) render(dialog.querySelector('.reference-entry[open]')?.id.replace('reference-','')??'');});
   return {open};
 }
 
 // Only short teaching paragraphs are annotated; drawings, controls and exam answers stay intact.
 const inlineTerms={optic:'optic',LC:'lc',MMC:'mmc',CAS:'cas',fanout:'fanout',follower:'follower',ferrule:'ferrule',TX:'tx',RX:'rx',IR:'ir',dBm:'dbm',attenuation:'attenuation',polarity:'polarity',loopback:'loopback',VFL:'vfl',continuity:'continuity',misport:'misport',splice:'splice',local:'local-remote',remote:'local-remote',FIM:'fim',LLDP:'lldp'};
-const termPattern=new RegExp(`\\b(${Object.keys(inlineTerms).join('|')})\\b`,'gi');
+Object.assign(inlineTerms,{'óptico':'optic',ramal:'follower','férula':'ferrule','atenuación':'attenuation',polaridad:'polarity',continuidad:'continuity',empalme:'splice',remoto:'local-remote'});
+const termPattern=new RegExp(`(?<![\\p{L}\\p{N}_])(${Object.keys(inlineTerms).join('|')})(?![\\p{L}\\p{N}_])`,'giu');
+const paragraphSources=new WeakMap();
 const termIds=Object.fromEntries(Object.entries(inlineTerms).map(([word,id])=>[word.toLowerCase(),id]));
 export function linkLessonTerms(root) {
   root.querySelectorAll('.lesson-section').forEach(section=>{
     const seen=new Set(); let count=0;
     const paragraphs=[...section.children].filter(node=>node.matches('p:not(.picture-note):not(.topic-position)'));
     paragraphs.forEach(paragraph=>{
+      if(!paragraphSources.has(paragraph)) paragraphSources.set(paragraph,paragraph.innerHTML);
+      paragraph.dataset.i18nManaged='';
+      paragraph.innerHTML=paragraphSources.get(paragraph);
+      const sourceWalker=document.createTreeWalker(paragraph,NodeFilter.SHOW_TEXT);
+      while(sourceWalker.nextNode()) sourceWalker.currentNode.nodeValue=translate(sourceWalker.currentNode.nodeValue);
       const walker=document.createTreeWalker(paragraph,NodeFilter.SHOW_TEXT,{acceptNode:node=>node.parentElement.closest('a,button')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
       const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
       nodes.forEach(node=>{
         const fragment=document.createDocumentFragment(); let start=0;
         for(const match of node.textContent.matchAll(termPattern)) {
           const id=termIds[match[0].toLowerCase()];
-          if(count>=3 || seen.has(id)) continue;
+          if(count>=3 || seen.has(id) || (id==='ir'&&match[0]!=='IR')) continue;
           fragment.append(node.textContent.slice(start,match.index));
           const button=document.createElement('button'); button.type='button';button.className='reference-term';
-          button.dataset.reference=id; button.textContent=match[0];button.setAttribute('aria-label',`${match[0]}: definition`);button.setAttribute('aria-haspopup','dialog');
+          button.dataset.reference=id; button.textContent=match[0];button.setAttribute('aria-label',translate(`${match[0]}: definition`));button.setAttribute('aria-haspopup','dialog');
           fragment.append(button);start=match.index+match[0].length;seen.add(id);count++;
         }
         if(start) {fragment.append(node.textContent.slice(start));node.replaceWith(fragment);}
@@ -140,3 +149,5 @@ export function linkLessonTerms(root) {
     });
   });
 }
+
+document.addEventListener('fiber:language',()=>linkLessonTerms(document));

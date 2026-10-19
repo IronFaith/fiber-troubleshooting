@@ -4,7 +4,7 @@ import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPa
 import { rackIllustration } from './rack-visuals.mjs?v=7';
 import { mountCommunicationRoute } from './communication-route.mjs?v=2';
 import { mountCourse, learningEntry } from './course.mjs?v=8';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=6';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=7';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=12';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';

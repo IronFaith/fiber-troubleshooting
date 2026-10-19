@@ -1,3 +1,4 @@
+import {translateLines} from './locale.mjs?v=1';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels} from './troubleshoot-state.mjs?v=11';
 import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=12';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=5';
@@ -356,7 +357,7 @@ host.addEventListener('click',async event=>{
   if(action==='show-path') {centerMap();host.querySelector('.ts-map-card').scrollIntoView({block:'start',behavior:'instant'});host.querySelector('.ts-map').focus({preventScroll:true});return;}
   if(action==='copy') {
     const a=assessment(s);
-    const text=[s.simulated?'SIMULATED FIBER CASE':'FIBER OBSERVATIONS — entered manually',`Reach: ${pointName(s.reach)}; ${s.count} passives on path`,
+    const text=translateLines([s.simulated?'SIMULATED FIBER CASE':'FIBER OBSERVATIONS — entered manually',`Reach: ${pointName(s.reach)}; ${s.count} passives on path`,
       `Mapped ports: ${s.ports.slice(0,s.count).map((p,i)=>`CAS ${i+1} / ${p}`).join(', ')}`,
       ...(!s.simulated?[`Starting local TX: ${statusLabels[s.tx]}; RX: ${s.rx==='good'?'Within optic limits':statusLabels[s.rx]}`]:[`Fault: ${faults[s.fault.kind]}; section ${s.fault.at}`]),
       `Case: ${caseStatus(s).label}; round ${s.round}`,
@@ -365,7 +366,7 @@ host.addEventListener('click',async event=>{
       ...Object.entries(s.patches??{}).map(([point,p])=>`Diagram CAS ${point}: port ${p.port}; rear ${patchAt(s,Number(point)).rear?'connected':'unplugged'}, front ${patchAt(s,Number(point)).front?'connected':'unplugged'}`),
       ...(!s.simulated&&s.service!=='unknown'?[`Restored link: ${s.service==='good'?'Required local readings and link normal':'Still has a problem'}`]:[]),
       ...caseHistory(s).filter(e=>!e.current).map(e=>`EARLIER round ${e.round}: ${historyLabel(e)} — ${historyResult(e)}`),
-      a.title,a.why,...(a.scope?[a.scope]:[]),...(a.comparisonFinding?[a.comparisonFinding]:[]),`Next: ${a.next}`,'Remote and untested lanes remain unverified.'].join('\n');
+      a.title,a.why,...(a.scope?[a.scope]:[]),...(a.comparisonFinding?[a.comparisonFinding]:[]),`Next: ${a.next}`,'Remote and untested lanes remain unverified.'].join('\n'));
     try {await navigator.clipboard.writeText(text);target.textContent='Copied';}
     catch {const area=document.createElement('textarea');area.value=text;area.readOnly=true;area.setAttribute('aria-label','Findings to copy');host.querySelector('#ts-copy-fallback').replaceChildren(area);area.select();}
     return;

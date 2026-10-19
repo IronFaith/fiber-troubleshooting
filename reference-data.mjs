@@ -1,3 +1,4 @@
+import {translate,getLanguage} from './locale.mjs?v=1';
 const foa = ['FOA · fiber testing', 'https://www.thefoa.org/tech/ref/basic/test.html'];
 const units = ['FOA · dB and dBm', 'https://www.thefoa.org/tech/ref/testing/test/dB.html'];
 const jargon = ['FOA · illustrated terms', 'https://www.thefoa.org/tech/ref/basic/jargon.html'];
@@ -59,9 +60,9 @@ export const referenceTerms = [
 ];
 
 export const referenceGroups = [...new Set(referenceTerms.map(term => term.group))];
-const normalize = value => value.toLowerCase().replaceAll('−', '-').trim();
-export function searchReference(query = '', group = '') {
+const normalize = value => value.toLowerCase().normalize('NFD').replace(/\p{M}/gu,'').replaceAll('−', '-').trim();
+export function searchReference(query = '', group = '', language = getLanguage()) {
   const words = normalize(query).split(/\s+/).filter(Boolean);
   return referenceTerms.filter(term => (!group || term.group === group) && words.every(word =>
-    normalize([term.label, term.also, ...term.aliases].join(' ')).includes(word)));
+    normalize([term.label, term.also, ...term.aliases].flatMap(value=>[value,translate(value,language)]).join(' ')).includes(word)));
 }
