@@ -1,9 +1,9 @@
-import {translateLines} from './locale.mjs?v=11';
+import {translateLines} from './locale.mjs?v=12';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=16';
 import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=18';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
-import {simpleVfl} from './vfl-simple.mjs?v=12';
+import {simpleVfl} from './vfl-simple.mjs?v=13';
 import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
@@ -11,6 +11,7 @@ const guided=document.querySelector('#guided-check');
 const key='fiber-workbench-v1';
 let view='actual', cases={actual:createCase(),simulation:createCase(true)};
 let selectedTool=null,setupOpen=false,newCaseStarted=false;
+let deferPortRender=false,portRenderPending=false;
 const undo={actual:[],simulation:[]};
 let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -83,13 +84,14 @@ try {
   }
 } catch { /* A fresh case is usable without storage. */ }
 function save() { try {sessionStorage.setItem(key,JSON.stringify({...cases,view}));} catch { /* Optional. */ } }
-function update(actions, message='') {
+function update(actions, message='',renderNow=true) {
   selectedTool=null;
   newCaseStarted=false;
   undo[view].push(cases[view]);
   if(undo[view].length>30) undo[view].shift();
   cases[view]=actions.reduce(changeCase,cases[view]);
-  save(); render(true);
+  save();
+  if(renderNow) render(true); else portRenderPending=true;
   if(message) announce(message);
 }
 // Keep the tapped control at the same screen position when evidence above it
@@ -107,6 +109,23 @@ function chooseVflStrand(target) {
   const value=target.dataset.vflStrand;
   const surface=target.closest('.vfl-strands')?'.vfl-strands':target.closest('.vfl-mobile')?'.vfl-mobile':'.vfl-desktop';
   updateVflInPlace([{type:'strand',value}],'',`${surface} [data-vfl-strand="${value}"]`);
+}
+function changeVflPort(port,selector) {
+  const s=cases[view],point=traceStop(s)?.point;
+  if(point===undefined||isOptic(s,point)) return;
+  const patch=patchAt(s,point),side=traceFrom(s)<s.selected?'rear':'front';
+  if(!Number.isInteger(port)||port<1||port>32) {
+    host.querySelector('[data-field="vfl-patch-port"]').value=patch.port;
+    announce('Choose a port from 1 to 32.');
+    return;
+  }
+  if(port===patch.port) return;
+  const actions=[{type:'patch',point,side,connected:patch[side],port}],message='Patched port updated. Recheck this section.';
+  // A blur commits the typed port before the following click. Keep its target
+  // in the DOM until that click is handled, so changing CAS takes only one tap.
+  if(deferPortRender) {update(actions,message,false);return;}
+  updateVflInPlace(actions,message,selector);
+  if(host.querySelector(selector)?.disabled) host.querySelector('[data-field="vfl-patch-port"]')?.focus({preventScroll:true});
 }
 function announce(message) {
   document.querySelector('#workbench-status').textContent=message;
@@ -267,6 +286,7 @@ function mobilePoints(s) {
   return `<nav class="ts-point-picker" aria-label="View a point on the path">${Array.from({length:s.count+2},(_,point)=>button(`focus-point-${point}`,`<span>${point===0?'Optic':point===s.count+1?'Remote':`CAS ${point}`}</span><span>${mark(point)}</span>`,`aria-pressed="${point===focused}"`)).join('')}</nav>`;
 }
 function render(preservePosition=false) {
+  portRenderPending=false;
   const scrollLeft=host.querySelector('.ts-map')?.scrollLeft??0;
   const patchScroll=host.querySelector('.ts-patch-scroll')?.scrollLeft??0;
   toolDrag.reset();
@@ -313,17 +333,24 @@ function centerPatch() {
 }
 
 document.querySelectorAll('[data-workbench-view]').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.workbenchView;selectedTool=null;newCaseStarted=false;save();render();}));
+document.addEventListener('pointerdown',event=>{
+  const input=host.querySelector('[data-field="vfl-patch-port"]');
+  deferPortRender=Boolean(input&&document.activeElement===input&&event.target!==input);
+},true);
+function flushPortEdit() {deferPortRender=false;if(portRenderPending) render(true);}
+document.addEventListener('click',flushPortEdit);
+document.addEventListener('pointercancel',flushPortEdit);
 host.addEventListener('change',event=>{
   const field=event.target.dataset.field;
   if(!field) return;
   const value=event.target.value,s=cases[view];
   if(field.startsWith('identity-')) {update([{type:'identity',key:field.slice(9),value:event.target.checked}],'Path identity updated. Optical observations are unchanged.');host.querySelector(`[data-field="${field}"]`)?.focus({preventScroll:true});return;}
-  if(field==='vfl-patch-port') {const stop=traceStop(s);patchConnection({type:'patch',point:stop.point,side:traceFrom(s)<s.selected?'rear':'front',connected:Boolean(patchAt(s,stop.point)[traceFrom(s)<s.selected?'rear':'front']),port:Number(value)});host.querySelector('[data-field="vfl-patch-port"]')?.focus({preventScroll:true});return;}
+  if(field==='vfl-patch-port') {changeVflPort(Number(value),'[data-field="vfl-patch-port"]');return;}
   if(field==='patch-port') {patchConnection({type:'patch',point:Number(event.target.dataset.patchPoint),side:event.target.dataset.patchSide,connected:true,port:Number(value)});host.querySelector('[data-field="patch-port"]')?.focus({preventScroll:true});return;}
-  const action=field==='vfl-from'?{type:'trace',from:value,to:s.selected}:field==='vfl-to'?{type:'trace',from:traceFrom(s),to:value}:field==='ready'?{type:'ready',value:event.target.checked}:field==='point'?{type:'select',point:value}:
+  const action=field==='vfl-from'?{type:'trace',from:value,to:s.selected}:field==='ready'?{type:'ready',value:event.target.checked}:field==='point'?{type:'select',point:value}:
     ['tx','rx'].includes(field)?{type:'health',signal:field,value}:field.startsWith('fault-')?{type:'fault',value:{[field.slice(6)]:value}}:{type:field,value};
-  update([action],['count','reach','port'].includes(field)?'Path updated. Earlier checks kept in history; current findings cleared.':['vfl-from','vfl-to'].includes(field)?'Trace route updated. Confirm this setup before recording a result.':'');
-  if(['vfl-from','vfl-to'].includes(field)) centerMap(Number(value));
+  update([action],['count','reach','port'].includes(field)?'Path updated. Earlier checks kept in history; current findings cleared.':field==='vfl-from'?'Trace route updated. Confirm this setup before recording a result.':'');
+  if(field==='vfl-from') centerMap(Number(value));
   host.querySelector(`[data-field="${field}"]`)?.focus({preventScroll:true});
 });
 function choosePoint(point) {
@@ -337,6 +364,12 @@ function choosePoint(point) {
   host.querySelector(`[data-point="${point}"]`)?.focus({preventScroll:true});
 }
 host.addEventListener('keydown',event=>{
+  if(event.target.dataset.field==='vfl-patch-port'&&['Enter','Tab'].includes(event.key)) {
+    deferPortRender=false;
+    if(event.key==='Enter') event.preventDefault();
+    changeVflPort(Number(event.target.value),'[data-field="vfl-patch-port"]');
+    return;
+  }
   const strand=event.target.closest('[data-vfl-strand]');
   if(strand&&strand.tagName.toLowerCase()!=='button'&&['Enter',' '].includes(event.key)){event.preventDefault();chooseVflStrand(strand);return;}
   const patch=event.target.closest('[data-patch-point]');
@@ -345,6 +378,7 @@ host.addEventListener('keydown',event=>{
   if(point&&['Enter',' '].includes(event.key)){event.preventDefault();choosePoint(Number(point.dataset.point));}
 });
 host.addEventListener('click',async event=>{
+  deferPortRender=false;
   const strand=event.target.closest('[data-vfl-strand]');
   if(strand){chooseVflStrand(strand);return;}
   const patch=event.target.closest('[data-patch-connected]');
@@ -354,6 +388,16 @@ host.addEventListener('click',async event=>{
   const target=event.target.closest('[data-action]');
   if(!target) return;
   const action=target.dataset.action,s=cases[view];
+  if(action.startsWith('vfl-view-')) {
+    const point=Number(action.slice(9));
+    if(point!==s.selected) updateVflInPlace([{type:'trace',from:traceFrom(s),to:point}],'Viewing point changed. Confirm the setup, then record what you see.',`[data-action="${action}"]`);
+    return;
+  }
+  if(action.startsWith('vfl-port-')) {
+    const point=traceStop(s).point,port=patchAt(s,point).port;
+    changeVflPort(action==='vfl-port-fim'?s.ports[point-1]:port+(action==='vfl-port-plus'?1:-1),action==='vfl-port-fim'?'[data-field="vfl-patch-port"]':`[data-action="${action}"]`);
+    return;
+  }
   if(action.startsWith('focus-point-')) {
     const point=Number(action.slice(12));
     if(selectedTool) {placeTool(selectedTool,point,true);return;}

@@ -2565,4 +2565,12 @@ export const arabicMessages = [
   ["Dim VFL light is a visual observation, not a loss measurement.","الضوء الخافت من VFL ملاحظة بصرية، وليس قياسًا للفقد."],
   ["Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.","أبقِ VFL على هذا الليف من LC. قارن الضوء عند رأس MMC الوارد المفصول بنتيجة الفحص عبر CAS؛ وافحص نقطة التوصيل إذا تغير الوهج عندها."],
   ["Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.","تحقق من VFL وإحكام توصيل LC باستخدام وصلة مرجعية سليمة. افحص نهايات الليف المحدد في المخطط وانحناءاته، ثم قِس الفقد باختبار الفقد البصري."],
+  ["Open here","مفتوح هنا"],
+  ["CAS {0} · Patched port","CAS {0} · المنفذ الموصول"],
+  ["Previous port","المنفذ السابق"],
+  ["Next port","المنفذ التالي"],
+  ["FIM · Port {0}","FIM · المنفذ {0}"],
+  ["Use FIM port {0}","استخدم منفذ FIM {0}"],
+  ["Choose a port from 1 to 32.","اختر منفذًا من 1 إلى 32."],
+  ["Patched port updated. Recheck this section.","تم تحديث المنفذ الموصول. أعد فحص هذا المقطع."],
 ];
