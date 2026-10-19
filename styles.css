@@ -1568,3 +1568,25 @@ body:has(.reference-dialog[open]) { overflow:hidden; }
 
 .ts-history-review { border:0; border-bottom:1px dotted #91abbc; padding:0 0 3px; background:transparent; text-align:left; color:#235b79; font:inherit; cursor:pointer; }
 .ts-history-review:hover { border-bottom-style:solid; }
+
+/* Recorded coverage remains on the connected path after Normalize. */
+.ts-coverage-passed .ts-node-card { fill:#edf7f2; stroke:#74a48c; }
+.ts-coverage-suspect .ts-node-card { fill:#fff5e7; stroke:#c48a46; }
+.ts-selected.ts-coverage-passed .ts-node-card,.ts-selected.ts-coverage-suspect .ts-node-card { stroke-width:3; }
+.ts-coverage-underlay { fill:none; stroke:#c2e3f4; stroke-width:9; stroke-linecap:round; stroke-linejoin:round; }
+.ts-confirmed-route .learn-signal { stroke-width:4; }
+.ts-coverage-lane { fill:none; stroke-width:6; stroke-linecap:round; }
+.ts-coverage-lane.loop.tx { stroke:#2583ce; }
+.ts-coverage-lane.loop.rx { stroke:#16816f; }
+.ts-coverage-lane.vfl { stroke:#bd4a61; stroke-width:4; stroke-dasharray:3 7; }
+.ts-coverage-lane.suspect { stroke:#c48a46; stroke-dasharray:8 5; }
+.ts-coverage-issue { fill:#fff1d8; stroke:#a76b24; stroke-width:1.5; }
+.ts-coverage-mark { fill:#885315; font-size:13px; font-weight:750; text-anchor:middle; }
+.ts-coverage-badge { fill:#edf1f4; }
+.ts-coverage-badge.loop { fill:#dbeee4; }
+.ts-coverage-badge.vfl { fill:#fbe3e7; }
+.ts-coverage-badge.suspect { fill:#ffe2b8; stroke:#be8140; }
+
+@media(min-width:701px) { .ts-map-card { scroll-margin-top:190px; } }
+
+.ts-map .ts-confirmed-route,.ts-map .light-source,.ts-map .ts-coverage-lane,.ts-map .ts-coverage-issue,.ts-map .ts-coverage-mark,.ts-map .ts-route { pointer-events:none; }

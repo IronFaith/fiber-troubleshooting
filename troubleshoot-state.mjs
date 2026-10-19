@@ -489,3 +489,46 @@ export function caseStatus(s) {
   if(s.started||s.tool!=='link') return {label:'Case active · waiting for a result',stage:1,count};
   return {label:'Ready · place a tool to begin',stage:0,count};
 }
+
+
+// Coverage is evidence from this case, not a live power reading. A loop checks
+// the illustrated pair; VFL checks only its recorded strand and route.
+export function pathCoverage(s) {
+  const passes=Object.entries(s.loops).filter(([,r])=>r==='pass').map(([p])=>Number(p));
+  const lastLoopPass=passes.length?Math.max(...passes):-1;
+  const points=Array.from({length:s.count+1},(_,point)=>({point,loop:point<=lastLoopPass?'pass':'unknown',head:{},port:{},issue:false}));
+  const spans=Array.from({length:s.count},(_,index)=>({point:index+1,lanes:Object.fromEntries(['tx','rx'].map(strand=>[strand,{loop:index+1<=lastLoopPass,vfl:false,issue:false,status:'unknown'}]))}));
+  const traces=Object.entries(s.traces).map(([key,result])=>({...parseTraceKey(key),result}));
+  const mark=(from,to,strand,field)=>{
+    for(const span of spans) if(span.point>Math.min(from,to)&&span.point<=Math.max(from,to)) span.lanes[strand][field]=true;
+  };
+  for(const r of traces) {
+    if(points[r.to]) points[r.to][r.head?'head':'port'][r.strand]=r.result;
+    if(r.result==='seen') mark(r.from,r.to,r.strand,'vfl');
+  }
+  for(const [point,result] of Object.entries(s.loops)) if(result!=='pass') {
+    const end=Number(point);
+    points[end].issue=true;
+    for(const strand of ['tx','rx']) mark(Math.max(0,lastLoopPass),end,strand,'issue');
+  }
+  for(const r of traces.filter(r=>r.result!=='seen')) {
+    const distance=entry=>Math.abs(entry.to-entry.from)*2-(entry.head?1:0);
+    const previous=traces.filter(t=>t.result==='seen'&&t.from===r.from&&t.strand===r.strand&&
+      Math.sign(t.to-t.from)===Math.sign(r.to-r.from)&&distance(t)<distance(r))
+      .sort((a,b)=>distance(b)-distance(a))[0];
+    mark(previous?.to??r.from,r.to,r.strand,'issue');
+    if(r.to>0&&points[r.to]) points[r.to].issue=true;
+  }
+  for(const span of spans) for(const lane of Object.values(span.lanes)) {
+    lane.status=lane.issue?'suspect':lane.loop?'loop':lane.vfl?'vfl':'unknown';
+  }
+  const optic=s.loops[0]&&s.loops[0]!=='pass'?'suspect':lastLoopPass>=0?'pass':'unknown';
+  let txThrough=0;
+  if(optic==='pass'&&connectionAt(s,0)==='plugged') {
+    for(const span of spans) {
+      if(span.lanes.tx.status!=='loop'||connectionAt(s,span.point)!=='plugged'||points[span.point].port.tx&&points[span.point].port.tx!=='seen') break;
+      txThrough=span.point;
+    }
+  }
+  return {optic,lastLoopPass,points,spans,txThrough};
+}

@@ -1,8 +1,8 @@
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions} from './troubleshoot-state.mjs?v=9';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=10';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage} from './troubleshoot-state.mjs?v=10';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=11';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=5';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=2';
-import {simpleVfl} from './vfl-simple.mjs?v=3';
+import {simpleVfl} from './vfl-simple.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -106,7 +106,9 @@ function removeTool() {
   update([{type:'remove'}],'Tool removed; connectors left unplugged. Results kept.');
 }
 function normalizeSetup() {
-  update([{type:'normalize'}],'Setup normalized in the diagram. Recheck actual health.');
+  update([{type:'normalize'}],'Setup normalized. Your recorded coverage stays on the path.');
+  centerMap(0);
+  host.querySelector('.ts-map-card')?.scrollIntoView({block:'start',behavior:'instant'});
 }
 const toolDrag=mountToolDrag(host,{select:selectTool,activate:kind=>kind==='vfl'?placeTool('vfl',0,true):selectTool(kind),place:placeTool,remove:removeTool,valid:(kind,point)=>canPlaceTool(cases[view],kind,point),announce,getSelected:()=>selectedTool});
 function patchConnection(action) {
@@ -212,7 +214,9 @@ function mobileActions(s) {
   return `<nav class="ts-mobile-actions" aria-label="Current test actions"><span>${context}</span><div>${button('view-test','View path')}${button(action,label,'class="ts-mobile-primary"')}</div></nav>`;
 }
 function mobilePoints(s) {
-  return `<nav class="ts-point-picker" aria-label="View a point on the path">${Array.from({length:s.count+2},(_,point)=>button(`focus-point-${point}`,point===0?'Optic':point===s.count+1?'Remote':`CAS ${point}`,`aria-pressed="${point===s.selected}"`)).join('')}</nav>`;
+  const coverage=pathCoverage(s),focused=s.tool==='link'?0:s.selected;
+  const mark=point=>coverage.points[point]?.issue?' !':coverage.points[point]?.loop==='pass'?' ✓':'';
+  return `<nav class="ts-point-picker" aria-label="View a point on the path">${Array.from({length:s.count+2},(_,point)=>button(`focus-point-${point}`,(point===0?'Optic':point===s.count+1?'Remote':`CAS ${point}`)+mark(point),`aria-pressed="${point===focused}"`)).join('')}</nav>`;
 }
 function render(preservePosition=false) {
   const scrollLeft=host.querySelector('.ts-map')?.scrollLeft??0;
@@ -228,14 +232,14 @@ function render(preservePosition=false) {
     host.innerHTML=`${setup(s)}${caseBar(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${advice(s)}${results(s)}${mobileActions(s)}`;
     return;
   }
-  host.innerHTML=`${setup(s)}${caseBar(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normal patching · health not confirmed':`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
+  host.innerHTML=`${setup(s)}${caseBar(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
     ${mobilePoints(s)}<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
-    <div class="ts-legend"><span>↔ Scroll to follow the path</span><span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span></div>
+    <div class="ts-legend"><span>↔ Scroll to follow the path</span>${s.tool==='link'&&!s.simulated?'<span class="ts-key-ir">Blue / teal: loop checked</span><span class="ts-key-red">Red: VFL continuity recorded</span><span>Amber: investigate · dashed: untested</span><span>A = TX strand · B = RX strand · one pair shown</span>':'<span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span>'}</div>
     </section>
     <div class="ts-work-grid">${controls(s)}${advice(s)}</div></div>${results(s)}${mobileActions(s)}`;
   if(preservePosition) host.querySelector('.ts-map').scrollLeft=scrollLeft;
   else centerMap();
-  if(window.matchMedia('(max-width:700px)').matches) centerMap();
+  if(window.matchMedia('(max-width:700px)').matches) centerMap(s.tool==='link'?0:s.selected);
   if(preservePosition&&host.querySelector('.ts-patch-scroll'))host.querySelector('.ts-patch-scroll').scrollLeft=patchScroll;
 }
 
@@ -310,7 +314,7 @@ host.addEventListener('click',async event=>{
     return;
   }
   if(action==='view-test') {
-    centerMap();
+    centerMap(s.tool==='link'?0:s.selected);
     const target=host.querySelector('.vfl-view, .ts-map-card');
     target?.scrollIntoView({block:'start',behavior:'instant'});
     return;

@@ -1,6 +1,6 @@
 import {cassetteFront} from './loop-visuals.mjs?v=3';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop} from './troubleshoot-state.mjs?v=9';
+import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage} from './troubleshoot-state.mjs?v=10';
 
 // At the observation cassette, open the onward connection, not the MMC
 // carrying light from the source. The selected port is the viewing face.
@@ -16,7 +16,7 @@ export function vflEndpoint(s,{preview=false}={}) {
     ...(preview?{mode:s.simulated?'simulation':result?'observation':'expected',outputStrand:result==='swapped'?(s.strand==='tx'?'rx':'tx'):s.strand}:{})};
 }
 
-function opticFace(mode='plugged',strand='tx',trace,receiving=false) {
+function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=null) {
   const loop=mode==='loop', plugged=mode==='plugged';
   const legs=[81,127].map((y,i)=>{
     const tip=plugged?168:52, boot=tip-40, bend=plugged?22+i*12:4+i*12, bottom=184+i*18;
@@ -26,6 +26,7 @@ function opticFace(mode='plugged',strand='tx',trace,receiving=false) {
     const signal=receiving?`M292 ${bottom} H${bend+12} Q${bend} ${bottom} ${bend} ${bottom-12} V${y+12} Q${bend} ${y} ${bend+12} ${y} H63`:`M63 ${y} H${boot} ${cable.slice(cable.indexOf(' H')+1)}`;
     return `<path class="loop-jacket" d="${cable}"/><path class="loop-cord" d="${cable}"/>
       <g class="ts-lc-leg" data-connection="${plugged?'seated':'unplugged'}"><rect class="hardware-boot" x="${boot}" y="${y-6}" width="12" height="12" rx="2"/><rect class="hardware-plug" x="${tip-29}" y="${y-9}" width="29" height="18" rx="2"/>${!plugged?`<rect class="hardware-metal" x="${tip}" y="${y-4}" width="11" height="8"/>`:''}<path class="hardware-grip" d="M${tip-23} ${y-5} v10 m6 -10 v10"/></g>
+      ${coverage?.txThrough>0&&plugged&&i===0?lightFlow(`M${tip} ${y} H${boot} ${cable.slice(cable.indexOf(' H')+1)}`):''}
       ${lit?lightFlow(signal,'red')+(receiving?`<circle class="ts-red-dot" cx="63" cy="${y}" r="5"/>`:''):''}`;
   }).join('');
   const vflY=strand==='tx'?81:127;
@@ -37,7 +38,7 @@ function opticFace(mode='plugged',strand='tx',trace,receiving=false) {
       <text class="hardware-label hardware-center hardware-small" x="${x}" y="181">${i ? '5' : '1'}</text>`).join('')}
     ${loop ? `<path class="loop-jacket" d="M88 81 H29 Q9 81 9 104 Q9 127 29 127 H88"/><path class="loop-cord" d="M88 81 H29 Q9 81 9 104 Q9 127 29 127 H88"/>
       ${[81,127].map(y => `<rect class="hardware-plug" x="59" y="${y-9}" width="29" height="18" rx="2"/><rect class="hardware-boot" x="48" y="${y-6}" width="12" height="12" rx="2"/>`).join('')}` : ''}
-    </g>${legs}
+    </g>${legs}${coverage?.optic==='pass'&&plugged?lightSource(168,81):''}
     ${mode==='vfl'?`<g data-mounted-tool="vfl" data-point="0"><rect class="hardware-metal" x="62" y="${vflY-6}" width="10" height="12"/><rect class="ts-vfl" x="70" y="${vflY-14}" width="51" height="28" rx="5"/><text class="ts-vfl-text" x="95" y="${vflY+5}">VFL</text>${lightSource(63,vflY,'red')}<rect class="ts-tool-handle" x="28" y="${vflY-49}" width="98" height="98" rx="8"><title>VFL attached to the unplugged LC leg. Drag to move or remove.</title></rect></g>`:''}
     </g>`;
 }
@@ -60,10 +61,60 @@ function passiveFace(s,point,mode) {
     (mode==='plugged'?'':`<g class="hardware-art ts-parked-head"><path class="loop-jacket" d="M1 189 H19"/><path class="loop-cord" d="M1 189 H19"/><rect class="hardware-plug" x="19" y="180" width="43" height="18" rx="3"/><rect class="hardware-metal" x="62" y="184" width="10" height="10"/><text class="hardware-label hardware-small" x="81" y="194">Head unplugged</text></g>`);
 }
 
+function recordedNodeCaption(s,coverage,point) {
+  const p=coverage.points[point];
+  if(!p) return 'Remote · unverified';
+  if(s.loops[point]&&s.loops[point]!=='pass') return `Loop here: ${loopLabels[s.loops[point]]}`;
+  if(p.issue) return 'Recorded mismatch · check connection';
+  if(p.loop==='pass') return point===0?'✓ Tested optic pair passed':'✓ Loop passed to here';
+  const check=Object.keys(p.port).length?p.port:p.head;
+  if(Object.keys(check).length) return `VFL ${point===0?'at LC':Object.keys(p.port).length?'through':'to head'} · A ${check.tx==='seen'?'✓':'—'} · B ${check.rx==='seen'?'✓':'—'}`;
+  return 'Not tested yet';
+}
+function coverageLabel(lane,strand) {
+  const label=strand==='tx'?'A':'B';
+  return `${label} · ${lane.status==='suspect'?'Investigate':lane.status==='loop'?lane.vfl?'Loop + VFL passed':'Loop passed':lane.status==='vfl'?'VFL continuity':'Not checked'}`;
+}
+// The overlay follows the LC leg into each mapped cassette port. The gray
+// continuation is still drawn, so the end of the confirmed route is not a
+// claim that light physically stops there. Only local TX is animated.
+function normalizedTxPath(s,centers,through,onward=false) {
+  const sourceX=centers[0]-107+292*214/300,sourceY=68+184*214/300;
+  let path=`M${sourceX} ${sourceY} V262 Q${sourceX} 274 ${sourceX+12} 274`;
+  for(let point=1;point<=through;point++) {
+    const cx=centers[point],port=s.ports[point-1],px=cx-121+(31.5+((port-1)%16)*19.8)*242/360,py=81+((port<=16?59:137)+12)*140/208;
+    path+=` H${cx-134} Q${cx-122} 274 ${cx-122} 262 V217 Q${cx-122} 205 ${cx-110} 205 H${px-12} Q${px} 205 ${px} 193 V${py}`;
+    if(point<through||onward) path+=` H${cx+110} Q${cx+122} ${py} ${cx+122} ${py+12} V262 Q${cx+122} 274 ${cx+134} 274`;
+  }
+  if(onward) path+=` H${centers.at(-1)}`;
+  return path;
+}
+function coverageOverlay(s,coverage,centers) {
+  let drawing='';
+  for(const span of coverage.spans) for(const strand of ['tx','rx']) {
+    const lane=span.lanes[strand],y=strand==='tx'?274:334;
+    if(lane.status==='unknown'||strand==='tx'&&lane.status==='loop'&&span.point<=coverage.txThrough) continue;
+    drawing+=`<g role="img" aria-label="${pointName(span.point-1)} to CAS ${span.point}, ${coverageLabel(lane,strand)}"><path class="ts-coverage-lane ${lane.status} ${strand}" d="M${centers[span.point-1]} ${y} H${centers[span.point]}"/></g>`;
+    if(lane.status==='suspect') {
+      const x=(centers[span.point-1]+centers[span.point])/2;
+      drawing+=`<circle class="ts-coverage-issue" cx="${x}" cy="${y}" r="11"/><text class="ts-coverage-mark" x="${x}" y="${y+4}">!</text>`;
+    }
+  }
+  if(coverage.txThrough>0) {
+    const path=normalizedTxPath(s,centers,coverage.txThrough);
+    drawing+=`<g class="ts-confirmed-route" role="img" aria-label="Recorded loop coverage: local TX through CAS ${coverage.txThrough}. Onward path unverified."><path class="ts-coverage-underlay" d="${path}"/>${lightFlow(path)}</g>`;
+    for(let p=1;p<=coverage.txThrough;p++) {
+      const port=s.ports[p-1],cx=centers[p]-121+(31.5+((port-1)%16)*19.8)*242/360,cy=81+((port<=16?59:137)+12)*140/208;
+      drawing+=lightSource(cx,cy);
+    }
+  }
+  return drawing;
+}
+
 export function workbenchDiagram(s) {
-  const a = assessment(s), loopAssessment=assessment({...s,tool:'link',service:'unknown',disconnected:[]}), centers = Array.from({length:s.count+2},(_,i) => 135+i*290);
+  const coverage=pathCoverage(s), centers = Array.from({length:s.count+2},(_,i) => 135+i*290);
   const width = centers.at(-1)+135;
-  const looping = s.tool === 'loop', tracing = s.tool === 'vfl';
+  const looping = s.tool === 'loop', tracing = s.tool === 'vfl', normalized=!s.simulated&&s.tool==='link';
   const loop = s.loops[s.selected];
   const from=traceFrom(s),trace = s.traces[traceKey(s)];
   const endpoint=vflEndpoint(s);
@@ -74,19 +125,19 @@ export function workbenchDiagram(s) {
     const mode=connectionAt(s,i), isLoop=mode==='loop';
     const handleX=i===0?cx-50:cx-121+(31.5+((s.ports[i-1]-1)%16)*19.8)*242/360-32;
     const handleY=i===0?117:81+(s.ports[i-1]<=16?59:137)*140/208-7;
-    drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${tracing&&from===i?' ts-vfl-source':''}${!accessible ? ' ts-inaccessible' : ''}${s.loops[i]?' ts-observed-'+s.loops[i]:''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="${tracing&&i!==from?'Check light at':'Select'} ${i===0&&tracing?'optic-side LC leg':pointName(i)}${i ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
+    drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${tracing&&from===i?' ts-vfl-source':''}${!accessible ? ' ts-inaccessible' : ''}${s.loops[i]?' ts-observed-'+s.loops[i]:''}${coverage.points[i]?.issue?' ts-coverage-suspect':coverage.points[i]?.loop==='pass'?' ts-coverage-passed':''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="${tracing&&i!==from?'Check light at':'Select'} ${i===0&&tracing?'optic-side LC leg':pointName(i)}${i ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
       <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="218" rx="12"/>
       <text class="ts-node-title" x="${cx}" y="59">${remote ? 'Remote device' : i===0 ? 'Local optic' : `CAS ${i} · Port ${patchAt(s,i).port}`}</text>
-      ${i===0 || remote ? `<svg x="${cx-107}" y="68" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,tracing&&i===0&&s.selected===0)}</svg>` :
+      ${i===0 || remote ? `<svg x="${cx-107}" y="68" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,tracing&&i===0&&s.selected===0,normalized&&i===0?coverage:null)}</svg>` :
         `<svg x="${cx-121}" y="81" width="242" height="140" viewBox="0 0 360 208">${passiveFace(s,i,mode)}</svg>`}
       ${isLoop?`<rect class="ts-tool-handle" data-mounted-tool="${i===0?'lc':'mmc'}" x="${handleX}" y="${handleY}" width="72" height="72" rx="9"><title>Drag this loop to move it, or return it to the tray</title></rect>`:''}
       <text class="ts-connection-label ${mode==='plugged'?'':'open'}" x="${cx}" y="230">${endpoint?.point===i?endpoint.kind==='head'?'MMC head unplugged · CAS bypassed':endpoint.closed?'Both sides patched · path continues':`${endpoint.face==='front'?'Front':'Rear'} port open · incoming MMC seated`:mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?i===0?'VFL on LC leg · optic empty':'VFL on unplugged fiber':mode==='unplugged'?i===0?'LC legs unplugged · optic empty':'MMC unplugged · path open':i===0||remote?'LC legs plugged into optic':'MMC head plugged into CAS'}</text>
-      <text class="ts-node-caption" x="${cx}" y="247">${tracing&&i===from?'VFL source':tracing&&i===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):remote ? 'Remote · unverified' : !accessible ? 'Outside your reach' : s.loops[i]?`Earlier loop: ${loopLabels[s.loops[i]]}`:isLoop?'Enter your loop result':'Not tested yet'}</text>
+      <text class="ts-node-caption" x="${cx}" y="247">${tracing&&i===from?'VFL source':tracing&&i===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):remote ? 'Remote · unverified' : !accessible ? 'Outside your reach' : isLoop&&!s.loops[i]?'Enter your loop result':recordedNodeCaption(s,coverage,i)}</text>
     </g>`;
   }
   drawing += `<text class="ts-lane-label" x="10" y="278">TX →</text><text class="ts-lane-label" x="10" y="338">RX ←</text>
     <text class="ts-lane-label" x="${width-64}" y="278">→ RX</text><text class="ts-lane-label" x="${width-64}" y="338">← TX</text>
-    <path class="ts-route" d="M${start} 274 H${end} M${end} 334 H${start}"/>`;
+    <path class="ts-route" d="${normalized?normalizedTxPath(s,centers,s.count,true):`M${start} 274 H${end}`} M${end} 334 H${start}"/>`;
   for (let i=0;i<centers.length;i++) {
     drawing += `<path class="ts-drop" d="M${centers[i]} 253 V263"/><circle class="ts-junction" cx="${centers[i]}" cy="274" r="5"/><circle class="ts-junction" cx="${centers[i]}" cy="334" r="5"/>`;
   }
@@ -122,7 +173,8 @@ export function workbenchDiagram(s) {
     if (trace && trace!=='dark'&&!endpoint?.blocked&&!endpoint?.closed) drawing += lightFlow(path,'red')+(s.selected===0&&trace!=='wrong'||endpoint&&trace!=='wrong'?'':`<circle class="ts-red-dot" cx="${x}" cy="${targetY}" r="7"/>`);
     if (trace==='wrong') drawing += `<text class="ts-route-note" x="${x+12}" y="308">Other port</text>`;
   } else {
-    drawing += `<text class="ts-result-label" x="${width/2}" y="309">${s.disconnected?.length?'Connectors unplugged · Normalize':s.simulated?'Simulated service path · fault position is illustrative':'Normal patching · health still needs checking'}</text>`;
+    drawing += `<text class="ts-result-label" x="${width/2}" y="309">${s.disconnected?.length?'Connectors unplugged · Normalize':s.simulated?'Simulated service path · fault position is illustrative':'Recorded coverage · live link not implied'}</text>`;
+    if(normalized) drawing+=coverageOverlay(s,coverage,centers);
     if(s.simulated && !s.disconnected?.length) {
       const f=s.fault,r=simulatedReadings(s),fx=f.at===0?start:(centers[f.at-1]+centers[f.at])/2;
       for(const strand of ['tx','rx']) {
@@ -142,17 +194,13 @@ export function workbenchDiagram(s) {
   }
   for (let i=1;i<=s.count;i++) {
     const cx=(centers[i-1]+centers[i])/2;
-    const boundary=a.tone==='suspect'&&a.from!==null?a:loopAssessment;
-    const suspect=boundary.from!==null && i>boundary.from && i<=boundary.to && boundary.tone==='suspect';
-    const passed=i<=loopAssessment.lastPass;
-    const traced=Object.entries(s.traces).some(([key,result])=>{const route=parseTraceKey(key);return result==='seen'&&route&&i>Math.min(route.from,route.to)&&i<=Math.max(route.from,route.to);});
-    drawing += `<g class="ts-fiber-target" ${i<=s.reach?`data-span="${i}" role="button" tabindex="0" aria-label="VFL on fiber from ${pointName(i-1)} to CAS ${i}"`:''}><rect class="ts-fiber-hit" x="${cx-127}" y="382" width="254" height="69" rx="8"/><text class="ts-span-name" x="${cx}" y="405">${i===1 ? 'LC leg → MMC head' : `CAS ${i-1} → CAS ${i}`}</text>
-      <rect class="ts-span-badge ${suspect ? 'suspect' : passed ? 'pass' : traced ? 'traced' : ''}" x="${cx-67}" y="416" width="134" height="26" rx="13"/>
-      <text class="ts-span-status" x="${cx}" y="434">${suspect ? 'Investigate here' : passed ? 'Loop passed' : traced ? 'Traced only' : 'Unverified'}</text></g>`;
+    const span=coverage.spans[i-1];
+    drawing += `<g class="ts-fiber-target" ${i<=s.reach?`data-span="${i}" role="button" tabindex="0" aria-label="VFL on fiber from ${pointName(i-1)} to CAS ${i}"`:''}><rect class="ts-fiber-hit" x="${cx-127}" y="382" width="254" height="87" rx="8"/><text class="ts-span-name" x="${cx}" y="401">${i===1 ? 'LC leg → MMC head' : `CAS ${i-1} → CAS ${i}`}</text>
+      ${['tx','rx'].map((strand,index)=>`<rect class="ts-coverage-badge ${span.lanes[strand].status}" x="${cx-111}" y="${410+index*27}" width="222" height="24" rx="6"/><text class="ts-span-status" x="${cx}" y="${426+index*27}">${coverageLabel(span.lanes[strand],strand)}</text>`).join('')}</g>`;
   }
   if (s.simulated && s.fault.kind!=='none') {
     const at = s.fault.at, fx=at===0 ? centers[0] : (centers[at-1]+centers[at])/2;
     drawing += `<path class="ts-fault-pointer" d="M${fx} 16 v12"/><text class="ts-fault-label" x="${fx}" y="12">Simulated fault ${at===0 ? 'at optic' : 'in this section'} ↓</text>`;
   }
-  return `<svg viewBox="0 0 ${width} 456" style="width:${width}px" role="group" aria-label="Interactive fiber path. TX sends along one strand; RX receives along the other. Choose a local optic or accessible cassette.">${drawing}</svg>`;
+  return `<svg viewBox="0 0 ${width} 476" style="width:${width}px" role="group" aria-label="Interactive fiber path. TX sends along one strand; RX receives along the other. Choose a local optic or accessible cassette.">${drawing}</svg>`;
 }
