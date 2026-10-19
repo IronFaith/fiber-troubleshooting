@@ -9696,4 +9696,7 @@ export const frenchMessages = [
   ["Recheck observations","Revérifier les observations"],
   ["The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.","La fibre entrante transmet la lumière visible jusqu’à la tête MMC débranchée. L’absence de lumière à travers le CAS met en cause le contact de cette voie : contamination, dommage, alignement ou enclenchement."],
   ["{0} passes visible light; {1} does not. The MMC ferrule holds separate fibers. Investigate {1}’s fiber and its end-face contacts; {0} passing does not clear them.","{0} transmet la lumière visible ; {1} ne la transmet pas. La férule MMC maintient des fibres distinctes. Examinez la fibre de {1} et ses contacts d’extrémité ; le passage de lumière sur {0} ne les valide pas."],
+  ["Does light reach the expected channel?","La lumière atteint-elle la voie attendue ?"],
+  ["Light on another channel or port","Lumière sur une autre voie ou un autre port"],
+  ["Other channel ({0})","Autre voie ({0})"],
 ];

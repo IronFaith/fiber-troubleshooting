@@ -1,9 +1,9 @@
-import {translateLines} from './locale.mjs?v=9';
+import {translateLines} from './locale.mjs?v=10';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=15';
 import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=17';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
-import {simpleVfl} from './vfl-simple.mjs?v=10';
+import {simpleVfl} from './vfl-simple.mjs?v=11';
 import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');

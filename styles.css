@@ -1419,6 +1419,11 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .vfl-observe-buttons { display:flex; gap:8px; }
 .vfl-observe button[aria-pressed=true] { color:white; background:#245b80; border-color:#245b80; }
 .vfl-observe p,.vfl-fine { font-size:12px; color:#657d8c; line-height:1.55; margin:9px 0 0; }
+.vfl-observe .vfl-testing { margin:0 0 12px; color:#345870; }
+.vfl-testing b { color:#9c2945; }
+.vfl-other-light { margin-top:10px; font-size:12px; color:#456174; }
+.vfl-other-light summary { cursor:pointer; padding:12px 0; min-height:44px; }
+.vfl-other-light .vfl-observe-buttons { padding:0 0 6px; }
 .vfl-hint { font-size:13px; color:#456174; line-height:1.6; margin:12px 0; }
 .vfl-checks { width:100%; border-collapse:collapse; font-size:13px; margin:18px 0 0; color:#345870; }
 .vfl-checks caption { text-align:left; font-weight:700; margin-bottom:7px; }

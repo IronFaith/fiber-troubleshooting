@@ -2556,4 +2556,7 @@ export const spanishMessages = [
   ["Recheck observations","Revisar las observaciones"],
   ["The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.","La fibra entrante lleva luz visible al cabezal MMC suelto. Si no hay luz al pasar por el CAS, el contacto de acoplamiento de este canal es sospechoso: suciedad, daño, alineación o asentamiento."],
   ["{0} passes visible light; {1} does not. The MMC ferrule holds separate fibers. Investigate {1}’s fiber and its end-face contacts; {0} passing does not clear them.","{0} deja pasar luz visible; {1} no. La férula MMC sostiene fibras separadas. Investiga la fibra de {1} y los contactos de sus caras terminales; que {0} pase luz no los descarta."],
+  ["Does light reach the expected channel?","¿La luz llega al canal esperado?"],
+  ["Light on another channel or port","Luz en otro canal o puerto"],
+  ["Other channel ({0})","Otro canal ({0})"],
 ];

@@ -9,6 +9,7 @@ test('new-case actions and recorded VFL path labels translate in all learner lan
     'Recorded VFL path','Recorded checks, not live light.','Viewing here','Loose MMC only',
     'Red: confirmed light','Amber: investigate','Dashed: not checked',
     'Fiber / contacts suspect','MMC / CAS contact suspect','Recheck observations',
+    'Does light reach the expected channel?','Light on another channel or port','Other channel (A)','Other channel (B)',
     'The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.',
     'A passes visible light; B does not. The MMC ferrule holds separate fibers. Investigate B’s fiber and its end-face contacts; A passing does not clear them.',
     'B passes visible light; A does not. The MMC ferrule holds separate fibers. Investigate A’s fiber and its end-face contacts; B passing does not clear them.']) {
