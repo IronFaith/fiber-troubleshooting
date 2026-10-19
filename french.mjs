@@ -9713,4 +9713,5 @@ export const frenchMessages = [
   ["Use FIM port {0}","Utiliser le port FIM {0}"],
   ["Choose a port from 1 to 32.","Choisissez un port de 1 à 32."],
   ["Patched port updated. Recheck this section.","Port raccordé mis à jour. Revérifiez cette section."],
+  ["Tap an LC leg, then mark the light at the viewing point.", "Touchez une branche LC, puis indiquez la lumière au point d’observation."],
 ];

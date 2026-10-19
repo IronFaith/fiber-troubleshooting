@@ -1,9 +1,9 @@
-import {translateLines} from './locale.mjs?v=12';
+import {translateLines} from './locale.mjs?v=13';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=16';
 import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=18';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
-import {simpleVfl} from './vfl-simple.mjs?v=13';
+import {simpleVfl} from './vfl-simple.mjs?v=14';
 import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
@@ -107,7 +107,7 @@ function updateVflInPlace(actions,message,selector) {
 }
 function chooseVflStrand(target) {
   const value=target.dataset.vflStrand;
-  const surface=target.closest('.vfl-strands')?'.vfl-strands':target.closest('.vfl-mobile')?'.vfl-mobile':'.vfl-desktop';
+  const surface=target.closest('.vfl-mobile')?'.vfl-mobile':'.vfl-desktop';
   updateVflInPlace([{type:'strand',value}],'',`${surface} [data-vfl-strand="${value}"]`);
 }
 function changeVflPort(port,selector) {
@@ -274,6 +274,7 @@ function results(s) {
     <p class="ts-note">Saved in this browser tab · up to 100 checks. Retest keeps earlier checks and starts fresh findings.</p><div id="ts-copy-fallback"></div></section>`;
 }
 function mobileActions(s) {
+  if(s.tool==='vfl') return '';
   const a=assessment(s), recorded=s.tool==='loop'?loopResult(s):s.tool==='vfl'?s.traces[traceKey(s)]:null;
   const action=s.tool!=='link'&&(!recorded||!s.ready)?'test-result':s.tool==='link'&&s.disconnected?.length?'normalize':recorded?'findings':a.check||a.suggestion?'next':'findings';
   const label=action==='test-result'?'Record result':action==='normalize'?'Normalize':action==='next'?'Next check':'See findings';
@@ -407,7 +408,7 @@ host.addEventListener('click',async event=>{
   }
   if(action==='view-test') {
     centerMap(s.tool==='link'?0:s.selected);
-    const target=host.querySelector('.vfl-progress, .ts-map-card');
+    const target=host.querySelector('.vfl-view, .ts-map-card');
     target?.scrollIntoView({block:'start',behavior:'instant'});
     return;
   }
@@ -424,7 +425,7 @@ host.addEventListener('click',async event=>{
   if(action==='test-result') {host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.vfl-observe, .ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}
   if(action==='start-loop') {placeTool('lc',0);return;}
   if(action==='motion') {
-    paused=!paused;host.querySelectorAll('.ts-map,.vfl-view,.vfl-feedback').forEach(el=>el.classList.toggle('light-paused',paused));target.textContent=paused?'Play arrows':'Pause arrows';return;
+    paused=!paused;host.querySelectorAll('.ts-map,.vfl-view').forEach(el=>el.classList.toggle('light-paused',paused));target.textContent=paused?'Play arrows':'Pause arrows';return;
   }
   if(action==='show-path') {centerMap();host.querySelector('.ts-map-card').scrollIntoView({block:'start',behavior:'instant'});host.querySelector('.ts-map').focus({preventScroll:true});return;}
   if(action==='copy') {

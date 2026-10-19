@@ -2573,4 +2573,5 @@ export const spanishMessages = [
   ["Use FIM port {0}","Usar puerto {0} de FIM"],
   ["Choose a port from 1 to 32.","Elige un puerto del 1 al 32."],
   ["Patched port updated. Recheck this section.","Puerto conectado actualizado. Vuelve a comprobar este tramo."],
+  ["Tap an LC leg, then mark the light at the viewing point.", "Toca una pata LC y registra la luz en el punto de observación."],
 ];

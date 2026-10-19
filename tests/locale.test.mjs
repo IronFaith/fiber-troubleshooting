@@ -11,7 +11,7 @@ test('new-case actions and recorded VFL path labels translate in all learner lan
     'Fiber / contacts suspect','MMC / CAS contact suspect','Recheck observations',
     "Weak light","Weak light reported here","Strand B: weak light reported","Dim VFL light is a visual observation, not a loss measurement.","Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.","Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.",
     "Open here","CAS 2 · Patched port","Previous port","Next port","Use FIM port 2","Choose a port from 1 to 32.","Patched port updated. Recheck this section.",
-    'Does light reach the expected channel?','Light on another channel or port','Other channel (A)','Other channel (B)',
+    'Tap an LC leg, then mark the light at the viewing point.','Does light reach the expected channel?','Light on another channel or port','Other channel (A)','Other channel (B)',
     'The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.',
     'A passes visible light; B does not. The MMC ferrule holds separate fibers. Investigate B’s fiber and its end-face contacts; A passing does not clear them.',
     'B passes visible light; A does not. The MMC ferrule holds separate fibers. Investigate A’s fiber and its end-face contacts; B passing does not clear them.']) {

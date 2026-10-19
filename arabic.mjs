@@ -2573,4 +2573,5 @@ export const arabicMessages = [
   ["Use FIM port {0}","استخدم منفذ FIM {0}"],
   ["Choose a port from 1 to 32.","اختر منفذًا من 1 إلى 32."],
   ["Patched port updated. Recheck this section.","تم تحديث المنفذ الموصول. أعد فحص هذا المقطع."],
+  ["Tap an LC leg, then mark the light at the viewing point.", "اضغط على أحد فروع LC، ثم سجّل حالة الضوء عند نقطة الفحص."],
 ];
