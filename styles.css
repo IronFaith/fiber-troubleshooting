@@ -1375,6 +1375,7 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .vfl-progress-marker.seen { background:#cc284b; border-color:#cc284b; color:#fff; }
 .vfl-progress-marker.issue { background:#fff4dd; border-color:#ad7019; color:#8b5710; }
 .vfl-progress-lane small { font-size:10px; color:#637d8c; }
+.vfl-progress-lane .vfl-isolation { color:#8b5710; font-weight:600; }
 .vfl-progress-key { display:flex; flex-wrap:wrap; gap:7px 14px; margin-top:12px; padding-top:10px; border-top:1px solid #e0e7ed; font-size:11px; }
 .vfl-progress-key span::before { content:''; display:inline-block; width:16px; margin-inline-end:5px; vertical-align:middle; border-top:3px solid #cc284b; }
 .vfl-progress-key .suspect::before { border-color:#b7791f; border-top-style:dashed; }

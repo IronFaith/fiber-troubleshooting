@@ -7,7 +7,11 @@ import {connectedCaseQuestions} from '../connected-case.mjs';
 test('new-case actions and recorded VFL path labels translate in all learner languages',()=>{
   for(const language of ['es','fr','ar']) for(const message of ['New case started','Choose your path, then place a tool to begin.',
     'Recorded VFL path','Recorded checks, not live light.','Viewing here','Loose MMC only',
-    'Red: confirmed light','Amber: investigate','Dashed: not checked']) {
+    'Red: confirmed light','Amber: investigate','Dashed: not checked',
+    'Fiber / contacts suspect','MMC / CAS contact suspect','Recheck observations',
+    'The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.',
+    'A passes visible light; B does not. The MMC ferrule holds separate fibers. Investigate B’s fiber and its end-face contacts; A passing does not clear them.',
+    'B passes visible light; A does not. The MMC ferrule holds separate fibers. Investigate A’s fiber and its end-face contacts; B passing does not clear them.']) {
     assert.notEqual(translate(message,language),message,`${language}: ${message}`);
   }
 });

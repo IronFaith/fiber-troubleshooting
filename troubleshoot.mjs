@@ -1,9 +1,9 @@
-import {translateLines} from './locale.mjs?v=8';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=14';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=16';
+import {translateLines} from './locale.mjs?v=9';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=15';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=17';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
-import {simpleVfl} from './vfl-simple.mjs?v=9';
+import {simpleVfl} from './vfl-simple.mjs?v=10';
 import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
@@ -205,6 +205,7 @@ function advice(s) {
   return `<section class="ts-advice ${waiting?'':a.tone}" aria-labelledby="finding-title"><p class="ts-eyebrow">${s.simulated?'Simulated findings':'Case findings'}${a.route?` · ${escape(a.route)}`:''}</p><h2 id="finding-title" tabindex="-1">${title}</h2>
     ${a.pair?`<div class="ts-evidence-pair" aria-label="Recorded strand comparison">${a.pair.map(r=>`<div class="${r.result==='dark'||r.result==='wrong'?'issue':r.result?'recorded':'untested'}"><b>VFL on ${r.strand}</b><span>${r.label}</span></div>`).join('')}</div>`:''}
     ${a.evidencePath?`<div class="ts-evidence-path" aria-label="Section to investigate"><span>${a.evidencePath[0]}</span><b aria-hidden="true">→</b><span>${a.evidencePath[1]}</span></div>`:''}
+    ${a.isolation?`<p class="ts-scope"><b>${a.isolation.strand==='tx'?'A':'B'}</b> · <strong>${a.isolation.label}</strong></p>`:''}
     <p>${why}</p>${a.scope?`<p class="ts-scope">${a.scope}</p>`:''}${a.comparisonFinding?`<p class="ts-comparison-finding"><b>What this adds</b>${a.comparisonFinding}</p>`:''}${a.caution?`<p class="ts-caution">${a.caution}</p>`:''}
     ${waiting?'':`<div class="ts-next"><b>${a.complete?'Verified by your confirmation':'Next check'}</b><p>${a.next}</p></div>
     ${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}${diagnosticControls(a,s)}

@@ -2551,4 +2551,9 @@ export const arabicMessages = [
   ["Red: confirmed light","أحمر: ضوء مؤكّد"],
   ["Amber: investigate","كهرماني: يحتاج إلى فحص"],
   ["Dashed: not checked","متقطّع: لم يُفحص"],
+  ["Fiber / contacts suspect","الليف / نقاط التلامس مشتبه بها"],
+  ["MMC / CAS contact suspect","نقطة تلامس MMC / CAS مشتبه بها"],
+  ["Recheck observations","أعد التحقق من الملاحظات"],
+  ["The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.","يمر الضوء المرئي عبر الليف الوارد إلى رأس MMC المفصول. غياب الضوء عبر CAS يجعل نقطة التلامس الخاصة بهذه القناة موضع اشتباه: تلوث أو تلف أو سوء محاذاة أو عدم إحكام التوصيل."],
+  ["{0} passes visible light; {1} does not. The MMC ferrule holds separate fibers. Investigate {1}’s fiber and its end-face contacts; {0} passing does not clear them.","يمر الضوء المرئي عبر {0}، ولا يمر عبر {1}. تحمل الفيرول في MMC أليافًا منفصلة. افحص ليف {1} ونقاط التلامس عند نهاياته؛ مرور الضوء عبر {0} لا يثبت سلامتها."],
 ];

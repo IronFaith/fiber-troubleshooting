@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=14';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=16';
+import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=15';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=17';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
@@ -15,7 +15,7 @@ function progressDiagram(s,viewing) {
     <div class="vfl-progress-source"><b>${progress.from===0?'Local LC legs':'Remote LC legs'}</b><b>A</b><b>B</b></div>
     <ol>${progress.points.map(({point,lanes})=>`<li class="${point===viewing?'is-viewing':''}">
       <div class="vfl-progress-point"><b>${isOptic(s,point)?fiberPointName(point,s):`CAS ${point}`}</b>${!isOptic(s,point)?`<small>Port ${patchAt(s,point).port}</small>`:''}${point===viewing?'<small class="vfl-viewing">Viewing here</small>':''}</div>
-      ${['tx','rx'].map(strand=>{const lane=lanes[strand];return `<div class="vfl-progress-lane ${lane.segment}"><span class="vfl-progress-marker ${lane.result==='seen'?'seen':lane.result?'issue':'unknown'}" aria-hidden="true">${lane.result==='seen'?'✓':lane.result==='dark'?'×':lane.result?'!':'?'}</span><div class="vfl-progress-result"><b>${resultLabel(lane.result,strand)}</b>${lane.headOnly?'<small>Loose MMC only</small>':''}</div></div>`;}).join('')}
+      ${['tx','rx'].map(strand=>{const lane=lanes[strand],recheck=lane.isolation?.kind==='recheck';return `<div class="vfl-progress-lane ${lane.segment}"><span class="vfl-progress-marker ${recheck?'issue':lane.result==='seen'?'seen':lane.result?'issue':'unknown'}" aria-hidden="true">${recheck?'!':lane.result==='seen'?'✓':lane.result==='dark'?'×':lane.result?'!':'?'}</span><div class="vfl-progress-result"><b>${resultLabel(lane.result,strand)}</b>${lane.headOnly?'<small>Loose MMC only</small>':''}${lane.isolation?`<small class="vfl-isolation">${lane.isolation.label}</small>`:''}</div></div>`;}).join('')}
     </li>`).join('')}</ol>
     <div class="vfl-progress-key"><span class="confirmed">Red: confirmed light</span><span class="suspect">Amber: investigate</span><span class="unknown">Dashed: not checked</span></div>
   </section>`;

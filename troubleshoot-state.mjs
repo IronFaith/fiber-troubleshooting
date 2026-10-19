@@ -458,6 +458,19 @@ const strandLetter=strand=>strand==='tx'?'A':'B';
 const routeDescription=(s,r)=>`${fiberPointName(r.from,s)} → ${fiberPointName(r.to,s)}${r.head?' · loose MMC head':!isOptic(s,r.to)?' · through CAS':''}`;
 const traceCheck=(r,label)=>({tool:'vfl',from:r.from,to:r.to,strand:r.strand,head:Boolean(r.head),label});
 
+// Bound a dark observation using only the same source, strand and direction.
+// A ferrule holds multiple fibers: a passing neighbor never clears this strand.
+function vflBoundary(entries,dark) {
+  const direction=Math.sign(dark.to-dark.from),distance=r=>Math.abs(r.to-r.from)*2-(r.head?1:0);
+  const related=entries.filter(r=>r.from===dark.from&&r.strand===dark.strand&&Math.sign(r.to-r.from)===direction);
+  const farther=related.find(r=>r.result==='seen'&&distance(r)>distance(dark));
+  const earlier=related.filter(r=>r.result==='seen'&&distance(r)<distance(dark)).sort((a,b)=>distance(b)-distance(a))[0];
+  const kind=farther?'recheck':earlier?.to===dark.to&&earlier.head?'mmc-cas-contact':'fiber-contacts';
+  const label=kind==='recheck'?'Recheck observations':kind==='mmc-cas-contact'?'MMC / CAS contact suspect':'Fiber / contacts suspect';
+  const isolation={kind,label,strand:dark.strand,from:Math.min(earlier?.to??dark.from,dark.to),to:Math.max(earlier?.to??dark.from,dark.to)};
+  return {related,earlier,farther,isolation};
+}
+
 // These are comparison observations about the original dark route, not new
 // continuity passes. A different source, strand, direction or endpoint never
 // inherits them. Hardware principles: US Conec MMC/TMT; Fluke fiber testing.
@@ -523,44 +536,42 @@ function traceAssessment(s) {
     }
     const dark=rows.find(r=>r.result==='dark');
     if(dark) {
-      const dir=Math.sign(dark.to-dark.from),distance=r=>Math.abs(r.to-r.from)*2-(r.head?1:0);
-      const related=entries.filter(r=>r.from===dark.from&&r.strand===dark.strand&&Math.sign(r.to-r.from)===dir);
-      const farther=related.find(r=>r.result==='seen'&&distance(r)>distance(dark));
-      const earlier=related.filter(r=>r.result==='seen'&&distance(r)<distance(dark)).sort((a,b)=>distance(b)-distance(a))[0];
+      const dir=Math.sign(dark.to-dark.from);
+      const {related,earlier,farther,isolation}=vflBoundary(entries,dark);
       const both=rows.every(r=>r.result==='dark')&&rows.length===2;
       const letter=strandLetter(dark.strand);
       if(farther) {
         make(100,'The location results need a recheck',`Strand ${letter} was dark at ${fiberPointName(dark.to,s)} but seen farther along the same route.`,
           'Confirm the source, strand and patching stayed the same. Recheck the dark point; these observations cannot yet isolate a fault.',
-          {check:traceCheck(dark,`Recheck ${fiberPointName(dark.to,s)} · ${letter}`)});
+          {isolation,check:traceCheck(dark,`Recheck ${fiberPointName(dark.to,s)} · ${letter}`)});
         continue;
       }
       // A dark incoming head already explains why the through-CAS check is
       // dark. Continue the head investigation instead of asking to repeat it.
       if(!dark.head&&!isOptic(s,dark.to)&&related.some(r=>r.head&&r.to===dark.to&&r.result==='dark')) continue;
       const headPass=earlier?.to===dark.to&&earlier.head;
+      const passing=rows.find(r=>r.result==='seen'),goodLetter=passing?strandLetter(passing.strand):null;
       const title=headPass?`Strand ${letter}: check the MMC / CAS connection`:both?'Both strands are dark here':a?.result==='seen'||b?.result==='seen'?`Strand ${letter} is dark; the other has light`:`Strand ${letter}: no light recorded here`;
-      const why=headPass?'Light reached the loose head, but was not seen through the cassette connection.':earlier?`Last light: ${fiberPointName(earlier.to,s)}. First dark check: ${fiberPointName(dark.to,s)}. The added section and connections need checking.`:'This is a failed continuity observation. It does not identify which part is bad.';
+      const why=headPass?'The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.':passing?`${goodLetter} passes visible light; ${letter} does not. The MMC ferrule holds separate fibers. Investigate ${letter}’s fiber and its end-face contacts; ${goodLetter} passing does not clear them.`:earlier?`Last light: ${fiberPointName(earlier.to,s)}. First dark check: ${fiberPointName(dark.to,s)}. The added section and connections need checking.`:'This is a failed continuity observation. It does not identify which part is bad.';
       const from=earlier?Math.min(earlier.to,dark.to):Math.min(dark.from,dark.to);
       const to=earlier?Math.max(earlier.to,dark.to):Math.max(dark.from,dark.to);
       if(!dark.head&&!isOptic(s,dark.to)&&!headPass) {
         make(80,title,why,`Keep the VFL on LC ${letter}. Verify its LC connection, then unplug the incoming MMC at CAS ${dark.to} and check its loose head for light.`,
-          {from,to,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check:traceCheck({...dark,head:true},`Check loose MMC · strand ${letter}`),
+          {from,to,isolation,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check:traceCheck({...dark,head:true},`Check loose MMC · strand ${letter}`),
             branches:[['Light at the head','Inspect seating, end faces and the CAS connection.'],['Head also dark','Work back toward the source; check fiber and earlier connections.']]});
       } else if(headPass) {
         make(85,title,why,'Inspect both mating ends; clean and reinspect as needed. Verify seating and the mapped CAS port, then retest through the CAS.',
-          {from,to,evidencePath:[`MMC head · ${letter} light seen`,`CAS ${dark.to} port · ${letter} dark`],check:traceCheck(dark,`Retest through CAS ${dark.to} · ${letter}`),
+          {from,to,isolation,evidencePath:[`MMC head · ${letter} light seen`,`CAS ${dark.to} port · ${letter} dark`],check:traceCheck(dark,`Retest through CAS ${dark.to} · ${letter}`),
             branches:[['Light returns','Retest both strands, then verify optical readings.'],['Still dark','Compare a known-good compatible connection to isolate the failing part.']]});
       } else {
         const previous=dark.to-dir;
         const check=previous!==dark.from&&!related.some(r=>r.to===previous&&!r.head)?traceCheck({...dark,to:previous,head:false},`Check ${fiberPointName(previous,s)} · ${letter}`):null;
-        const oneDark=rows.some(r=>r.result==='seen');
         const scope=dark.head?`At the loose head, the receiving CAS ${dark.to} mating connection is bypassed. Check the incoming assembly and source-side connections.`:
           'The optic is disconnected from this VFL trace. Check the mapped fiber, its terminations and the source-side connection.';
         const guide=check?{}:s.simulated?{next:'Verify the source and mapped channel, inspect the individual fiber contacts, then compare one compatible assembly at a time. In a real case, record these checks in Find my problem.'}:comparisonGuide(s,dark.key);
-        make(80,title,oneDark?`The MMC ferrule aligns separate fibers. One passes light; ${letter} does not. That fiber, its end face or contact can fail independently. Verify mapping and the test setup before identifying a faulty part.`:why,
+        make(80,title,why,
           check?`Keep the source and strand unchanged. Check ${fiberPointName(previous,s)} to shorten the suspect section.`:guide.next,
-          {from,to,scope,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check,...guide,
+          {from,to,isolation,scope,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check,...guide,
             ...(check?{branches:[['Earlier point has light','Investigate the section added after that point.'],['Earlier point is dark','Move toward the source and verify the VFL setup.']]}:{})});
       }
       continue;
@@ -717,6 +728,12 @@ export function vflProgress(s) {
   const from=traceFrom(s),direction=from===0?1:-1;
   const traces=Object.fromEntries(Object.entries(s.traces).filter(([key])=>parseTraceKey(key)?.from===from));
   const coverage=pathCoverage({...s,traces,loops:{},remoteLoops:{}});
+  const entries=Object.entries(traces).map(([key,result])=>({...parseTraceKey(key),result}));
+  const isolationAt=(point,strand)=>{
+    const failures=entries.filter(r=>r.to===point&&r.strand===strand&&r.result==='dark');
+    const dark=failures.find(r=>r.head)??failures[0];
+    return dark?vflBoundary(entries,dark).isolation:null;
+  };
   const points=[];
   for(let point=from+direction;point>=0&&point<=s.reach;point+=direction) {
     const measured=coverage.points[point],span=coverage.spans[Math.max(point,point-direction)-1];
@@ -725,6 +742,7 @@ export function vflProgress(s) {
       head:measured.head[strand],through:measured.port[strand],
       result:measured.port[strand]??measured.head[strand],
       headOnly:!measured.port[strand]&&Boolean(measured.head[strand]),
+      isolation:isolationAt(point,strand),
     }]))});
   }
   return {from,points};
