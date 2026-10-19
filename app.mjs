@@ -1,4 +1,4 @@
-import { loopIllustration } from './loop-visuals.mjs?v=4';
+import { loopIllustration } from './loop-visuals.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import { nodes, destination, currentNode, answerQuestion, goBack, restoreHistory, fiberTrace } from './flow.mjs?v=8';
 

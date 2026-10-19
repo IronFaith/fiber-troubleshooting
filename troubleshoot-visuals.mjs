@@ -1,4 +1,5 @@
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=4';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=5';
+import {lcConnector,lcLoopback,vflPen} from './test-tool-visuals.mjs?v=1';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
 import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage,isOptic,loopSource,loopResult} from './troubleshoot-state.mjs?v=19';
 
@@ -16,7 +17,7 @@ export function vflEndpoint(s,{preview=false}={}) {
     ...(preview?{mode:s.simulated?'simulation':result?'observation':'expected',outputStrand:result==='swapped'?(s.strand==='tx'?'rx':'tx'):s.strand}:{})};
 }
 
-function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=null,remote=false,point=0) {
+function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=null,remote=false,point=0,loopState) {
   const loop=mode==='loop', plugged=mode==='plugged';
   const legs=[81,127].map((y,i)=>{
     const tip=plugged?168:52, boot=tip-40, bend=plugged?22+i*12:4+i*12, bottom=184+i*18;
@@ -25,7 +26,7 @@ function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=nul
     const lit=(mode==='vfl'||receiving&&trace!=='wrong')&&trace&&trace!=='dark'&&(i===0?litStrand==='tx':litStrand==='rx');
     const signal=receiving?`M${remote?8:292} ${bottom} H${bend+12} Q${bend} ${bottom} ${bend} ${bottom-12} V${y+12} Q${bend} ${y} ${bend+12} ${y} H63`:`M63 ${y} H${boot} ${cable.slice(cable.indexOf(' H')+1)}`;
     return `<path class="loop-jacket" d="${cable}"/><path class="loop-cord" d="${cable}"/>
-      <g class="ts-lc-leg" data-connection="${plugged?'seated':'unplugged'}"><rect class="hardware-boot" x="${boot}" y="${y-6}" width="12" height="12" rx="2"/><rect class="hardware-plug" x="${tip-29}" y="${y-9}" width="29" height="18" rx="2"/>${!plugged?`<rect class="hardware-metal" x="${tip}" y="${y-4}" width="11" height="8"/>`:''}<path class="hardware-grip" d="M${tip-23} ${y-5} v10 m6 -10 v10"/></g>
+      <g class="ts-lc-leg" data-connection="${plugged?'seated':'unplugged'}">${lcConnector(plugged?tip:tip+11,y,{scale:.67,seated:plugged})}</g>
       ${coverage?.txThrough>0&&plugged&&i===(remote?1:0)?lightFlow(`M${tip} ${y} H${boot} ${cable.slice(cable.indexOf(' H')+1)}`):''}
       ${lit?lightFlow(signal,'red')+(receiving?`<circle class="ts-red-dot" cx="63" cy="${y}" r="5"/>`:''):''}`;
   }).join('');
@@ -36,10 +37,9 @@ function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=nul
     ${[88,151].map((x,i) => `<rect class="optic-recess" x="${x-23}" y="59" width="46" height="90" rx="3"/>
       ${[81,127].map(y => `<rect class="optic-opening" x="${x-15}" y="${y-13}" width="30" height="27" rx="2"/><circle class="optic-ferrule" cx="${x}" cy="${y}" r="7"/><circle class="optic-core" cx="${x}" cy="${y}" r="3"/>`).join('')}
       <text class="hardware-label hardware-center hardware-small" x="${x}" y="181">${i ? '5' : '1'}</text>`).join('')}
-    ${loop ? `<path class="loop-jacket" d="M88 81 H29 Q9 81 9 104 Q9 127 29 127 H88"/><path class="loop-cord" d="M88 81 H29 Q9 81 9 104 Q9 127 29 127 H88"/>
-      ${[81,127].map(y => `<rect class="hardware-plug" x="59" y="${y-9}" width="29" height="18" rx="2"/><rect class="hardware-boot" x="48" y="${y-6}" width="12" height="12" rx="2"/>`).join('')}` : ''}
+    ${loop?lcLoopback(88,81,{gap:46/.8,scale:.8,seated:true,result:loopState}):''}
     </g>${legs}${coverage?.optic==='pass'&&plugged?lightSource(168,remote?127:81):''}
-    ${mode==='vfl'?`<g data-mounted-tool="vfl" data-point="${point}"><rect class="hardware-metal" x="62" y="${vflY-6}" width="10" height="12"/><rect class="ts-vfl" x="70" y="${vflY-14}" width="51" height="28" rx="5"/><text class="ts-vfl-text" x="95" y="${vflY+5}">VFL</text>${lightSource(63,vflY,'red')}<rect class="ts-tool-handle" x="28" y="${vflY-49}" width="98" height="98" rx="8"><title>VFL attached to the unplugged LC leg. Drag to move or remove.</title></rect></g>`:''}
+    ${mode==='vfl'?`<g data-mounted-tool="vfl" data-point="${point}">${vflPen(63,vflY,{scale:.65,reverse:true,on:true})}${lightSource(63,vflY,'red')}<rect class="ts-tool-handle" x="28" y="${vflY-49}" width="108" height="98" rx="8"><title>VFL attached to the unplugged LC leg. Drag to move or remove.</title></rect></g>`:''}
     </g>`;
 }
 
@@ -142,7 +142,7 @@ export function workbenchDiagram(s) {
     drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${tracing&&from===i?' ts-vfl-source':''}${!accessible ? ' ts-inaccessible' : ''}${loopResult(s,i)?' ts-observed-'+loopResult(s,i):''}${coverage.points[i]?.issue?' ts-coverage-suspect':coverage.points[i]?.loop==='pass'?' ts-coverage-passed':''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="${tracing&&i!==from?'Check light at':'Select'} ${i===0&&tracing?'optic-side LC leg':pointName(i,s)}${!isOptic(s,i) ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
       <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="218" rx="12"/>
       <text class="ts-node-title" x="${cx}" y="59">${remote ? 'Remote optic' : i===0 ? 'Local optic' : `CAS ${i} · Port ${patchAt(s,i).port}`}</text>
-      ${i===0 || remote ? `<svg x="${cx-107}" y="68" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,tracing&&s.selected===i,normalized&&isOptic(s,i)?remote?{optic:coverage.remoteOptic,txThrough:s.count+1-coverage.remoteTxThrough}:coverage:null,remote,i)}</svg>` :
+      ${i===0 || remote ? `<svg x="${cx-107}" y="68" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,tracing&&s.selected===i,normalized&&isOptic(s,i)?remote?{optic:coverage.remoteOptic,txThrough:s.count+1-coverage.remoteTxThrough}:coverage:null,remote,i,loopResult(s,i))}</svg>` :
         `<svg x="${cx-121}" y="81" width="242" height="140" viewBox="0 0 360 208">${passiveFace(s,i,mode)}</svg>`}
       ${isLoop?`<rect class="ts-tool-handle" data-mounted-tool="${isOptic(s,i)?'lc':'mmc'}" x="${handleX}" y="${handleY}" width="72" height="72" rx="9"><title>Drag this loop to move it, or return it to the tray</title></rect>`:''}
       <text class="ts-connection-label ${mode==='plugged'?'':'open'}" x="${cx}" y="230">${endpoint?.point===i&&endpoint.kind!=='lc'?endpoint.kind==='head'?'MMC head unplugged · CAS bypassed':endpoint.closed?'Both sides patched · path continues':`${endpoint.face==='front'?'Front':'Rear'} port open · incoming MMC seated`:mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?isOptic(s,i)?'VFL on LC leg · optic empty':'VFL on unplugged fiber':mode==='unplugged'?isOptic(s,i)?'LC legs unplugged · optic empty':'MMC unplugged · path open':i===0||remote?'LC legs plugged into optic':'MMC head plugged into CAS'}</text>

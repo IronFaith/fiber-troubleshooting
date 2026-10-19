@@ -1,4 +1,4 @@
-import {questions, startAttempt, recordAnswer, validRoundIds} from './quiz-data.mjs?v=13';
+import {questions, startAttempt, recordAnswer, validRoundIds} from './quiz-data.mjs?v=14';
 
 export const sessionKey = 'fiber-exam-session-v1';
 const validChoices = (id,value) => {

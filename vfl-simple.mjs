@@ -1,6 +1,7 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
 import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=19';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=21';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=22';
+import {lcConnector,vflPen} from './test-tool-visuals.mjs?v=1';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
@@ -60,12 +61,12 @@ function diagram(s,mobile) {
   for(let i=0;i<2;i++) {
     const [x,y]=source[i],strand=i?'rx':'tx';
     drawing+=cable(activePath(i,stop[i]));
-    drawing+=`<g role="button" tabindex="0" data-vfl-strand="${strand}" aria-pressed="${i===selected}" aria-label="Move VFL to ${sourceLC?'LC':'strand'} ${i?'B':'A'}" class="vfl-leg"><rect class="vfl-leg-hit" x="${mobile?x-40:x-120}" y="${mobile?y-115:y-25}" width="${mobile?80:140}" height="${mobile?140:50}" rx="9"/>
-      <g transform="translate(${x} ${y}) ${mobile?'rotate(90)':''}"><rect class="hardware-metal" x="-52" y="-5" width="12" height="10"/><rect class="hardware-plug" x="-42" y="-12" width="32" height="24" rx="3"/><rect class="hardware-boot" x="-10" y="-7" width="10" height="14" rx="2"/>${i===selected?'<rect class="vfl-tool" x="-111" y="-15" width="59" height="30" rx="9"/>':''}</g>
-      ${i===selected?label(mobile?x:x-82,mobile?y-78:y+5,'VFL','tool centered'):''}${label(mobile?x-33:x+28,mobile?y+21:y-16,`${sourceLC?'LC':'Strand'} ${i?'B':'A'}`,mobile?'centered':'')}
+    drawing+=`<g role="button" tabindex="0" data-vfl-strand="${strand}" aria-pressed="${i===selected}" aria-label="Move VFL to ${sourceLC?'LC':'strand'} ${i?'B':'A'}" class="vfl-leg"><rect class="vfl-leg-hit" x="${mobile?x-40:x-140}" y="${mobile?y-140:y-25}" width="${mobile?80:160}" height="${mobile?165:50}" rx="9"/>
+      <g transform="translate(${x} ${y}) ${mobile?'rotate(90)':''}">${lcConnector(-52,0,{scale:.82,reverse:true})}${i===selected?vflPen(-52,0,{scale:.8,on:true})+lightFlow('M-52 0 H0','red')+lightSource(-52,0,'red'):''}</g>
+      ${label(mobile?x-33:x+28,mobile?y+21:y-16,`${sourceLC?'LC':'Strand'} ${i?'B':'A'}`,mobile?'centered':'')}
       ${label(mobile?x+25:x+70,mobile?y+21:y-16,resultMark(s.traces[traceKey({...s,selected:point,strand})]),'vfl-leg-result centered')}</g>`;
   }
-  drawing+=lightSource(source[selected][0],source[selected][1],'red')+cards;
+  drawing+=cards;
   if(atCAS) {
     drawing+=mobile?`<rect class="cassette-adapter" x="126" y="526" width="94" height="26" rx="4"/>`:`<rect class="cassette-adapter" x="619" y="129" width="32" height="82" rx="4"/>`;
     drawing+=`<g>

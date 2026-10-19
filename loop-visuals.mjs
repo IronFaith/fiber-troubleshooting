@@ -1,6 +1,7 @@
 // Shared educational hardware drawings. Port numbering follows the site's layout;
 // the enlarged light path illustrates one pair, not a connector pin map.
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
+import {lcConnector} from './test-tool-visuals.mjs?v=1';
 const text = (x,y,value,style='') => `<text x="${x}" y="${y}" class="hardware-label ${style}">${value}</text>`;
 
 export function cassetteFront({port = 12, inserted = false, patched = false, name = 'CAS 1'} = {}) {
@@ -36,10 +37,7 @@ function signal(out,back) {
   return `<path class="hardware-tx" d="${out}"/><path class="hardware-rx" d="${back}"/>`;
 }
 function lcPlug(x,y) {
-  return `<g transform="translate(${x} ${y})"><path class="hardware-plug" d="M0 4 H34 L40 8 V20 L34 24 H0 Z"/>`+
-    '<rect class="hardware-boot" x="-17" y="8" width="18" height="12" rx="3"/>'+
-    '<path class="hardware-latch" d="M6 3 H30 L34 7 H9 Z"/>'+
-    '<path class="hardware-grip" d="M5 9 V19 M10 9 V19 M15 9 V19"/></g>';
+  return lcConnector(x+40,y+14,{scale:.89,seated:true});
 }
 
 // Original schematic based on US Conec's MMC product photo: green housing,

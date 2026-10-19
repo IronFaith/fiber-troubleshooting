@@ -1,4 +1,5 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
+import {vflPen} from './test-tool-visuals.mjs?v=1';
 
 // A/B name this teaching pair, not MMC pin positions or Ethernet ports.
 export function polarityExample({swapped=false,strand='a'}={}) {
@@ -52,8 +53,7 @@ function picture(state,mobile) {
   }
   if(vfl) {
     const [x,y]=local(pick),out=end(model.vfl.to==='a'?0:1);
-    body+=mobile?`<rect class="pol-adapter" x="${x-22}" y="92" width="22" height="16" rx="3"/><rect class="pol-vfl" x="${x-80}" y="86" width="60" height="28" rx="8"/>${text(x-50,105,'VFL','center white')}`:
-      `<rect class="pol-adapter" x="106" y="${y-9}" width="39" height="18" rx="3"/><rect class="pol-vfl" x="44" y="${y-17}" width="62" height="34" rx="8"/>${text(75,y+5,'VFL','center white')}`;
+    body+=mobile?vflPen(x,100,{scale:.78,on:true}):vflPen(145,y,{on:true});
     body+=lightSource(x,y,'red')+lightFlow(line(pick),'red')+lightSource(...out,'red');
     body+=`<circle class="pol-red-glow" cx="${out[0]}" cy="${out[1]}" r="18"/><path class="pol-beam" d="${mobile?`M${out[0]} ${out[1]} l-14 38 h28 Z`:`M${out[0]} ${out[1]} l38 -14 v28 Z`}"/>`;
   } else {

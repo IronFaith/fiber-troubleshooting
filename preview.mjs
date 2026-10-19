@@ -19,6 +19,7 @@ files['/quiz-data.mjs'] = ['quiz-data.mjs', 'text/javascript'];
 files['/loop-visuals.mjs'] = ['loop-visuals.mjs', 'text/javascript'];
 files['/rack-visuals.mjs'] = ['rack-visuals.mjs', 'text/javascript'];
 files['/light-visuals.mjs'] = ['light-visuals.mjs', 'text/javascript'];
+files['/test-tool-visuals.mjs'] = ['test-tool-visuals.mjs', 'text/javascript'];
 files['/loop-lesson.mjs'] = ['loop-lesson.mjs', 'text/javascript'];
 for(const name of ['patching-visuals.mjs','patch-practice.mjs','patch-practice-data.mjs','patch-cable-visuals.mjs','quiz-visuals.mjs']) files[`/${name}`]=[name,'text/javascript'];
 for(const name of ['troubleshoot.mjs','troubleshoot-state.mjs','troubleshoot-visuals.mjs','troubleshoot-tools.mjs','troubleshoot-patching.mjs','vfl-simple.mjs']) files[`/${name}`]=[name,'text/javascript'];

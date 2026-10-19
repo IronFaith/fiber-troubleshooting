@@ -1,7 +1,8 @@
 import {translate,getLanguage,formatBidi} from './locale.mjs?v=16';
 import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=20';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
-import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=4';
+import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=5';
+import {vflPen} from './test-tool-visuals.mjs?v=1';
 
 const text = (x,y,label) => `<text x="${x}" y="${y}" text-anchor="middle">${label}</text>`;
 const line = (x,y,end,color='#277bc2') => `<path d="M${x} ${y} H${end}" fill="none" stroke="${color}" stroke-width="5"/><path d="M${end-8} ${y-6} l8 6 -8 6" fill="none" stroke="${color}" stroke-width="3"/>`;
@@ -42,7 +43,7 @@ function illustration(term) {
       text(180,55,'RX · example report')+`<text x="180" y="99" text-anchor="middle" style="font-size:32px;font-weight:700;fill:${art==='dark'?'#b51f38':'#173b59'}">${art==='dark'?'−40':'+0.25'} dBm</text>`;
     caption=art==='dark'?'No-light indication in our site report example':'Compare the reading with the installed optic’s limits.';
   } else if(art==='vfl') {
-    drawing=box(10,58,'VFL')+line(105,78,304,'#d52942')+'<circle cx="317" cy="78" r="12" fill="#e22a43"/>'+text(183,128,'Isolated fiber → expected strand');
+    drawing=vflPen(105,78,{scale:.9,on:true})+line(105,78,304,'#d52942')+'<circle cx="317" cy="78" r="12" fill="#e22a43"/>'+text(183,128,'Isolated fiber → expected strand');
     caption='Visible red light · continuity is not a loss measurement';
   } else if(art==='ticket' || art==='rack') {
     drawing=box(24,15,art==='rack'?'QNO5 · 5C · 16f · 17 · 30':'Device → Ethernet 25/1',312)+

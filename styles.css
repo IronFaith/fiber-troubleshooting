@@ -1802,6 +1802,8 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-workspace .ts-tool-items { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; }
 .ts-workspace .ts-tool-pick { flex-direction:column; padding:4px 2px; gap:2px; min-height:62px; }
 .ts-workspace .ts-tool-pick svg { width:42px; height:28px; }
+.ts-workspace .ts-tool-pick[data-pick-tool="lc"] svg { width:51px; height:32px; }
+.ts-workspace .ts-tool-pick[data-pick-tool="vfl"] svg { width:62px; height:32px; }
 .ts-workspace .ts-tool-pick[data-pick-tool="mmc"] svg { width:60px; }
 .ts-workspace .ts-tool-pick b,.ts-workspace .ts-normalize b { font-size:11px; font-weight:600; }
 .ts-workspace .ts-tool-pick.is-mounted { background:#edf6f2; border-color:#689b86; }

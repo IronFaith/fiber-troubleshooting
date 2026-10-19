@@ -1,16 +1,17 @@
 import {mountSiteCounter} from './site-counter.mjs?v=7';
-import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
-import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=4';
-import { rackIllustration } from './rack-visuals.mjs?v=8';
-import { mountCommunicationRoute } from './communication-route.mjs?v=3';
+import {vflPen} from './test-tool-visuals.mjs?v=1';
+import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=2';
+import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=5';
+import { rackIllustration } from './rack-visuals.mjs?v=9';
+import { mountCommunicationRoute } from './communication-route.mjs?v=4';
 import { mountCourse, learningEntry } from './course.mjs?v=9';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=21';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=22';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
-import { mountPatchPractice } from './patch-practice.mjs?v=13';
-import { mountLightJourney } from './loop-lesson.mjs?v=6';
+import { mountPatchPractice } from './patch-practice.mjs?v=14';
+import { mountLightJourney } from './loop-lesson.mjs?v=7';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=2';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=9';
+import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=3';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=10';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -190,9 +191,7 @@ function light(path, color='ir', strength='') {
 function optic(x,y) {
   return `<g transform="translate(${x} ${y})"><rect class="optic-metal" x="0" y="0" width="105" height="70" rx="5"/><path class="optic-detail" d="M10 8 H72 M10 16 H72 M10 54 H72 M10 62 H72"/><rect class="optic-port" x="84" y="8" width="29" height="20" rx="2"/><rect class="optic-port" x="84" y="42" width="29" height="20" rx="2"/>${text(12,40,'Optic')}${text(88,23,'TX','class="small"')}${text(88,57,'RX','class="small"')}</g>`;
 }
-function vfl(x,y) {
-  return `<g transform="translate(${x} ${y})"><rect class="vfl-body" x="0" y="0" width="102" height="43" rx="19"/><path class="vfl-grip" d="M13 8 V35 M20 8 V35 M27 8 V35"/><rect class="vfl-tip" x="94" y="11" width="23" height="21" rx="2"/><circle class="red-dot" cx="77" cy="21" r="5"/>${text(36,27,'VFL')}</g>`;
-}
+function vfl(x,y) {return vflPen(x+117,y+21,{scale:1.1,on:true});}
 function opticPicture() {
   return {height:200, caption:'IR carries data. The receiver turns arriving light back into electrical data.', drawing:
     text(16,27,'Electrical data → light')+optic(12,52)+box(277,52,73,70,'Optic')+

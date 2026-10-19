@@ -1,8 +1,8 @@
-import {cassetteFront, loopIllustration} from './loop-visuals.mjs?v=4';
+import {cassetteFront, loopIllustration} from './loop-visuals.mjs?v=5';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {lightFlow} from './light-visuals.mjs?v=1';
-import {connectedCaseVisual} from './connected-case.mjs?v=2';
-import {caseVisual} from './exam-evidence.mjs?v=2';
+import {connectedCaseVisual} from './connected-case.mjs?v=3';
+import {caseVisual} from './exam-evidence.mjs?v=3';
 
 const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const text=(x,y,value,extra='')=>`<text x="${x}" y="${y}" ${extra}>${value}</text>`;
