@@ -1,4 +1,4 @@
-import {translate,readLanguage,saveLanguage,getLanguage,languages,isLanguage,languageKey,languageDirection,formatBidi} from './locale.mjs?v=10';
+import {translate,readLanguage,saveLanguage,getLanguage,languages,isLanguage,languageKey,languageDirection,formatBidi} from './locale.mjs?v=11';
 // Display-only localization: IDs, field values and all learning / case state
 // remain unchanged. Keep each source node so switching back restores English.
 const textSources=new WeakMap(),attributeSources=new WeakMap();

@@ -2559,4 +2559,10 @@ export const spanishMessages = [
   ["Does light reach the expected channel?","¿La luz llega al canal esperado?"],
   ["Light on another channel or port","Luz en otro canal o puerto"],
   ["Other channel ({0})","Otro canal ({0})"],
+  ["Weak light","Luz débil"],
+  ["Weak light reported here","Se reporta luz débil aquí"],
+  ["Strand {0}: weak light reported","Fibra {0}: se reporta luz débil"],
+  ["Dim VFL light is a visual observation, not a loss measurement.","La luz tenue del VFL es una observación visual, no una medición de pérdida."],
+  ["Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.","Mantén el VFL en esta fibra LC. Compara la luz del cabezal MMC entrante suelto con el resultado a través del CAS; inspecciona la conexión si el brillo cambia ahí."],
+  ["Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.","Comprueba el VFL y el asentamiento del LC con un latiguillo de referencia en buen estado. Inspecciona los extremos y las curvas de la fibra indicada en el mapa; después mide la pérdida con una prueba de pérdida óptica."],
 ];

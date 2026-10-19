@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCase,changeCase,traceKey} from '../troubleshoot-state.mjs';
+import {createCase,changeCase,traceKey,assessment,vflProgress,caseHistory,restoreCaseHistory,nextCheckActions} from '../troubleshoot-state.mjs';
 import {vflEndpoint} from '../troubleshoot-visuals.mjs';
 const apply=(s,...actions)=>actions.reduce(changeCase,s);
 const record=(s,result)=>apply(s,{type:'ready',value:true},{type:'record',result});
@@ -50,4 +50,43 @@ test('loose-head checks survive seating the same MMC so both strands can be comp
   assert.equal(s.traces['1:tx:head'],'seen');
   s=changeCase(s,{type:'patch',point:1,side:'rear',connected:true,port:20});
   assert.deepEqual(s.traces,{});
+});
+
+test('weak VFL observations persist per strand, emit visible light and remain suspect in either direction',()=>{
+  for(const [from,to] of [[0,1],[3,2]]) {
+    let s=changeCase(createCase(),{type:'trace',from,to});
+    s=record(s,'seen');
+    s=record(changeCase(s,{type:'strand',value:'rx'}),'weak');
+    assert.equal(s.traces[traceKey(s)],'weak');
+    assert.equal(vflEndpoint(s,{preview:true}).result,'weak');
+    assert.equal(vflEndpoint(s,{preview:true}).emitting,true);
+    assert.equal(vflEndpoint(s,{preview:true}).outputStrand,'rx');
+    const lanes=vflProgress(s).points[0].lanes;
+    assert.equal(lanes.tx.result,'seen');
+    assert.equal(lanes.rx.result,'weak');
+    assert.equal(lanes.rx.segment,'suspect');
+    assert.equal(caseHistory(restoreCaseHistory(s,s)).filter(e=>e.current&&e.result==='weak').length,1);
+    assert.deepEqual(changeCase(s,{type:'normalize'}).traces,s.traces);
+  }
+});
+
+test('weak light guides a same-strand head check without treating brightness as a loss measurement or a pass',()=>{
+  for(const [from,to] of [[0,1],[3,2]]) {
+    let s=record(changeCase(createCase(),{type:'trace',from,to}),'weak');
+    let finding=assessment(s);
+    assert.equal(finding.tone,'suspect');
+    assert.match(finding.title,/weak light/);
+    assert.match(finding.why,/not a loss measurement/);
+    assert.deepEqual([finding.check.from,finding.check.to,finding.check.strand,finding.check.head],[from,to,'tx',true]);
+    const atHead=apply(s,...nextCheckActions(s));
+    const headPass=assessment(record(atHead,'seen'));
+    assert.match(headPass.next,/both mating ends/);
+    assert.equal(headPass.check.head,false,'do not repeat a head check already recorded');
+    s=record(atHead,'weak');
+    finding=assessment(s);
+    assert.match(finding.next,/reference lead/);
+    assert.equal(finding.check.head,true);
+    s=record(changeCase(s,{type:'strand',value:'rx'}),'swapped');
+    assert.match(assessment(s).title,/conflict/,'weak visible light still identifies its reported output channel');
+  }
 });

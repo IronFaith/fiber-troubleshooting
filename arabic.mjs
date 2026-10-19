@@ -2559,4 +2559,10 @@ export const arabicMessages = [
   ["Does light reach the expected channel?","هل يصل الضوء إلى القناة المتوقعة؟"],
   ["Light on another channel or port","ضوء في قناة أو منفذ آخر"],
   ["Other channel ({0})","القناة الأخرى ({0})"],
+  ["Weak light","ضوء ضعيف"],
+  ["Weak light reported here","أُبلغ عن ضوء ضعيف هنا"],
+  ["Strand {0}: weak light reported","الليف {0}: أُبلغ عن ضوء ضعيف"],
+  ["Dim VFL light is a visual observation, not a loss measurement.","الضوء الخافت من VFL ملاحظة بصرية، وليس قياسًا للفقد."],
+  ["Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.","أبقِ VFL على هذا الليف من LC. قارن الضوء عند رأس MMC الوارد المفصول بنتيجة الفحص عبر CAS؛ وافحص نقطة التوصيل إذا تغير الوهج عندها."],
+  ["Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.","تحقق من VFL وإحكام توصيل LC باستخدام وصلة مرجعية سليمة. افحص نهايات الليف المحدد في المخطط وانحناءاته، ثم قِس الفقد باختبار الفقد البصري."],
 ];

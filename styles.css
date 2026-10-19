@@ -1424,6 +1424,26 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .vfl-other-light { margin-top:10px; font-size:12px; color:#456174; }
 .vfl-other-light summary { cursor:pointer; padding:12px 0; min-height:44px; }
 .vfl-other-light .vfl-observe-buttons { padding:0 0 6px; }
+.vfl-observe .vfl-strands button { position:relative; padding-inline:26px; min-height:66px; }
+.vfl-observe .vfl-strands button[aria-pressed=true] { color:#a32442; border-color:#b72f4d; background:#fff0f4; }
+.vfl-strand-mark { position:absolute; inset-inline-end:7px; top:8px; display:grid; place-items:center; width:19px; height:19px; border-radius:50%; background:#e8eef2; color:#536e80; font-size:13px; }
+.vfl-strand-mark.seen { background:#cc284b; color:white; }
+.vfl-strand-mark.weak,.vfl-strand-mark.dark,.vfl-strand-mark.swapped,.vfl-strand-mark.wrong { background:#ffedcb; color:#86520f; }
+.vfl-feedback { display:flex; gap:12px; align-items:center; padding:8px 12px; margin:0 0 12px; border:1px solid #d8e3eb; border-radius:7px; background:#f8fbfd; }
+.vfl-feedback svg { display:block; flex:1; width:0; min-width:80px; height:40px; }
+.vfl-feedback p { display:flex; align-items:center; gap:6px; margin:0; max-width:45%; min-height:40px; color:#345870; }
+.vfl-feedback.seen p { color:#a32442; }
+.vfl-feedback.weak p,.vfl-feedback.dark p { color:#86520f; }
+.vfl-result-mark { font-size:18px; }
+.vfl-feedback-track,.vfl-dark-path { fill:none; stroke:#a7b8c3; stroke-width:3; stroke-dasharray:5 7; }
+.vfl-feedback-end { fill:#f8fbfd; stroke:#7893a4; stroke-width:2; }
+.vfl-dark-mark { fill:none; stroke:#a36b22; stroke-width:2.5; stroke-linecap:round; }
+.vfl-dim { opacity:.28; }
+.vfl-observe .vfl-main-results { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.vfl-observe .vfl-main-results button { min-width:0; padding:10px 6px; }
+.vfl-main-results [data-action=result-seen][aria-pressed=true] { background:#a92d48; border-color:#a92d48; }
+.vfl-main-results [data-action=result-weak][aria-pressed=true] { background:#fff0d7; color:#81500d; border-color:#ad771f; }
+.vfl-main-results [data-action=result-dark][aria-pressed=true] { background:#465862; border-color:#465862; }
 .vfl-hint { font-size:13px; color:#456174; line-height:1.6; margin:12px 0; }
 .vfl-checks { width:100%; border-collapse:collapse; font-size:13px; margin:18px 0 0; color:#345870; }
 .vfl-checks caption { text-align:left; font-weight:700; margin-bottom:7px; }

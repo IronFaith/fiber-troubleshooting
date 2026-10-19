@@ -7,7 +7,7 @@ export const faults = {
   polarity: 'Polarity swapped', splice: 'Poor splice'
 };
 export const loopLabels = { pass: 'Pass', weak: 'Weak return', dark: 'No return light' };
-export const traceLabels = { seen: 'Expected port + strand', wrong: 'Different port', swapped: 'Other strand', dark: 'No light seen' };
+export const traceLabels = { seen: 'Expected port + strand', weak: 'Weak light', wrong: 'Different port', swapped: 'Other strand', dark: 'No light seen' };
 export const identityLabels = {
   optic:'Device + optic port', fanout:'LC follower + MMC head',
   route:'CAS route + ports', channels:'Strand mapping'
@@ -519,7 +519,7 @@ function traceAssessment(s) {
     const make=(priority,title,why,next,extra={})=>findings.push({priority,title,why,next,tone:priority>=50?'suspect':'trace',
       from:Math.min(g.from,g.to),to:Math.max(g.from,g.to),route:routeDescription(s,g),pair,...extra,
       active:rows.some(r=>r.key===activeKey)});
-    const output=r=>r?.result==='seen'?r.strand:r?.result==='swapped'?(r.strand==='tx'?'rx':'tx'):null;
+    const output=r=>['seen','weak'].includes(r?.result)?r.strand:r?.result==='swapped'?(r.strand==='tx'?'rx':'tx'):null;
     if(a&&b&&output(a)&&output(a)===output(b)) {
       make(100,'These channel results conflict','Both input strands were recorded at the same output channel.',
         'Confirm A / B labels and test one strand at a time. Recheck the same setup before changing polarity.',
@@ -574,6 +574,22 @@ function traceAssessment(s) {
           {from,to,isolation,scope,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check,...guide,
             ...(check?{branches:[['Earlier point has light','Investigate the section added after that point.'],['Earlier point is dark','Move toward the source and verify the VFL setup.']]}:{})});
       }
+      continue;
+    }
+    const weak=rows.find(r=>r.result==='weak');
+    if(weak) {
+      const letter=strandLetter(weak.strand);
+      const head=entries.find(r=>r.head&&r.from===weak.from&&r.to===weak.to&&r.strand===weak.strand);
+      const checkHead=!weak.head&&!isOptic(s,weak.to)&&!head;
+      const distance=r=>Math.abs(r.to-r.from)*2-(r.head?1:0);
+      const earlier=entries.filter(r=>r.from===weak.from&&r.strand===weak.strand&&r.result==='seen'&&
+        Math.sign(r.to-r.from)===Math.sign(weak.to-weak.from)&&distance(r)<distance(weak)).sort((a,b)=>distance(b)-distance(a))[0];
+      make(75,`Strand ${letter}: weak light reported`,'Dim VFL light is a visual observation, not a loss measurement.',
+        checkHead?'Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.':head?.result==='seen'?
+          'Inspect both mating ends; clean and reinspect as needed. Verify seating and the mapped CAS port, then retest through the CAS.':
+          'Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.',
+        {from:Math.min(earlier?.to??weak.from,weak.to),to:Math.max(earlier?.to??weak.from,weak.to),
+          check:traceCheck({...weak,head:checkHead||weak.head},checkHead?`Check loose MMC · strand ${letter}`:`Recheck ${fiberPointName(weak.to,s)} · ${letter}`)});
       continue;
     }
     if(rows.some(r=>r.result==='swapped')) {

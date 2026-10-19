@@ -1,12 +1,24 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=15';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=17';
+import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=16';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=18';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
 const cable=path=>`<path class="loop-jacket" d="${path}"/><path class="loop-cord" d="${path}"/>`;
 const patchAction=(point,side,connected,port)=>`data-patch-point="${point}" data-patch-side="${side}" data-patch-connected="${connected}" data-patch-port="${port}"`;
-const resultLabel=(result,strand)=>!result?'Not checked':result==='seen'?`Light at ${letter(strand)}`:result==='swapped'?`Light at ${letter(strand==='tx'?'rx':'tx')}`:result==='dark'?'No light':'Other port';
+const resultLabel=(result,strand)=>!result?'Not checked':result==='seen'?`Light at ${letter(strand)}`:result==='swapped'?`Light at ${letter(strand==='tx'?'rx':'tx')}`:result==='dark'?'No light':result==='weak'?'Weak light':'Other port';
+const observationLabels={seen:'Light seen',weak:'Weak light',swapped:'Other channel',dark:'No light',wrong:'Different port'};
+const resultMark=result=>result==='seen'?'✓':result==='dark'?'×':result?'!':'?';
+
+function feedback(light,paused) {
+  const result=light.result,lit=['seen','weak','swapped'].includes(result),path='M18 20 H282';
+  return `<div class="vfl-feedback ${result??'unknown'} ${paused?'light-paused':''}">
+    <svg viewBox="0 0 300 40" aria-hidden="true"><path class="vfl-feedback-track" d="${path}"/>${lightSource(18,20,'red')}
+      ${lit?`<g class="${result==='weak'?'vfl-dim':''}">${lightFlow(path,'red')}${lightSource(282,20,'red')}</g>`:'<circle class="vfl-feedback-end" cx="282" cy="20" r="7"/>'}
+      ${result==='dark'?'<path class="vfl-dark-mark" d="M277 15 l10 10 m0 -10 l-10 10"/>':''}
+    </svg><p role="status"><span class="vfl-result-mark" aria-hidden="true">${resultMark(result)}</span><b>${result?observationLabels[result]:'Not checked'}</b></p>
+  </div>`;
+}
 
 function progressDiagram(s,viewing) {
   const progress=vflProgress(s);
@@ -66,14 +78,18 @@ function diagram(s,mobile) {
   if(atCAS)drawing+='</g>';
   const path=atCAS?activePath(selected,stop[output]):mobile?`M${source[selected][0]} ${source[selected][1]} V370 H${port[output][0]} V${port[output][1]}`:`M${source[selected][0]} ${source[selected][1]} C390 ${source[selected][1]} 560 ${port[output][1]} ${port[output][0]} ${port[output][1]}`;
   if(light.emitting||closed&&light.result!=='dark') {
-    drawing+=lightFlow(path,'red');
+    drawing+=`<g class="${light.result==='weak'?'vfl-dim':''}">${lightFlow(path,'red')}`;
     if(closed) drawing+=lightFlow(mobile?`M${port[output][0]} ${port[output][1]} V590`:`M${port[output][0]} ${port[output][1]} H900`,'red');
     else {
       const [x,y]=stop[output];
       drawing+=`<circle class="ts-port-glow" cx="${x}" cy="${y}" r="17"/>${lightSource(x,y,'red')}<path class="ts-port-emission" d="${mobile?`M${x} ${y} l-15 32 h30 Z`:`M${x} ${y} l32 -15 v30 Z`}"/>`;
     }
+    drawing+='</g>';
+  } else if(light.result==='dark') {
+    const [x,y]=stop[selected];
+    drawing+=`<path class="vfl-dark-path" d="${path}"/><path class="vfl-dark-mark" d="M${x-6} ${y-6} l12 12 m0 -12 l-12 12"/>`;
   }
-  const outputCaption=closed?'Light continues onward →':light.result==='dark'?'No light reported here':light.result==='wrong'?'Light reported at a different port':`${light.mode==='expected'?'Expected':'Shown'} at ${atCAS?seated?'CAS':'MMC head':'LC'} · ${letter(light.outputStrand)}`;
+  const outputCaption=closed?'Light continues onward →':light.result==='dark'?'No light reported here':light.result==='weak'?'Weak light reported here':light.result==='wrong'?'Light reported at a different port':`${light.mode==='expected'?'Expected':'Shown'} at ${atCAS?seated?'CAS':'MMC head':'LC'} · ${letter(light.outputStrand)}`;
   drawing+=mobile?label(180,583,outputCaption,'centered'):label(650,304,outputCaption);
   return `<svg class="vfl-simple-canvas hardware-art ${mobile?'vfl-mobile':'vfl-desktop'}" viewBox="0 0 ${mobile?'360 610':'900 330'}" role="group" aria-label="VFL light from ${sourceName} to ${atCAS?`CAS ${point}`:fiberPointName(point,s)}">${drawing}</svg>`;
 }
@@ -83,7 +99,7 @@ function pairChecks(s,point) {
     const base=traceKey({...s,selected:point,strand}).replace(/:head$/,'');
     return {strand,head:s.traces[base+':head'],port:s.traces[base]};
   });
-  return `<table class="vfl-checks"><caption>Your checks · ${fiberPointName(point,s)} · from ${fiberPointName(traceFrom(s),s)}</caption><thead><tr><th scope="col">VFL on</th><th scope="col">Loose MMC</th><th scope="col">Through CAS</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${letter(r.strand)}</th><td class="${r.head==='dark'?'issue':''}">${resultLabel(r.head,r.strand)}</td><td class="${r.port==='dark'?'issue':''}">${resultLabel(r.port,r.strand)}</td></tr>`).join('')}</tbody></table>`;
+  return `<table class="vfl-checks"><caption>Your checks · ${fiberPointName(point,s)} · from ${fiberPointName(traceFrom(s),s)}</caption><thead><tr><th scope="col">VFL on</th><th scope="col">Loose MMC</th><th scope="col">Through CAS</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${letter(r.strand)}</th><td class="${['dark','weak'].includes(r.head)?'issue':''}">${resultLabel(r.head,r.strand)}</td><td class="${['dark','weak'].includes(r.port)?'issue':''}">${resultLabel(r.port,r.strand)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 export function simpleVfl(s,paused) {
@@ -94,20 +110,19 @@ export function simpleVfl(s,paused) {
   const select=(field,title,items,current)=>`<label>${title}<select data-field="${field}">${items.map(([v,t])=>`<option value="${v}" ${Number(current)===v?'selected':''}>${t}</option>`).join('')}</select></label>`;
   const points=Array.from({length:s.reach+1},(_,p)=>[p,p===0?'Local LC legs':p===s.count+1?'Remote LC legs':`CAS ${p}`]);
   const status=light.mode==='expected'?'Expected path · no result recorded':light.mode==='simulation'?'Simulated fault · illustration':'Your recorded observation';
-  const obsLabels={seen:'Light seen',swapped:'Other channel',dark:'No light',wrong:'Different port'};
   const next=point+(forward?1:-1);
   return `<section class="vfl-simple" aria-label="VFL strand check">
     <div class="vfl-simple-top"><div><h2>Follow the red light</h2><p>VFL stays on the LC leg. Plug or unplug the MMC to check for light.</p></div><button type="button" data-action="motion" class="motion-toggle">${paused?'Play arrows':'Pause arrows'}</button></div>
     <div class="vfl-simple-route">${select('vfl-from','VFL attached to',points.filter(([p])=>isOptic(s,p)&&p!==s.selected),from)}${select('vfl-to','Look for light at',points.filter(([p])=>p!==from),s.selected)}${atCAS?select('vfl-patch-port','Patched port',Array.from({length:32},(_,i)=>[i+1,i+1]),patch.port):''}</div>
     ${atCAS?`<p class="vfl-hint">FIM destination: CAS ${point} · Port ${s.ports[point-1]}</p>`:''}
-    <div class="vfl-strands" role="group" aria-label="Choose VFL strand">${['tx','rx'].map(strand=>`<button type="button" data-vfl-strand="${strand}" aria-pressed="${s.strand===strand}"><b>${sourceLC?'LC':'Strand'} ${letter(strand)}</b><small>${sourceLC?(strand==='tx')===(from===0)?'Normally TX':'Normally RX':'Trace this strand'}</small></button>`).join('')}</div>
     ${progressDiagram(s,point)}
-    <div class="vfl-view ${paused?'light-paused':''}"><p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${obsLabels[light.result]}`:''}</p>${diagram(s,false)}${diagram(s,true)}</div>
+    <div class="vfl-view ${paused?'light-paused':''}"><p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${observationLabels[light.result]}`:''}</p>${diagram(s,false)}${diagram(s,true)}</div>
     <div class="vfl-connect-actions">${atCAS?`<button type="button" ${patchAction(point,incoming,!patch[incoming],patch.port)}>${patch[incoming]?'Unplug MMC':'Plug MMC in'}</button>${next>=0&&next<=s.reach&&next!==from?`<button type="button" data-action="continue-trace">Connect onward → ${fiberPointName(next,s)}</button>`:''}`:''}</div>
     ${light.blocked?`<p class="vfl-hint">Light exits at the open connection at CAS ${point}, before your selected destination.</p>`:''}
     <div class="vfl-observe" aria-labelledby="test-title"><h3 id="test-title" tabindex="-1">${s.simulated?'Save the simulated check':'Does light reach the expected channel?'}</h3>
+      <div class="vfl-strands" role="group" aria-label="Choose VFL strand">${['tx','rx'].map(strand=>{const result=s.traces[traceKey({...s,selected:point,strand})];return `<button type="button" data-vfl-strand="${strand}" aria-pressed="${s.strand===strand}"><b>${sourceLC?'LC':'Strand'} ${letter(strand)}</b><small>${result?observationLabels[result]:sourceLC?(strand==='tx')===(from===0)?'Normally TX':'Normally RX':'Trace this strand'}</small><span class="vfl-strand-mark ${result??'unknown'}" aria-hidden="true">${resultMark(result)}</span></button>`;}).join('')}</div>
       <p class="vfl-testing"><b>VFL on LC ${letter(s.strand)}</b><span aria-hidden="true"> → </span><span>${destination}</span></p>
-      ${light.closed?'<p>Unplug the onward connection to check this port.</p><button type="button" data-action="open-vfl-end">Unplug onward MMC</button>':s.simulated?'<button type="button" data-action="run">Record this check</button>':`<div class="vfl-observe-buttons"><button type="button" data-action="result-seen" aria-pressed="${light.result==='seen'}">Light seen</button><button type="button" data-action="result-dark" aria-pressed="${light.result==='dark'}">No light</button></div><details class="vfl-other-light" ${['swapped','wrong'].includes(light.result)?'open':''}><summary>Light on another channel or port</summary><div class="vfl-observe-buttons"><button type="button" data-action="result-swapped" aria-pressed="${light.result==='swapped'}">Other channel (${letter(s.strand==='tx'?'rx':'tx')})</button><button type="button" data-action="result-wrong" aria-pressed="${light.result==='wrong'}">Different port</button></div></details><p>Record the real observation to get your next check. The initial glow is only an illustration.</p>`}
+      ${light.closed?'<p>Unplug the onward connection to check this port.</p><button type="button" data-action="open-vfl-end">Unplug onward MMC</button>':`${feedback(light,paused)}${s.simulated?'<button type="button" data-action="run">Record this check</button>':`<div class="vfl-observe-buttons vfl-main-results">${['seen','weak','dark'].map(result=>`<button type="button" data-action="result-${result}" aria-pressed="${light.result===result}">${observationLabels[result]}</button>`).join('')}</div><details class="vfl-other-light" ${['swapped','wrong'].includes(light.result)?'open':''}><summary>Light on another channel or port</summary><div class="vfl-observe-buttons"><button type="button" data-action="result-swapped" aria-pressed="${light.result==='swapped'}">Other channel (${letter(s.strand==='tx'?'rx':'tx')})</button><button type="button" data-action="result-wrong" aria-pressed="${light.result==='wrong'}">Different port</button></div></details><p>${light.result==='weak'?'Dim VFL light is a visual observation, not a loss measurement.':'Record the real observation to get your next check. The initial glow is only an illustration.'}</p>`}`}
     </div>
     ${atCAS?pairChecks(s,point):''}
     <p class="vfl-hint"><a href="./learn.html#polarity-checks">Learn polarity: see TX / RX and trace both strands →</a></p>

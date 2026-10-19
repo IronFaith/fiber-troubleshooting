@@ -1,9 +1,9 @@
-import {translateLines} from './locale.mjs?v=10';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=15';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=17';
+import {translateLines} from './locale.mjs?v=11';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=16';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=18';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
-import {simpleVfl} from './vfl-simple.mjs?v=11';
+import {simpleVfl} from './vfl-simple.mjs?v=12';
 import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
@@ -91,6 +91,22 @@ function update(actions, message='') {
   cases[view]=actions.reduce(changeCase,cases[view]);
   save(); render(true);
   if(message) announce(message);
+}
+// Keep the tapped control at the same screen position when evidence above it
+// changes height. Wait for display-only translation before restoring its offset.
+function updateVflInPlace(actions,message,selector) {
+  const top=host.querySelector(selector)?.getBoundingClientRect().top;
+  update(actions,message);
+  host.querySelector(selector)?.focus({preventScroll:true});
+  if(top!==undefined) requestAnimationFrame(()=>{
+    const control=host.querySelector(selector);
+    if(control) window.scrollBy({top:control.getBoundingClientRect().top-top,behavior:'instant'});
+  });
+}
+function chooseVflStrand(target) {
+  const value=target.dataset.vflStrand;
+  const surface=target.closest('.vfl-strands')?'.vfl-strands':target.closest('.vfl-mobile')?'.vfl-mobile':'.vfl-desktop';
+  updateVflInPlace([{type:'strand',value}],'',`${surface} [data-vfl-strand="${value}"]`);
 }
 function announce(message) {
   document.querySelector('#workbench-status').textContent=message;
@@ -203,7 +219,7 @@ function advice(s) {
   const why=waiting?(s.tool==='loop'?'Compare TX and returning RX with the optic’s limits.':'The red glow illustrates the expected path. Record what you actually see on the selected strand.'):a.why;
   const nextLabel=a.check?.label??(a.suggestion?.tool==='loop'?`Next: ${isOptic(s,a.suggestion.point)?'LC':'MMC'} loop at ${pointName(a.suggestion.point,s)}`:a.suggestion?.tool==='vfl'?`VFL from ${a.suggestion.side==='remote'?'Remote LC legs':'Local LC legs'} → ${fiberPointName(a.suggestion.point,s)}`:'Normalize');
   return `<section class="ts-advice ${waiting?'':a.tone}" aria-labelledby="finding-title"><p class="ts-eyebrow">${s.simulated?'Simulated findings':'Case findings'}${a.route?` · ${escape(a.route)}`:''}</p><h2 id="finding-title" tabindex="-1">${title}</h2>
-    ${a.pair?`<div class="ts-evidence-pair" aria-label="Recorded strand comparison">${a.pair.map(r=>`<div class="${r.result==='dark'||r.result==='wrong'?'issue':r.result?'recorded':'untested'}"><b>VFL on ${r.strand}</b><span>${r.label}</span></div>`).join('')}</div>`:''}
+    ${a.pair?`<div class="ts-evidence-pair" aria-label="Recorded strand comparison">${a.pair.map(r=>`<div class="${['dark','wrong','weak'].includes(r.result)?'issue':r.result?'recorded':'untested'}"><b>VFL on ${r.strand}</b><span>${r.label}</span></div>`).join('')}</div>`:''}
     ${a.evidencePath?`<div class="ts-evidence-path" aria-label="Section to investigate"><span>${a.evidencePath[0]}</span><b aria-hidden="true">→</b><span>${a.evidencePath[1]}</span></div>`:''}
     ${a.isolation?`<p class="ts-scope"><b>${a.isolation.strand==='tx'?'A':'B'}</b> · <strong>${a.isolation.label}</strong></p>`:''}
     <p>${why}</p>${a.scope?`<p class="ts-scope">${a.scope}</p>`:''}${a.comparisonFinding?`<p class="ts-comparison-finding"><b>What this adds</b>${a.comparisonFinding}</p>`:''}${a.caution?`<p class="ts-caution">${a.caution}</p>`:''}
@@ -322,7 +338,7 @@ function choosePoint(point) {
 }
 host.addEventListener('keydown',event=>{
   const strand=event.target.closest('[data-vfl-strand]');
-  if(strand&&strand.tagName.toLowerCase()!=='button'&&['Enter',' '].includes(event.key)){event.preventDefault();update([{type:'strand',value:strand.dataset.vflStrand}]);host.querySelector(`.vfl-strands [data-vfl-strand="${strand.dataset.vflStrand}"]`)?.focus({preventScroll:true});return;}
+  if(strand&&strand.tagName.toLowerCase()!=='button'&&['Enter',' '].includes(event.key)){event.preventDefault();chooseVflStrand(strand);return;}
   const patch=event.target.closest('[data-patch-point]');
   if(patch&&['Enter',' '].includes(event.key)&&patch.tagName.toLowerCase()!=='button'&&patch.tagName.toLowerCase()!=='select') {event.preventDefault();patchConnection({type:'patch',point:Number(patch.dataset.patchPoint),side:patch.dataset.patchSide,connected:patch.dataset.patchConnected==='true',...(patch.dataset.patchPort?{port:Number(patch.dataset.patchPort)}:{})});return;}
   const point=event.target.closest('[data-point]');
@@ -330,7 +346,7 @@ host.addEventListener('keydown',event=>{
 });
 host.addEventListener('click',async event=>{
   const strand=event.target.closest('[data-vfl-strand]');
-  if(strand){const value=strand.dataset.vflStrand;update([{type:'strand',value}]);host.querySelector(`.vfl-strands [data-vfl-strand="${value}"]`)?.focus({preventScroll:true});return;}
+  if(strand){chooseVflStrand(strand);return;}
   const patch=event.target.closest('[data-patch-connected]');
   if(patch){patchConnection({type:'patch',point:Number(patch.dataset.patchPoint),side:patch.dataset.patchSide,connected:patch.dataset.patchConnected==='true',...(patch.dataset.patchPort?{port:Number(patch.dataset.patchPort)}:{})});return;}
   const point=event.target.closest('[data-point]');
@@ -364,7 +380,7 @@ host.addEventListener('click',async event=>{
   if(action==='test-result') {host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.vfl-observe, .ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}
   if(action==='start-loop') {placeTool('lc',0);return;}
   if(action==='motion') {
-    paused=!paused;host.querySelectorAll('.ts-map,.vfl-view').forEach(el=>el.classList.toggle('light-paused',paused));target.textContent=paused?'Play arrows':'Pause arrows';return;
+    paused=!paused;host.querySelectorAll('.ts-map,.vfl-view,.vfl-feedback').forEach(el=>el.classList.toggle('light-paused',paused));target.textContent=paused?'Play arrows':'Pause arrows';return;
   }
   if(action==='show-path') {centerMap();host.querySelector('.ts-map-card').scrollIntoView({block:'start',behavior:'instant'});host.querySelector('.ts-map').focus({preventScroll:true});return;}
   if(action==='copy') {
@@ -396,9 +412,13 @@ host.addEventListener('click',async event=>{
     return;
   }
   else if(['loop','vfl','link'].includes(action)) update([{type:'tool',tool:action}]);
-  else if(action==='run') update([...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record'}],'Simulated test recorded.');
   else if(action.startsWith('service-')) update([{type:'service',value:action.slice(8)}],'Restored link observation recorded.');
-  else if(action.startsWith('result-')) update([...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record',result:action.slice(7)}],'Observation recorded.');
+  else if(action==='run'||action.startsWith('result-')) {
+    const actions=[...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record',...(action==='run'?{}:{result:action.slice(7)})}];
+    const message=action==='run'?'Simulated test recorded.':'Observation recorded.';
+    if(s.tool==='vfl') {updateVflInPlace(actions,message,`.vfl-observe [data-action="${action}"]`);return;}
+    update(actions,message);
+  }
   else if(action==='next') {const actions=nextCheckActions(s),next=assessment(s).suggestion;if(actions.length){update(actions,'Next check set up in the diagram. Match the real setup, then record your result.');host.querySelector('.vfl-observe')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#test-title')?.focus({preventScroll:true});return;}if(next){if(next.tool==='link')normalizeSetup();else if(next.tool==='vfl'){update([{type:'trace',from:next.side==='remote'?s.count+1:0,to:next.point}],'VFL placed. Choose its source and where you expect light, then enter your observation.');host.querySelector('.vfl-simple')?.scrollIntoView({block:'start',behavior:'instant'});}else placeTool(isOptic(s,next.point)?'lc':'mmc',next.point,false,next.side);}}
   else if(action.startsWith('review-vfl-')) {const [,,from,to,strand,head]=action.split('-');const review=[{type:'trace',from,to},{type:'strand',value:strand}];update(review);if(Boolean(head)!==(traceStop(cases[view])?.kind==='head'))announce('The connections changed. Set up this recorded test again before rechecking.');}
   else if(action.startsWith('review-loop-')) {const [,,point,side]=action.split('-');update([{type:'place',kind:isOptic(s,Number(point))?'lc':'mmc',point:Number(point)},{type:'loop-side',value:side??'local'}]);}
