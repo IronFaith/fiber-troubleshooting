@@ -1,10 +1,9 @@
-import {translateLines} from './locale.mjs?v=15';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=18';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=20';
+import {translateLines} from './locale.mjs?v=16';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=19';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=21';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
-import {simpleVfl} from './vfl-simple.mjs?v=16';
-import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
+import {simpleVfl} from './vfl-simple.mjs?v=17';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -118,7 +117,8 @@ function changeVflPort(port,selector) {
   if(point===undefined||isOptic(s,point)) return;
   const patch=patchAt(s,point),side=traceFrom(s)<s.selected?'rear':'front';
   if(!Number.isInteger(port)||port<1||port>32) {
-    host.querySelector('[data-field="vfl-patch-port"]').value=patch.port;
+    const input=host.querySelector('[data-field="vfl-patch-port"]');
+    if(input) input.value=patch.port;
     announce('Choose a port from 1 to 32.');
     return;
   }
@@ -130,9 +130,19 @@ function changeVflPort(port,selector) {
   updateVflInPlace(actions,message,selector);
   if(host.querySelector(selector)?.disabled) host.querySelector('[data-field="vfl-patch-port"]')?.focus({preventScroll:true});
 }
-function announce(message) {
+function changeWorkspacePort(input) {
+  const s=cases[view],point=Number(input.dataset.pathPoint),port=Number(input.value);
+  const current=s.tool==='vfl'?patchAt(s,point).port:s.ports[point-1];
+  if(!Number.isInteger(port)||port<1||port>32) {input.value=current;announce('Choose a port from 1 to 32.',true);return;}
+  if(port===current) return;
+  const action=s.tool==='vfl'?{type:'patch',point,side:traceFrom(s)<point?'rear':'front',connected:true,port}:{type:'port',point,value:port};
+  const message=s.tool==='vfl'?'Viewing port updated. Recheck this section.':'Path updated. Earlier checks kept in history; current findings cleared.';
+  if(deferPortRender) {update([action],message,false);return;}
+  updateVflInPlace([action],message,`[data-field="workspace-port"][data-path-point="${point}"]`);
+}
+function announce(message,showHint=false) {
   document.querySelector('#workbench-status').textContent=message;
-  const hint=host.querySelector('#ts-tool-hint'); if(hint) hint.textContent=message;
+  const hint=host.querySelector('#ts-tool-hint'); if(hint&&showHint) hint.textContent=message;
 }
 function selectTool(kind) {
   selectedTool=kind;
@@ -141,22 +151,20 @@ function selectTool(kind) {
     const point=Number(el.dataset.point);
     el.classList.toggle('ts-can-drop',Boolean(kind)&&canPlaceTool(cases[view],kind,point));
   });
-  announce(kind?`${toolNames[kind]}: ${kind==='lc'?'drop on either optic.':kind==='mmc'?'drop on a reachable CAS.':'attach to disconnected local or remote LC legs, then choose where to check for light.'} You can also tap the target.`:'Drag a tool onto the path, or tap a tool then its target.');
+  announce(kind?kind==='lc'?'LC loopback: tap either optic.':kind==='mmc'?'MMC loopback: tap a CAS.':'VFL: tap Local or Remote LC legs.':'Drag a tool onto the path, or tap a tool then its target.',true);
 }
 function placeTool(kind,point,atSource=false,side) {
-  if(!canPlaceTool(cases[view],kind,point)) {announce(kind==='vfl'?'Attach VFL only to disconnected LC legs. CAS and MMC are viewing points.':'That tool does not match this point. Choose a highlighted target.');return;}
+  if(!canPlaceTool(cases[view],kind,point)) {announce(kind==='vfl'?'Attach VFL only to disconnected LC legs. CAS and MMC are viewing points.':'That tool does not match this point. Choose a highlighted target.',true);return;}
   selectedTool=null;
   update([{type:'place',kind,point,atSource},...(side?[{type:'loop-side',value:side}]:[])],kind==='vfl'?'VFL placed. Choose its source and where you expect light, then enter your observation.':`${toolNames[kind]} placed. Enter the result you observed.`);
-  host.querySelector('[data-action="test-result"]')?.focus({preventScroll:true});
-  if(window.matchMedia('(max-width:700px)').matches) host.querySelector('.vfl-simple, .ts-map-card')?.scrollIntoView({block:'start',behavior:'instant'});
+  centerMap(cases[view].selected);
+  host.querySelector(`[data-pick-tool="${kind}"]`)?.focus({preventScroll:true});
 }
 function removeTool() {
   update([{type:'remove'}],'Tool removed; connectors left unplugged. Results kept.');
 }
 function normalizeSetup() {
   update([{type:'normalize'}],'Setup normalized. Your recorded coverage stays on the path.');
-  centerMap(0);
-  host.querySelector('.ts-map-card')?.scrollIntoView({block:'start',behavior:'instant'});
 }
 const toolDrag=mountToolDrag(host,{select:selectTool,activate:kind=>kind==='vfl'&&canPlaceTool(cases[view],kind,cases[view].selected)?placeTool('vfl',cases[view].selected,true):selectTool(kind),place:placeTool,remove:removeTool,valid:(kind,point)=>canPlaceTool(cases[view],kind,point),announce,getSelected:()=>selectedTool});
 function patchConnection(action) {
@@ -167,8 +175,17 @@ function patchConnection(action) {
 const patchDrag=mountPatchDrag(host,patchConnection,announce);
 
 function tray(s) {
-  if(s.tool==='vfl') return `<div class="ts-tool-tray vfl-active-tray" aria-label="Test tools"><b>VFL on fiber</b>${button('remove-tool','Remove VFL')}${button('normalize','Normalize')}</div>`;
-  return `<div class="ts-tool-tray" aria-label="Test tools"><div class="ts-tool-items">${Object.entries(toolNames).map(([kind,name])=>`<button type="button" class="ts-tool-pick" data-pick-tool="${kind}" aria-pressed="${selectedTool===kind}" aria-label="Pick up ${name}">${toolArt(kind)}<span><b>${name}</b><small>${kind==='lc'?'At either optic':kind==='mmc'?'At a cassette':'Disconnected LC legs only'}</small></span></button>`).join('')}</div><div class="ts-tray-actions"><span>Drag a placed tool back here to remove.</span>${button('test-result','Enter result ↓',s.tool==='link'?'disabled':'')}${button('remove-tool','Remove tool',`class="ts-remove" aria-label="Remove placed tool" ${s.tool==='link'?'disabled':''}`)}${button('normalize','Normalize',`class="ts-normalize" ${s.tool==='link'&&!s.disconnected?.length?'disabled':''}`)}</div><p id="ts-tool-hint">Drag a tool onto the path, or tap a tool then its target.</p></div>`;
+  const mounted=s.tool==='vfl'?'vfl':s.tool==='loop'?isOptic(s,s.selected)?'lc':'mmc':null;
+  return `<div class="ts-tool-tray" aria-label="Test tools"><div class="ts-tool-items">${Object.entries(toolNames).map(([kind,name])=>`<button type="button" class="ts-tool-pick ${mounted===kind?'is-mounted':''}" data-pick-tool="${kind}" aria-pressed="${selectedTool===kind}" aria-label="Pick up ${name}">${toolArt(kind)}<span><b>${name}</b></span></button>`).join('')}${button('normalize','<span aria-hidden="true">↺</span><b>Normalize</b>',`class="ts-normalize" ${s.tool==='link'&&!s.disconnected?.length?'disabled':''}`)}</div><p id="ts-tool-hint">Drag a tool onto the path, or tap a tool then its target.</p></div>`;
+}
+
+function pathBar(s) {
+  const coverage=pathCoverage(s);
+  return `<nav class="ts-path-bar" aria-label="Your test path">${Array.from({length:s.count+2},(_,point)=>{
+    const optic=isOptic(s,point),port=optic?null:s.tool==='vfl'?patchAt(s,point).port:s.ports[point-1],accessible=point<=s.reach;
+    const mark=coverage.points[point]?.issue?'!':coverage.points[point]?.loop==='pass'?'✓':'';
+    return `<div class="ts-path-point ${s.selected===point?'is-focused':''} ${s.tool==='vfl'&&traceFrom(s)===point?'is-source':''}"><button type="button" data-point="${point}" aria-pressed="${s.selected===point}" ${accessible?'':'disabled'}><b>${point===0?'Local':point===s.count+1?'Remote':`CAS ${point}`}</b><span class="ts-path-mark" aria-hidden="true">${mark}</span></button>${optic?`<small>${s.tool==='vfl'&&traceFrom(s)===point?'VFL source':'Optic'}</small>`:`<label><span>Port</span><input type="number" inputmode="numeric" min="1" max="32" step="1" required data-field="workspace-port" data-path-point="${point}" value="${port}" aria-label="CAS ${point} · ${s.tool==='vfl'?'Viewing port':'Mapped port'}" ${accessible?'':'disabled'}></label>`}</div>`;
+  }).join('')}</nav>`;
 }
 
 function setup(s) {
@@ -222,10 +239,9 @@ function controls(s) {
   if(tool==='link'&&canVerifyService(s)) return `<details class="ts-service-check" ${serviceCheckOpen?'open':''}><summary id="test-title"><span><b>Final check · normal operation</b><small>${s.service==='good'?'Yes · link working':s.service==='bad'?'No · still a problem':'Use after reconnecting the real service path.'}</small></span></summary><div class="ts-service-body"><p>A loop or VFL pass checks only part of the connection. This final check confirms whether the devices communicate after the tools are removed.</p><p>Reconnect the mapped path. Check current TX/RX against the optic limits and confirm link status at the accessible devices.</p><div class="ts-result-buttons">${button('service-good','Yes · link working',`aria-pressed="${s.service==='good'}"`)}${button('service-bad','No · still a problem',`aria-pressed="${s.service==='bad'}"`)}</div><p class="ts-note">Not ready? Keep testing; this check is optional until you finish.</p></div></details>`;
   if(tool==='link') return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">${hasResults?'Choose the next test':'Place your first test'}</h2>${hasResults?'<p class="ts-tool-caption">Place a tool for your next check. Earlier observations stay on the path and in Case history.</p>':'<p class="ts-tool-caption">Drag LC onto either optic to start. At a cassette, choose the optic under test. Earlier findings stay in this case.</p>'}</section>`;
   const labels=tool==='loop'?{pass:'Yes · passes',dark:'No · no return light',weak:'Light returns, but weak'}:traceLabels;
-  return `<section class="ts-control-card" aria-labelledby="test-title"><div class="ts-section-top"><div><p class="ts-test-location">${tool==='vfl'?'VFL':isOptic(s,point)?'LC loopback':'MMC loopback'} · ${tool==='vfl'?traceName(s):pointName(point,s)}</p><h2 id="test-title" tabindex="-1">${tool==='loop'?'Does the loop pass?':`What did you see at ${fiberPointName(point,s)}?`}</h2></div>${button('link','Remove tool','class="ts-remove"')}</div>
-    <div class="ts-fields">${tool==='loop'&&!isOptic(s,point)&&s.reach===s.count+1?select('loop-side','Optic under test',[['local','Local optic'],['remote','Remote optic']],s.loopSide):''}${!isOptic(s,point)?select('port',`CAS ${point} ${tool==='vfl'?'expected':'mapped'} port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[point-1]):''}</div>
+  return `<section class="ts-control-card" aria-labelledby="test-title"><div class="ts-section-top"><div><p class="ts-test-location">${tool==='vfl'?'VFL':isOptic(s,point)?'LC loopback':'MMC loopback'} · ${tool==='vfl'?traceName(s):pointName(point,s)}</p><h2 id="test-title" tabindex="-1">${tool==='loop'?'Does the loop pass?':`What did you see at ${fiberPointName(point,s)}?`}</h2></div></div>
+    <div class="ts-fields">${tool==='loop'&&!isOptic(s,point)&&s.reach===s.count+1?select('loop-side','Optic under test',[['local','Local optic'],['remote','Remote optic']],s.loopSide):''}</div>
     ${tool==='loop'?`<p class="ts-loop-context"><b>${isOptic(s,point)?`${pointName(point,s)} · TX → loop → RX`:`Light path: ${pointName(loopSource(s),s)} → ${pointName(point,s)} → ${pointName(loopSource(s),s)}`}</b><span>${isOptic(s,point)?'Direct loop · external fiber bypassed':`Loop faces ${pointName(loopSource(s),s)}. Read returning RX at that device.`}</span></p>`:''}
-    ${tool==='loop'&&!isOptic(s,point)?`<svg class="ts-loop-closeup" viewBox="0 0 360 140" role="img" aria-label="MMC loopback">${mmcLoopbackConnection(`CAS ${point}`,s.ports[point-1])}</svg>`:''}
     <p class="ts-tool-caption">${tool==='loop'?'Use the correct loop mapping and required attenuation. Check TX and returning RX against this optic’s limits.':`The VFL supplies red light at ${fiberPointName(traceFrom(s),s)}. Check the isolated fiber end at ${fiberPointName(point,s)}. ${traceFrom(s)===0||point===0?'The optic-side LC leg is unplugged; the optic itself is not part of this trace.':''}`}</p>
     ${tool==='vfl'?select('strand','Strand to trace',[['tx','Normally local TX → remote RX'],['rx','Normally remote TX → local RX']],s.strand):''}
     ${s.simulated?'<p class="ts-prepared">Practice only · results come from the chosen fault.</p>':tool==='vfl'?`<label class="ts-ready"><input type="checkbox" data-field="ready" ${s.ready?'checked':''}><span>The test fiber is disconnected from the optics; VFL is attached to an LC leg.</span></label>`:''}
@@ -283,44 +299,24 @@ function results(s) {
     ${history.length?`<ol class="ts-history-list">${entries}</ol>`:'<p class="ts-note">No tests recorded. Place a tool, then enter the result you observed.</p>'}
     <p class="ts-note">Saved in this browser tab · up to 100 checks. Retest keeps earlier checks and starts fresh findings.</p><div id="ts-copy-fallback"></div></section>`;
 }
-function mobileActions(s) {
-  if(s.tool==='vfl') return '';
-  const a=assessment(s), recorded=s.tool==='loop'?loopResult(s):s.tool==='vfl'?s.traces[traceKey(s)]:null;
-  const action=s.tool!=='link'&&(!recorded||!s.ready)?'test-result':s.tool==='link'&&s.disconnected?.length?'normalize':recorded?'findings':a.check||a.suggestion?'next':'findings';
-  const label=action==='test-result'?'Record result':action==='normalize'?'Normalize':action==='next'?'Next check':'See findings';
-  const context=s.tool==='vfl'?`VFL · check ${fiberPointName(s.selected,s)}`:s.tool==='loop'?`${s.loopSide==='remote'?'Remote loop':'Local loop'} · ${pointName(s.selected,s)} · ${recorded?loopLabels[recorded]:'loop placed'}`:'Choose a test, then record what you find';
-  return `<nav class="ts-mobile-actions" aria-label="Current test actions"><span>${context}</span><div>${button('view-test','View path')}${button(action,label,'class="ts-mobile-primary"')}</div></nav>`;
-}
-function mobilePoints(s) {
-  const coverage=pathCoverage(s),focused=s.tool==='link'?0:s.selected;
-  const mark=point=>coverage.points[point]?.issue?' !':coverage.points[point]?.loop==='pass'?' ✓':'';
-  return `<nav class="ts-point-picker" aria-label="View a point on the path">${Array.from({length:s.count+2},(_,point)=>button(`focus-point-${point}`,`<span>${point===0?'Optic':point===s.count+1?'Remote':`CAS ${point}`}</span><span>${mark(point)}</span>`,`aria-pressed="${point===focused}"`)).join('')}</nav>`;
-}
 function render(preservePosition=false) {
   portRenderPending=false;
   const scrollLeft=host.querySelector('.ts-map')?.scrollLeft??0;
-  const patchScroll=host.querySelector('.ts-patch-scroll')?.scrollLeft??0;
-  toolDrag.reset();
-  patchDrag.reset();
-  selectedTool=null;
+  const pathScroll=host.querySelector('.ts-path-bar')?.scrollLeft??0;
+  toolDrag.reset(); patchDrag.reset(); selectedTool=null;
   guided.hidden=view!=='guided'; host.hidden=view==='guided';
   document.querySelectorAll('[data-workbench-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.workbenchView===view)));
   if(view==='guided') return;
   const s=cases[view];
-  if(s.tool==='vfl') {
-    host.innerHTML=`${setup(s)}${caseBar(s)}${identityChecks(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${advice(s)}${results(s)}${mobileActions(s)}`;
-    return;
-  }
   const freshCase=newCaseStarted?`<section class="ts-new-case" aria-labelledby="new-case-title"><div role="status"><h2 id="new-case-title" tabindex="-1">New case started</h2><p>Choose your path, then place a tool to begin.</p></div>${button('undo','Undo')}</section>`:'';
-  host.innerHTML=`${freshCase}${setup(s)}${caseBar(s)}${identityChecks(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`${s.loopSide==='remote'?'Remote loop':'Local loop'} at ${pointName(s.selected,s)} · ${loopResult(s)?loopLabels[loopResult(s)]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
-    ${mobilePoints(s)}<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
-    <div class="ts-legend"><span>↔ Scroll to follow the path</span>${s.tool==='link'&&!s.simulated?'<span class="ts-key-ir">Blue / teal: loop checked</span><span class="ts-key-red">Red: VFL continuity recorded</span><span>Amber: investigate · dashed: untested</span><span>A = local TX → remote RX · B = remote TX → local RX</span>':'<span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span>'}</div>
-    </section>
-    <div class="ts-work-grid">${controls(s)}${advice(s)}</div></div>${results(s)}${mobileActions(s)}`;
-  if(preservePosition) host.querySelector('.ts-map').scrollLeft=scrollLeft;
-  else centerMap();
-  if(window.matchMedia('(max-width:700px)').matches) centerMap(s.tool==='link'?0:s.selected);
-  if(preservePosition&&host.querySelector('.ts-patch-scroll'))host.querySelector('.ts-patch-scroll').scrollLeft=patchScroll;
+  const status=s.tool==='vfl'?'VFL on fiber':s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`${s.loopSide==='remote'?'Remote loop':'Local loop'} at ${pointName(s.selected,s)} · ${loopResult(s)?loopLabels[loopResult(s)]:'waiting for your result'}`;
+  const legend=s.tool==='link'&&!s.simulated?'<span class="ts-key-ir">Blue / teal: loop checked</span><span class="ts-key-red">Red: VFL continuity recorded</span><span>Amber: investigate · dashed: untested</span>':'<span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span>';
+  const visual=s.tool==='vfl'?simpleVfl(s,paused,{embedded:true}):`<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div><div class="ts-legend"><span>↔ Scroll to follow the path</span>${legend}</div>${controls(s)}`;
+  host.innerHTML=`${s.simulated?setup(s):''}<div class="ts-workspace-layout"><section id="ts-workspace" class="ts-workspace" aria-label="Visual test path">${freshCase}<div class="ts-workspace-heading"><h2>Your test path</h2><div class="ts-cas-count" role="group" aria-label="Passives on path">${button('cas-remove','−',`aria-label="Remove last CAS" ${s.count===1?'disabled':''}`)}<b>${s.count} CAS</b>${button('cas-add','+',`aria-label="Add CAS" ${s.count===4?'disabled':''}`)}</div></div>
+    ${pathBar(s)}${tray(s)}<p class="ts-workspace-state">${status}</p><div class="ts-workspace-test">${visual}</div><div class="ts-workspace-actions">${button('remove-tool','Remove tool',`aria-label="Remove placed tool" ${s.tool==='link'?'disabled':''}`)}${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>${!s.simulated?setup(s):''}</section>
+    <aside class="ts-workspace-findings">${caseBar(s)}${identityChecks(s)}${readings(s)}${advice(s)}</aside></div>${results(s)}`;
+  host.querySelector('.ts-path-bar').scrollLeft=pathScroll;
+  if(host.querySelector('.ts-map')) {if(preservePosition)host.querySelector('.ts-map').scrollLeft=scrollLeft;else centerMap();}
 }
 
 function showFindings() {
@@ -345,8 +341,8 @@ function centerPatch() {
 
 document.querySelectorAll('[data-workbench-view]').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.workbenchView;selectedTool=null;newCaseStarted=false;save();render();}));
 document.addEventListener('pointerdown',event=>{
-  const input=host.querySelector('[data-field="vfl-patch-port"]');
-  deferPortRender=Boolean(input&&document.activeElement===input&&event.target!==input);
+  const input=document.activeElement;
+  deferPortRender=Boolean(input?.matches('[data-field="vfl-patch-port"],[data-field="workspace-port"]')&&host.contains(input)&&event.target!==input);
 },true);
 function flushPortEdit() {deferPortRender=false;if(portRenderPending) render(true);}
 document.addEventListener('click',flushPortEdit);
@@ -355,6 +351,7 @@ host.addEventListener('change',event=>{
   const field=event.target.dataset.field;
   if(!field) return;
   const value=event.target.value,s=cases[view];
+  if(field==='workspace-port') {changeWorkspacePort(event.target);return;}
   if(field.startsWith('identity-')) {update([{type:'identity',key:field.slice(9),value:event.target.checked}],'Path identity updated. Optical observations are unchanged.');host.querySelector(`[data-field="${field}"]`)?.focus({preventScroll:true});return;}
   if(field==='vfl-patch-port') {changeVflPort(Number(value),'[data-field="vfl-patch-port"]');return;}
   if(field==='patch-port') {patchConnection({type:'patch',point:Number(event.target.dataset.patchPoint),side:event.target.dataset.patchSide,connected:true,port:Number(value)});host.querySelector('[data-field="patch-port"]')?.focus({preventScroll:true});return;}
@@ -369,13 +366,19 @@ function choosePoint(point) {
   if(selectedTool) {placeTool(selectedTool,point,true);return;}
   if(cases[view].tool==='vfl') {
     if(point===traceFrom(cases[view])) {announce('The VFL starts here. Choose a different point to check for light.');return;}
-    update([{type:'trace',from:traceFrom(cases[view]),to:point}],'Viewing point changed. Confirm the setup, then record what you see.');return;
+    updateVflInPlace([{type:'trace',from:traceFrom(cases[view]),to:point}],'Viewing point changed. Confirm the setup, then record what you see.',`.ts-path-bar [data-point="${point}"]`);return;
   }
-  if(cases[view].tool!=='link') {announce('To move a tool, drag its handle or select it from the tray.');return;}
+  if(cases[view].tool!=='link') {centerMap(point);return;}
   update([{type:'select',point}]);
+  centerMap(point);
   host.querySelector(`[data-point="${point}"]`)?.focus({preventScroll:true});
 }
 host.addEventListener('keydown',event=>{
+  if(event.target.dataset.field==='workspace-port'&&['Enter','Tab'].includes(event.key)) {
+    deferPortRender=false;
+    if(event.key==='Enter') event.preventDefault();
+    changeWorkspacePort(event.target);return;
+  }
   if(event.target.dataset.field==='vfl-patch-port'&&['Enter','Tab'].includes(event.key)) {
     deferPortRender=false;
     if(event.key==='Enter') event.preventDefault();
@@ -387,7 +390,7 @@ host.addEventListener('keydown',event=>{
   const patch=event.target.closest('[data-patch-point]');
   if(patch&&['Enter',' '].includes(event.key)&&patch.tagName.toLowerCase()!=='button'&&patch.tagName.toLowerCase()!=='select') {event.preventDefault();patchConnection({type:'patch',point:Number(patch.dataset.patchPoint),side:patch.dataset.patchSide,connected:patch.dataset.patchConnected==='true',...(patch.dataset.patchPort?{port:Number(patch.dataset.patchPort)}:{})});return;}
   const point=event.target.closest('[data-point]');
-  if(point&&['Enter',' '].includes(event.key)){event.preventDefault();choosePoint(Number(point.dataset.point));}
+  if(point&&point.tagName.toLowerCase()!=='button'&&['Enter',' '].includes(event.key)){event.preventDefault();choosePoint(Number(point.dataset.point));}
 });
 host.addEventListener('click',async event=>{
   deferPortRender=false;
@@ -400,6 +403,11 @@ host.addEventListener('click',async event=>{
   const target=event.target.closest('[data-action]');
   if(!target) return;
   const action=target.dataset.action,s=cases[view];
+  if(action==='cas-add'||action==='cas-remove') {
+    updateVflInPlace([{type:'count',value:s.count+(action==='cas-add'?1:-1)}],'Path updated. Earlier checks kept in history; current findings cleared.',`[data-action="${action}"]`);
+    if(host.querySelector(`[data-action="${action}"]`)?.disabled) host.querySelector('.ts-cas-count button:not(:disabled)')?.focus({preventScroll:true});
+    return;
+  }
   if(action.startsWith('vfl-view-')) {
     const point=Number(action.slice(9));
     if(point!==s.selected) updateVflInPlace([{type:'trace',from:traceFrom(s),to:point}],'Viewing point changed. Confirm the setup, then record what you see.',`[data-action="${action}"]`);
@@ -407,7 +415,7 @@ host.addEventListener('click',async event=>{
   }
   if(action.startsWith('vfl-port-')) {
     const point=traceStop(s).point,port=patchAt(s,point).port;
-    changeVflPort(action==='vfl-port-fim'?s.ports[point-1]:port+(action==='vfl-port-plus'?1:-1),action==='vfl-port-fim'?'[data-field="vfl-patch-port"]':`[data-action="${action}"]`);
+    changeVflPort(action==='vfl-port-fim'?s.ports[point-1]:port+(action==='vfl-port-plus'?1:-1),action==='vfl-port-fim'?`[data-field="workspace-port"][data-path-point="${point}"]`:`[data-action="${action}"]`);
     return;
   }
   if(action.startsWith('focus-point-')) {
@@ -419,7 +427,7 @@ host.addEventListener('click',async event=>{
   }
   if(action==='view-test') {
     centerMap(s.tool==='link'?0:s.selected);
-    const target=host.querySelector('.vfl-view, .ts-map-card');
+    const target=host.querySelector('.ts-workspace');
     target?.scrollIntoView({block:'start',behavior:'instant'});
     return;
   }
@@ -436,7 +444,7 @@ host.addEventListener('click',async event=>{
   if(action==='motion') {
     paused=!paused;host.querySelectorAll('.ts-map,.vfl-view').forEach(el=>el.classList.toggle('light-paused',paused));target.textContent=paused?'Play arrows':'Pause arrows';return;
   }
-  if(action==='show-path') {centerMap();host.querySelector('.ts-map-card').scrollIntoView({block:'start',behavior:'instant'});host.querySelector('.ts-map').focus({preventScroll:true});return;}
+  if(action==='show-path') {centerMap();host.querySelector('.ts-workspace')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('.ts-map')?.focus({preventScroll:true});return;}
   if(action==='copy') {
     const a=assessment(s);
     const text=translateLines([s.simulated?'SIMULATED FIBER CASE':'FIBER OBSERVATIONS — entered manually',`Reach: ${pointName(s.reach,s)}; ${s.count} passives on path`,
@@ -453,7 +461,7 @@ host.addEventListener('click',async event=>{
     catch {const area=document.createElement('textarea');area.value=text;area.readOnly=true;area.setAttribute('aria-label','Findings to copy');host.querySelector('#ts-copy-fallback').replaceChildren(area);area.select();}
     return;
   }
-  if(action==='undo') {if(undo[view].length){const wasNewCase=newCaseStarted;newCaseStarted=false;cases[view]=undo[view].pop();save();render();if(wasNewCase){host.querySelector('.vfl-simple, .ts-map-card')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#test-title')?.focus({preventScroll:true});return;}}}
+  if(action==='undo') {if(undo[view].length){const wasNewCase=newCaseStarted;newCaseStarted=false;cases[view]=undo[view].pop();save();render();if(wasNewCase){host.querySelector('.ts-workspace')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#test-title')?.focus({preventScroll:true});return;}}}
   else if(action==='retest') {update([{type:'retest'}],'Retest started. Earlier checks kept; enter fresh results after your change.');host.querySelector('#test-title')?.focus({preventScroll:true});}
   else if(action==='reset') {
     undo[view].push(s);
@@ -471,12 +479,21 @@ host.addEventListener('click',async event=>{
     const actions=[...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record',...(action==='run'?{}:{result:action.slice(7)})}];
     const message=action==='run'?'Simulated test recorded.':'Observation recorded.';
     if(s.tool==='vfl') {updateVflInPlace(actions,message,`.vfl-observe [data-action="${action}"]`);return;}
-    update(actions,message);
+    updateVflInPlace(actions,message,`.ts-control-card [data-action="${action}"]`);return;
   }
-  else if(action==='next') {const actions=nextCheckActions(s),next=assessment(s).suggestion;if(actions.length){update(actions,'Next check set up in the diagram. Match the real setup, then record your result.');host.querySelector('.vfl-observe')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#test-title')?.focus({preventScroll:true});return;}if(next){if(next.tool==='link')normalizeSetup();else if(next.tool==='vfl'){update([{type:'trace',from:next.side==='remote'?s.count+1:0,to:next.point}],'VFL placed. Choose its source and where you expect light, then enter your observation.');host.querySelector('.vfl-simple')?.scrollIntoView({block:'start',behavior:'instant'});}else placeTool(isOptic(s,next.point)?'lc':'mmc',next.point,false,next.side);}}
+  else if(action==='next') {
+    const actions=nextCheckActions(s),next=assessment(s).suggestion;
+    if(actions.length) update(actions,'Next check set up in the diagram. Match the real setup, then record your result.');
+    else if(next) {
+      if(next.tool==='link') normalizeSetup();
+      else if(next.tool==='vfl') update([{type:'trace',from:next.side==='remote'?s.count+1:0,to:next.point}],'VFL placed. Choose its source and where you expect light, then enter your observation.');
+      else placeTool(isOptic(s,next.point)?'lc':'mmc',next.point,false,next.side);
+    }
+    if(actions.length||next) {centerMap();host.querySelector('.ts-workspace')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('.ts-path-bar [aria-pressed="true"]')?.focus({preventScroll:true});}
+    return;
+  }
   else if(action.startsWith('review-vfl-')) {const [,,from,to,strand,head]=action.split('-');const review=[{type:'trace',from,to},{type:'strand',value:strand}];update(review);if(Boolean(head)!==(traceStop(cases[view])?.kind==='head'))announce('The connections changed. Set up this recorded test again before rechecking.');}
   else if(action.startsWith('review-loop-')) {const [,,point,side]=action.split('-');update([{type:'place',kind:isOptic(s,Number(point))?'lc':'mmc',point:Number(point)},{type:'loop-side',value:side??'local'}]);}
-  if(action.startsWith('result-') || action==='run' || action.startsWith('service-')) {showFindings();return;}
   host.querySelector(`[data-action="${action}"]`)?.focus({preventScroll:true});
 });
 render();

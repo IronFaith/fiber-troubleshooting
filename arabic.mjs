@@ -2604,4 +2604,11 @@ export const arabicMessages = [
   ["Check the unverified strand", "افحص الليف غير المختبر"],
   ["Visible continuity and loop passes do not measure service loss. Check current TX/RX against each optic’s limits; if power is normal, verify optic compatibility, port state, speed and FEC settings.", "الاستمرارية المرئية ونجاح الحلقات لا يقيسان الفقد أثناء الخدمة. قارن TX/RX الحاليين بحدود كل وحدة؛ إذا كانت القدرة طبيعية، فتحقق من توافق الوحدات وحالة المنفذ والسرعة وإعدادات FEC."],
   ["Check current optical readings and measure loss on the accessible path. Request remote-end readings and checks for the section you cannot reach.", "افحص القراءات الضوئية الحالية وقس الفقد على المسار المتاح. اطلب قراءات وفحوص الطرف البعيد للجزء الذي لا يمكنك الوصول إليه."],
+  ["Add CAS","إضافة CAS"],
+  ["Remove last CAS","إزالة آخر CAS"],
+  ["Port","منفذ"],
+  ["CAS {0} · Mapped port","CAS {0} · المنفذ المحدد"],
+  ["LC loopback: tap either optic.","حلقة LC: اضغط على إحدى الوحدتين الضوئيتين."],
+  ["MMC loopback: tap a CAS.","حلقة MMC: اضغط على CAS."],
+  ["VFL: tap Local or Remote LC legs.","VFL: اضغط على فروع LC المحلية أو البعيدة."],
 ];

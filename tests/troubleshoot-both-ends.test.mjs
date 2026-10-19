@@ -5,6 +5,28 @@ const apply=(s,...actions)=>actions.reduce(changeCase,s);
 const loop=(s,point,result,side='local')=>apply(s,{type:'place',kind:point===0||point===s.count+1?'lc':'mmc',point},{type:'loop-side',value:side},{type:'ready',value:true},{type:'record',result});
 const trace=(s,from,to,strand,result)=>apply(s,{type:'trace',from,to},{type:'strand',value:strand},{type:'ready',value:true},{type:'record',result});
 
+test('editing CAS count keeps the tool at its endpoint and never turns a removed CAS into an optic',()=>{
+  for(const from of [0,3]) {
+    let s=changeCase(createCase(),{type:'vfl-point-checks'});
+    s=trace(s,from,2,'tx','seen');
+    s=changeCase(s,{type:'count',value:3});
+    assert.equal(s.tool,'vfl');
+    assert.equal(s.vflFrom,from===0?0:4);
+    assert.equal(s.selected,2);
+    assert.deepEqual(s.traces,{});
+    assert.equal(caseHistory(s).filter(e=>!e.current).length,1);
+    s=changeCase(s,{type:'count',value:1});
+    assert.equal(s.tool,'vfl');
+    assert.equal(s.vflFrom,from===0?0:2);
+    assert.equal(s.selected,1);
+  }
+  const passiveLoop=changeCase(loop(createCase(),2,'pass'),{type:'count',value:1});
+  assert.equal(passiveLoop.selected,1);
+  const remoteLoop=changeCase(loop(createCase(),3,'pass','remote'),{type:'count',value:3});
+  assert.equal(remoteLoop.selected,4);
+  assert.equal(remoteLoop.loopSide,'remote');
+});
+
 test('remote loop results retain their source and never overwrite local tests at the same cassette',()=>{
   let s=createCase();
   assert.equal(canPlaceTool(s,'lc',3),true);

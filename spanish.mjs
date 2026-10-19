@@ -2604,4 +2604,11 @@ export const spanishMessages = [
   ["Check the unverified strand", "Comprobar la fibra pendiente"],
   ["Visible continuity and loop passes do not measure service loss. Check current TX/RX against each optic’s limits; if power is normal, verify optic compatibility, port state, speed and FEC settings.", "La continuidad visible y los bucles satisfactorios no miden la pérdida en servicio. Compara TX/RX actuales con los límites de cada óptico; si la potencia es normal, verifica compatibilidad, estado del puerto, velocidad y FEC."],
   ["Check current optical readings and measure loss on the accessible path. Request remote-end readings and checks for the section you cannot reach.", "Revisa las lecturas ópticas actuales y mide la pérdida en la ruta accesible. Solicita lecturas y pruebas del extremo remoto para el tramo al que no puedes acceder."],
+  ["Add CAS","Añadir CAS"],
+  ["Remove last CAS","Quitar el último CAS"],
+  ["Port","Puerto"],
+  ["CAS {0} · Mapped port","CAS {0} · Puerto asignado"],
+  ["LC loopback: tap either optic.","Loopback LC: toca uno de los ópticos."],
+  ["MMC loopback: tap a CAS.","Loopback MMC: toca un CAS."],
+  ["VFL: tap Local or Remote LC legs.","VFL: toca las patas LC locales o remotas."],
 ];

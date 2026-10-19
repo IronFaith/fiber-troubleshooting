@@ -237,9 +237,11 @@ export function changeCase(state, action) {
       if (!['tx','rx'].includes(action.signal) || !['unknown','good','weak','dark'].includes(action.value)) return state;
       s[action.signal] = action.value; break;
     case 'count':
-      {const all=s.reach===s.count+1,remoteSelected=s.selected===s.count+1,remoteFault=s.fault.kind.startsWith('optic_')&&s.fault.at===s.count+1;
+      {const all=s.reach===s.count+1,remoteSelected=s.selected===s.count+1,remoteSource=s.vflFrom===s.count+1,remoteFault=s.fault.kind.startsWith('optic_')&&s.fault.at===s.count+1;
         s.count=bounded(action.value,1,4);s.reach=all?s.count+1:Math.min(s.reach,s.count);
-        if(remoteSelected)s.selected=s.count+1;if(remoteFault)s.fault.at=s.count+1;}
+        s.selected=remoteSelected?s.count+1:Math.min(s.selected,s.count);
+        if(remoteSource)s.vflFrom=s.count+1;
+        if(remoteFault)s.fault.at=s.count+1;}
       s.selected = Math.min(s.selected,s.reach); s.fault.at = Math.min(s.fault.at,s.count+1); clear(); break;
     case 'reach': s.reach = bounded(action.value,0,s.count+1); s.selected = Math.min(s.selected,s.reach); if(s.reach<=s.count)s.loopSide='local'; clear(); break;
     case 'port': {

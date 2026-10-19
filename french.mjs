@@ -9744,4 +9744,11 @@ export const frenchMessages = [
   ["Check the unverified strand", "Vérifier la fibre non testée"],
   ["Visible continuity and loop passes do not measure service loss. Check current TX/RX against each optic’s limits; if power is normal, verify optic compatibility, port state, speed and FEC settings.", "La continuité visible et les boucles réussies ne mesurent pas la perte en service. Comparez TX/RX actuels aux limites de chaque module ; si la puissance est normale, vérifiez la compatibilité, l’état du port, la vitesse et les réglages FEC."],
   ["Check current optical readings and measure loss on the accessible path. Request remote-end readings and checks for the section you cannot reach.", "Vérifiez les mesures optiques actuelles et mesurez la perte sur le chemin accessible. Demandez les mesures et contrôles distants pour la section inaccessible."],
+  ["Add CAS","Ajouter un CAS"],
+  ["Remove last CAS","Retirer le dernier CAS"],
+  ["Port","Port"],
+  ["CAS {0} · Mapped port","CAS {0} · Port prévu"],
+  ["LC loopback: tap either optic.","Boucle LC : touchez une optique."],
+  ["MMC loopback: tap a CAS.","Boucle MMC : touchez un CAS."],
+  ["VFL: tap Local or Remote LC legs.","VFL : touchez les brins LC locaux ou distants."],
 ];

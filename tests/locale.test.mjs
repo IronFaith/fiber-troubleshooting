@@ -7,6 +7,7 @@ import {connectedCaseQuestions} from '../connected-case.mjs';
 test('new-case actions and recorded VFL path labels translate in all learner languages',()=>{
   for(const language of ['es','fr','ar']) for(const message of ['New case started','Choose your path, then place a tool to begin.',
     'Recorded VFL path','Recorded checks, not live light.','Viewing here','Loose MMC only',
+    'Add CAS','Remove last CAS','CAS 2 · Mapped port','LC loopback: tap either optic.','MMC loopback: tap a CAS.','VFL: tap Local or Remote LC legs.',
     'Red: confirmed light','Amber: investigate','Dashed: not checked',
     'Fiber / contacts suspect','MMC / CAS contact suspect','Recheck observations',
     "Weak light","Weak light reported here","Strand B: weak light reported","Dim VFL light is a visual observation, not a loss measurement.","Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.","Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.",

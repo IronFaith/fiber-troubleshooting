@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=18';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=20';
+import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=19';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=21';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
@@ -101,7 +101,7 @@ function viewingControls(s,light,points) {
   </div>`;
 }
 
-export function simpleVfl(s,paused) {
+export function simpleVfl(s,paused,{embedded=false}={}) {
   const light=vflEndpoint(s,{preview:true}),point=light.point,from=traceFrom(s);
   const atCAS=!isOptic(s,point);
   const patch=atCAS?patchAt(s,point):null;
@@ -110,15 +110,14 @@ export function simpleVfl(s,paused) {
   const points=Array.from({length:s.reach+1},(_,p)=>[p,p===0?'Local LC legs':p===s.count+1?'Remote LC legs':`CAS ${p}`]);
   const status=light.mode==='expected'?'Expected path · no result recorded':light.mode==='simulation'?'Simulated fault · illustration':'Your recorded observation';
   return `<section class="vfl-simple" aria-label="VFL strand check">
-    <div class="vfl-simple-top"><div><h2>Follow the red light</h2><p>Tap an LC leg, then mark the light at the viewing point.</p></div><button type="button" data-action="motion" class="motion-toggle">${paused?'Play arrows':'Pause arrows'}</button></div>
-    <div class="vfl-simple-route">${select('vfl-from','VFL attached to',points.filter(([p])=>isOptic(s,p)&&p!==s.selected),from)}</div>
+    ${embedded?'':`<div class="vfl-simple-top"><div><h2>Follow the red light</h2><p>Tap an LC leg, then mark the light at the viewing point.</p></div><button type="button" data-action="motion" class="motion-toggle">${paused?'Play arrows':'Pause arrows'}</button></div>`}
+    <div class="vfl-simple-route">${select('vfl-from','VFL attached to',points.filter(([p])=>isOptic(s,p)&&p!==s.selected),from)}${embedded&&atCAS?`<div class="vfl-fim-port">${patch.port===s.ports[point-1]?`<span>FIM · Port ${s.ports[point-1]}</span>`:`<button type="button" data-action="vfl-port-fim">Use FIM port ${s.ports[point-1]}</button>`}</div>`:''}</div>
     <div class="vfl-view ${paused?'light-paused':''}">
-      ${viewingControls(s,light,points)}
+      ${embedded?'':viewingControls(s,light,points)}
       <p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${observationLabels[light.result]}`:''}</p>
       <div class="vfl-scene">${diagram(s,false)}${diagram(s,true)}${inlineObservation(s,light,destination)}</div>
     </div>
-    ${progressDiagram(s,point)}
-    <p class="vfl-hint"><a href="./learn.html#polarity-checks">Learn polarity: see TX / RX and trace both strands →</a></p>
-    <p class="vfl-fine">A / B illustrate one pair, not MMC pin numbers. Follow your actual channel map. Attach VFL only to disconnected LC legs; view light indirectly at the MMC or CAS.</p>
+    ${embedded?`<details class="ts-finding-details"><summary>Recorded VFL path</summary>${progressDiagram(s,point)}</details>`:progressDiagram(s,point)}
+    ${embedded?'':`<p class="vfl-hint"><a href="./learn.html#polarity-checks">Learn polarity: see TX / RX and trace both strands →</a></p><p class="vfl-fine">A / B illustrate one pair, not MMC pin numbers. Follow your actual channel map. Attach VFL only to disconnected LC legs; view light indirectly at the MMC or CAS.</p>`}
   </section>`;
 }

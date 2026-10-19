@@ -1775,3 +1775,70 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-finding-details { border-top:1px solid #dce5ea; margin-top:14px; font-size:12px; color:#526f83; line-height:1.5; }
 .ts-finding-details summary { min-height:44px; padding:12px 0; cursor:pointer; }
 .ts-finding-details p { margin:0 0 10px; }
+/* One path workspace for placement, port edits and test results. */
+.ts-workspace-layout { display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:16px; align-items:start; }
+.ts-workspace { min-width:0; padding:14px; border:1px solid #c8d7e1; border-radius:12px; background:white; scroll-margin-top:12px; }
+.ts-workspace-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.ts-workspace-heading h2 { margin:0; font-size:20px; color:#173b59; }
+.ts-cas-count { display:flex; align-items:center; gap:5px; white-space:nowrap; direction:ltr; }
+.ts-cas-count b { font-size:12px; color:#456174; }
+.ts-cas-count button { min-width:36px; min-height:44px; border:1px solid #b5c9d7; border-radius:6px; background:#f5f9fb; color:#24506f; font-size:22px; cursor:pointer; }
+.ts-cas-count button:disabled { opacity:.35; cursor:default; }
+.ts-path-bar { display:flex; gap:5px; padding:8px 0; overflow-x:auto; direction:ltr; scrollbar-width:thin; }
+.ts-path-point { flex:1 0 64px; min-width:0; border:1px solid #bacbd7; border-radius:7px; background:#f5f8fa; text-align:center; }
+.ts-path-point.is-focused { border-color:#337fa6; background:#edf7fc; }
+.ts-path-point.is-source { border-color:#bd4a61; background:#fff3f6; }
+.ts-path-point > button { display:flex; align-items:center; justify-content:center; gap:4px; width:100%; min-height:44px; padding:4px 2px; border:0; border-radius:6px 6px 0 0; background:transparent; color:#244c67; font:600 12px 'Segoe UI',sans-serif; cursor:pointer; }
+.ts-path-point > button:disabled { opacity:.45; cursor:default; }
+.ts-path-point > small { display:block; min-height:32px; padding:5px 2px; font-size:10px; color:#597587; }
+.ts-path-point label { display:flex; align-items:center; justify-content:center; gap:2px; padding:0 3px 4px; font-size:10px; color:#597587; }
+.ts-path-point input { width:38px; min-height:40px; border:1px solid #afc4d1; border-radius:4px; padding:2px; background:white; color:#1f506e; text-align:center; font:600 14px 'Segoe UI',sans-serif; appearance:textfield; }
+.ts-path-point input::-webkit-inner-spin-button,.ts-path-point input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+.ts-path-point.ts-can-drop { border-color:#20704f; background:#e3f4eb; }
+.ts-path-point > .ts-can-drop { outline:2px dashed #20704f; outline-offset:-2px; }
+.ts-path-point > .ts-drop-over { background:#ccebdc; }
+.ts-path-point > .ts-drop-invalid { background:#fce4e1; }
+.ts-workspace .ts-tool-tray { position:static; padding:4px 0; border:0; background:transparent; }
+.ts-workspace .ts-tool-items { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; }
+.ts-workspace .ts-tool-pick { flex-direction:column; padding:4px 2px; gap:2px; min-height:62px; }
+.ts-workspace .ts-tool-pick svg { width:42px; height:28px; }
+.ts-workspace .ts-tool-pick[data-pick-tool="mmc"] svg { width:60px; }
+.ts-workspace .ts-tool-pick b,.ts-workspace .ts-normalize b { font-size:11px; font-weight:600; }
+.ts-workspace .ts-tool-pick.is-mounted { background:#edf6f2; border-color:#689b86; }
+.ts-workspace .ts-normalize { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border:1px solid #8eaf9e; border-radius:8px; background:#f3f8f5; color:#2d644d; cursor:pointer; }
+.ts-workspace .ts-normalize > span { font-size:24px; line-height:28px; }
+.ts-workspace .ts-normalize:disabled { opacity:.45; cursor:default; }
+.ts-workspace #ts-tool-hint { margin:6px 0 0; min-height:32px; font-size:11px; line-height:1.4; }
+.ts-workspace-state { margin:4px 0; min-height:20px; color:#526f83; font-size:12px; }
+.ts-workspace .ts-map { margin:0 -4px; padding:0; }
+.ts-workspace .ts-map > svg { height:290px; }
+.ts-workspace .ts-control-card { border:0; border-top:1px solid #dce5ea; border-radius:0; padding:12px 0 0; margin-top:12px; }
+.ts-workspace .ts-control-card h2 { font-size:19px; }
+.ts-workspace .vfl-simple { padding:0; border:0; border-radius:0; margin:0; }
+.ts-workspace .vfl-view { margin-top:8px; }
+.ts-workspace .vfl-simple-route label { font-size:11px; }
+.ts-workspace .vfl-simple-route select { min-height:36px; padding:5px; }
+.ts-workspace .vfl-simple-route { align-items:end; justify-content:space-between; gap:6px; }
+.ts-workspace .vfl-fim-port { display:flex; align-items:center; min-height:44px; font-size:11px; }
+.ts-workspace .vfl-fim-port button { min-height:44px; }
+.ts-workspace-actions { display:flex; justify-content:space-between; gap:8px; margin-top:12px; }
+.ts-workspace-actions button { min-height:44px; padding:8px 10px; border:1px solid #bbcfdd; border-radius:6px; background:#f7fafb; color:#345e79; font-size:12px; cursor:pointer; }
+.ts-workspace-actions button:disabled { opacity:.4; cursor:default; }
+.ts-workspace .ts-path-settings { margin-bottom:0; }
+.ts-workspace-findings { min-width:0; }
+.ts-workspace-findings .ts-case-bar { margin-top:0; flex-direction:column; align-items:stretch; padding:12px; }
+.ts-workspace-findings .ts-case-bar ol { justify-content:space-between; gap:4px; }
+.ts-workspace-findings .ts-advice { padding:14px; }
+.ts-workspace-findings .ts-advice h2 { font-size:20px; }
+.ts-workspace-findings .ts-check-branches { grid-template-columns:1fr; }
+.ts-workspace button:focus-visible,.ts-path-point input:focus-visible { outline:3px solid #347cbc; outline-offset:2px; }
+@media(max-width:1000px) { .ts-workspace-layout { grid-template-columns:1fr; } }
+@media(max-width:700px) {
+  .ts-main { padding-bottom:24px; }
+  .ts-main > .learning-entry { flex-direction:row; align-items:center; padding:6px 0; font-size:11px; }
+  .ts-main > .ts-view-tabs { margin:12px 0; }
+  .ts-workspace { padding:10px; }
+  .ts-workspace-heading h2 { font-size:18px; }
+  .ts-workspace .ts-map > svg { height:255px; }
+  .ts-workspace .ts-legend { gap:4px 10px; font-size:10px; }
+}
