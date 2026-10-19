@@ -1404,22 +1404,14 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .vfl-leg:hover .vfl-leg-hit,.vfl-leg:focus-visible .vfl-leg-hit { fill:#ffe7ef55; stroke:#b72f4d; }
 .vfl-leg[aria-pressed=true] .vfl-leg-hit { fill:#ffe7ef55; stroke:#b72f4d; }
 .vfl-simple-canvas .vfl-leg-result { fill:#9c2945; }
-.vfl-port-target { cursor:pointer; }
-.vfl-port-target:hover .vfl-port-face,.vfl-port-target:focus-visible .vfl-port-face { stroke:#ffda6a; stroke-width:3; }
-.vfl-unplug-target { fill:transparent; stroke:transparent; }
-.vfl-unplug-target.ts-patch-over { fill:#fff0d3; stroke:#b37b29; stroke-width:2; }
 .vfl-view .light-flow,.vfl-view .light-source,.vfl-view .ts-port-glow,.vfl-view .ts-port-emission { pointer-events:none; }
-.vfl-connect-actions { display:flex; gap:10px; margin:0; padding:0 12px 12px; }
-.vfl-connect-actions:empty { display:none; }
-.vfl-connect-actions button,.vfl-viewing-controls button,.vfl-observe button { flex:1; min-height:44px; padding:10px; border:1px solid #8caabb; border-radius:6px; background:white; font:600 13px 'Segoe UI',sans-serif; color:#254d67; cursor:pointer; }
-.vfl-connect-actions button:first-child { background:#edf6f1; border-color:#448267; color:#23593f; }
+.vfl-viewing-controls button,.vfl-observe button { flex:1; min-height:44px; padding:10px; border:1px solid #8caabb; border-radius:6px; background:white; font:600 13px 'Segoe UI',sans-serif; color:#254d67; cursor:pointer; }
 .vfl-scene { position:relative; }
 .vfl-observe { position:absolute; top:8px; left:29%; width:29%; scroll-margin-top:90px; background:#f9fbfd; border-radius:6px; padding:6px; }
 .vfl-viewing-controls { padding:12px; border-bottom:1px solid #d8e3eb; }
 .vfl-destinations { display:flex; flex-wrap:wrap; gap:7px; direction:ltr; }
 .vfl-destinations button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-width:80px; min-height:58px; }
 .vfl-destinations small { font-size:11px; font-weight:400; }
-.vfl-destinations .vfl-open-here { color:#9a5d13; font-weight:700; }
 .vfl-port-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin-top:12px; }
 .vfl-port-controls label { color:#345870; font-size:12px; font-weight:650; }
 .vfl-port-stepper { display:flex; align-items:stretch; gap:4px; direction:ltr; }
@@ -1429,7 +1421,6 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .vfl-port-stepper button:disabled { opacity:.4; cursor:default; }
 .vfl-fim-port { min-height:44px; display:flex; align-items:center; font-size:12px; color:#657d8c; }
 .vfl-fim-port button { padding:8px 10px; font-size:12px; background:#fff6e5; border-color:#c09654; color:#835514; }
-.vfl-blocked-note { color:#835514; background:#fff6e5; padding:8px; border-radius:5px; font-size:12px; margin:8px 0 0; }
 @media(max-width:600px) { .vfl-port-controls label { flex-basis:100%; } .vfl-destinations button { padding:8px; } }
 .vfl-observe-buttons { display:flex; gap:8px; }
 .vfl-observe button[aria-pressed=true],.vfl-destinations button[aria-pressed=true] { color:white; background:#245b80; border-color:#245b80; }
@@ -1449,10 +1440,6 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .vfl-main-results [data-action=result-weak][aria-pressed=true] { background:#fff0d7; color:#81500d; border-color:#ad771f; }
 .vfl-main-results [data-action=result-dark][aria-pressed=true] { background:#465862; border-color:#465862; }
 .vfl-hint { font-size:13px; color:#456174; line-height:1.6; margin:12px 0; }
-.vfl-checks { width:100%; border-collapse:collapse; font-size:13px; margin:18px 0 0; color:#345870; }
-.vfl-checks caption { text-align:left; font-weight:700; margin-bottom:7px; }
-.vfl-checks th,.vfl-checks td { padding:9px; text-align:left; border-bottom:1px solid #dce6ed; }
-.vfl-checks thead { background:#f1f6fa; }
 .vfl-mobile { display:none; }
 .ts-tool-tray.vfl-active-tray { display:flex; align-items:center; gap:10px; padding:12px; top:0; }
 .vfl-active-tray > b { margin-right:auto; color:#9c2945; font-size:14px; }

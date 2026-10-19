@@ -1,9 +1,9 @@
-import {translateLines} from './locale.mjs?v=13';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=16';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=18';
+import {translateLines} from './locale.mjs?v=14';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=17';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=19';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
-import {simpleVfl} from './vfl-simple.mjs?v=14';
+import {simpleVfl} from './vfl-simple.mjs?v=15';
 import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
@@ -73,6 +73,7 @@ function restore(raw,simulated) {
   }
   if(s.tool==='link' && Array.isArray(raw.disconnected)) s.disconnected=[...new Set(raw.disconnected.filter(p=>Number.isInteger(p)&&p>=0&&p<=s.reach))];
   s=restoreCaseHistory(s,raw);
+  if(raw.vflPointChecks===true||s.tool==='vfl') s=changeCase(s,{type:'vfl-point-checks'});
   s.ready=raw.ready===true && Boolean(s.tool==='loop'?loopResult(s):s.tool==='vfl'&&!traceStop(s)?.blocked&&!traceStop(s)?.closed&&s.traces[traceKey(s)]);
   return changeCase(s,{type:'service',value:raw.service});
 }
@@ -90,6 +91,7 @@ function update(actions, message='',renderNow=true) {
   undo[view].push(cases[view]);
   if(undo[view].length>30) undo[view].shift();
   cases[view]=actions.reduce(changeCase,cases[view]);
+  if(cases[view].tool==='vfl') cases[view]=changeCase(cases[view],{type:'vfl-point-checks'});
   save();
   if(renderNow) render(true); else portRenderPending=true;
   if(message) announce(message);
@@ -120,7 +122,7 @@ function changeVflPort(port,selector) {
     return;
   }
   if(port===patch.port) return;
-  const actions=[{type:'patch',point,side,connected:patch[side],port}],message='Patched port updated. Recheck this section.';
+  const actions=[{type:'patch',point,side,connected:patch[side],port}],message='Viewing port updated. Recheck this section.';
   // A blur commits the typed port before the following click. Keep its target
   // in the DOM until that click is handled, so changing CAS takes only one tap.
   if(deferPortRender) {update(actions,message,false);return;}
@@ -160,7 +162,6 @@ function patchConnection(action) {
   update([action],`CAS ${action.point}: ${action.side} ${action.connected?'connected':'unplugged'}. Recheck the affected section.`);
   centerMap(action.point);
   centerPatch();
-  host.querySelector(`.vfl-connect-actions button[data-patch-side="${action.side}"]`)?.focus({preventScroll:true});
 }
 const patchDrag=mountPatchDrag(host,patchConnection,announce);
 
@@ -418,8 +419,6 @@ host.addEventListener('click',async event=>{
   if(action==='setup') {setupOpen=!setupOpen;render();return;}
   if(action==='normalize') {normalizeSetup();return;}
   if(action==='check-opening') {update([{type:'trace',from:traceFrom(s),to:traceStop(s).point}],'Check the open end here, then enter your observation.');centerMap();return;}
-  if(action==='continue-trace') {const forward=traceFrom(s)<s.selected,point=traceStop(s).point;update([{type:'patch',point,side:forward?'rear':'front',connected:true},{type:'patch',point,side:forward?'front':'rear',connected:true},{type:'trace',from:traceFrom(s),to:point+(forward?1:-1)}],'Onward connection seated. Check the next opening.');return;}
-  if(action==='open-vfl-end') {patchConnection({type:'patch',point:traceStop(s).point,side:traceFrom(s)<s.selected?'front':'rear',connected:false});return;}
   if(action==='swap-trace') {update([{type:'trace',from:s.selected,to:traceFrom(s)}],'VFL direction reversed. Confirm the new setup before recording a result.');centerMap(traceFrom(cases[view]));host.querySelector('[data-action="swap-trace"]')?.focus({preventScroll:true});return;}
   if(action==='remove-tool'||action==='link') {removeTool();host.querySelector('[data-pick-tool]')?.focus({preventScroll:true});return;}
   if(action==='test-result') {host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.vfl-observe, .ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}

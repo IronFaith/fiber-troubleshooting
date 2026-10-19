@@ -9714,4 +9714,7 @@ export const frenchMessages = [
   ["Choose a port from 1 to 32.","Choisissez un port de 1 à 32."],
   ["Patched port updated. Recheck this section.","Port raccordé mis à jour. Revérifiez cette section."],
   ["Tap an LC leg, then mark the light at the viewing point.", "Touchez une branche LC, puis indiquez la lumière au point d’observation."],
+  ["CAS {0} · Viewing port", "CAS {0} · Port d’observation"],
+  ["Viewing port updated. Recheck this section.", "Port d’observation mis à jour. Revérifiez ce tronçon."],
+  ["Inspect the strand and its connections; compare with an earlier CAS.", "Inspectez la fibre et ses connexions ; comparez avec un CAS précédent."],
 ];

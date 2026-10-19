@@ -2574,4 +2574,7 @@ export const arabicMessages = [
   ["Choose a port from 1 to 32.","اختر منفذًا من 1 إلى 32."],
   ["Patched port updated. Recheck this section.","تم تحديث المنفذ الموصول. أعد فحص هذا المقطع."],
   ["Tap an LC leg, then mark the light at the viewing point.", "اضغط على أحد فروع LC، ثم سجّل حالة الضوء عند نقطة الفحص."],
+  ["CAS {0} · Viewing port", "CAS {0} · منفذ الفحص"],
+  ["Viewing port updated. Recheck this section.", "تم تحديث منفذ الفحص. أعد فحص هذا المقطع."],
+  ["Inspect the strand and its connections; compare with an earlier CAS.", "افحص الليف ووصلاته، وقارن النتيجة مع CAS سابق على المسار."],
 ];

@@ -66,6 +66,13 @@ export function connectionAt(state,point) {
 // opens only the outward connection. Explicit changes persist until Normalize.
 export function patchAt(s,point) {
   const patch={rear:true,front:true,port:s.ports[point-1]};
+  // Point checks illustrate the chosen observation route. Connector animations
+  // do not gate recording; only the selected port and entered light result do.
+  if(s.tool==='vfl'&&s.vflPointChecks) {
+    patch.port=s.patches?.[point]?.port??patch.port;
+    if(point===s.selected) patch[traceFrom(s)<s.selected?'front':'rear']=false;
+    return patch;
+  }
   if(s.disconnected?.includes(point)) patch.front=false;
   if(s.tool==='vfl') {
     const forward=traceFrom(s)<s.selected;
@@ -129,6 +136,15 @@ export function changeCase(state, action) {
   s.remoteLoops??={}; s.loopSide??='local';
   const clear = () => { if(loopEntries(s).length||Object.keys(s.traces).length||s.history?.length) s.round=(s.round??1)+1; s.loops = {}; s.remoteLoops={}; s.traces = {}; s.identity={}; s.comparisons={}; s.ready = false; s.service='unknown'; s.disconnected=[]; s.patches={}; };
   switch (action.type) {
+    case 'vfl-point-checks':
+      if(s.vflPointChecks) return state;
+      // Keep the old, narrower head tests as history. Never relabel them as a
+      // pass at the cassette port when switching to the simpler workflow.
+      for(const [key,result] of Object.entries(s.traces)) if(parseTraceKey(key)?.head) {
+        if(!s.history?.some(e=>e.kind==='vfl'&&e.key===key&&e.result===result&&e.round===s.round)) appendObservation(s,'vfl',key,result);
+        delete s.traces[key]; delete s.comparisons?.[key]; s.ready=false;
+      }
+      s.vflPointChecks=true; break;
     case 'identity':
       if(!Object.hasOwn(identityLabels,action.key)||typeof action.value!=='boolean'||s.identity?.[action.key]===action.value) return state;
       s.identity??={}; s.identity[action.key]=action.value; s.service='unknown';
@@ -455,7 +471,7 @@ export function canVerifyService(s) {
     loopEntries(s).length+Object.keys(s.traces).length>0;
 }
 const strandLetter=strand=>strand==='tx'?'A':'B';
-const routeDescription=(s,r)=>`${fiberPointName(r.from,s)} → ${fiberPointName(r.to,s)}${r.head?' · loose MMC head':!isOptic(s,r.to)?' · through CAS':''}`;
+const routeDescription=(s,r)=>`${fiberPointName(r.from,s)} → ${fiberPointName(r.to,s)}${r.head?' · loose MMC head':!isOptic(s,r.to)?s.vflPointChecks?` · Port ${patchAt(s,r.to).port}`:' · through CAS':''}`;
 const traceCheck=(r,label)=>({tool:'vfl',from:r.from,to:r.to,strand:r.strand,head:Boolean(r.head),label});
 
 // Bound a dark observation using only the same source, strand and direction.
@@ -555,7 +571,7 @@ function traceAssessment(s) {
       const why=headPass?'The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.':passing?`${goodLetter} passes visible light; ${letter} does not. The MMC ferrule holds separate fibers. Investigate ${letter}’s fiber and its end-face contacts; ${goodLetter} passing does not clear them.`:earlier?`Last light: ${fiberPointName(earlier.to,s)}. First dark check: ${fiberPointName(dark.to,s)}. The added section and connections need checking.`:'This is a failed continuity observation. It does not identify which part is bad.';
       const from=earlier?Math.min(earlier.to,dark.to):Math.min(dark.from,dark.to);
       const to=earlier?Math.max(earlier.to,dark.to):Math.max(dark.from,dark.to);
-      if(!dark.head&&!isOptic(s,dark.to)&&!headPass) {
+      if(!s.vflPointChecks&&!dark.head&&!isOptic(s,dark.to)&&!headPass) {
         make(80,title,why,`Keep the VFL on LC ${letter}. Verify its LC connection, then unplug the incoming MMC at CAS ${dark.to} and check its loose head for light.`,
           {from,to,isolation,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check:traceCheck({...dark,head:true},`Check loose MMC · strand ${letter}`),
             branches:[['Light at the head','Inspect seating, end faces and the CAS connection.'],['Head also dark','Work back toward the source; check fiber and earlier connections.']]});
@@ -580,7 +596,7 @@ function traceAssessment(s) {
     if(weak) {
       const letter=strandLetter(weak.strand);
       const head=entries.find(r=>r.head&&r.from===weak.from&&r.to===weak.to&&r.strand===weak.strand);
-      const checkHead=!weak.head&&!isOptic(s,weak.to)&&!head;
+      const checkHead=!s.vflPointChecks&&!weak.head&&!isOptic(s,weak.to)&&!head;
       const distance=r=>Math.abs(r.to-r.from)*2-(r.head?1:0);
       const earlier=entries.filter(r=>r.from===weak.from&&r.strand===weak.strand&&r.result==='seen'&&
         Math.sign(r.to-r.from)===Math.sign(weak.to-weak.from)&&distance(r)<distance(weak)).sort((a,b)=>distance(b)-distance(a))[0];
@@ -609,7 +625,7 @@ function traceAssessment(s) {
         'One recorded strand does not prove the pair is continuous. Visible light does not prove acceptable IR loss or optic health.',
         'Keep the same source and viewing point. Move the VFL to the other strand and record what you see.',
         {check:traceCheck({...rows[0],strand:rows[0].strand==='tx'?'rx':'tx'},'Check the other strand'),
-          branches:[['Other strand has light','Both have visible continuity at this point.'],['Other strand is dark','Separate the incoming head from the CAS connection.']]});
+          branches:[['Other strand has light','Both have visible continuity at this point.'],['Other strand is dark',s.vflPointChecks?'Inspect the strand and its connections; compare with an earlier CAS.':'Separate the incoming head from the CAS connection.']]});
     } else {
       const distance=r=>Math.abs(r.to-r.from)*2-(r.head?1:0);
       const covered=rows.every(row=>entries.some(r=>r.from===g.from&&r.strand===row.strand&&r.result==='seen'&&
@@ -663,6 +679,7 @@ export function nextCheckActions(s) {
   if(!check) return [];
   if(!validTrace(s,check.from,check.to)) return [];
   const actions=[{type:'trace',from:check.from,to:check.to},{type:'strand',value:check.strand}];
+  if(s.vflPointChecks) return actions;
   const direction=Math.sign(check.to-check.from),incoming=direction>0?'rear':'front',outgoing=direction>0?'front':'rear';
   // A guided next check positions the diagram only. It never records a result.
   for(let p=check.from+direction;direction>0?p<check.to:p>check.to;p+=direction) if(!isOptic(s,p)) {

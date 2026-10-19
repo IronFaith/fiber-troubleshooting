@@ -2574,4 +2574,7 @@ export const spanishMessages = [
   ["Choose a port from 1 to 32.","Elige un puerto del 1 al 32."],
   ["Patched port updated. Recheck this section.","Puerto conectado actualizado. Vuelve a comprobar este tramo."],
   ["Tap an LC leg, then mark the light at the viewing point.", "Toca una pata LC y registra la luz en el punto de observación."],
+  ["CAS {0} · Viewing port", "CAS {0} · Puerto de observación"],
+  ["Viewing port updated. Recheck this section.", "Puerto de observación actualizado. Vuelve a comprobar este tramo."],
+  ["Inspect the strand and its connections; compare with an earlier CAS.", "Inspecciona la fibra y sus conexiones; compara con un CAS anterior."],
 ];
