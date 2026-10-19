@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {chapters,coursePosition,courseDestination} from '../course.mjs';
+import {chapters,coursePosition,courseDestination,learningEntry} from '../course.mjs';
 
 test('explicit chapter and lesson links override the remembered chapter', () => {
   chapters.forEach((chapter,index) => {
@@ -25,4 +25,15 @@ test('legacy course links stay in the course while hands-on practice stays separ
   assert.equal(courseDestination('/patching.html', '#patch-practice'), null);
   assert.equal(courseDestination('/simulations.html'), null);
   assert.equal(courseDestination('/quiz.html'), null);
+});
+
+
+test('exact topic bookmarks resume while explicit links and old chapter bookmarks remain valid', () => {
+  assert.deepEqual(coursePosition('', 'lldp-neighbors'), {index:1,anchor:'lldp-neighbors'});
+  assert.deepEqual(coursePosition('#readings', 'lldp-neighbors'), {index:0,anchor:'readings'});
+  assert.deepEqual(coursePosition('', 'chapter-3'), {index:2,anchor:'chapter-3'});
+  assert.equal(learningEntry({getItem:()=> 'lldp-neighbors'}).href,'./learn.html#lldp-neighbors');
+  assert.equal(learningEntry({getItem:()=> 'devices'}).action,'Continue learning');
+  assert.equal(learningEntry({getItem:()=> 'unknown'}).action,'Start learning');
+  assert.equal(learningEntry().action,'Start learning');
 });

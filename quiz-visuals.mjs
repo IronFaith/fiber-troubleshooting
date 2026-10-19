@@ -114,7 +114,16 @@ function bendChange(answered) {
 export function quizVisual(question,{answered=false,choice=null}={}) {
   const kind=question.visual;
   let body='';
-  if(kind.startsWith('case-')) body=caseVisual(question,answered);
+  if(kind.startsWith('lldp-')) {
+    const missing=kind==='lldp-missing', purpose=kind==='lldp-purpose';
+    const device=kind==='lldp-device'?'Device C':'Device B';
+    const port=kind==='lldp-port'?'7/5':'7/1';
+    body=`<p class="q-report-label">${purpose?'LLDP · Link Layer Discovery Protocol':'Fresh Cable Guy report · local Device A / 25/1'}</p>
+      <div class="q-lldp-route"><div><b>Device A</b><small>Local · 25/1</small></div><span aria-hidden="true">↔</span><div class="q-lldp-cas"><b>CAS → CAS</b><small>Passive fiber path</small></div><span aria-hidden="true">↔</span><div><b>${missing?'Unconfirmed':device}</b><small>${missing?'No neighbor reported':`Remote · ${port}`}</small></div></div>
+      ${purpose?'<div class="q-lldp-message">“I’m Device B. My port is 7/1.”<small>Message received by Device A over this link</small></div>':`<div class="q-lldp-reports"><div><span>FIM expects</span><strong>Device B</strong><b>Port 7/1</b></div><div><span>LLDP reports</span><strong>${missing?'No neighbor':device}</strong><b>${missing?'Identity unconfirmed':`Port ${port}`}</b></div></div>`}
+      ${kind==='lldp-device'?'<p class="q-test-results"><strong>TX / RX within example limits</strong><span>Expected endpoint still needs confirmation</span></p>':''}`;
+  }
+  else if(kind.startsWith('case-')) body=caseVisual(question,answered);
   else if(['simple-dark','simple-rx-dark','light-returns','healthy','weak'].includes(kind)) body=readings(kind,answered);
   else if(kind==='connections') body=`<p class="q-observation">Side views · tap a connection</p><div class="q-connection-choices">${[0,1].map(i=>target(question,i,`<strong>Connection ${i===0 ? 'A' : 'B'}</strong>${connector(i===0)}`,answered,choice)).join('')}</div>`;
   else if(kind==='seated-dark') body=`<div class="q-report-label">Connector after inspection and reseating</div>${connector(true)}<div class="quiz-reading reading-alert"><span>RX after reseating</span><strong>−40</strong><small>dBm</small></div>`;

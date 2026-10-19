@@ -1,3 +1,4 @@
+import {questionVariants} from './quiz-variants.mjs?v=1';
 import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=1';
 export const topics = ['Spot the problem', 'Check the connection', 'Understand the light', 'Narrow down the problem'];
 export const roundDescriptions = [
@@ -155,8 +156,27 @@ export const questions = [
   }
 ];
 
-questions.push(...appliedQuestions);
-export const roundQuestionIds = topic => questions.filter(question => question.topic === topic).map(question => question.id);
+questions.push(...appliedQuestions,...questionVariants);
+export const roundQuestionIds = topic => questions.filter(question => question.topic === topic && !question.variantOf).map(question => question.id);
+
+export function drawRoundIds(topic, random = Math.random) {
+  const ids=roundQuestionIds(topic).map(id=>{
+    const pool=questions.filter(q=>q.id===id || q.variantOf===id);
+    return pool[Math.min(pool.length-1,Math.floor(random()*pool.length))].id;
+  });
+  // Keep the first beginner round gentle and in teaching order.
+  if(topic!==0) for(let i=ids.length-1;i>0;i--) {
+    const j=Math.min(i,Math.floor(random()*(i+1)));
+    [ids[i],ids[j]]=[ids[j],ids[i]];
+  }
+  return ids;
+}
+export function validRoundIds(topic, ids) {
+  const slots=roundQuestionIds(topic);
+  if(!Number.isInteger(topic) || slots.length!==5 || !Array.isArray(ids) || ids.length!==5) return false;
+  const selected=ids.map(id=>questions.find(q=>q.id===id&&q.topic===topic)).filter(Boolean);
+  return selected.length===5 && new Set(selected.map(q=>q.variantOf||q.id)).size===5 && selected.every(q=>slots.includes(q.variantOf||q.id));
+}
 
 export function skillsFor(topic, answers) {
   const skills=new Map();
@@ -199,8 +219,8 @@ export function resultsFor(attempt) {
   return { total:attempt.ids.length, answered:answered.length, correct:answered.length-missed.length, missed, complete:answered.length === attempt.ids.length };
 }
 
-export function roundProgress(topic, answers) {
-  const result = resultsFor({ids:roundQuestionIds(topic),answers});
+export function roundProgress(topic, answers, ids = roundQuestionIds(topic)) {
+  const result = resultsFor({ids:validRoundIds(topic,ids)?ids:[],answers});
   const passed = result.complete && result.total === 5 && result.correct >= 4;
   const rounds = roundsForLevel(levelFor(topic));
   return {...result, passed, nextRound:passed ? rounds[rounds.indexOf(topic)+1] ?? null : null};
@@ -233,9 +253,9 @@ export function saveQuizProgress(storage, scores, level = 'beginner') {
   catch { return false; }
 }
 
-export function recordRoundProgress(scores, topic, answers, {practice = false} = {}) {
+export function recordRoundProgress(scores, topic, answers, {practice = false, ids = roundQuestionIds(topic)} = {}) {
   if (practice && levelFor(topic) === 'intermediate') return scores;
-  const result = roundProgress(topic,answers);
+  const result = roundProgress(topic,answers,ids);
   if (!result.complete || result.total !== 5) return scores;
   const index = roundsForLevel(levelFor(topic)).indexOf(topic);
   return scores.map((score,i) => i === index ? Math.max(score ?? 0,result.correct) : score);

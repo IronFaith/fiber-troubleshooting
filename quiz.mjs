@@ -1,8 +1,9 @@
+import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=1';
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=5';
+import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=6';
 
-import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=10';
-import {loadPatchBest} from './patch-practice-data.mjs?v=1';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=11';
+import {loadPatchBest} from './patch-practice-data.mjs?v=2';
 
 const host = document.querySelector('#quiz');
 let attempt, countEvent;
@@ -16,6 +17,7 @@ let progressStorage;
 try { progressStorage = window.localStorage; } catch { /* Quizzes still work without storage. */ }
 let {scores:savedScores,canSave} = loadQuizProgress(progressStorage);
 let {scores:appliedScores} = loadQuizProgress(progressStorage,'intermediate');
+let suspended=loadExam(progressStorage), fullRoundIds=[], draftChoices=[];
 let selectedLevel=['beginner','intermediate'].includes(location.hash.slice(1))?location.hash.slice(1):null;
 const levelTitle=level=>level==='intermediate'?'Intermediate':'Beginner';
 const activeScores=()=>selectedLevel==='intermediate'?appliedScores:savedScores;
@@ -26,8 +28,28 @@ function focusTitle() {
   host.scrollIntoView({block:'start',behavior:'instant'});
 }
 
+function persistExam() {
+  suspended={round:currentRound,ids:fullRoundIds,attempt,index,retry,roundAnswers,firstScore,countEvent,draftChoices};
+  saveExam(progressStorage,suspended);
+}
+function showResume() {
+  if(!suspended) return;
+  const panel=document.createElement('div'); panel.className='exam-resume';
+  panel.innerHTML=`<div><strong>${suspended.retry?'Practice':'Exam'} in progress</strong><span>${allTopics[suspended.round]} · Question ${suspended.index+1} of ${suspended.attempt.ids.length}</span></div><button type="button">Resume ${suspended.retry?'practice':'exam'}</button>`;
+  host.querySelector('h2').after(panel);
+  panel.querySelector('button').addEventListener('click',()=>{
+    const saved=suspended;
+    currentRound=saved.round; fullRoundIds=[...saved.ids]; attempt=saved.attempt; index=saved.index;
+    retry=saved.retry; roundAnswers=saved.roundAnswers; firstScore=saved.firstScore; draftChoices=saved.draftChoices;
+    countEvent=retry?null:saved.countEvent?{...saved.countEvent,at:Date.now()}:startExamCount();
+    selectedLevel=levelFor(currentRound);
+    history.replaceState(null,'',`${location.pathname}#${selectedLevel}`);
+    renderQuestion();
+  });
+}
+
 function begin(ids, isRetry = false) {
-  attempt = startAttempt(ids); index = 0; retry = isRetry;
+  attempt = startAttempt(ids); index = 0; retry = isRetry; draftChoices=[];
   countEvent = isRetry ? null : startExamCount();
   renderQuestion();
 }
@@ -38,12 +60,13 @@ function beginRound(topic) {
   currentRound = topic;
   roundAnswers = {};
   firstScore = 0;
-  begin(roundQuestionIds(topic));
+  fullRoundIds=drawRoundIds(topic);
+  begin(fullRoundIds);
 }
 
 function renderIntro() {
   host.classList.remove('light-paused');
-  if(location.hash==='#progress') { renderProgress(); return; }
+  if(location.hash==='#progress') { renderProgress(); showResume(); return; }
   const patchBest=loadPatchBest(progressStorage).best;
   if(!selectedLevel) {
     const counts=[savedScores.filter(s=>s>=4).length+(patchBest>=4?1:0),appliedScores.filter(s=>s>=4).length];
@@ -53,6 +76,7 @@ function renderIntro() {
         ${quizThumbnail(i===0?2:3)}<span><strong>${levelTitle(level)}</strong><b>${i===0?'Foundations':'Applied troubleshooting'}</b><span>${i===0?'Recognize parts, read the signs and make the basic checks.':'Combine observations, explain the limits of a test and choose your next check.'}</span><small>${counts[i]} of ${i===0?5:2} exams passed · choose any exam</small><em>Open ${levelTitle(level)} →</em></span></button>`).join('')}</div>
       <p class="picture-note">Beginner includes four knowledge exams and hands-on patching. Intermediate combines those ideas in mixed scenarios. Choose any exam; there is no required order.</p>
       <a class="quiz-lesson-link" href="./learn.html">Explore the chapters</a>`;
+    showResume();
     host.querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>chooseLevel(b.dataset.level)));
     return;
   }
@@ -74,6 +98,7 @@ function renderIntro() {
     }).join('')}${beginner?`<a class="quiz-pick${patchBest>=4?' quiz-pick-passed':''}" href="./simulations.html?exam=patching#practice">${quizThumbnail(1)}<span class="quiz-pick-content"><strong>Hands-on patching</strong><span class="quiz-pick-description">Place LC and MMC connectors from a mock FIM ticket, including a flipped optic.</span><span class="quiz-pick-status">${patchBest===null?'Not taken':`${patchBest>=4?'✓ Passed':'Keep practicing'} · Best result ${patchBest}/5`}</span><span class="quiz-pick-action">Open patching exam →</span></span></a>`:''}</div>
     <p class="picture-note">${canSave ? `Scores stay in this browser on this device. ${beginner?'Knowledge-exam best results include retries.':'Intermediate best scores use complete exam attempts; practice retries do not replace them.'}` : 'This browser cannot save progress. You can still choose any exam; results last for this visit.'}</p>
     <a class="quiz-lesson-link" href="./learn.html${beginner?'':'#compare-loops'}">${beginner?'Learn the basics first':'Review the worked examples'}</a>`;
+  showResume();
   host.querySelectorAll('[data-round]').forEach(button => button.addEventListener('click',() => beginRound(Number(button.dataset.round))));
   host.querySelector('#exam-levels').addEventListener('click',()=>chooseLevel(null));
 }
@@ -121,6 +146,7 @@ function showQuizPicker() {
 }
 
 function renderQuestion() {
+  persistExam();
   const question = questions.find(item => item.id === attempt.ids[index]);
   const multiple = Array.isArray(question.correct);
   const visual = question.interaction==='visual';
@@ -141,14 +167,19 @@ function renderQuestion() {
   if (multiple) {
     const check = host.querySelector('#quiz-check');
     host.querySelectorAll('.quiz-multiple input').forEach(input => input.addEventListener('change',() => {
-      check.disabled = !host.querySelector('.quiz-multiple input:checked');
+      draftChoices=[...host.querySelectorAll('.quiz-multiple input:checked')].map(input=>Number(input.value));
+      check.disabled = !draftChoices.length;
+      persistExam();
     }));
+    host.querySelectorAll('.quiz-multiple input').forEach(input=>{input.checked=draftChoices.includes(Number(input.value));});
+    check.disabled=!draftChoices.length;
     check.addEventListener('click',() => choose(question,[...host.querySelectorAll('.quiz-multiple input:checked')].map(input => Number(input.value))));
   } else {
     host.querySelectorAll('[data-choice]').forEach(button => button.addEventListener('click',() => choose(question,Number(button.dataset.choice))));
   }
   host.querySelector('#quiz-next').addEventListener('click',() => {
     if (!Object.hasOwn(attempt.answers,question.id)) return;
+    draftChoices=[];
     if (++index < attempt.ids.length) renderQuestion(); else renderResults();
   });
   host.querySelector('#quiz-all').addEventListener('click',showQuizPicker);
@@ -159,6 +190,7 @@ function renderQuestion() {
     event.currentTarget.setAttribute('aria-label',`${motionPaused ? 'Play' : 'Pause'} explanation animations`);
   });
   focusTitle();
+  if(Object.hasOwn(attempt.answers,question.id)) showAnswer(question,attempt.answers[question.id],false);
 }
 
 function choose(question,choice) {
@@ -167,12 +199,18 @@ function choose(question,choice) {
   if (updated === attempt) return;
   attempt = updated;
   roundAnswers = {...roundAnswers,[question.id]:attempt.answers[question.id]};
+  draftChoices=[];
+  persistExam();
+  showAnswer(question,choice);
+}
+
+function showAnswer(question,choice,moveFocus=true) {
   const correct = isCorrectAnswer(question,choice);
   const multiple = Array.isArray(question.correct);
   const expected = multiple ? question.correct : [question.correct];
   const selected = multiple ? choice : [choice];
   host.querySelectorAll('.quiz-answer').forEach((card,i) => {
-    if (multiple) card.querySelector('input').disabled = true; else card.disabled = true;
+    if (multiple) {card.querySelector('input').disabled = true; card.querySelector('input').checked=selected.includes(i);} else card.disabled = true;
     const status = card.querySelector('.quiz-answer-state');
     if (expected.includes(i)) {
       card.classList.add('answer-correct');
@@ -194,8 +232,7 @@ function choose(question,choice) {
     ${(question.relatedLessons??[]).map(([title,href])=>`<a class="exam-related" href="./${href}" target="_blank" rel="noopener noreferrer">${title} ↗</a>`).join('')}`;
   host.querySelector('.quiz-progress').value = index+1;
   const next = host.querySelector('#quiz-next'); next.hidden = false;
-  next.focus({preventScroll:true});
-  host.querySelector('#quiz-scene').scrollIntoView({block:'start',behavior:'instant'});
+  if(moveFocus) {next.focus({preventScroll:true});host.querySelector('#quiz-scene').scrollIntoView({block:'start',behavior:'instant'});}
 }
 
 function rankCard(rank, earnedNow, passed) {
@@ -214,14 +251,15 @@ function rankCard(rank, earnedNow, passed) {
 }
 
 function renderResults() {
+  suspended=null; clearExam(progressStorage);
   recordExamCompletion(countEvent, {practice:retry});
   const result = resultsFor(attempt);
   if (!retry) firstScore = result.correct;
-  const progress = roundProgress(currentRound,roundAnswers);
+  const progress = roundProgress(currentRound,roundAnswers,fullRoundIds);
   const nextRound = progress.nextRound;
   const previousRank = apprenticeRank(savedScores);
   const beginner=selectedLevel==='beginner';
-  const updated=recordRoundProgress(activeScores(),currentRound,roundAnswers,{practice:retry});
+  const updated=recordRoundProgress(activeScores(),currentRound,roundAnswers,{practice:retry,ids:fullRoundIds});
   if(beginner) savedScores=updated; else appliedScores=updated;
   canSave = saveQuizProgress(progressStorage,updated,selectedLevel);
   const rank = apprenticeRank(savedScores);
@@ -244,7 +282,7 @@ function renderResults() {
       ${nextRound !== null ? '<button type="button" class="quiz-primary" id="quiz-continue">Try the next 5 questions</button>' : ''}
       ${progress.missed.length ? `<button type="button" class="${progress.passed ? 'quiz-secondary' : 'quiz-primary'}" id="quiz-retry">Retry ${progress.missed.length} missed ${progress.missed.length === 1 ? 'question' : 'questions'}</button>` : ''}
       <button type="button" class="${nextRound === null && progress.passed ? 'quiz-primary' : 'quiz-secondary'}" id="quiz-all">Choose another exam</button>
-      <button type="button" class="quiz-secondary" id="quiz-restart">Repeat these 5 questions</button>
+      <button type="button" class="quiz-secondary" id="quiz-restart">${currentRound===0?'Retake this exam':'Retake with a fresh mix'}</button>
       <a class="quiz-lesson-link" href="#progress">My progress</a>
       <a class="quiz-lesson-link" href="./learn.html">Stop here · back to lessons</a>
     </div>

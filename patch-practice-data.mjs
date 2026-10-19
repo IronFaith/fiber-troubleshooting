@@ -51,3 +51,27 @@ export function savePatchBest(storage,score) {
   try { storage.setItem(storageKey,JSON.stringify(best)); return {best,canSave:true}; }
   catch { return {best,canSave:false}; }
 }
+
+
+const draftKey='fiber-patching-session-v1';
+export function loadPatchDraft(storage) {
+  try {
+    const raw=JSON.parse(storage.getItem(draftKey));
+    if(raw?.version!==1 || !Number.isInteger(raw.index) || raw.index<0 || raw.index>=patchTasks.length) return null;
+    let answers={};
+    for(const task of patchTasks) {
+      const answer=raw.answers?.[task.id];
+      if(answer) answers=recordPatchAnswer(answers,task.id,answer.connector,answer.slot);
+    }
+    if(patchTasks.some((task,i)=>i<raw.index&&!Object.hasOwn(answers,task.id) || i>raw.index&&Object.hasOwn(answers,task.id))) return null;
+    const event=raw.countEvent;
+    return {index:raw.index,answers,selected:['lc','mmc'].includes(raw.selected)?raw.selected:null,
+      countEvent:event?.kind==='exam' && /^[0-9a-f-]{36}$/i.test(event.id) && Number.isSafeInteger(event.at)?{id:event.id,kind:'exam',at:event.at}:null};
+  } catch { return null; }
+}
+export function savePatchDraft(storage,state) {
+  try { storage.setItem(draftKey,JSON.stringify({version:1,...state})); return true; } catch { return false; }
+}
+export function clearPatchDraft(storage) {
+  try {storage.removeItem(draftKey);} catch { /* Optional. */ }
+}

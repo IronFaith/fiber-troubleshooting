@@ -97,6 +97,7 @@ function placeTool(kind,point,atSource=false) {
   selectedTool=null;
   update([{type:'place',kind,point,atSource}],kind==='vfl'?'VFL placed. Choose its source and where you expect light, then enter your observation.':`${toolNames[kind]} placed. Enter the result you observed.`);
   host.querySelector('[data-action="test-result"]')?.focus({preventScroll:true});
+  if(window.matchMedia('(max-width:700px)').matches) host.querySelector('.vfl-simple, .ts-map-card')?.scrollIntoView({block:'start',behavior:'instant'});
 }
 function removeTool() {
   update([{type:'remove'}],'Tool removed; connectors left unplugged. Results kept.');
@@ -179,6 +180,16 @@ function results(s) {
     ${loops.length+traces.length?`<div class="ts-log-list">${[...loops,...traces].join('')}</div>`:'<p class="ts-note">No tests recorded yet. Moving a loop or VFL does not mark a section as good.</p>'}
     <p class="ts-note">Saved in this browser tab. Changing the path or mapped ports clears test results. After a repair, start a new case and retest.</p><div id="ts-copy-fallback"></div></section>`;
 }
+function mobileActions(s) {
+  const a=assessment(s), recorded=s.tool==='loop'&&s.loops[s.selected];
+  const action=s.tool==='vfl'||s.tool==='loop'&&!recorded?'test-result':s.tool==='link'&&s.disconnected?.length?'normalize':a.suggestion?'next':'findings';
+  const label=action==='test-result'?'Record result':action==='normalize'?'Normalize':action==='next'?'Next check':'See findings';
+  const context=s.tool==='vfl'?`VFL · check ${fiberPointName(s.selected)}`:s.tool==='loop'?`${pointName(s.selected)} · ${recorded?loopLabels[recorded]:'loop placed'}`:'Choose a test, then record what you find';
+  return `<nav class="ts-mobile-actions" aria-label="Current test actions"><span>${context}</span><div>${button('view-test','View path')}${button(action,label,'class="ts-mobile-primary"')}</div></nav>`;
+}
+function mobilePoints(s) {
+  return `<nav class="ts-point-picker" aria-label="View a point on the path">${Array.from({length:s.count+2},(_,point)=>button(`focus-point-${point}`,point===0?'Optic':point===s.count+1?'Remote':`CAS ${point}`,`aria-pressed="${point===s.selected}"`)).join('')}</nav>`;
+}
 function render(preservePosition=false) {
   const scrollLeft=host.querySelector('.ts-map')?.scrollLeft??0;
   const patchScroll=host.querySelector('.ts-patch-scroll')?.scrollLeft??0;
@@ -190,16 +201,17 @@ function render(preservePosition=false) {
   if(view==='guided') return;
   const s=cases[view];
   if(s.tool==='vfl') {
-    host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${results(s)}`;
+    host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${results(s)}${mobileActions(s)}`;
     return;
   }
   host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normal patching · health not confirmed':`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
-    <div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
+    ${mobilePoints(s)}<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
     <div class="ts-legend"><span>↔ Scroll to follow the path</span><span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span></div>
     </section>
-    <div class="ts-work-grid">${controls(s)}${advice(s)}</div></div>${results(s)}`;
+    <div class="ts-work-grid">${controls(s)}${advice(s)}</div></div>${results(s)}${mobileActions(s)}`;
   if(preservePosition) host.querySelector('.ts-map').scrollLeft=scrollLeft;
   else centerMap();
+  if(window.matchMedia('(max-width:700px)').matches) centerMap();
   if(preservePosition&&host.querySelector('.ts-patch-scroll'))host.querySelector('.ts-patch-scroll').scrollLeft=patchScroll;
 }
 
@@ -262,6 +274,20 @@ host.addEventListener('click',async event=>{
   const target=event.target.closest('[data-action]');
   if(!target) return;
   const action=target.dataset.action,s=cases[view];
+  if(action.startsWith('focus-point-')) {
+    const point=Number(action.slice(12));
+    if(selectedTool) {placeTool(selectedTool,point,true);return;}
+    centerMap(point);
+    host.querySelectorAll('.ts-point-picker button').forEach(b=>b.setAttribute('aria-pressed',String(b===target)));
+    return;
+  }
+  if(action==='view-test') {
+    centerMap();
+    const target=host.querySelector('.vfl-view, .ts-map-card');
+    target?.scrollIntoView({block:'start',behavior:'instant'});
+    return;
+  }
+  if(action==='findings') {host.querySelector('.ts-advice, .vfl-observe')?.scrollIntoView({block:'start',behavior:'instant'});return;}
   if(action==='setup') {setupOpen=!setupOpen;render();return;}
   if(action==='normalize') {normalizeSetup();return;}
   if(action==='check-opening') {update([{type:'trace',from:traceFrom(s),to:traceStop(s).point}],'Check the open end here, then enter your observation.');centerMap();return;}

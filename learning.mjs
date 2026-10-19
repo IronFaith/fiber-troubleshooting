@@ -3,10 +3,10 @@ import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
 import { mountCommunicationRoute } from './communication-route.mjs?v=2';
-import { mountCourse } from './course.mjs?v=7';
+import { mountCourse, learningEntry } from './course.mjs?v=8';
 import { mountReference, linkLessonTerms } from './reference.mjs?v=6';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
-import { mountPatchPractice } from './patch-practice.mjs?v=11';
+import { mountPatchPractice } from './patch-practice.mjs?v=12';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=8';
@@ -39,6 +39,24 @@ if (document.querySelector('#quiz')) quizLink.setAttribute('aria-current', 'page
 menuPanel.append(courseLink, contentsLink, simulationsLink, quizLink, link('My progress', './quiz.html#progress'), link('Troubleshoot', './index.html', 'menu-return'));
 menu.append(menuButton, menuPanel);
 document.querySelector('header').append(menu);
+if(document.querySelector('#troubleshoot-workbench')) {
+  const entry = document.createElement('a');
+  entry.className = 'learning-entry';
+  const refreshEntry = () => {
+    let storage;
+    try { storage = window.localStorage; } catch { /* Reading works without storage. */ }
+    const item = learningEntry(storage);
+    entry.href = item.href;
+    entry.replaceChildren();
+    const action = document.createElement('strong'); action.textContent = `${item.action} →`;
+    const title = document.createElement('span'); title.textContent = item.title;
+    entry.append(action,title);
+  };
+  refreshEntry();
+  document.querySelector('header').after(entry);
+  window.addEventListener('pageshow',refreshEntry);
+  window.addEventListener('storage',event=>{if(event.key==='fiber-learn-chapter-v1') refreshEntry();});
+}
 function closeMenu(restoreFocus = false) {
   menuPanel.hidden = true; menuButton.setAttribute('aria-expanded', 'false');
   if (restoreFocus) menuButton.focus();

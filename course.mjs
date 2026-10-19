@@ -28,9 +28,21 @@ export function coursePosition(hash = '', saved = '') {
   const anchor = hash.replace(/^#/, '');
   const index = chapters.findIndex((chapter, i) => anchor === `chapter-${i+1}` || chapter.sections.includes(anchor));
   if (index !== -1) return {index, anchor};
-  const remembered = chapters.findIndex(chapter => chapter.key === saved);
+  const topic = chapters.findIndex(chapter => chapter.sections.includes(saved));
+  if (topic !== -1) return {index:topic, anchor:saved};
+  const remembered = chapters.findIndex((chapter,i) => chapter.key === saved || saved === `chapter-${i+1}`);
   const fallback = remembered === -1 ? 0 : remembered;
   return {index:fallback, anchor:`chapter-${fallback+1}`};
+}
+
+export function learningEntry(storage) {
+  let saved = '';
+  try { saved = storage.getItem('fiber-learn-chapter-v1') || ''; } catch { /* Optional. */ }
+  const position = coursePosition('', saved);
+  const chapter = chapters[position.index];
+  const topic = chapter.groups.flatMap(group=>group.topics).find(([id])=>id===position.anchor);
+  const valid = chapters.some((item,i)=>item.key===saved || saved===`chapter-${i+1}` || item.sections.includes(saved));
+  return {href:`./learn.html#${position.anchor}`, action:valid?'Continue learning':'Start learning', title:topic?.[1] || chapter.title};
 }
 
 export function courseDestination(pathname, hash = '') {
@@ -55,7 +67,7 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
         <a class="contents-start" href="#chapter-${i+1}">Start chapter ${i+1}</a>
         ${chapter.groups.map(group=>`<div class="contents-group"><h4>${group.title}</h4><ul>${group.topics.map(([id,label])=>`<li><a href="#${id}">${label}</a></li>`).join('')}</ul></div>`).join('')}
       </details>`).join('')}
-      <p class="contents-note">Dotted-underlined terms open a definition. Your chapter is saved on this device.</p>
+      <p class="contents-note">Dotted-underlined terms open a definition. Your place is saved on this device.</p>
       </nav>
     </div>
     <div class="course-chapters">${chapters.map((chapter,i) => `
@@ -112,7 +124,7 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
       }
       mounted.add(index);
     }
-    saved = chapters[index].key;
+    saved = anchor;
     try { localStorage.setItem(storageKey, saved); } catch { /* Storage is optional. */ }
     host.querySelectorAll('.course-contents a').forEach(link=>{
       if(link.getAttribute('href')===`#${anchor}`) link.setAttribute('aria-current','location');
@@ -167,6 +179,23 @@ export function mountCourse(host, renderers, onChapter = () => {}) {
   const hadHash = Boolean(location.hash);
   const initial = coursePosition(location.hash, saved);
   if (!hadHash) history.replaceState(null, '', `#${initial.anchor}`);
-  show(initial, {scroll:hadHash && location.hash!=='#contents'});
+  show(initial, {scroll:location.hash!=='#contents' && (hadHash || chapters[initial.index].sections.includes(initial.anchor))});
   if(location.hash==='#contents') requestAnimationFrame(showContents);
+  let scrollPending = false;
+  window.addEventListener('scroll', () => {
+    if(scrollPending || !host.querySelector('#contents').hidden) return;
+    scrollPending = true;
+    requestAnimationFrame(() => {
+      scrollPending = false;
+      const body = bodies.find(item=>!item.hidden);
+      if(!body) return;
+      const sections = [...body.querySelectorAll('.lesson-section')].filter(section=>chapters.some(chapter=>chapter.sections.includes(section.id)));
+      const line = Math.min(180, window.innerHeight / 3);
+      const current = sections.find(section=>{const box=section.getBoundingClientRect();return box.top<=line && box.bottom>line;});
+      if(!current || current.id===saved) return;
+      saved = current.id;
+      try { localStorage.setItem(storageKey,saved); } catch { /* Optional. */ }
+      history.replaceState(null,'',`#${saved}`);
+    });
+  }, {passive:true});
 }

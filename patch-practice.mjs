@@ -2,7 +2,7 @@ import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
 import {cassetteFront, mmcHead} from './loop-visuals.mjs?v=3';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {patchCableVisual} from './patch-cable-visuals.mjs?v=1';
-import {patchTasks,headSerial,placementCorrect,placementExplanation,recordPatchAnswer,patchResult,loadPatchBest,savePatchBest} from './patch-practice-data.mjs?v=1';
+import {patchTasks,headSerial,placementCorrect,placementExplanation,recordPatchAnswer,patchResult,loadPatchBest,savePatchBest,loadPatchDraft,savePatchDraft,clearPatchDraft} from './patch-practice-data.mjs?v=2';
 
 function connectorArt(kind) {
   if(kind==='mmc') return `<svg viewBox="0 0 130 85" aria-hidden="true"><path class="loop-cord" d="M2 48 H35"/><g class="lab-connector-head" transform="translate(32 24) scale(.85)">${mmcHead(0,0,false)}</g></svg>`;
@@ -15,6 +15,20 @@ export function mountPatchPractice(host) {
   let storage;
   try { storage=window.localStorage; } catch { /* Works without saved progress. */ }
   let {best,canSave}=loadPatchBest(storage);
+  let pending=loadPatchDraft(storage);
+  if(mode==='quiz' && pending) restorePending();
+  function restorePending() {
+    mode='quiz'; index=pending.index; answers=pending.answers; selected=pending.selected;
+    countEvent=pending.countEvent?{...pending.countEvent,at:Date.now()}:startExamCount();
+    const answer=answers[patchTasks[index].id];
+    placement=answer?{slot:answer.slot,correct:placementCorrect(patchTasks[index],answer.connector,answer.slot)}:null;
+    if(answer) selected=answer.connector;
+    finished=false;
+  }
+  function persist() {
+    if(mode!=='quiz' || finished) return;
+    pending={index,answers,selected,countEvent};savePatchDraft(storage,pending);
+  }
   let drag=null, ignoreClickUntil=0;
   const cable=patchCableVisual(host);
   const task=()=>patchTasks[index];
@@ -28,7 +42,7 @@ export function mountPatchPractice(host) {
   function selectConnector(kind) {
     if(locked() || placement?.correct) return;
     if(!drag) cable.clear();
-    selected=kind;
+    selected=kind; persist();
     host.querySelectorAll('[data-connector]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.connector===kind)));
     feedback(`${kind.toUpperCase()} selected. Drag it, or tap the port to place it.`);
   }
@@ -135,7 +149,7 @@ export function mountPatchPractice(host) {
     if(!selected) { feedback('Choose an LC connector or MMC head first.'); return; }
     const current=task(), correct=placementCorrect(current,selected,slot);
     if(mode==='quiz') answers=recordPatchAnswer(answers,current.id,selected,slot);
-    placement={slot,correct};
+    placement={slot,correct}; persist();
     updateBoard();
     const wrongType=selected!==current.kind;
     feedback(`${correct ? '✓ Seated in the correct port.' : wrongType ? `${selected.toUpperCase()} is the wrong connector here. ${current.kind==='lc' ? 'LC followers connect to the optic.' : 'The MMC head connects to the CAS.'}` : 'That is a different port.'} ${placementExplanation(current)}${mode==='practice' && !correct ? ' Try again.' : ''}`,correct ? 'success' : 'error');
@@ -154,7 +168,7 @@ export function mountPatchPractice(host) {
 
   function begin(nextMode,nextIndex=0) {
     clearDrag(); mode=nextMode; index=nextIndex; selected=null; placement=null; finished=false; ignoreClickUntil=0;
-    if(mode==='quiz') { answers={}; countEvent=startExamCount(); }
+    if(mode==='quiz') {if(pending) restorePending(); else {answers={}; countEvent=startExamCount();}}
     render(); focusTask();
   }
   function focusTask() {
@@ -164,13 +178,14 @@ export function mountPatchPractice(host) {
   function finishQuiz() {
     if (finished) return;
     recordExamCompletion(countEvent);
-    finished=true;
+    finished=true; pending=null; clearPatchDraft(storage);
     const result=patchResult(answers);
     const saved=savePatchBest(storage,Math.max(result.correct,best ?? 0));
     best=saved.best; canSave=saved.canSave;
     render(); focusTask();
   }
   function render() {
+    persist();
     cable.clear();
     const current=task();
     const result=patchResult(answers);
@@ -179,6 +194,7 @@ export function mountPatchPractice(host) {
         <button type="button" data-mode="quiz" aria-pressed="${mode==='quiz'}">Take the 5-question exam</button>
       </div>
       <p class="lab-best">${best===null ? 'Beginner patching · exam available anytime' : `Beginner patching · best exam ${best}/5`}${!canSave ? ' · progress lasts for this visit' : ''}</p>
+      ${mode==='practice'&&pending?'<div class="exam-resume"><span>Your patching exam is saved.</span><button type="button" class="lab-resume">Resume patching exam</button></div>':''}
       ${finished ? `<div class="lab-result">
         <h4 tabindex="-1">${result.passed ? 'Patching basics passed' : 'Keep building your patching skills'}</h4>
         <p class="lab-score">${result.correct}<span> / 5</span></p><p>Correct on the first placement. ${result.passed ? 'You matched at least four of the five tickets.' : 'Aim for 4/5. Review the missed placements below.'}</p>
@@ -199,6 +215,7 @@ export function mountPatchPractice(host) {
       </div>
       <p class="lab-feedback" role="status" aria-live="polite" aria-atomic="true">${mode==='practice' ? current.kind==='lc' ? 'Match the Ethernet suffix to the optic position. Check which way the purple tab faces.' : 'Match the CAS and port in the ticket. The serial alone does not tell you the port.' : 'Choose your connector, then make one placement.'}</p>
       <button type="button" class="quiz-primary lab-next" hidden>${mode==='quiz' ? index===4 ? 'See my exam result' : 'Next question' : 'Next practice ticket'}</button>`}`;
+    host.querySelector('.lab-resume')?.addEventListener('click',()=>begin('quiz'));
     host.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=> {
       if(button.dataset.mode===mode && !finished) return;
       begin(button.dataset.mode);
@@ -213,6 +230,15 @@ export function mountPatchPractice(host) {
     host.querySelectorAll('[data-connector]').forEach(attachDrag);
     updateBoard();
     cable.reset();
+    if(locked()) {
+      host.querySelectorAll('[data-connector]').forEach(button=>button.disabled=true);
+      feedback(`${placement.correct?'Correct placement.':'This placement did not match.'} ${placementExplanation(current)}`,placement.correct?'success':'error');
+      host.querySelector('.lab-next').hidden=false;
+      host.querySelector('progress').value=Object.keys(answers).length;
+      if(placement.correct) cable.seat(selected,placement.slot);
+    } else if(selected) {
+      host.querySelector(`[data-connector="${selected}"]`)?.setAttribute('aria-pressed','true');
+    }
     host.querySelector('.lab-next').addEventListener('click',()=> {
       if(mode==='quiz' && !locked()) return;
       if(mode==='quiz' && index===4) { finishQuiz(); return; }
