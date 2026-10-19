@@ -1,5 +1,5 @@
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {quizVisual, quizThumbnail} from './quiz-visuals.mjs?v=4';
+import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=5';
 
 import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, roundQuestionIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=10';
 import {loadPatchBest} from './patch-practice-data.mjs?v=1';
@@ -87,7 +87,7 @@ function renderProgress() {
   const rank=apprenticeRank(savedScores), patch=loadPatchBest(progressStorage);
   const badge=(title,score,topic)=>{
     const earned=score!==null && score>=4;
-    const content=`<svg class="progress-badge-icon" viewBox="0 0 48 56" aria-hidden="true"><path class="progress-badge-shield" d="M24 3 L44 11 V28 Q44 41 24 53 Q4 41 4 28 V11 Z"/><path class="progress-badge-mark" d="${earned?'M13 27 l7 7 15-17':'M17 24 h14 M17 32 h14'}"/></svg>
+    const content=`${examEmblem(topic===null?'patch':topic,earned)}
       <span><strong>${title}</strong><small>${earned?'Earned':score===null?'Not yet earned':'Keep practicing'}${score===null?'':` · Best ${score}/5`}</small></span><span class="progress-badge-action">${score===null?'Take exam':'Retake'} →</span>`;
     const classes=`progress-badge${earned?' badge-earned':''}`;
     return topic===null ? `<a class="${classes}" href="./simulations.html?exam=patching#practice">${content}</a>` : `<button type="button" class="${classes}" data-round="${topic}">${content}</button>`;
@@ -96,6 +96,10 @@ function renderProgress() {
   host.innerHTML=`<button type="button" class="quiz-picker-back" id="exam-levels">← Exams</button>
     <h2 id="quiz-title" tabindex="-1">My progress</h2>
     ${rankCard(rank,false,true)}
+    <ol class="rank-tiers" aria-label="Fiber Apprentice tier designs">${[1,2,3,4].map(level=>{
+      const status=level===rank.level?'Current':level<rank.level?'Earned':'Not earned';
+      return `<li class="rank-tier${level===rank.level?' tier-current':''}"${level===rank.level?' aria-current="step"':''} aria-label="Fiber Apprentice ${['','I','II','III','IV'][level]} · ${status}">${rankEmblem(level)}<strong>${['','I','II','III','IV'][level]}</strong><span>${status}</span></li>`;
+    }).join('')}</ol>
     <p class="picture-note">${canSave && patch.canSave?'Saved only in this browser. Clearing site data removes your progress.':'This browser cannot save progress. Results last for this visit.'}</p>
     <div class="progress-badges-heading"><h3>Your badges</h3><span>${earned} of 7 earned</span></div>
     <p class="section-intro">Earn a badge by passing its exam with 4/5 or better.</p>
@@ -199,11 +203,8 @@ function rankCard(rank, earnedNow, passed) {
     : !passed && (savedScores[currentRound] ?? 0) < 4 ? 'Get 4/5 in this exam to earn your next Apprentice level.'
     : !passed ? 'Your earned level stays while you practice.'
     : 'One Apprentice level for each beginner knowledge exam passed.';
-  return `<section class="quiz-rank${rank.complete ? ' rank-complete' : ''}" aria-labelledby="quiz-rank-title">
-    <svg class="quiz-rank-badge" viewBox="0 0 88 100" aria-hidden="true" focusable="false">
-      <path class="rank-shield" d="M8 7 Q44 -1 80 7 V59 Q80 78 44 96 Q8 78 8 59 Z"/>
-      ${Array.from({length:4},(_,i) => `<path class="rank-stripe${i < rank.level ? ' stripe-earned' : ''}" d="M23 ${21+i*14} L44 ${28+i*14} L65 ${21+i*14} V${28+i*14} L44 ${35+i*14} L23 ${28+i*14} Z"/>`).join('')}
-    </svg>
+  return `<section class="quiz-rank${rank.complete ? ' rank-complete' : ''}" data-rank="${rank.level}" aria-labelledby="quiz-rank-title">
+    ${rankEmblem(rank.level)}
     <div><p class="quiz-rank-label">Beginner · ${earnedNow ? 'Apprentice level earned' : rank.level ? 'Your earned rank' : 'Your first Apprentice level is next'}</p>
       <h3 id="quiz-rank-title">${rank.title}</h3>
       <p class="quiz-rank-count">${rank.level} of 4 knowledge exams passed${rank.complete ? ' · Knowledge rounds complete' : ''}</p>

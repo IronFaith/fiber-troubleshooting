@@ -151,3 +151,41 @@ export function quizThumbnail(topic) {
   ];
   return `<span class="q-quiz-thumb" aria-hidden="true">${svg(drawings[topic],250)}</span>`;
 }
+
+// Achievement artwork is decorative; nearby labels carry the earned state and title.
+const emblemLine=d=>`<path d="${d}" fill="none" stroke="#102d43" stroke-width="7" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#efc45d" stroke-width="4" stroke-linecap="round"/>`;
+const emblemOptic=(x,y,scale=1)=>`<g transform="translate(${x} ${y}) scale(${scale})"><path d="M7 15 V3 H33 V15" fill="none" stroke="#a58bdd" stroke-width="6" stroke-linejoin="round"/><rect y="12" width="40" height="34" rx="4" fill="#d8e2ec" stroke="#7e97ae" stroke-width="2"/><path d="M4 16 H36" stroke="#fff" stroke-width="2"/>${[6,23].map(px=>`<rect x="${px}" y="21" width="11" height="19" rx="2" fill="#193a53"/>${[26,35].map(py=>`<circle cx="${px+5.5}" cy="${py}" r="3" fill="#71d9ee" stroke="#e9faff"/>`).join('')}`).join('')}</g>`;
+const emblemLc=(x,y,scale=1)=>`<g transform="translate(${x} ${y}) scale(${scale})"><path d="M9 7 V0 M23 7 V0" stroke="#e4edf3" stroke-width="6"/><path d="M3 9 H29 V29 L25 35 H7 L3 29 Z" fill="#7baed4" stroke="#c7e9ff" stroke-width="2"/><path d="M11 11 H21 V24 H11 Z" fill="#345c7c"/><path d="M12 33 V44 M21 33 V44" stroke="#efc45d" stroke-width="4" stroke-linecap="round"/><path d="M3 26 H29" stroke="#c7e9ff" stroke-width="2"/></g>`;
+const emblemCas=(x,y,scale=1)=>`<g transform="translate(${x} ${y}) scale(${scale})"><rect width="44" height="24" rx="3" fill="#31775d" stroke="#9ed7b8" stroke-width="2"/>${[5,15,25,35].map(px=>[5,14].map(py=>`<rect x="${px}" y="${py}" width="5" height="5" rx="1" fill="#163e33" stroke="#a4d7bb"/>`).join('')).join('')}</g>`;
+const emblemPulse=(x,y)=>`<path d="M${x-5} ${y} H${x+5} M${x+1} ${y-4} L${x+5} ${y} L${x+1} ${y+4}" fill="none" stroke="#80e7f4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+const fanoutEmblem=()=>`${emblemLine('M60 46 V56 M60 56 Q34 56 32 77 M60 56 Q49 60 50 80 M60 56 Q71 60 70 80 M60 56 Q86 56 88 77')}<rect x="47" y="26" width="26" height="23" rx="4" fill="#79b99c" stroke="#c3ead6" stroke-width="2"/><rect x="52" y="31" width="16" height="10" rx="2" fill="#174a3b"/>${[55,60,65].map(x=>`<circle cx="${x}" cy="36" r="1.6" fill="#94e6c0"/>`).join('')}${[27,45,65,83].map((x,i)=>emblemLc(x,i===0||i===3?77:80,.32)).join('')}`;
+const linkEmblem=()=>`${emblemLine('M37 78 H27 Q19 78 19 70 V47 Q19 40 27 40 H93 Q101 40 101 47 V70 Q101 78 93 78 H83')}${emblemCas(27,28,.55)}${emblemCas(69,28,.55)}${emblemOptic(23,57,.72)}${emblemOptic(68,57,.72)}${emblemPulse(60,40)}<path d="M60 55 L63 62 L70 65 L63 68 L60 75 L57 68 L50 65 L57 62 Z" fill="#f5d88c"/>`;
+
+function emblemFrame(level) {
+  const shape=level===2?'<rect class="emblem-metal" x="8" y="8" width="104" height="104" rx="25"/>':level===3?'<path class="emblem-metal" d="M60 4 L108 32 V88 L60 116 L12 88 V32 Z"/>':level===4?'<path class="emblem-metal" d="M38 6 H82 L87 13 H98 L107 22 V33 L114 38 V82 L107 87 V98 L98 107 H87 L82 114 H38 L33 107 H22 L13 98 V87 L6 82 V38 L13 33 V22 L22 13 H33 Z"/>':'<circle class="emblem-metal" cx="60" cy="60" r="54"/>';
+  return `${shape}<circle class="emblem-face" cx="60" cy="60" r="46"/><circle class="emblem-ring" cx="60" cy="60" r="42"/><path d="M28 26 A47 47 0 0 1 88 24" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="2" stroke-linecap="round"/>${level>1?[24,96].map(x=>[24,96].map(y=>`<circle cx="${x}" cy="${y}" r="2" fill="#fff" fill-opacity=".75"/>`).join('')).join(''):''}`;
+}
+
+export function rankEmblem(level) {
+  const motifs=[
+    '<circle cx="60" cy="56" r="23" fill="#bacbd8"/><circle cx="60" cy="56" r="17" fill="#eef5fa"/><circle cx="60" cy="56" r="10" fill="#65bbd6"/><circle cx="57" cy="53" r="4" fill="#fff"/><path d="M60 24 V18 M60 88 V94 M28 56 H22 M92 56 H98" stroke="#8caabd" stroke-width="2"/>',
+    `${emblemLine('M56 75 V83 Q56 93 70 93 H79')}${emblemLc(44,30)}${emblemPulse(82,54)}`,
+    `${emblemLine('M50 82 V89 Q50 95 43 95 M71 82 V89 Q71 95 78 95')}${emblemOptic(37,30,1.15)}${emblemPulse(60,23)}`,
+    fanoutEmblem(),linkEmblem()
+  ];
+  return `<svg class="badge-art rank-emblem" data-tier="${level}" viewBox="0 0 120 120" aria-hidden="true" focusable="false">${emblemFrame(level)}${motifs[level]}${level?`<rect class="emblem-number-plate" x="43" y="98" width="34" height="17" rx="5"/><text class="emblem-number" x="60" y="110" text-anchor="middle">${['','I','II','III','IV'][level]}</text>`:''}</svg>`;
+}
+
+export function examEmblem(topic,earned) {
+  const motifs={
+    0:`${emblemLine('M27 73 H92')}<circle cx="54" cy="49" r="19" fill="#193f59" stroke="#d7eaf4" stroke-width="5"/><path d="M68 64 L83 81" stroke="#d7eaf4" stroke-width="7" stroke-linecap="round"/><path d="M42 49 H66" stroke="#80e7f4" stroke-width="4"/><circle cx="54" cy="49" r="4" fill="#fff"/>`,
+    1:`${emblemLc(44,25)}<path d="M35 78 H85 M39 84 H81" stroke="#91c5dc" stroke-width="3"/><path d="m49 77 8 8 17-18" fill="none" stroke="#8fe3bd" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+    2:`${emblemOptic(40,28)}<path d="M30 82 H89 M35 91 H84" stroke="#efc45d" stroke-width="3"/>${emblemPulse(61,82)}<g transform="translate(120 182) rotate(180)">${emblemPulse(61,91)}</g>`,
+    3:`${emblemLine('M42 76 H31 Q24 76 24 69 V38 Q24 28 36 28 H83 Q96 28 96 40 V69 Q96 76 87 76 H77')}${emblemOptic(40,47)}${emblemPulse(60,28)}`,
+    patch:`${emblemLine('M45 76 V86 Q45 93 61 93 Q81 93 81 80 V59')}${emblemLc(29,28,.8)}${emblemCas(65,32,.65)}`,
+    4:'<rect x="32" y="25" width="56" height="68" rx="6" fill="#e3edf5"/><path d="M43 40 H68 M43 51 H62 M43 62 H55" stroke="#5b7b95" stroke-width="4" stroke-linecap="round"/><circle cx="72" cy="70" r="16" fill="#286453" stroke="#9ce4bd" stroke-width="2"/><path d="m64 70 6 6 11-12" fill="none" stroke="#c8f7df" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
+    5:linkEmblem()
+  };
+  const tier={0:1,1:2,2:2,3:3,patch:3,4:3,5:4}[topic];
+  return `<svg class="badge-art exam-emblem${earned?'':' emblem-unearned'}" data-tier="${tier}" viewBox="0 0 120 120" aria-hidden="true" focusable="false">${emblemFrame(tier)}${motifs[topic]}${earned?'<circle cx="94" cy="94" r="13" fill="#246447" stroke="#fff" stroke-width="2"/><path d="m88 94 4 4 8-9" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg>`;
+}
