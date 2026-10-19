@@ -1590,3 +1590,26 @@ body:has(.reference-dialog[open]) { overflow:hidden; }
 @media(min-width:701px) { .ts-map-card { scroll-margin-top:190px; } }
 
 .ts-map .ts-confirmed-route,.ts-map .light-source,.ts-map .ts-coverage-lane,.ts-map .ts-coverage-issue,.ts-map .ts-coverage-mark,.ts-map .ts-route { pointer-events:none; }
+
+/* Identity is checked separately from light / loop observations. */
+.ts-identity { margin:12px 0; padding:16px 18px; border:1px solid #c8d7e1; border-radius:10px; background:white; scroll-margin-top:90px; }
+.ts-identity h3 { margin:0; font-size:16px; color:#183e59; }
+.ts-identity .ts-section-top > b { font-size:12px; color:#526f83; white-space:nowrap; }
+.ts-identity-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:12px; }
+.ts-identity-grid label { display:flex; gap:9px; align-items:flex-start; cursor:pointer; }
+.ts-identity-grid input { flex-shrink:0; width:19px; height:19px; margin:2px 0; accent-color:#245b91; }
+.ts-identity-grid input:focus-visible { outline:3px solid #347cbc; outline-offset:3px; }
+.ts-identity-grid span { display:grid; gap:4px; }
+.ts-identity-grid b { font-size:12px; color:#254c65; }
+.ts-identity-grid small { font-size:11px; line-height:1.5; color:#587487; }
+.ts-scope { border-left:3px solid #8baabd; padding-left:12px; }
+.ts-comparison-finding { display:grid; gap:5px; background:#edf4f7; border-radius:6px; padding:12px; }
+.ts-comparison-finding b { font-size:12px; color:#183e59; }
+.ts-comparison-options { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.ts-comparison-options button { background:white; color:#244f6a; border:1px solid #91afc2; border-radius:6px; padding:12px; font:inherit; font-size:13px; cursor:pointer; }
+.ts-comparison-options button:hover,.ts-comparison-options button[aria-pressed="true"] { background:#e8f2f8; border-color:#245b91; }
+.ts-comparison-options button:focus-visible { outline:3px solid #347cbc; outline-offset:2px; }
+.ts-sources { font-size:11px; line-height:1.6; }
+.ts-sources a { color:#245b91; text-decoration:underline; }
+@media(max-width:1000px) { .ts-identity-grid { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:480px) { .ts-identity { padding:13px; scroll-margin-top:12px; } .ts-identity-grid { gap:15px 12px; } .ts-comparison-options button { flex:1 1 100%; } }

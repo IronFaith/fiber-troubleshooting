@@ -8,6 +8,17 @@ export const faults = {
 };
 export const loopLabels = { pass: 'Pass', weak: 'Weak return', dark: 'No return light' };
 export const traceLabels = { seen: 'Expected port + strand', wrong: 'Different port', swapped: 'Other strand', dark: 'No light seen' };
+export const identityLabels = {
+  optic:'Device + optic port', fanout:'LC follower + MMC head',
+  route:'CAS route + ports', channels:'Strand mapping'
+};
+export const comparisonLabels = {
+  source:{pass:'Reference has light',fail:'Reference also dark'},
+  inspection:{clear:'Ends clean; original still dark',damage:'Damage seen',unavailable:'Cannot inspect'},
+  substitute:{light:'Replacement has light',dark:'Replacement also dark',unavailable:'No compatible spare'}
+};
+export const identityConfirmed = s => Object.keys(identityLabels).every(key=>s.identity?.[key]===true);
+const parseComparisonKey = key => {const [trace,step]=String(key).split('~');return parseTraceKey(trace)&&Object.hasOwn(comparisonLabels,step)?{trace,step}:null;};
 export const pointName = point => point === 0 ? 'Local optic' : `CAS ${point}`;
 export const spanName = point => `${pointName(point - 1)} → CAS ${point}`;
 export const fiberPointName = point => point === 0 ? 'Optic-side LC leg' : pointName(point);
@@ -25,7 +36,7 @@ export function parseTraceKey(key) {
 const validTrace = (state,from,to) => [from,to].every(p=>Number.isInteger(p)&&p>=0&&p<=state.reach) && from!==to;
 
 export function createCase(simulated = false) {
-  return { simulated, started:false, round:1, history:[], count: 2, reach: 2, selected: 0, ports: [12,12,12,12], tool: 'link',
+  return { simulated, started:false, round:1, history:[], identity:{}, comparisons:{}, count: 2, reach: 2, selected: 0, ports: [12,12,12,12], tool: 'link',
     strand: 'tx', vflFrom:0, ready: false, loops: {}, traces: {}, tx: 'unknown', rx: 'unknown', service:'unknown', disconnected:[], patches:{},
     fault: { kind: 'break', at: 2, strand: 'tx', severity: 'dark' } };
 }
@@ -108,8 +119,22 @@ export function simulatedReadings(state) {
 
 export function changeCase(state, action) {
   const s = structuredClone(state);
-  const clear = () => { if(Object.keys(s.loops).length||Object.keys(s.traces).length||s.history?.length) s.round=(s.round??1)+1; s.loops = {}; s.traces = {}; s.ready = false; s.service='unknown'; s.disconnected=[]; s.patches={}; };
+  const clear = () => { if(Object.keys(s.loops).length||Object.keys(s.traces).length||s.history?.length) s.round=(s.round??1)+1; s.loops = {}; s.traces = {}; s.identity={}; s.comparisons={}; s.ready = false; s.service='unknown'; s.disconnected=[]; s.patches={}; };
   switch (action.type) {
+    case 'identity':
+      if(!Object.hasOwn(identityLabels,action.key)||typeof action.value!=='boolean'||s.identity?.[action.key]===action.value) return state;
+      s.identity??={}; s.identity[action.key]=action.value; s.service='unknown';
+      if(!action.value) s.comparisons={};
+      appendObservation(s,'identity',action.key,action.value?'confirmed':'unchecked'); break;
+    case 'comparison': {
+      const guide=comparisonGuide(s,action.key);
+      if(!guide?.diagnostic || guide.diagnostic.step!==action.step || !guide.diagnostic.options.some(([v])=>v===action.value)) return state;
+      s.comparisons??={}; s.comparisons[action.key]??={};
+      const steps=Object.keys(comparisonLabels),index=steps.indexOf(action.step);
+      for(const later of steps.slice(index+1)) delete s.comparisons[action.key][later];
+      s.comparisons[action.key][action.step]=action.value; s.service='unknown';
+      appendObservation(s,'comparison',`${action.key}~${action.step}`,action.value); break;
+    }
     case 'place':
       if(!canPlaceTool(s,action.kind,action.point)) return state;
       if(action.kind==='vfl' && action.atSource) {
@@ -135,6 +160,7 @@ export function changeCase(state, action) {
       s.tool='link'; s.ready=false; s.service='unknown'; break;
     case 'normalize':
       for(const [point,patch] of Object.entries(s.patches??{})) if(patch.port!==s.ports[Number(point)-1]) {
+        s.identity={}; s.comparisons={};
         for(const key of Object.keys(s.loops)) if(Number(key)>=Number(point)) delete s.loops[key];
         for(const key of Object.keys(s.traces)) {const r=parseTraceKey(key);if(r&&Number(point)>=Math.min(r.from,r.to)&&Number(point)<=Math.max(r.from,r.to))delete s.traces[key];}
       }
@@ -149,6 +175,7 @@ export function changeCase(state, action) {
       s.patches[point]={...s.patches[point],[action.side]:action.connected,port};
       s.ready=false; s.service='unknown';
       if(current[action.side]===action.connected && current.port===port) break;
+      if(port!==current.port) {s.identity={}; s.comparisons={};}
       if(port!==current.port) for(const key of Object.keys(s.loops)) if(Number(key)>=point) delete s.loops[key];
       for(const key of Object.keys(s.traces)) {
         const route=parseTraceKey(key);
@@ -213,16 +240,18 @@ export function changeCase(state, action) {
         if(stop?.blocked||stop?.closed) return state;
         const result = s.simulated ? simulatedTrace(s) : action.result;
         if (!Object.hasOwn(traceLabels,result)) return state;
+        delete s.comparisons?.[traceKey(s)];
         s.traces[traceKey(s)] = result;
         appendObservation(s,'vfl',traceKey(s),result);
       }
       break;
     }
     case 'retest':
-      s.round=(s.round??1)+1; s.loops={}; s.traces={}; s.ready=false; s.service='unknown'; break;
+      s.round=(s.round??1)+1; s.loops={}; s.traces={}; s.identity={}; s.comparisons={}; s.ready=false; s.service='unknown'; break;
     case 'clear': clear(); break;
     default: return state;
   }
+  for(const key of Object.keys(s.comparisons??{})) if(s.traces[key]!=='dark') delete s.comparisons[key];
   if (s.tool === 'vfl' && !validTrace(s,traceFrom(s),s.selected)) {
     if(s.reach===0) s.tool='link';
     else s.vflFrom=s.selected===0?1:s.selected-1;
@@ -303,18 +332,37 @@ function basicAssessment(s) {
 function appendObservation(s,kind,key,result) {
   s.started=true;
   s.history=[...(s.history??[]),{kind,key,result,round:s.round??1,
-    ports:s.ports.slice(0,s.count),port:kind==='vfl'?traceStop(s)?.port:undefined}].slice(-100);
+    ports:s.ports.slice(0,s.count),...(kind==='vfl'&&traceStop(s)?.port?{port:traceStop(s).port}:{})}].slice(-100);
 }
+const observationValue=(s,entry)=> {
+  if(entry.kind==='identity') return s.identity?.[entry.key]===true?'confirmed':s.identity?.[entry.key]===false?'unchecked':undefined;
+  if(entry.kind==='comparison') {const r=parseComparisonKey(entry.key);return r?s.comparisons?.[r.trace]?.[r.step]:undefined;}
+  return (entry.kind==='loop'?s.loops:s.traces)[entry.key];
+};
 export function caseHistory(s) {
   const history=s.history??[];
   return history.map((entry,index)=>({...entry,current:entry.round===(s.round??1) &&
-    (entry.kind==='loop'?s.loops:s.traces)[entry.key]===entry.result &&
+    observationValue(s,entry)===entry.result &&
     !history.slice(index+1).some(e=>e.kind===entry.kind&&e.key===entry.key)}));
 }
 export function restoreCaseHistory(s,raw) {
+  s.identity=Object.fromEntries(Object.keys(identityLabels).filter(k=>typeof raw.identity?.[k]==='boolean').map(k=>[k,raw.identity[k]]));
+  s.comparisons={};
+  for(const [key,values] of Object.entries(raw.comparisons??{})) {
+    if(s.traces[key]!=='dark'||!values||typeof values!=='object') continue;
+    for(const step of Object.keys(comparisonLabels)) if(Object.hasOwn(comparisonLabels[step],values[step])) {
+      if(step!=='source'&&s.comparisons[key]?.source!=='pass') continue;
+      if(step!=='source'&&!identityConfirmed(s)) continue;
+      if(step==='substitute'&&!s.comparisons[key]?.inspection) continue;
+      (s.comparisons[key]??={})[step]=values[step];
+    }
+  }
   s.round=Number.isInteger(raw.round)&&raw.round>0?raw.round:1;
   s.history=Array.isArray(raw.history)?raw.history.filter(e=>e && Number.isInteger(e.round)&&e.round>0&&e.round<=s.round &&
-    (e.kind==='loop'?/^[0-4]$/.test(e.key)&&Object.hasOwn(loopLabels,e.result):e.kind==='vfl'&&parseTraceKey(e.key)&&Object.hasOwn(traceLabels,e.result)))
+    (e.kind==='loop'?/^[0-4]$/.test(e.key)&&Object.hasOwn(loopLabels,e.result):
+      e.kind==='vfl'?parseTraceKey(e.key)&&Object.hasOwn(traceLabels,e.result):
+      e.kind==='identity'?Object.hasOwn(identityLabels,e.key)&&['confirmed','unchecked'].includes(e.result):
+      e.kind==='comparison'&&parseComparisonKey(e.key)&&Object.hasOwn(comparisonLabels[parseComparisonKey(e.key).step],e.result)))
     .slice(-100).map(e=>({kind:e.kind,key:String(e.key),result:e.result,round:e.round,
       ports:Array.isArray(e.ports)?e.ports.slice(0,4).map(p=>bounded(p,1,32)):[],
       ...(Number.isInteger(e.port)&&e.port>=1&&e.port<=32?{port:e.port}:{})})):[];
@@ -334,6 +382,36 @@ export function canVerifyService(s) {
 const strandLetter=strand=>strand==='tx'?'A':'B';
 const routeDescription=r=>`${fiberPointName(r.from)} → ${fiberPointName(r.to)}${r.head?' · loose MMC head':r.to>0?' · through CAS':''}`;
 const traceCheck=(r,label)=>({tool:'vfl',from:r.from,to:r.to,strand:r.strand,head:Boolean(r.head),label});
+
+// These are comparison observations about the original dark route, not new
+// continuity passes. A different source, strand, direction or endpoint never
+// inherits them. Hardware principles: US Conec MMC/TMT; Fluke fiber testing.
+export function comparisonGuide(s,key) {
+  const r=parseTraceKey(key);
+  if(!r||s.traces[key]!=='dark') return null;
+  const c=s.comparisons?.[key]??{},letter=strandLetter(r.strand);
+  const diagnostic=(step,next,extra={})=>({next,diagnostic:{key,step,options:Object.entries(comparisonLabels[step])},...extra});
+  const terminal=(next,extra={})=>({next,diagnostic:{key,step:null,options:[]},...extra});
+  if(c.source!=='pass') return diagnostic('source',
+    `Check the VFL on a known-good reference using the same adapter / launch channel used for ${letter}. Does the reference pass light?`,
+    c.source==='fail'?{comparisonFinding:'The reference is also dark. Resolve the VFL, adapter, launch lead or coupling before blaming the installed fiber.'}:{});
+  if(!identityConfirmed(s)) return terminal('Confirm the device / optic socket, follower-to-head serial, CAS ports and expected channel in “Match the physical path”. A working strand can still belong to the wrong fanout.',{needsIdentity:true,comparisonFinding:'The VFL reference passes. The intended fiber identity still needs confirmation.'});
+  if(!c.inspection) return diagnostic('inspection',
+    `Turn the VFL off and isolate from active gear. Inspect the mapped ${letter} fiber end faces with a compatible inspection probe. Clean and reinspect as needed; check seating and visible bends. Retest the original route before continuing.`,
+    {comparisonFinding:'Reference and mapping checked. Inspect the individual fiber contacts, not just the outside of the MMC.'});
+  if(c.inspection==='damage') return terminal('Record which end / component shows damage. Replace or repair it using the approved procedure, then choose “Made a change · retest” and check both strands and optical readings.',
+    {comparisonFinding:'Visible damage is a concrete finding. It may explain the dark strand; a post-repair test must confirm recovery.'});
+  if(!c.substitute) return diagnostic('substitute',
+    r.head||r.to===0?`Compare one known-good compatible cable / fanout in place of the suspect assembly, keeping the same source, adapter and mapped ${letter} channel. Record the replacement result; the diagram still shows the original observations.`:
+    `Compare one known-good compatible mating lead / connection at CAS ${r.to}, keeping the source and mapped ${letter} channel unchanged. Record the comparison separately from the original path.`,
+    {comparisonFinding:c.inspection==='clear'?'Clean end faces did not restore continuity. Compare one component at a time.':'End-face condition remains unknown. A compatible spare can still help narrow the assembly.'});
+  if(c.substitute==='light') return terminal('The original assembly or its mating contact is implicated. Record the replaced part; use end-face inspection and loss testing to separate connector / ferrule contact from an internal fiber fault. Retest both strands after the actual repair.',
+    {comparisonFinding:'The compatible replacement passes where the original did not. This supports an assembly / connection problem; it does not prove a damaged ferrule.'});
+  if(c.substitute==='dark') return terminal('Both assemblies were dark in this setup. Recheck the common adapter / channel, source-side connection and mapping. The original assembly is not cleared. Use a loss test and, where suitable, OTDR to locate an unresolved fault.',
+    {comparisonFinding:'Replacing that assembly did not restore visible continuity. Investigate what stayed common to both tests.'});
+  return terminal('Keep this strand and its connections suspect. Use an optical loss test to quantify loss and a suitable OTDR to locate events, or hand off these recorded checks to someone with access / equipment.',
+    {comparisonFinding:'No compatible comparison is available. The evidence does not yet distinguish the termination, bend, break or splice.'});
+}
 
 function traceAssessment(s) {
   const entries=Object.entries(s.traces).map(([key,result])=>({...parseTraceKey(key),key,result}));
@@ -382,6 +460,9 @@ function traceAssessment(s) {
           {check:traceCheck(dark,`Recheck ${fiberPointName(dark.to)} · ${letter}`)});
         continue;
       }
+      // A dark incoming head already explains why the through-CAS check is
+      // dark. Continue the head investigation instead of asking to repeat it.
+      if(!dark.head&&dark.to>0&&related.some(r=>r.head&&r.to===dark.to&&r.result==='dark')) continue;
       const headPass=earlier?.to===dark.to&&earlier.head;
       const title=headPass?`Strand ${letter}: check the MMC / CAS connection`:both?'Both strands are dark here':a?.result==='seen'||b?.result==='seen'?`Strand ${letter} is dark; the other has light`:`Strand ${letter}: no light recorded here`;
       const why=headPass?'Light reached the loose head, but was not seen through the cassette connection.':earlier?`Last light: ${fiberPointName(earlier.to)}. First dark check: ${fiberPointName(dark.to)}. The added section and connections need checking.`:'This is a failed continuity observation. It does not identify which part is bad.';
@@ -398,8 +479,14 @@ function traceAssessment(s) {
       } else {
         const previous=dark.to-dir;
         const check=previous!==dark.from&&!related.some(r=>r.to===previous&&!r.head)?traceCheck({...dark,to:previous,head:false},`Check ${fiberPointName(previous)} · ${letter}`):null;
-        make(80,title,why,'Verify the VFL / adapter and LC seating. Inspect this fiber section for contamination, bends or damage; compare a known-good compatible lead if needed.',
-          {from,to,...(earlier?{evidencePath:[`${fiberPointName(earlier.to)} · ${letter} light seen`,`${fiberPointName(dark.to)} · ${letter} dark`]}:{}),check,branches:[['Earlier point has light','Investigate the section added after that point.'],['Earlier point is dark','Move toward the source and verify the VFL setup.']]});
+        const oneDark=rows.some(r=>r.result==='seen');
+        const scope=dark.head?`At the loose head, the receiving CAS ${dark.to} mating connection is bypassed. Check the incoming assembly and source-side connections.`:
+          'The optic is disconnected from this VFL trace. Check the mapped fiber, its terminations and the source-side connection.';
+        const guide=check?{}:s.simulated?{next:'Verify the source and mapped channel, inspect the individual fiber contacts, then compare one compatible assembly at a time. In a real case, record these checks in Find my problem.'}:comparisonGuide(s,dark.key);
+        make(80,title,oneDark?`The MMC ferrule aligns separate fibers. One passes light; ${letter} does not. That fiber, its end face or contact can fail independently. Verify mapping and the test setup before identifying a faulty part.`:why,
+          check?`Keep the source and strand unchanged. Check ${fiberPointName(previous)} to shorten the suspect section.`:guide.next,
+          {from,to,scope,...(earlier?{evidencePath:[`${fiberPointName(earlier.to)} · ${letter} light seen`,`${fiberPointName(dark.to)} · ${letter} dark`]}:{}),check,...guide,
+            ...(check?{branches:[['Earlier point has light','Investigate the section added after that point.'],['Earlier point is dark','Move toward the source and verify the VFL setup.']]}:{})});
       }
       continue;
     }

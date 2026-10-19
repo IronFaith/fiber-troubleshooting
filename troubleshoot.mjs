@@ -1,8 +1,8 @@
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage} from './troubleshoot-state.mjs?v=10';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=11';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels} from './troubleshoot-state.mjs?v=11';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=12';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=5';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=2';
-import {simpleVfl} from './vfl-simple.mjs?v=4';
+import {simpleVfl} from './vfl-simple.mjs?v=5';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -141,6 +141,20 @@ function setup(s) {
     ${['dirty','loose','ferrule','bend','splice'].includes(f.kind)?select('fault-severity','Example effect',[['dark','Blocks light'],['weak','Adds loss · weak light']],f.severity):''}</div>
     <p class="ts-note">${faultNotes[f.kind]} Effects are simplified; real results depend on the hardware, mapping and wavelength.</p></section>`;
 }
+function identityChecks(s) {
+  if(s.simulated) return '';
+  const help={optic:'Ethernet ID + physical socket, e.g. 25/1 vs 25/5',fanout:'Follower number + head serial match the record',route:'Accessible CAS faces and ports match FIM',channels:'Expected fiber / channel at both test ends'};
+  const count=Object.keys(identityLabels).filter(k=>s.identity?.[k]).length;
+  return `<section class="ts-identity" aria-labelledby="identity-title"><div class="ts-section-top"><h3 id="identity-title" tabindex="-1">Match the physical path</h3><b>${count}/4 confirmed</b></div>
+    <p class="ts-note">${identityConfirmed(s)?'Identity checked by you for this round. This is separate from optical health.':'A pass belongs to the hardware tested. Confirm it is the intended path.'}</p>
+    <div class="ts-identity-grid">${Object.entries(identityLabels).map(([key,label])=>`<label><input type="checkbox" data-field="identity-${key}" ${s.identity?.[key]?'checked':''}><span><b>${label}</b><small>${help[key]}</small></span></label>`).join('')}</div></section>`;
+}
+function diagnosticControls(a,s) {
+  if(!a.diagnostic||s.simulated) return '';
+  return `${a.diagnostic.options.length?`<div class="ts-comparison-options" role="group" aria-label="Record the comparison result">${a.diagnostic.options.map(([value,label])=>button('comparison',label,`data-check-key="${escape(a.diagnostic.key)}" data-check-step="${a.diagnostic.step}" data-check-value="${value}" aria-pressed="${s.comparisons?.[a.diagnostic.key]?.[a.diagnostic.step]===value}"`)).join('')}</div>`:''}
+    ${a.needsIdentity?button('check-identity','Confirm path identity','class="ts-next-button"'):''}
+    <p class="ts-note ts-sources">Method references: <a href="https://www.usconec.com/connectors/mmc-connectors" target="_blank" rel="noopener noreferrer">MMC ferrule</a> · <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fiber testing</a> · <a href="https://www.flukenetworks.com/edocs/wp-fiber-cleaning-and-inspection-white-paper" target="_blank" rel="noopener noreferrer">Inspection</a>. Guidance combines these principles with your observations.</p>`;
+}
 function readings(s) {
   if(!s.simulated) return '';
   const r=simulatedReadings(s);
@@ -179,9 +193,9 @@ function advice(s) {
   return `<section class="ts-advice ${waiting?'':a.tone}" aria-labelledby="finding-title"><p class="ts-eyebrow">${s.simulated?'Simulated findings':'Case findings'}${a.route?` · ${escape(a.route)}`:''}</p><h2 id="finding-title" tabindex="-1">${title}</h2>
     ${a.pair?`<div class="ts-evidence-pair" aria-label="Recorded strand comparison">${a.pair.map(r=>`<div class="${r.result==='dark'||r.result==='wrong'?'issue':r.result?'recorded':'untested'}"><b>VFL on ${r.strand}</b><span>${r.label}</span></div>`).join('')}</div>`:''}
     ${a.evidencePath?`<div class="ts-evidence-path" aria-label="Section to investigate"><span>${a.evidencePath[0]}</span><b aria-hidden="true">→</b><span>${a.evidencePath[1]}</span></div>`:''}
-    <p>${why}</p>${a.caution?`<p class="ts-caution">${a.caution}</p>`:''}
+    <p>${why}</p>${a.scope?`<p class="ts-scope">${a.scope}</p>`:''}${a.comparisonFinding?`<p class="ts-comparison-finding"><b>What this adds</b>${a.comparisonFinding}</p>`:''}${a.caution?`<p class="ts-caution">${a.caution}</p>`:''}
     ${waiting?'':`<div class="ts-next"><b>${a.complete?'Verified by your confirmation':'Next check'}</b><p>${a.next}</p></div>
-    ${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}
+    ${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}${diagnosticControls(a,s)}
     ${a.branches?`<div class="ts-check-branches" aria-label="How the next result guides you">${a.branches.map(([condition,meaning])=>`<div><b>↳ ${condition}</b><span>${meaning}</span></div>`).join('')}</div>`:''}`}
     ${pending&&hasEvidence?'<p class="ts-note">Current setup: waiting for a new result. Earlier findings stay visible.</p>':''}
     ${a.otherIssues?`<p class="ts-note">${a.otherIssues} other recorded ${a.otherIssues===1?'issue':'issues'} remain in this case.</p>`:''}
@@ -189,11 +203,15 @@ function advice(s) {
   </section>`;
 }
 function historyLabel(e) {
+  if(e.kind==='identity') return `Identity · ${identityLabels[e.key]}`;
+  if(e.kind==='comparison') {const [key,step]=e.key.split('~');return `${historyLabel({kind:'vfl',key})} · ${step==='source'?'VFL reference':step==='inspection'?'End-face inspection':'Compatible replacement'}`;}
   if(e.kind==='loop') return `Loop · ${pointName(Number(e.key))}${Number(e.key)>0&&e.ports?.[Number(e.key)-1]?` · port ${e.ports[Number(e.key)-1]}`:''}`;
   const r=parseTraceKey(e.key);
   return `VFL ${fiberPointName(r.from)} → ${fiberPointName(r.to)}${r.head?' · loose head':''}${e.port?` · port ${e.port}`:''} · strand ${r.strand==='tx'?'A':'B'}`;
 }
 function historyResult(e) {
+  if(e.kind==='identity') return e.result==='confirmed'?'Confirmed by you':'Needs confirmation';
+  if(e.kind==='comparison') return comparisonLabels[e.key.split('~')[1]][e.result];
   if(e.kind==='loop') return loopLabels[e.result];
   const strand=parseTraceKey(e.key).strand;
   return e.result==='seen'?`Light at ${strand==='tx'?'A':'B'}`:e.result==='swapped'?`Light at ${strand==='tx'?'B':'A'}`:traceLabels[e.result];
@@ -201,7 +219,7 @@ function historyResult(e) {
 function results(s) {
   const history=caseHistory(s).reverse();
   const reviewAction=e=>{if(e.kind==='loop')return `review-loop-${e.key}`;const r=parseTraceKey(e.key);return `review-vfl-${r.from}-${r.to}-${r.strand}${r.head?'-head':''}`;};
-  const entries=history.map(e=>`<li class="ts-history-entry ${e.current?'current':'earlier'}"><span class="ts-history-state">${e.current?'Current':'Earlier'} · round ${e.round}</span><span>${e.current?button(reviewAction(e),escape(historyLabel(e)),'class="ts-history-review"'):escape(historyLabel(e))}</span><b>${historyResult(e)}</b></li>`).join('');
+  const entries=history.map(e=>`<li class="ts-history-entry ${e.current?'current':'earlier'}"><span class="ts-history-state">${e.current?'Current':'Earlier'} · round ${e.round}</span><span>${e.current&&['loop','vfl'].includes(e.kind)?button(reviewAction(e),escape(historyLabel(e)),'class="ts-history-review"'):escape(historyLabel(e))}</span><b>${historyResult(e)}</b></li>`).join('');
   return `<section class="ts-log" aria-label="Recorded tests"><div class="ts-section-top"><h3>${s.simulated?'Practice':'Case'} history</h3><div class="ts-small-actions">${button('undo','Undo',undo[view].length?'':'disabled')}${button('retest','Made a change · retest',history.length?'':'disabled')}${button('copy','Copy findings')}${button('reset','New case')}</div></div>
     ${history.length?`<ol class="ts-history-list">${entries}</ol>`:'<p class="ts-note">No tests recorded. Place a tool, then enter the result you observed.</p>'}
     <p class="ts-note">Saved in this browser tab · up to 100 checks. Retest keeps earlier checks and starts fresh findings.</p><div id="ts-copy-fallback"></div></section>`;
@@ -229,10 +247,10 @@ function render(preservePosition=false) {
   if(view==='guided') return;
   const s=cases[view];
   if(s.tool==='vfl') {
-    host.innerHTML=`${setup(s)}${caseBar(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${advice(s)}${results(s)}${mobileActions(s)}`;
+    host.innerHTML=`${setup(s)}${caseBar(s)}${identityChecks(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${advice(s)}${results(s)}${mobileActions(s)}`;
     return;
   }
-  host.innerHTML=`${setup(s)}${caseBar(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
+  host.innerHTML=`${setup(s)}${caseBar(s)}${identityChecks(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
     ${mobilePoints(s)}<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
     <div class="ts-legend"><span>↔ Scroll to follow the path</span>${s.tool==='link'&&!s.simulated?'<span class="ts-key-ir">Blue / teal: loop checked</span><span class="ts-key-red">Red: VFL continuity recorded</span><span>Amber: investigate · dashed: untested</span><span>A = TX strand · B = RX strand · one pair shown</span>':'<span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span>'}</div>
     </section>
@@ -268,6 +286,7 @@ host.addEventListener('change',event=>{
   const field=event.target.dataset.field;
   if(!field) return;
   const value=event.target.value,s=cases[view];
+  if(field.startsWith('identity-')) {update([{type:'identity',key:field.slice(9),value:event.target.checked}],'Path identity updated. Optical observations are unchanged.');host.querySelector(`[data-field="${field}"]`)?.focus({preventScroll:true});return;}
   if(field==='vfl-patch-port') {const stop=traceStop(s);patchConnection({type:'patch',point:stop.point,side:traceFrom(s)<s.selected?'rear':'front',connected:Boolean(patchAt(s,stop.point)[traceFrom(s)<s.selected?'rear':'front']),port:Number(value)});host.querySelector('[data-field="vfl-patch-port"]')?.focus({preventScroll:true});return;}
   if(field==='patch-port') {patchConnection({type:'patch',point:Number(event.target.dataset.patchPoint),side:event.target.dataset.patchSide,connected:true,port:Number(value)});host.querySelector('[data-field="patch-port"]')?.focus({preventScroll:true});return;}
   const action=field==='vfl-from'?{type:'trace',from:value,to:s.selected}:field==='vfl-to'?{type:'trace',from:traceFrom(s),to:value}:field==='vfl-source-port'?{type:'port',point:traceFrom(s),value}:field==='ready'?{type:'ready',value:event.target.checked}:field==='point'?{type:'select',point:value}:
@@ -320,6 +339,8 @@ host.addEventListener('click',async event=>{
     return;
   }
   if(action==='findings') {showFindings();return;}
+  if(action==='check-identity') {host.querySelector('.ts-identity')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#identity-title')?.focus({preventScroll:true});return;}
+  if(action==='comparison') {update([{type:'comparison',key:target.dataset.checkKey,step:target.dataset.checkStep,value:target.dataset.checkValue}],'Comparison recorded for this route and strand.');showFindings();return;}
   if(action==='setup') {setupOpen=!setupOpen;render();return;}
   if(action==='normalize') {normalizeSetup();return;}
   if(action==='check-opening') {update([{type:'trace',from:traceFrom(s),to:traceStop(s).point}],'Check the open end here, then enter your observation.');centerMap();return;}
@@ -339,11 +360,12 @@ host.addEventListener('click',async event=>{
       `Mapped ports: ${s.ports.slice(0,s.count).map((p,i)=>`CAS ${i+1} / ${p}`).join(', ')}`,
       ...(!s.simulated?[`Starting local TX: ${statusLabels[s.tx]}; RX: ${s.rx==='good'?'Within optic limits':statusLabels[s.rx]}`]:[`Fault: ${faults[s.fault.kind]}; section ${s.fault.at}`]),
       `Case: ${caseStatus(s).label}; round ${s.round}`,
+      ...Object.entries(identityLabels).map(([key,label])=>`IDENTITY: ${label} — ${s.identity?.[key]?'confirmed by technician':'not confirmed'}`),
       ...caseHistory(s).filter(e=>e.current).map(e=>`CURRENT: ${historyLabel(e)} — ${historyResult(e)}`),
       ...Object.entries(s.patches??{}).map(([point,p])=>`Diagram CAS ${point}: port ${p.port}; rear ${patchAt(s,Number(point)).rear?'connected':'unplugged'}, front ${patchAt(s,Number(point)).front?'connected':'unplugged'}`),
       ...(!s.simulated&&s.service!=='unknown'?[`Restored link: ${s.service==='good'?'Required local readings and link normal':'Still has a problem'}`]:[]),
       ...caseHistory(s).filter(e=>!e.current).map(e=>`EARLIER round ${e.round}: ${historyLabel(e)} — ${historyResult(e)}`),
-      a.title,a.why,`Next: ${a.next}`,'Remote and untested lanes remain unverified.'].join('\n');
+      a.title,a.why,...(a.scope?[a.scope]:[]),...(a.comparisonFinding?[a.comparisonFinding]:[]),`Next: ${a.next}`,'Remote and untested lanes remain unverified.'].join('\n');
     try {await navigator.clipboard.writeText(text);target.textContent='Copied';}
     catch {const area=document.createElement('textarea');area.value=text;area.readOnly=true;area.setAttribute('aria-label','Findings to copy');host.querySelector('#ts-copy-fallback').replaceChildren(area);area.select();}
     return;

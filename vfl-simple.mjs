@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey} from './troubleshoot-state.mjs?v=10';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=11';
+import {patchAt,traceFrom,traceKey} from './troubleshoot-state.mjs?v=11';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=12';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
