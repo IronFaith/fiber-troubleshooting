@@ -10,7 +10,7 @@ const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
 const key='fiber-workbench-v1';
 let view='actual', cases={actual:createCase(),simulation:createCase(true)};
-let selectedTool=null,setupOpen=false,newCaseStarted=false;
+let selectedTool=null,setupOpen=false,identityOpen=false,newCaseStarted=false;
 let deferPortRender=false,portRenderPending=false;
 const undo={actual:[],simulation:[]};
 let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -173,10 +173,10 @@ function tray(s) {
 function setup(s) {
   const topology=select('count','Passives on path',[1,2,3,4].map(n=>[n,n]),s.count)+
     select('reach','I can reach',Array.from({length:s.count+2},(_,i)=>[i,i===0?'Local optic only':i===s.count+1?'Both devices + full path':`Through CAS ${i}`]),s.reach);
-  if(!s.simulated) return `<div class="ts-path-settings"><p><b>Find the problem</b><span>Start with what you can reach. No fault selection needed.</span></p>${button('setup',`Edit path · ${s.count} CAS`,`aria-expanded="${setupOpen}" aria-controls="ts-path-fields"`)}</div><section id="ts-path-fields" class="ts-setup" aria-label="Your path settings" ${setupOpen?'':'hidden'}><div class="ts-fields">${topology}
+  if(!s.simulated) return `<section class="ts-path-settings" aria-label="Your path settings">${button('setup',`<span>Edit path · ${s.count} CAS</span><span class="ts-disclosure-arrow" aria-hidden="true"></span>`,`class="ts-disclosure" aria-expanded="${setupOpen}" aria-controls="ts-path-fields"`)}<div id="ts-path-fields" class="ts-setup" ${setupOpen?'':'hidden'}><div class="ts-fields">${topology}
     ${select('tx','Starting local TX',Object.entries(statusLabels),s.tx)}
     ${select('rx','Starting local RX',Object.entries({...statusLabels,good:'Within optic limits'}),s.rx)}</div>
-    <p class="ts-note">Enter your observations. Nothing is connected to Cable Guy or live equipment. A −40 report tells us no light was reported, not the cause.</p></section>`;
+    <p class="ts-note">Enter your observations. Nothing is connected to Cable Guy or live equipment. A −40 report tells us no light was reported, not the cause.</p></div></section>`;
   const f=s.fault;
   const opticOnly=f.kind.startsWith('optic_'), canAtOptic=['dirty','loose','none'].includes(f.kind);
   const locations=Array.from({length:s.count+2},(_,i)=>[i,i===0?'Optic face / LC socket':i===s.count+1?opticOnly?'Remote optic':`Beyond CAS ${s.count} → remote`:spanName(i,s)]).filter(([i])=>opticOnly?isOptic(s,i):canAtOptic||i>0);
@@ -191,9 +191,16 @@ function identityChecks(s) {
   if(s.simulated) return '';
   const help={optic:'Device IDs + optic sockets at the tested ends, e.g. 25/1 vs 25/5',fanout:'Follower number + head serial match the record',route:'Accessible CAS faces and ports match FIM',channels:'Expected fiber / channel at both test ends'};
   const count=Object.keys(identityLabels).filter(k=>s.identity?.[k]).length;
-  return `<section class="ts-identity" aria-labelledby="identity-title"><div class="ts-section-top"><h3 id="identity-title" tabindex="-1">Match the physical path</h3><b>${count}/4 confirmed</b></div>
+  return `<section class="ts-identity" aria-labelledby="identity-title"><h3>${button('identity',`<span>Match the physical path</span><b>${count}/4 confirmed</b><span class="ts-disclosure-arrow" aria-hidden="true"></span>`,`id="identity-title" class="ts-disclosure" aria-expanded="${identityOpen}" aria-controls="ts-identity-fields"`)}</h3><div id="ts-identity-fields" class="ts-identity-fields" ${identityOpen?'':'hidden'}>
     <p class="ts-note">${identityConfirmed(s)?'Identity checked by you for this round. This is separate from optical health.':'A pass belongs to the hardware tested. Confirm it is the intended path.'}</p>
-    <div class="ts-identity-grid">${Object.entries(identityLabels).map(([key,label])=>`<label><input type="checkbox" data-field="identity-${key}" ${s.identity?.[key]?'checked':''}><span><b>${label}</b><small>${help[key]}</small></span></label>`).join('')}</div></section>`;
+    <div class="ts-identity-grid">${Object.entries(identityLabels).map(([key,label])=>`<label><input type="checkbox" data-field="identity-${key}" ${s.identity?.[key]?'checked':''}><span><b>${label}</b><small>${help[key]}</small></span></label>`).join('')}</div></div></section>`;
+}
+function setDisclosure(action,open) {
+  if(action==='setup') setupOpen=open; else identityOpen=open;
+  const toggle=host.querySelector(`[data-action="${action}"]`);
+  toggle?.setAttribute('aria-expanded',String(open));
+  const fields=host.querySelector(action==='setup'?'#ts-path-fields':'#ts-identity-fields');
+  if(fields) fields.hidden=!open;
 }
 function diagnosticControls(a,s) {
   if(!a.diagnostic||s.simulated) return '';
@@ -414,9 +421,9 @@ host.addEventListener('click',async event=>{
     return;
   }
   if(action==='findings') {showFindings();return;}
-  if(action==='check-identity') {host.querySelector('.ts-identity')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#identity-title')?.focus({preventScroll:true});return;}
+  if(action==='check-identity') {setDisclosure('identity',true);host.querySelector('.ts-identity')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#identity-title')?.focus({preventScroll:true});return;}
   if(action==='comparison') {update([{type:'comparison',key:target.dataset.checkKey,step:target.dataset.checkStep,value:target.dataset.checkValue}],'Comparison recorded for this route and strand.');showFindings();return;}
-  if(action==='setup') {setupOpen=!setupOpen;render();return;}
+  if(action==='setup'||action==='identity') {setDisclosure(action,!(action==='setup'?setupOpen:identityOpen));return;}
   if(action==='normalize') {normalizeSetup();return;}
   if(action==='check-opening') {update([{type:'trace',from:traceFrom(s),to:traceStop(s).point}],'Check the open end here, then enter your observation.');centerMap();return;}
   if(action==='swap-trace') {update([{type:'trace',from:s.selected,to:traceFrom(s)}],'VFL direction reversed. Confirm the new setup before recording a result.');centerMap(traceFrom(cases[view]));host.querySelector('[data-action="swap-trace"]')?.focus({preventScroll:true});return;}
@@ -449,7 +456,7 @@ host.addEventListener('click',async event=>{
     undo[view].push(s);
     if(undo[view].length>30) undo[view].shift();
     cases[view]=createCase(s.simulated);
-    newCaseStarted=true;setupOpen=true;
+    newCaseStarted=true;setupOpen=true;identityOpen=false;
     save();render();
     host.querySelector('.ts-new-case')?.scrollIntoView({block:'start',behavior:'instant'});
     host.querySelector('#new-case-title')?.focus({preventScroll:true});

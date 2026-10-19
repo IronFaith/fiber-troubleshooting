@@ -1176,10 +1176,16 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .ts-new-case h2 { margin:0 0 5px; color:#215a43; font-size:18px; }
 .ts-new-case p { margin:0; color:#355d4d; font-size:14px; line-height:1.5; }
 .ts-new-case button { flex-shrink:0; min-height:44px; padding:8px 14px; border:1px solid #99c7b4; border-radius:6px; color:#215a43; background:#fff; }
-.ts-path-settings { display:flex; justify-content:space-between; align-items:center; gap:16px; margin:20px 0 12px; }
-.ts-path-settings p { margin:0; display:grid; gap:4px; color:#244c67; font-size:16px; }
-.ts-path-settings p span { font-size:13px; color:#607887; }
-.ts-path-settings button,.ts-remove { background:white; border:1px solid #bbcdd9; border-radius:6px; padding:9px 12px; min-height:44px; color:#345e79; font-size:12px; white-space:nowrap; }
+.ts-path-settings { margin:12px 0; border:1px solid #c8d7e1; border-radius:8px; background:white; }
+.ts-path-settings .ts-setup { margin:0; border:0; border-top:1px solid #e1e9ee; border-radius:0 0 8px 8px; }
+.ts-disclosure { display:flex; align-items:center; gap:12px; width:100%; min-height:48px; padding:10px 14px; border:0; border-radius:8px; background:transparent; color:#244c67; font:inherit; font-size:14px; font-weight:600; text-align:start; cursor:pointer; }
+.ts-disclosure > span:first-child { flex:1; }
+.ts-disclosure > b { font-size:12px; font-weight:500; color:#526f83; white-space:nowrap; }
+.ts-disclosure:hover { background:#f3f8fb; }
+.ts-disclosure:focus-visible { outline:3px solid #347cbc; outline-offset:2px; }
+.ts-disclosure-arrow { flex:none; width:7px; height:7px; margin:0 2px 4px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
+.ts-disclosure[aria-expanded="true"] .ts-disclosure-arrow { transform:rotate(225deg); margin-top:4px; margin-bottom:0; }
+.ts-remove { background:white; border:1px solid #bbcdd9; border-radius:6px; padding:9px 12px; min-height:44px; color:#345e79; font-size:12px; white-space:nowrap; }
 .ts-tool-tray { position:sticky; top:0; z-index:12; background:#f5f8fa; padding:10px 0 8px; border-bottom:1px solid #cad8e2; }
 .ts-tool-items { display:flex; gap:12px; }
 .ts-tool-pick { flex:1; display:flex; align-items:center; justify-content:center; gap:10px; min-width:0; padding:8px 12px; border:1px solid #a9c0d0; border-radius:8px; background:#fff; color:#234c69; cursor:grab; touch-action:none; user-select:none; }
@@ -1240,8 +1246,6 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 }
 @media(max-width:700px) {
   .ts-live-grid .ts-work-grid { grid-template-columns:1fr; }
-  .ts-path-settings { align-items:flex-start; }
-  .ts-path-settings p span { max-width:220px; }
   .ts-tool-items { gap:6px; }
   .ts-tool-pick { flex-direction:column; padding:8px 5px; gap:3px; }
   .ts-tool-pick[aria-pressed=true] { padding:7px 4px; }
@@ -1688,9 +1692,9 @@ body:has(.reference-dialog[open]) { overflow:hidden; }
 .ts-map .ts-confirmed-route,.ts-map .light-source,.ts-map .ts-coverage-lane,.ts-map .ts-coverage-issue,.ts-map .ts-coverage-mark,.ts-map .ts-route { pointer-events:none; }
 
 /* Identity is checked separately from light / loop observations. */
-.ts-identity { margin:12px 0; padding:16px 18px; border:1px solid #c8d7e1; border-radius:10px; background:white; scroll-margin-top:90px; }
-.ts-identity h3 { margin:0; font-size:16px; color:#183e59; }
-.ts-identity .ts-section-top > b { font-size:12px; color:#526f83; white-space:nowrap; }
+.ts-identity { margin:12px 0; border:1px solid #c8d7e1; border-radius:8px; background:white; scroll-margin-top:90px; }
+.ts-identity h3 { margin:0; }
+.ts-identity-fields { padding:0 14px 14px; border-top:1px solid #e1e9ee; }
 .ts-identity-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:12px; }
 .ts-identity-grid label { display:flex; gap:9px; align-items:flex-start; cursor:pointer; }
 .ts-identity-grid input { flex-shrink:0; width:19px; height:19px; margin:2px 0; accent-color:#245b91; }
@@ -1708,7 +1712,7 @@ body:has(.reference-dialog[open]) { overflow:hidden; }
 .ts-sources { font-size:11px; line-height:1.6; }
 .ts-sources a { color:#245b91; text-decoration:underline; }
 @media(max-width:1000px) { .ts-identity-grid { grid-template-columns:repeat(2,1fr); } }
-@media(max-width:480px) { .ts-identity { padding:13px; scroll-margin-top:12px; } .ts-identity-grid { gap:15px 12px; } .ts-comparison-options button { flex:1 1 100%; } }
+@media(max-width:480px) { .ts-identity { scroll-margin-top:12px; } .ts-identity-grid { gap:15px 12px; } .ts-comparison-options button { flex:1 1 100%; } }
 
 /* The language control changes display text without replacing active activities. */
 .language-picker { display:flex; align-items:center; gap:5px; order:3; flex-shrink:0; min-height:44px; padding:0 8px; background:white; border:1px solid #bdcbd5; border-radius:6px; color:#173b59; }
