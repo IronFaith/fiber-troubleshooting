@@ -1,5 +1,7 @@
 // French learner-facing messages. Keep English keys aligned with spanish.mjs.
 export const frenchMessages = [
+  ["New case started","Nouveau cas commencé"],
+  ["Choose your path, then place a tool to begin.","Choisissez votre parcours, puis placez un outil pour commencer."],
   [
     "Play light",
     "Animer la lumière"

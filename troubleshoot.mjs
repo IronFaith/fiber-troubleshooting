@@ -1,4 +1,4 @@
-import {translateLines} from './locale.mjs?v=6';
+import {translateLines} from './locale.mjs?v=7';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=13';
 import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=14';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=6';
@@ -9,7 +9,7 @@ const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
 const key='fiber-workbench-v1';
 let view='actual', cases={actual:createCase(),simulation:createCase(true)};
-let selectedTool=null,setupOpen=false;
+let selectedTool=null,setupOpen=false,newCaseStarted=false;
 const undo={actual:[],simulation:[]};
 let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -84,6 +84,7 @@ try {
 function save() { try {sessionStorage.setItem(key,JSON.stringify({...cases,view}));} catch { /* Optional. */ } }
 function update(actions, message='') {
   selectedTool=null;
+  newCaseStarted=false;
   undo[view].push(cases[view]);
   if(undo[view].length>30) undo[view].shift();
   cases[view]=actions.reduce(changeCase,cases[view]);
@@ -260,7 +261,8 @@ function render(preservePosition=false) {
     host.innerHTML=`${setup(s)}${caseBar(s)}${identityChecks(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${advice(s)}${results(s)}${mobileActions(s)}`;
     return;
   }
-  host.innerHTML=`${setup(s)}${caseBar(s)}${identityChecks(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`${s.loopSide==='remote'?'Remote loop':'Local loop'} at ${pointName(s.selected,s)} · ${loopResult(s)?loopLabels[loopResult(s)]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
+  const freshCase=newCaseStarted?`<section class="ts-new-case" aria-labelledby="new-case-title"><div role="status"><h2 id="new-case-title" tabindex="-1">New case started</h2><p>Choose your path, then place a tool to begin.</p></div>${button('undo','Undo')}</section>`:'';
+  host.innerHTML=`${freshCase}${setup(s)}${caseBar(s)}${identityChecks(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`${s.loopSide==='remote'?'Remote loop':'Local loop'} at ${pointName(s.selected,s)} · ${loopResult(s)?loopLabels[loopResult(s)]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
     ${mobilePoints(s)}<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
     <div class="ts-legend"><span>↔ Scroll to follow the path</span>${s.tool==='link'&&!s.simulated?'<span class="ts-key-ir">Blue / teal: loop checked</span><span class="ts-key-red">Red: VFL continuity recorded</span><span>Amber: investigate · dashed: untested</span><span>A = local TX → remote RX · B = remote TX → local RX</span>':'<span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span>'}</div>
     </section>
@@ -291,7 +293,7 @@ function centerPatch() {
   panel.scrollLeft+=rect.left+rect.width/2-box.left-panel.clientWidth/2;
 }
 
-document.querySelectorAll('[data-workbench-view]').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.workbenchView;selectedTool=null;save();render();}));
+document.querySelectorAll('[data-workbench-view]').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.workbenchView;selectedTool=null;newCaseStarted=false;save();render();}));
 host.addEventListener('change',event=>{
   const field=event.target.dataset.field;
   if(!field) return;
@@ -378,9 +380,18 @@ host.addEventListener('click',async event=>{
     catch {const area=document.createElement('textarea');area.value=text;area.readOnly=true;area.setAttribute('aria-label','Findings to copy');host.querySelector('#ts-copy-fallback').replaceChildren(area);area.select();}
     return;
   }
-  if(action==='undo') {if(undo[view].length){cases[view]=undo[view].pop();save();render();}}
+  if(action==='undo') {if(undo[view].length){const wasNewCase=newCaseStarted;newCaseStarted=false;cases[view]=undo[view].pop();save();render();if(wasNewCase){host.querySelector('.vfl-simple, .ts-map-card')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#test-title')?.focus({preventScroll:true});return;}}}
   else if(action==='retest') {update([{type:'retest'}],'Retest started. Earlier checks kept; enter fresh results after your change.');host.querySelector('#test-title')?.focus({preventScroll:true});}
-  else if(action==='reset') {undo[view].push(s);cases[view]=createCase(s.simulated);save();render();}
+  else if(action==='reset') {
+    undo[view].push(s);
+    if(undo[view].length>30) undo[view].shift();
+    cases[view]=createCase(s.simulated);
+    newCaseStarted=true;setupOpen=true;
+    save();render();
+    host.querySelector('.ts-new-case')?.scrollIntoView({block:'start',behavior:'instant'});
+    host.querySelector('#new-case-title')?.focus({preventScroll:true});
+    return;
+  }
   else if(['loop','vfl','link'].includes(action)) update([{type:'tool',tool:action}]);
   else if(action==='run') update([...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record'}],'Simulated test recorded.');
   else if(action.startsWith('service-')) update([{type:'service',value:action.slice(8)}],'Restored link observation recorded.');

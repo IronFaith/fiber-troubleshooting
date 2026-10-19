@@ -4,6 +4,12 @@ import {translate,translateLines,readLanguage,saveLanguage,languageKey,languageD
 import {searchReference} from '../reference-data.mjs';
 import {connectedCaseQuestions} from '../connected-case.mjs';
 
+test('new-case confirmation and next action translate in all learner languages',()=>{
+  for(const language of ['es','fr','ar']) for(const message of ['New case started','Choose your path, then place a tool to begin.']) {
+    assert.notEqual(translate(message,language),message,`${language}: ${message}`);
+  }
+});
+
 test('every connected-case question, answer and explanation is translated in all learner languages',()=>{
   for(const language of ['es','fr','ar']) for(const source of ['Example RX limits: −3.00 to +3.00 dBm','Other required lanes','Not yet checked']) assert.notEqual(translate(source,language),source);
   for(const language of ['es','fr','ar']) for(const question of connectedCaseQuestions) {

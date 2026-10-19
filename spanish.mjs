@@ -2542,4 +2542,6 @@ export const spanishMessages = [
   ["Example RX limits: −3.00 to +3.00 dBm","Límites RX del ejemplo: −3.00 a +3.00 dBm"],
   ["Other required lanes","Otros canales requeridos"],
   ["Not yet checked","Aún sin verificar"],
+  ["New case started","Nuevo caso iniciado"],
+  ["Choose your path, then place a tool to begin.","Elige tu ruta y coloca una herramienta para comenzar."],
 ];

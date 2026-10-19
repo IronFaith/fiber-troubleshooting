@@ -1172,6 +1172,10 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .reason-suspect-area { fill:#f9c66c33; stroke:#b68435; stroke-width:2; }
 #worked-loop figcaption { display:grid; gap:7px; font-size:14px; line-height:1.5; }
 /* Observation-first troubleshooting: tools stay beside the path they act on. */
+.ts-new-case { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px; margin:16px 0; border:1px solid #99c7b4; border-radius:10px; background:#edf8f2; scroll-margin-top:16px; }
+.ts-new-case h2 { margin:0 0 5px; color:#215a43; font-size:18px; }
+.ts-new-case p { margin:0; color:#355d4d; font-size:14px; line-height:1.5; }
+.ts-new-case button { flex-shrink:0; min-height:44px; padding:8px 14px; border:1px solid #99c7b4; border-radius:6px; color:#215a43; background:#fff; }
 .ts-path-settings { display:flex; justify-content:space-between; align-items:center; gap:16px; margin:20px 0 12px; }
 .ts-path-settings p { margin:0; display:grid; gap:4px; color:#244c67; font-size:16px; }
 .ts-path-settings p span { font-size:13px; color:#607887; }
