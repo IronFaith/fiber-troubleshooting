@@ -2544,4 +2544,11 @@ export const arabicMessages = [
   ["Example RX limits: −3.00 to +3.00 dBm","حدود RX في المثال: من −3.00 إلى +3.00 dBm"],
   ["Other required lanes","القنوات الأخرى المطلوبة"],
   ["Not yet checked","لم يُفحص بعد"],
+  ["Recorded VFL path","مسار VFL المسجّل"],
+  ["Recorded checks, not live light.","هذه نتائج فحوص مسجّلة، وليست ضوءًا مباشرًا."],
+  ["Viewing here","نقطة المشاهدة"],
+  ["Loose MMC only","موصل MMC المفصول فقط"],
+  ["Red: confirmed light","أحمر: ضوء مؤكّد"],
+  ["Amber: investigate","كهرماني: يحتاج إلى فحص"],
+  ["Dashed: not checked","متقطّع: لم يُفحص"],
 ];

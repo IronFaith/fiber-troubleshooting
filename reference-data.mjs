@@ -1,4 +1,4 @@
-import {translate,getLanguage} from './locale.mjs?v=7';
+import {translate,getLanguage} from './locale.mjs?v=8';
 const foa = ['FOA · fiber testing', 'https://www.thefoa.org/tech/ref/basic/test.html'];
 const units = ['FOA · dB and dBm', 'https://www.thefoa.org/tech/ref/testing/test/dB.html'];
 const jargon = ['FOA · illustrated terms', 'https://www.thefoa.org/tech/ref/basic/jargon.html'];

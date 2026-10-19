@@ -9684,4 +9684,11 @@ export const frenchMessages = [
   ["Example RX limits: −3.00 to +3.00 dBm","Limites RX de l’exemple : −3.00 à +3.00 dBm"],
   ["Other required lanes","Autres voies requises"],
   ["Not yet checked","Pas encore vérifié"],
+  ["Recorded VFL path","Parcours VFL enregistré"],
+  ["Recorded checks, not live light.","Contrôles enregistrés, pas de lumière en temps réel."],
+  ["Viewing here","Point observé"],
+  ["Loose MMC only","MMC débranché uniquement"],
+  ["Red: confirmed light","Rouge : lumière confirmée"],
+  ["Amber: investigate","Orange : à examiner"],
+  ["Dashed: not checked","Pointillés : non contrôlé"],
 ];

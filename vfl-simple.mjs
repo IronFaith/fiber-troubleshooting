@@ -1,11 +1,25 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey,isOptic,fiberPointName} from './troubleshoot-state.mjs?v=13';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=15';
+import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=14';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=16';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
 const cable=path=>`<path class="loop-jacket" d="${path}"/><path class="loop-cord" d="${path}"/>`;
 const patchAction=(point,side,connected,port)=>`data-patch-point="${point}" data-patch-side="${side}" data-patch-connected="${connected}" data-patch-port="${port}"`;
+const resultLabel=(result,strand)=>!result?'Not checked':result==='seen'?`Light at ${letter(strand)}`:result==='swapped'?`Light at ${letter(strand==='tx'?'rx':'tx')}`:result==='dark'?'No light':'Other port';
+
+function progressDiagram(s,viewing) {
+  const progress=vflProgress(s);
+  return `<section class="vfl-progress" aria-label="Recorded VFL path">
+    <h3>Recorded VFL path</h3><p>Recorded checks, not live light.</p>
+    <div class="vfl-progress-source"><b>${progress.from===0?'Local LC legs':'Remote LC legs'}</b><b>A</b><b>B</b></div>
+    <ol>${progress.points.map(({point,lanes})=>`<li class="${point===viewing?'is-viewing':''}">
+      <div class="vfl-progress-point"><b>${isOptic(s,point)?fiberPointName(point,s):`CAS ${point}`}</b>${!isOptic(s,point)?`<small>Port ${patchAt(s,point).port}</small>`:''}${point===viewing?'<small class="vfl-viewing">Viewing here</small>':''}</div>
+      ${['tx','rx'].map(strand=>{const lane=lanes[strand];return `<div class="vfl-progress-lane ${lane.segment}"><span class="vfl-progress-marker ${lane.result==='seen'?'seen':lane.result?'issue':'unknown'}" aria-hidden="true">${lane.result==='seen'?'✓':lane.result==='dark'?'×':lane.result?'!':'?'}</span><div class="vfl-progress-result"><b>${resultLabel(lane.result,strand)}</b>${lane.headOnly?'<small>Loose MMC only</small>':''}</div></div>`;}).join('')}
+    </li>`).join('')}</ol>
+    <div class="vfl-progress-key"><span class="confirmed">Red: confirmed light</span><span class="suspect">Amber: investigate</span><span class="unknown">Dashed: not checked</span></div>
+  </section>`;
+}
 
 function diagram(s,mobile) {
   const light=vflEndpoint(s,{preview:true}),point=light.point,from=traceFrom(s),forward=from<s.selected;
@@ -69,8 +83,7 @@ function pairChecks(s,point) {
     const base=traceKey({...s,selected:point,strand}).replace(/:head$/,'');
     return {strand,head:s.traces[base+':head'],port:s.traces[base]};
   });
-  const summary=(result,strand)=>!result?'Not checked':result==='seen'?`Light at ${letter(strand)}`:result==='swapped'?`Light at ${letter(strand==='tx'?'rx':'tx')}`:result==='dark'?'No light':'Other port';
-  return `<table class="vfl-checks"><caption>Your checks · ${fiberPointName(point,s)} · from ${fiberPointName(traceFrom(s),s)}</caption><thead><tr><th scope="col">VFL on</th><th scope="col">Loose MMC</th><th scope="col">Through CAS</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${letter(r.strand)}</th><td class="${r.head==='dark'?'issue':''}">${summary(r.head,r.strand)}</td><td class="${r.port==='dark'?'issue':''}">${summary(r.port,r.strand)}</td></tr>`).join('')}</tbody></table>`;
+  return `<table class="vfl-checks"><caption>Your checks · ${fiberPointName(point,s)} · from ${fiberPointName(traceFrom(s),s)}</caption><thead><tr><th scope="col">VFL on</th><th scope="col">Loose MMC</th><th scope="col">Through CAS</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${letter(r.strand)}</th><td class="${r.head==='dark'?'issue':''}">${resultLabel(r.head,r.strand)}</td><td class="${r.port==='dark'?'issue':''}">${resultLabel(r.port,r.strand)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 export function simpleVfl(s,paused) {
@@ -83,13 +96,13 @@ export function simpleVfl(s,paused) {
   const status=light.mode==='expected'?'Expected path · no result recorded':light.mode==='simulation'?'Simulated fault · illustration':'Your recorded observation';
   const obsLabels={seen:'Same channel',swapped:'Other channel',dark:'No light',wrong:'Different port'};
   const next=point+(forward?1:-1);
-  const path=Array.from({length:Math.abs(point-from)+1},(_,i)=>from+i*(forward?1:-1)).map(p=>`<span>${fiberPointName(p,s)}</span>`).join(' → ');
   return `<section class="vfl-simple" aria-label="VFL strand check">
     <div class="vfl-simple-top"><div><h2>Follow the red light</h2><p>VFL stays on the LC leg. Plug or unplug the MMC to check for light.</p></div><button type="button" data-action="motion" class="motion-toggle">${paused?'Play arrows':'Pause arrows'}</button></div>
     <div class="vfl-simple-route">${select('vfl-from','VFL attached to',points.filter(([p])=>isOptic(s,p)&&p!==s.selected),from)}${select('vfl-to','Look for light at',points.filter(([p])=>p!==from),s.selected)}${atCAS?select('vfl-patch-port','Patched port',Array.from({length:32},(_,i)=>[i+1,i+1]),patch.port):''}</div>
     ${atCAS?`<p class="vfl-hint">FIM destination: CAS ${point} · Port ${s.ports[point-1]}</p>`:''}
     <div class="vfl-strands" role="group" aria-label="Choose VFL strand">${['tx','rx'].map(strand=>`<button type="button" data-vfl-strand="${strand}" aria-pressed="${s.strand===strand}"><b>${sourceLC?'LC':'Strand'} ${letter(strand)}</b><small>${sourceLC?(strand==='tx')===(from===0)?'Normally TX':'Normally RX':'Trace this strand'}</small></button>`).join('')}</div>
-    <div class="vfl-view ${paused?'light-paused':''}"><p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${obsLabels[light.result]}`:''}</p>${Math.abs(point-from)>1?`<p class="vfl-path"><span>Path:</span> ${path}</p>`:''}${diagram(s,false)}${diagram(s,true)}</div>
+    ${progressDiagram(s,point)}
+    <div class="vfl-view ${paused?'light-paused':''}"><p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${obsLabels[light.result]}`:''}</p>${diagram(s,false)}${diagram(s,true)}</div>
     <div class="vfl-connect-actions">${atCAS?`<button type="button" ${patchAction(point,incoming,!patch[incoming],patch.port)}>${patch[incoming]?'Unplug MMC':'Plug MMC in'}</button>${next>=0&&next<=s.reach&&next!==from?`<button type="button" data-action="continue-trace">Connect onward → ${fiberPointName(next,s)}</button>`:''}`:''}</div>
     ${light.blocked?`<p class="vfl-hint">Light exits at the open connection at CAS ${point}, before your selected destination.</p>`:''}
     <div class="vfl-observe" aria-labelledby="test-title"><h3 id="test-title" tabindex="-1">${s.simulated?'Save the simulated check':`What do you see at the ${destination}?`}</h3>

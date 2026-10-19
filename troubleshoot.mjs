@@ -1,9 +1,9 @@
-import {translateLines} from './locale.mjs?v=7';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=13';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=15';
+import {translateLines} from './locale.mjs?v=8';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=14';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=16';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
-import {simpleVfl} from './vfl-simple.mjs?v=8';
+import {simpleVfl} from './vfl-simple.mjs?v=9';
 import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
@@ -346,7 +346,7 @@ host.addEventListener('click',async event=>{
   }
   if(action==='view-test') {
     centerMap(s.tool==='link'?0:s.selected);
-    const target=host.querySelector('.vfl-view, .ts-map-card');
+    const target=host.querySelector('.vfl-progress, .ts-map-card');
     target?.scrollIntoView({block:'start',behavior:'instant'});
     return;
   }

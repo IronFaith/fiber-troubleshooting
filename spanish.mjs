@@ -2543,5 +2543,12 @@ export const spanishMessages = [
   ["Other required lanes","Otros canales requeridos"],
   ["Not yet checked","Aún sin verificar"],
   ["New case started","Nuevo caso iniciado"],
+  ["Recorded VFL path","Ruta VFL registrada"],
+  ["Recorded checks, not live light.","Comprobaciones registradas, no luz en tiempo real."],
+  ["Viewing here","Viendo aquí"],
+  ["Loose MMC only","Solo MMC suelto"],
+  ["Red: confirmed light","Rojo: luz confirmada"],
+  ["Amber: investigate","Ámbar: investigar"],
+  ["Dashed: not checked","Discontinuo: sin comprobar"],
   ["Choose your path, then place a tool to begin.","Elige tu ruta y coloca una herramienta para comenzar."],
 ];

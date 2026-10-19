@@ -4,8 +4,10 @@ import {translate,translateLines,readLanguage,saveLanguage,languageKey,languageD
 import {searchReference} from '../reference-data.mjs';
 import {connectedCaseQuestions} from '../connected-case.mjs';
 
-test('new-case confirmation and next action translate in all learner languages',()=>{
-  for(const language of ['es','fr','ar']) for(const message of ['New case started','Choose your path, then place a tool to begin.']) {
+test('new-case actions and recorded VFL path labels translate in all learner languages',()=>{
+  for(const language of ['es','fr','ar']) for(const message of ['New case started','Choose your path, then place a tool to begin.',
+    'Recorded VFL path','Recorded checks, not live light.','Viewing here','Loose MMC only',
+    'Red: confirmed light','Amber: investigate','Dashed: not checked']) {
     assert.notEqual(translate(message,language),message,`${language}: ${message}`);
   }
 });

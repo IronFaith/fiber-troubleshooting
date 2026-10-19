@@ -189,12 +189,10 @@ export function changeCase(state, action) {
       if(port!==current.port) {s.identity={}; s.comparisons={};}
       if(port!==current.port) for(const key of Object.keys(s.loops)) if(Number(key)>=point) delete s.loops[key];
       if(port!==current.port) for(const key of Object.keys(s.remoteLoops)) if(Number(key)<=point) delete s.remoteLoops[key];
-      for(const key of Object.keys(s.traces)) {
+      for(const key of port!==current.port?Object.keys(s.traces):[]) {
         const route=parseTraceKey(key);
-        // Opening a test endpoint is a setup change, not a repair. Keep its
-        // head / through-CAS observations for comparison; repatching a
-        // different port still invalidates the affected route.
-        if(route&&point===route.to&&port===current.port) continue;
+        // Plugging / unplugging on the same route only changes the live
+        // opening. Keep recorded checks until a retest or route change.
         if(route&&point>=Math.min(route.from,route.to)&&point<=Math.max(route.from,route.to)) delete s.traces[key];
       }
       break;
@@ -586,6 +584,10 @@ function traceAssessment(s) {
         {check:traceCheck({...rows[0],strand:rows[0].strand==='tx'?'rx':'tx'},'Check the other strand'),
           branches:[['Other strand has light','Both have visible continuity at this point.'],['Other strand is dark','Separate the incoming head from the CAS connection.']]});
     } else {
+      const distance=r=>Math.abs(r.to-r.from)*2-(r.head?1:0);
+      const covered=rows.every(row=>entries.some(r=>r.from===g.from&&r.strand===row.strand&&r.result==='seen'&&
+        Math.sign(r.to-r.from)===Math.sign(g.to-g.from)&&distance(r)>distance(g)));
+      if(covered) continue; // A completed onward check supersedes this earlier success.
       const nextPoint=g.to+Math.sign(g.to-g.from);
       make(10,g.head?'Both strands reach the loose MMC head':'Both strands have visible continuity here',
         g.head?'The cassette connection has not yet been checked.':'This does not prove acceptable IR loss, optic health or the remote link.',
@@ -707,4 +709,23 @@ export function pathCoverage(s) {
     }
   }
   return {optic,remoteOptic,lastLoopPass,firstRemotePass,points,spans,txThrough,remoteTxThrough};
+}
+
+// Recorded VFL continuity for one LC source only. Physical emission still uses
+// traceStop; unplugging a connector cannot turn history into live light.
+export function vflProgress(s) {
+  const from=traceFrom(s),direction=from===0?1:-1;
+  const traces=Object.fromEntries(Object.entries(s.traces).filter(([key])=>parseTraceKey(key)?.from===from));
+  const coverage=pathCoverage({...s,traces,loops:{},remoteLoops:{}});
+  const points=[];
+  for(let point=from+direction;point>=0&&point<=s.reach;point+=direction) {
+    const measured=coverage.points[point],span=coverage.spans[Math.max(point,point-direction)-1];
+    points.push({point,lanes:Object.fromEntries(['tx','rx'].map(strand=>[strand,{
+      segment:span.lanes[strand].status,
+      head:measured.head[strand],through:measured.port[strand],
+      result:measured.port[strand]??measured.head[strand],
+      headOnly:!measured.port[strand]&&Boolean(measured.head[strand]),
+    }]))});
+  }
+  return {from,points};
 }
