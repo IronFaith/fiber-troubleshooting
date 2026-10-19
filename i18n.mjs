@@ -1,4 +1,4 @@
-import {translate,readLanguage,saveLanguage,getLanguage} from './locale.mjs?v=1';
+import {translate,readLanguage,saveLanguage,getLanguage,languages,isLanguage,languageKey} from './locale.mjs?v=2';
 // Display-only localization: IDs, field values and all learning / case state
 // remain unchanged. Keep each source node so switching back restores English.
 const textSources=new WeakMap(),attributeSources=new WeakMap();
@@ -47,11 +47,11 @@ const observer=new MutationObserver(records=>{
 });
 observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:attributes});
 const selector=document.createElement('label');selector.className='language-picker';selector.dataset.noI18n='';
-selector.innerHTML='<span aria-hidden="true">◎</span><select aria-label="Language / Idioma"><option value="en" lang="en">English</option><option value="es" lang="es">Español</option></select>';
+selector.innerHTML=`<span aria-hidden="true">◎</span><select aria-label="Language / Idioma / Langue">${Object.entries(languages).map(([code,label])=>`<option value="${code}" lang="${code}">${label}</option>`).join('')}</select>`;
 const select=selector.querySelector('select');select.value=language;
 document.querySelector('header')?.append(selector);
 function switchLanguage(next,persist=true) {
-  if(!['en','es'].includes(next))return;
+  if(!isLanguage(next))return;
   language=next;document.documentElement.lang=next;select.value=next;
   if(persist)saveLanguage(storage,next);
   document.title=translate(titleSource,next);
@@ -63,6 +63,6 @@ select.addEventListener('change',()=>{
   if(url.searchParams.has('lang')){url.searchParams.delete('lang');history.replaceState(null,'',url);}
   switchLanguage(select.value);
 });
-window.addEventListener('storage',event=>{if(event.key==='fiber-language-v1')switchLanguage(event.newValue==='es'?'es':'en',false);});
+window.addEventListener('storage',event=>{if(event.key===languageKey)switchLanguage(isLanguage(event.newValue)?event.newValue:'en',false);});
 switchLanguage(language,new URLSearchParams(location.search).has('lang'));
 export {getLanguage};

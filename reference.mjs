@@ -1,5 +1,5 @@
-import {translate,getLanguage} from './locale.mjs?v=1';
-import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=7';
+import {translate,getLanguage} from './locale.mjs?v=2';
+import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=8';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=3';
 
@@ -119,6 +119,7 @@ export function mountReference(menuPanel, closeMenu, menuButton) {
 // Only short teaching paragraphs are annotated; drawings, controls and exam answers stay intact.
 const inlineTerms={optic:'optic',LC:'lc',MMC:'mmc',CAS:'cas',fanout:'fanout',follower:'follower',ferrule:'ferrule',TX:'tx',RX:'rx',IR:'ir',dBm:'dbm',attenuation:'attenuation',polarity:'polarity',loopback:'loopback',VFL:'vfl',continuity:'continuity',misport:'misport',splice:'splice',local:'local-remote',remote:'local-remote',FIM:'fim',LLDP:'lldp'};
 Object.assign(inlineTerms,{'óptico':'optic',ramal:'follower','férula':'ferrule','atenuación':'attenuation',polaridad:'polarity',continuidad:'continuity',empalme:'splice',remoto:'local-remote'});
+Object.assign(inlineTerms,{optique:'optic',branche:'follower','férule':'ferrule','atténuation':'attenuation','polarité':'polarity','continuité':'continuity','épissure':'splice',distant:'local-remote'});
 const termPattern=new RegExp(`(?<![\\p{L}\\p{N}_])(${Object.keys(inlineTerms).join('|')})(?![\\p{L}\\p{N}_])`,'giu');
 const paragraphSources=new WeakMap();
 const termIds=Object.fromEntries(Object.entries(inlineTerms).map(([word,id])=>[word.toLowerCase(),id]));

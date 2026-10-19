@@ -80,6 +80,8 @@ Chapter 1’s device communication lesson (`learn.html#trace-loops`) teaches the
 
 ## Languages
 
-The header offers English and neutral Latin American Spanish. The `fiber-language-v1` browser preference is independent of exam progress and troubleshooting state. `?lang=es` can open the Spanish version directly.
+The header offers English, neutral Latin American Spanish, and French. The `fiber-language-v1` browser preference is independent of exam progress and troubleshooting state. `?lang=es` and `?lang=fr` open the corresponding language directly.
 
-`spanish.mjs` is the reviewed translation catalog; English phrases are the keys and numbered placeholders preserve dynamic values. Add translations there when changing course text. `locale.mjs` handles messages and preferences, while `i18n.mjs` translates displayed text and accessible labels without changing form values, equipment IDs, answers, or stored results. Inline lesson definitions and glossary search support both languages. No translation API or external service is used.
+`spanish.mjs` and `french.mjs` contain translations keyed by English phrases; numbered placeholders preserve dynamic values. **Every new or changed learner-facing item must be updated in all three languages in the same change**, including lessons, exams and feedback, diagrams and accessible labels, glossary, simulations, troubleshooting guidance, navigation, and badges. Keep both catalogs’ English keys aligned and preserve placeholders and technical identifiers. The locale tests check catalog parity and placeholders; check the translated experience as well, including mobile layout.
+
+`locale.mjs` handles messages and preferences, while `i18n.mjs` translates displayed text and accessible labels without changing form values, equipment IDs, answers, or stored results. Inline lesson definitions and glossary search support all three languages. No translation API or external service is used.

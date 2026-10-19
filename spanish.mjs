@@ -2378,5 +2378,6 @@ export const spanishMessages = [
   ["through CAS", "a través del CAS"],
   ["loose MMC head", "cabezal MMC suelto"],
   ["VFL {0} · A {1} · B {2}", "VFL {0} · A {1} · B {2}"],
-  ["{0} to +{1}", "{0} a +{1}"]
+  ["{0} to +{1}", "{0} a +{1}"],
+  ["Then check your answers.", "Luego revisa tus respuestas."]
 ];

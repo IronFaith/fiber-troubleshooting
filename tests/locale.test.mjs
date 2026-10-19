@@ -39,3 +39,51 @@ test('Spanish glossary search accepts accents, plain spelling and English equipm
   assert.deepEqual(searchReference('TX','Hardware','es'),[]);
   assert.deepEqual(searchReference('férula','Hardware','es').map(term=>term.id),['ferrule']);
 });
+
+
+test('French translates composed feedback and findings without mixing language caches or technical values',()=>{
+  const finding='Strand B is dark; the other has light';
+  assert.equal(translate(finding,'fr'),'La fibre B est sans lumière ; l’autre transmet');
+  assert.equal(translate(finding,'es'),'La fibra B está sin luz; la otra tiene luz');
+  assert.equal(translate(finding,'en'),finding);
+  assert.equal(translate(finding,'fr'),'La fibre B est sans lumière ; l’autre transmet');
+  assert.equal(translate('Question 1 of 5','fr'),'Question 1 sur 5');
+  assert.equal(translate('Select all supported answers. Then check your answers.','fr'),'Sélectionnez toutes les réponses étayées. Puis vérifiez vos réponses.');
+  assert.equal(translate('Select all supported answers. Then check your answers.','es'),'Selecciona todas las respuestas respaldadas por la evidencia. Luego revisa tus respuestas.');
+  assert.equal(translate('1 current check · Round 3','fr'),'1 contrôle actuel · série 3');
+  assert.equal(translate('CAS 2 · Port 12','fr'),'CAS 2 · port 12');
+  assert.equal(translate('✓ Seated in the correct port. 25/1 means optic 25, position 1. With the tab above, that is the left side.','fr'),'✓ Enclenché dans le bon port. 25/1 signifie optique 25, position 1. Avec la languette en haut, c’est le côté gauche.');
+  assert.equal(translateLines('FIBER OBSERVATIONS — entered manually\nLoop · Local optic','fr'),'OBSERVATIONS FIBRE — saisies manuellement\nBoucle · Optique locale');
+  for(const id of ['QNO5.5C.16f.17.30','S747885346FWL','25/5','RX −40 dBm','TX +0.25 dBm']) assert.equal(translate(id,'fr'),id);
+  assert.equal(translate(finding,'unsupported'),finding);
+});
+
+test('French preference and glossary work without affecting progress or English aliases',()=>{
+  const values=new Map([['fiber-progress','keep'],['fiber-workbench-v1','keep case']]);
+  const storage={getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)};
+  assert.equal(saveLanguage(storage,'fr'),true);
+  assert.equal(readLanguage(storage),'fr');
+  assert.equal(readLanguage(storage,'?lang=es'),'es');
+  assert.equal(readLanguage(null,'?lang=fr'),'fr');
+  assert.equal(readLanguage(storage,'?lang=unknown'),'fr');
+  assert.equal(values.get('fiber-progress'),'keep');
+  assert.equal(values.get('fiber-workbench-v1'),'keep case');
+  assert.equal(saveLanguage(null,'fr'),false);
+  for(const [query,id] of [['optique','optic'],['ferule','ferrule'],['férule','ferrule'],['polarite','polarity'],['voisin','lldp'],['localisateur visuel','vfl'],['branche','follower'],['transceiver','optic']])
+    assert.ok(searchReference(query,'','fr').some(term=>term.id===id),query);
+  assert.deepEqual(searchReference('férule','Hardware','fr').map(term=>term.id),['ferrule']);
+});
+
+test('every translated catalog covers the same material and preserves message placeholders',async()=>{
+  const {spanishMessages}=await import('../spanish.mjs');
+  const {frenchMessages}=await import('../french.mjs');
+  const keys=messages=>[...new Set(messages.map(([source])=>source))].sort();
+  assert.deepEqual(keys(frenchMessages),keys(spanishMessages));
+  const placeholders=value=>[...value.matchAll(/\{\d+\}/g)].map(match=>match[0]).sort();
+  for(const [language,messages] of [['es',spanishMessages],['fr',frenchMessages]]) {
+    for(const [source,translation] of messages) {
+      assert.ok(translation.trim(),`${language}: ${source}`);
+      assert.deepEqual(placeholders(translation),placeholders(source),`${language}: ${source}`);
+    }
+  }
+});
