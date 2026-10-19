@@ -1,5 +1,6 @@
 // Modern Standard Arabic. Keep English keys aligned with all translation catalogs.
 export const arabicMessages = [
+  ["Case details", "تفاصيل الحالة"],
   ["New case started","بدأت حالة جديدة"],
   ["Choose your path, then place a tool to begin.","اختر مسارك، ثم ضع أداة للبدء."],
   ["Play light", "تشغيل حركة الضوء"],

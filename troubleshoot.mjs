@@ -1,16 +1,16 @@
-import {translateLines} from './locale.mjs?v=16';
+import {translateLines} from './locale.mjs?v=17';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=19';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=22';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=23';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=8';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=4';
-import {simpleVfl} from './vfl-simple.mjs?v=18';
+import {simpleVfl} from './vfl-simple.mjs?v=19';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
 const key='fiber-workbench-v1';
 let view='actual', cases={actual:createCase(),simulation:createCase(true)};
 let selectedTool=null,setupOpen=false,identityOpen=false,newCaseStarted=false;
-let serviceCheckOpen=false;
+let serviceCheckOpen=false,caseDetailsOpen=false;
 let deferPortRender=false,portRenderPending=false;
 const undo={actual:[],simulation:[]};
 let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -231,33 +231,45 @@ function readings(s) {
   const badge=(name,value)=>`<span class="ts-reading ${value}">${name}<b>${value==='good'?'Light present':value==='weak'?'Weak':'No light'}</b></span>`;
   return `<div class="ts-readings"><span>Expected with service path restored:</span>${badge('Local TX',r.tx)}${badge('Local RX',r.rx)}${badge('Remote TX',s.fault.kind==='optic_tx'&&s.fault.at===s.count+1?'dark':'good')}${badge('Remote RX',r.farRx)}<small>Simulated readings at both ends.</small></div>`;
 }
+function loopControls(s) {
+  const result=loopResult(s),point=s.selected;
+  return `<section class="ts-inline-loop ${result??'pending'}" aria-labelledby="test-title">
+    <h2 id="test-title" tabindex="-1">Does the loop pass?</h2>
+    ${!isOptic(s,point)&&s.reach===s.count+1?select('loop-side','Optic under test',[['local','Local optic'],['remote','Remote optic']],s.loopSide):`<p class="ts-test-location">${pointName(loopSource(s),s)}</p>`}
+    <div class="ts-result-buttons">${s.simulated?button('run','Run this test','class="ts-primary"'):[['pass','Pass'],['dark','No return light'],['weak','Weak return']].map(([value,label])=>button(`result-${value}`,label,`aria-pressed="${result===value}"`)).join('')}</div>
+    <p class="ts-loop-recorded">${result?`${s.simulated?'Simulated':'You recorded'}: <b>${loopLabels[result]}</b>`:'Placing the tool does not record a pass.'}</p>
+    <p class="ts-note">Compare TX and returning RX with the optic’s limits.</p>
+  </section>`;
+}
 function controls(s) {
-  const point=s.selected, tool=s.tool;
+  const tool=s.tool;
   const hasResults=loopEntries(s).length+Object.keys(s.traces).length>0;
-  const result=tool==='loop'?loopResult(s,point):s.traces[traceKey(s)];
   if(tool==='link' && s.disconnected?.length) return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">Reconnect the service path</h2><p class="ts-tool-caption">The tool is off. The highlighted LC legs or MMC heads are still unplugged.</p>${button('normalize','Normalize','class="ts-primary"')}<p class="ts-note">Reconnects the illustration and keeps recorded tests. Confirm the real connections before checking health.</p></section>`;
   if(tool==='link'&&canVerifyService(s)) return `<details class="ts-service-check" ${serviceCheckOpen?'open':''}><summary id="test-title"><span><b>Final check · normal operation</b><small>${s.service==='good'?'Yes · link working':s.service==='bad'?'No · still a problem':'Use after reconnecting the real service path.'}</small></span></summary><div class="ts-service-body"><p>A loop or VFL pass checks only part of the connection. This final check confirms whether the devices communicate after the tools are removed.</p><p>Reconnect the mapped path. Check current TX/RX against the optic limits and confirm link status at the accessible devices.</p><div class="ts-result-buttons">${button('service-good','Yes · link working',`aria-pressed="${s.service==='good'}"`)}${button('service-bad','No · still a problem',`aria-pressed="${s.service==='bad'}"`)}</div><p class="ts-note">Not ready? Keep testing; this check is optional until you finish.</p></div></details>`;
   if(tool==='link') return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">${hasResults?'Choose the next test':'Place your first test'}</h2>${hasResults?'<p class="ts-tool-caption">Place a tool for your next check. Earlier observations stay on the path and in Case history.</p>':'<p class="ts-tool-caption">Drag LC onto either optic to start. At a cassette, choose the optic under test. Earlier findings stay in this case.</p>'}</section>`;
-  const labels=tool==='loop'?{pass:'Yes · passes',dark:'No · no return light',weak:'Light returns, but weak'}:traceLabels;
-  return `<section class="ts-control-card" aria-labelledby="test-title"><div class="ts-section-top"><div><p class="ts-test-location">${tool==='vfl'?'VFL':isOptic(s,point)?'LC loopback':'MMC loopback'} · ${tool==='vfl'?traceName(s):pointName(point,s)}</p><h2 id="test-title" tabindex="-1">${tool==='loop'?'Does the loop pass?':`What did you see at ${fiberPointName(point,s)}?`}</h2></div></div>
-    <div class="ts-fields">${tool==='loop'&&!isOptic(s,point)&&s.reach===s.count+1?select('loop-side','Optic under test',[['local','Local optic'],['remote','Remote optic']],s.loopSide):''}</div>
-    ${tool==='loop'?`<p class="ts-loop-context"><b>${isOptic(s,point)?`${pointName(point,s)} · TX → loop → RX`:`Light path: ${pointName(loopSource(s),s)} → ${pointName(point,s)} → ${pointName(loopSource(s),s)}`}</b><span>${isOptic(s,point)?'Direct loop · external fiber bypassed':`Loop faces ${pointName(loopSource(s),s)}. Read returning RX at that device.`}</span></p>`:''}
-    <p class="ts-tool-caption">${tool==='loop'?'Use the correct loop mapping and required attenuation. Check TX and returning RX against this optic’s limits.':`The VFL supplies red light at ${fiberPointName(traceFrom(s),s)}. Check the isolated fiber end at ${fiberPointName(point,s)}. ${traceFrom(s)===0||point===0?'The optic-side LC leg is unplugged; the optic itself is not part of this trace.':''}`}</p>
-    ${tool==='vfl'?select('strand','Strand to trace',[['tx','Normally local TX → remote RX'],['rx','Normally remote TX → local RX']],s.strand):''}
-    ${s.simulated?'<p class="ts-prepared">Practice only · results come from the chosen fault.</p>':tool==='vfl'?`<label class="ts-ready"><input type="checkbox" data-field="ready" ${s.ready?'checked':''}><span>The test fiber is disconnected from the optics; VFL is attached to an LC leg.</span></label>`:''}
-    <div class="ts-result-buttons">${s.simulated?button('run','Run this test','class="ts-primary"'):Object.entries(labels).map(([value,label])=>button(`result-${value}`,label,`aria-pressed="${result===value}" ${tool==='vfl'&&!s.ready?'disabled':''}`)).join('')}</div>
-    ${result?`<p class="ts-recorded">${s.simulated?'Simulated':'You recorded'}: <b>${tool==='loop'?loopLabels[result]:traceLabels[result]}</b></p>`:'<p class="ts-note">Placing the tool does not record a pass.</p>'}</section>`;
 }
+
 function caseBar(s) {
   const status=caseStatus(s);
   return `<section class="ts-case-bar" aria-label="Case progress"><div><b>${s.simulated?'Practice · ':''}${status.label}</b><span>${status.count} current ${status.count===1?'check':'checks'} · Round ${s.round}</span></div><ol>${['Set up','Test','Isolate','Verify'].map((label,i)=>`<li class="${i===status.stage?'active':i<status.stage?'done':''}" ${i===status.stage?'aria-current="step"':''}><span>${i+1}</span>${label}</li>`).join('')}</ol></section>`;
+}
+function findingTitle(s) {
+  const pending=s.tool!=='link'&&(!s.ready || (s.tool==='loop'?!loopResult(s):!s.traces[traceKey(s)]));
+  return pending&&!loopEntries(s).length&&!Object.keys(s.traces).length&&!traceStop(s)?.blocked&&!traceStop(s)?.closed?'Ready for your first result':assessment(s).title;
+}
+function caseDetails(s) {
+  const status=caseStatus(s);
+  return `<details class="ts-case-details" ${caseDetailsOpen?'open':''}>
+    <summary><span><b>Case details</b><small>${findingTitle(s)}</small></span><span class="ts-detail-count">${status.count} ${status.count===1?'check':'checks'}</span></summary>
+    <div class="ts-case-body">${caseBar(s)}<div class="ts-case-columns">${advice(s)}<div>${identityChecks(s)}${readings(s)}${s.tool==='loop'?'<p class="ts-note">Use the correct loop mapping and required attenuation. Check TX and returning RX against this optic’s limits.</p>':''}</div></div>${results(s)}</div>
+  </details>`;
 }
 function advice(s) {
   const a=assessment(s);
   const pending=s.tool!=='link'&&(!s.ready || (s.tool==='loop'?!loopResult(s):!s.traces[traceKey(s)]));
   const hasEvidence=loopEntries(s).length+Object.keys(s.traces).length>0;
   const waiting=pending&&!hasEvidence&&!traceStop(s)?.blocked&&!traceStop(s)?.closed;
-  const title=waiting?'Ready for your first result':a.title;
+  const title=findingTitle(s);
   const why=waiting?(s.tool==='loop'?'Compare TX and returning RX with the optic’s limits.':'The red glow illustrates the expected path. Record what you actually see on the selected strand.'):a.why;
   const areaPoint=point=>a.issue==='loop'?pointName(point,s):fiberPointName(point,s);
   const nextLabel=a.check?.label??(a.suggestion?.tool==='loop'?`Next: ${isOptic(s,a.suggestion.point)?'LC':'MMC'} loop at ${pointName(a.suggestion.point,s)}`:a.suggestion?.tool==='vfl'?`VFL from ${a.suggestion.side==='remote'?'Remote LC legs':'Local LC legs'} → ${fiberPointName(a.suggestion.point,s)}`:'Normalize');
@@ -311,17 +323,23 @@ function render(preservePosition=false) {
   const freshCase=newCaseStarted?`<section class="ts-new-case" aria-labelledby="new-case-title"><div role="status"><h2 id="new-case-title" tabindex="-1">New case started</h2><p>Choose your path, then place a tool to begin.</p></div>${button('undo','Undo')}</section>`:'';
   const status=s.tool==='vfl'?'VFL on fiber':s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`${s.loopSide==='remote'?'Remote loop':'Local loop'} at ${pointName(s.selected,s)} · ${loopResult(s)?loopLabels[loopResult(s)]:'waiting for your result'}`;
   const legend=s.tool==='link'&&!s.simulated?'<span class="ts-key-ir">Blue / teal: loop checked</span><span class="ts-key-red">Red: VFL continuity recorded</span><span>Amber: investigate · dashed: untested</span>':'<span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span>';
-  const visual=s.tool==='vfl'?simpleVfl(s,paused,{embedded:true}):`<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div><div class="ts-legend"><span>↔ Scroll to follow the path</span>${legend}</div>${controls(s)}`;
-  host.innerHTML=`${s.simulated?setup(s):''}<div class="ts-workspace-layout"><section id="ts-workspace" class="ts-workspace" aria-label="Visual test path">${freshCase}<div class="ts-workspace-heading"><h2>Your test path</h2><div class="ts-cas-count" role="group" aria-label="Passives on path">${button('cas-remove','−',`aria-label="Remove last CAS" ${s.count===1?'disabled':''}`)}<b>${s.count} CAS</b>${button('cas-add','+',`aria-label="Add CAS" ${s.count===4?'disabled':''}`)}</div></div>
+  const visual=s.tool==='vfl'?simpleVfl(s,paused,{embedded:true}):`<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s,s.tool==='loop'?loopControls(s):'')}</div><div class="ts-legend"><span>↔ Scroll to follow the path</span>${legend}</div>${s.tool==='link'?controls(s):''}`;
+  host.innerHTML=`${s.simulated?setup(s):''}<section id="ts-workspace" class="ts-workspace" aria-label="Visual test path">${freshCase}<div class="ts-workspace-heading"><h2>Your test path</h2><div class="ts-cas-count" role="group" aria-label="Passives on path">${button('cas-remove','−',`aria-label="Remove last CAS" ${s.count===1?'disabled':''}`)}<b>${s.count} CAS</b>${button('cas-add','+',`aria-label="Add CAS" ${s.count===4?'disabled':''}`)}</div></div>
     ${pathBar(s)}${tray(s)}<p class="ts-workspace-state">${status}</p><div class="ts-workspace-test">${visual}</div><div class="ts-workspace-actions">${button('remove-tool','Remove tool',`aria-label="Remove placed tool" ${s.tool==='link'?'disabled':''}`)}${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>${!s.simulated?setup(s):''}</section>
-    <aside class="ts-workspace-findings">${caseBar(s)}${identityChecks(s)}${readings(s)}${advice(s)}</aside></div>${results(s)}`;
+    ${caseDetails(s)}`;
   host.querySelector('.ts-path-bar').scrollLeft=pathScroll;
   if(host.querySelector('.ts-map')) {if(preservePosition)host.querySelector('.ts-map').scrollLeft=scrollLeft;else centerMap();}
 }
 
 function showFindings() {
+  openCaseDetails();
   host.querySelector('.ts-advice')?.scrollIntoView({block:'start',behavior:'instant'});
   host.querySelector('#finding-title')?.focus({preventScroll:true});
+}
+function openCaseDetails() {
+  caseDetailsOpen=true;
+  const details=host.querySelector('.ts-case-details');
+  if(details) details.open=true;
 }
 function centerMap(focusPoint) {
   const s=cases[view],map=host.querySelector('.ts-map');
@@ -361,7 +379,11 @@ host.addEventListener('change',event=>{
   if(field==='vfl-from') centerMap(Number(value));
   host.querySelector(`[data-field="${field}"]`)?.focus({preventScroll:true});
 });
-host.addEventListener('toggle',event=>{if(host.contains(event.target)&&event.target.matches('.ts-service-check')) serviceCheckOpen=event.target.open;},true);
+host.addEventListener('toggle',event=>{
+  if(!host.contains(event.target)) return;
+  if(event.target.matches('.ts-service-check')) serviceCheckOpen=event.target.open;
+  if(event.target.matches('.ts-case-details')) caseDetailsOpen=event.target.open;
+},true);
 function choosePoint(point) {
   if(selectedTool) {placeTool(selectedTool,point,true);return;}
   if(cases[view].tool==='vfl') {
@@ -432,14 +454,14 @@ host.addEventListener('click',async event=>{
     return;
   }
   if(action==='findings') {showFindings();return;}
-  if(action==='check-identity') {setDisclosure('identity',true);host.querySelector('.ts-identity')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#identity-title')?.focus({preventScroll:true});return;}
+  if(action==='check-identity') {openCaseDetails();setDisclosure('identity',true);host.querySelector('.ts-identity')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#identity-title')?.focus({preventScroll:true});return;}
   if(action==='comparison') {update([{type:'comparison',key:target.dataset.checkKey,step:target.dataset.checkStep,value:target.dataset.checkValue}],'Comparison recorded for this route and strand.');showFindings();return;}
   if(action==='setup'||action==='identity') {setDisclosure(action,!(action==='setup'?setupOpen:identityOpen));return;}
   if(action==='normalize') {normalizeSetup();return;}
   if(action==='check-opening') {update([{type:'trace',from:traceFrom(s),to:traceStop(s).point}],'Check the open end here, then enter your observation.');centerMap();return;}
   if(action==='swap-trace') {update([{type:'trace',from:s.selected,to:traceFrom(s)}],'VFL direction reversed. Confirm the new setup before recording a result.');centerMap(traceFrom(cases[view]));host.querySelector('[data-action="swap-trace"]')?.focus({preventScroll:true});return;}
   if(action==='remove-tool'||action==='link') {removeTool();host.querySelector('[data-pick-tool]')?.focus({preventScroll:true});return;}
-  if(action==='test-result') {host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.vfl-observe, .ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}
+  if(action==='test-result') {centerMap();host.querySelector('#test-title')?.focus({preventScroll:true});host.querySelector('.vfl-observe, .ts-inline-loop, .ts-control-card')?.scrollIntoView({block:'start',behavior:'instant'});return;}
   if(action==='start-loop') {placeTool('lc',0);return;}
   if(action==='motion') {
     paused=!paused;host.querySelectorAll('.ts-map,.vfl-view').forEach(el=>el.classList.toggle('light-paused',paused));target.textContent=paused?'Play arrows':'Pause arrows';return;
@@ -467,7 +489,7 @@ host.addEventListener('click',async event=>{
     undo[view].push(s);
     if(undo[view].length>30) undo[view].shift();
     cases[view]=createCase(s.simulated);
-    newCaseStarted=true;setupOpen=true;identityOpen=false;serviceCheckOpen=false;
+    newCaseStarted=true;setupOpen=true;identityOpen=false;serviceCheckOpen=false;caseDetailsOpen=false;
     save();render();
     host.querySelector('.ts-new-case')?.scrollIntoView({block:'start',behavior:'instant'});
     host.querySelector('#new-case-title')?.focus({preventScroll:true});
@@ -479,7 +501,7 @@ host.addEventListener('click',async event=>{
     const actions=[...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record',...(action==='run'?{}:{result:action.slice(7)})}];
     const message=action==='run'?'Simulated test recorded.':'Observation recorded.';
     if(s.tool==='vfl') {updateVflInPlace(actions,message,`.vfl-observe [data-action="${action}"]`);return;}
-    updateVflInPlace(actions,message,`.ts-control-card [data-action="${action}"]`);return;
+    updateVflInPlace(actions,message,`.ts-inline-loop [data-action="${action}"]`);return;
   }
   else if(action==='next') {
     const actions=nextCheckActions(s),next=assessment(s).suggestion;

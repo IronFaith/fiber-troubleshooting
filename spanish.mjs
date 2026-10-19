@@ -1,5 +1,6 @@
 // Neutral Latin American Spanish. Keep numbered placeholders and technical identifiers intact.
 export const spanishMessages = [
+  ["Case details", "Detalles del caso"],
   ["Play light", "Animar luz"],
   ["Pause light", "Pausar luz"],
   ["Not connected", "Sin conectar"],

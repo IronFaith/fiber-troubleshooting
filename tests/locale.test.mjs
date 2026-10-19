@@ -5,7 +5,7 @@ import {searchReference} from '../reference-data.mjs';
 import {connectedCaseQuestions} from '../connected-case.mjs';
 
 test('new-case actions and recorded VFL path labels translate in all learner languages',()=>{
-  for(const language of ['es','fr','ar']) for(const message of ['New case started','Choose your path, then place a tool to begin.',
+  for(const language of ['es','fr','ar']) for(const message of ['Case details','Pass','No return light','Weak return','New case started','Choose your path, then place a tool to begin.',
     'Recorded VFL path','Recorded checks, not live light.','Viewing here','Loose MMC only',
     'Add CAS','Remove last CAS','CAS 2 · Mapped port','LC loopback: tap either optic.','MMC loopback: tap a CAS.','VFL: tap Local or Remote LC legs.',
     'Red: confirmed light','Amber: investigate','Dashed: not checked',

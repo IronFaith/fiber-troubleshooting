@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
 import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=19';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=22';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=23';
 import {lcConnector,vflPen} from './test-tool-visuals.mjs?v=1';
 
 const letter=strand=>strand==='tx'?'A':'B';

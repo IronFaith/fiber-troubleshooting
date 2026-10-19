@@ -125,7 +125,7 @@ function coverageOverlay(s,coverage,centers) {
   return drawing;
 }
 
-export function workbenchDiagram(s) {
+export function workbenchDiagram(s,loopControls='') {
   const coverage=pathCoverage(s), centers = Array.from({length:s.count+2},(_,i) => 135+i*290);
   const width = centers.at(-1)+135;
   const looping = s.tool === 'loop', tracing = s.tool === 'vfl', normalized=!s.simulated&&s.tool==='link';
@@ -149,6 +149,8 @@ export function workbenchDiagram(s) {
       <text class="ts-node-caption" x="${cx}" y="247">${tracing&&i===from?'VFL source':tracing&&i===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):!accessible ? 'Outside your reach' : isLoop&&!loopResult(s,i)?'Enter your loop result':recordedNodeCaption(s,coverage,i)}</text>
     </g>`;
   }
+  let nodes=drawing;
+  drawing='';
   drawing += `<text class="ts-lane-label" x="10" y="278">TX →</text><text class="ts-lane-label" x="10" y="338">RX ←</text>
     <text class="ts-lane-label" x="${width-64}" y="278">→ RX</text><text class="ts-lane-label" x="${width-64}" y="338">← TX</text>
     <path class="ts-route" d="${normalized?normalizedTxPath(s,centers,s.count,true):`M${start} 274 H${end}`} M${end} 334 H${start}"/>`;
@@ -215,7 +217,12 @@ export function workbenchDiagram(s) {
   }
   if (s.simulated && s.fault.kind!=='none') {
     const at = s.fault.at, fx=s.fault.kind.startsWith('optic_')?centers[at]:at===0 ? centers[0] : (centers[at-1]+centers[at])/2;
-    drawing += `<path class="ts-fault-pointer" d="M${fx} 16 v12"/><text class="ts-fault-label" x="${fx}" y="12">Simulated fault ${s.fault.kind.startsWith('optic_')||at===0 ? 'at optic' : 'in this section'} ↓</text>`;
+    nodes += `<path class="ts-fault-pointer" d="M${fx} 16 v12"/><text class="ts-fault-label" x="${fx}" y="12">Simulated fault ${s.fault.kind.startsWith('optic_')||at===0 ? 'at optic' : 'in this section'} ↓</text>`;
   }
-  return `<svg viewBox="0 0 ${width} 476" style="width:${width}px" role="group" aria-label="Interactive fiber path. TX sends along one strand; RX receives along the other. Choose either optic or an accessible cassette.">${drawing}</svg>`;
+  const label='Interactive fiber path. TX sends along one strand; RX receives along the other. Choose either optic or an accessible cassette.';
+  // Keep HTML result controls at their equipment's physical coordinate. Their
+  // natural height accommodates translations without scaling buttons or text.
+  return `<div class="ts-path-scene" style="width:${width}px" role="group" aria-label="${label}">${loopControls?
+    `<svg viewBox="0 0 ${width} 256" style="height:256px">${nodes}</svg><div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px">${loopControls}</div><svg viewBox="0 256 ${width} 220" style="height:220px">${drawing}</svg>`:
+    `<svg viewBox="0 0 ${width} 476" style="height:476px">${nodes}${drawing}</svg>`}</div>`;
 }
