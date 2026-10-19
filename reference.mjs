@@ -1,5 +1,5 @@
-import {translate,getLanguage,formatBidi} from './locale.mjs?v=14';
-import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=18';
+import {translate,getLanguage,formatBidi} from './locale.mjs?v=15';
+import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=19';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=4';
 

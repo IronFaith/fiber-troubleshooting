@@ -147,7 +147,7 @@ export function changeCase(state, action) {
       s.vflPointChecks=true; break;
     case 'identity':
       if(!Object.hasOwn(identityLabels,action.key)||typeof action.value!=='boolean'||s.identity?.[action.key]===action.value) return state;
-      s.identity??={}; s.identity[action.key]=action.value; s.service='unknown';
+      s.identity??={}; s.identity[action.key]=action.value; if(s.service==='good') s.service='unknown';
       if(!action.value) s.comparisons={};
       appendObservation(s,'identity',action.key,action.value?'confirmed':'unchecked'); break;
     case 'comparison': {
@@ -299,7 +299,7 @@ function sideLoopAssessment(s,side) {
   const passes=pairs.filter(([,r])=>r==='pass').map(([p])=>p);
   const lastPass=passes.length?passes.at(-1):-1;
   const fail=pairs.find(([p,r])=>r!=='pass'&&(lastPass<0||dir*(p-lastPass)>0));
-  const result=(title,why,next,extra={})=>({title,why,next,tone:'neutral',from:null,to:null,lastPass,...extra});
+  const result=(title,why,next,extra={})=>({title,why,next,tone:'neutral',from:null,to:null,lastPass,issue:'loop',...extra});
   if(side==='local') {
     if (s.loops[0] && s.loops[0] !== 'pass') return result('Start at the optic and test setup',
       'The direct loop did not pass. The external fiber path is bypassed.',
@@ -375,10 +375,7 @@ function basicAssessment(s) {
   if(s.tool==='link' && s.service==='good') return result('Restored link is working',
     'You confirmed the required readings and link status at the accessible devices after removing the tools.',
     'Record the work and readings. This does not identify the original cause or verify every other channel.',{tone:'pass',complete:true});
-  if(s.tool==='link' && s.service==='bad') return result('The restored link still needs checking',
-    'Loop tests do not prove the restored end-to-end pairing or live link.',
-    'Verify FIM ports and TX-to-RX pairing. Compare both optic tests and trace accessible strands; keep untested sections unverified.',
-    {tone:'suspect',suggestion:s.reach>0?{point:1,tool:'vfl'}:null});
+  if(s.tool==='link' && s.service==='bad') return serviceFailureAssessment(s);
   if (trace) {
     const from=traceFrom(s),longRoute=Math.abs(s.selected-from)>1;
     const shared = { from:Math.min(from,s.selected), to:Math.max(from,s.selected), tone:trace === 'seen' ? 'trace' : 'suspect' };
@@ -486,6 +483,20 @@ function vflBoundary(entries,dark) {
   const isolation={kind,label,strand:dark.strand,from:Math.min(earlier?.to??dark.from,dark.to),to:Math.max(earlier?.to??dark.from,dark.to)};
   return {related,earlier,farther,isolation};
 }
+function serviceFailureAssessment(s) {
+  const loops=combinedLoopAssessment(s);
+  if(loops?.tone==='suspect') return {...loops,caution:loops.caution??'The restored link still has a problem. These recorded findings remain unresolved.'};
+  const base={title:'The restored link still needs checking',why:'Loop tests do not prove the restored end-to-end pairing or live link.',tone:'suspect',from:null,to:null,issue:'service'};
+  if(!identityConfirmed(s)) return {...base,needsIdentity:true,next:'Confirm the device, optic socket, fanout and CAS ports. Verify that each TX reaches the intended RX before repeating passed tests.',causeIds:['mapping','pairing']};
+  const missingOptic=s.loops[0]!=='pass'?0:s.reach===s.count+1&&s.remoteLoops?.[s.count+1]!=='pass'?s.count+1:null;
+  if(missingOptic!==null) return {...base,next:'The fiber checks do not verify this optic. Run its supported direct loop and compare TX and returning RX with its limits.',suggestion:{point:missingOptic,tool:'loop',side:missingOptic===0?'local':'remote'},causeIds:['optic','loop-setup']};
+  const entries=Object.entries(s.traces).map(([key,result])=>({...parseTraceKey(key),result}));
+  const from=isOptic(s,traceFrom(s))&&traceFrom(s)<=s.reach?traceFrom(s):0,to=from===0?s.reach:0;
+  const fullPair=[0,s.count+1].some(source=>['tx','rx'].every(strand=>entries.some(r=>!r.head&&r.from===source&&r.to===(source===0?s.count+1:0)&&r.strand===strand&&r.result==='seen')));
+  const missing=!fullPair&&['tx','rx'].find(strand=>!entries.some(r=>!r.head&&r.from===from&&r.to===to&&r.strand===strand&&r.result==='seen'));
+  if(from!==to&&missing) return {...base,next:'The full accessible route is not yet traced on both strands from this end. Check the missing strand at the farthest accessible point.',check:traceCheck({from,to,strand:missing},'Check the unverified strand'),causeIds:['contacts','fiber']};
+  return {...base,next:s.reach===s.count+1?'Visible continuity and loop passes do not measure service loss. Check current TX/RX against each optic’s limits; if power is normal, verify optic compatibility, port state, speed and FEC settings.':'Check current optical readings and measure loss on the accessible path. Request remote-end readings and checks for the section you cannot reach.',causeIds:s.reach===s.count+1?['loss','configuration']:['loss','unverified-remote']};
+}
 
 // These are comparison observations about the original dark route, not new
 // continuity passes. A different source, strand, direction or endpoint never
@@ -532,14 +543,14 @@ function traceAssessment(s) {
     const rows=g.rows, a=rows.find(r=>r.strand==='tx'),b=rows.find(r=>r.strand==='rx');
     const status=r=>!r?'Not checked':r.result==='seen'?'Light at '+strandLetter(r.strand):r.result==='swapped'?'Light at '+strandLetter(r.strand==='tx'?'rx':'tx'):traceLabels[r.result];
     const pair=[{strand:'A',result:a?.result,label:status(a)},{strand:'B',result:b?.result,label:status(b)}];
-    const make=(priority,title,why,next,extra={})=>findings.push({priority,title,why,next,tone:priority>=50?'suspect':'trace',
+    const make=(priority,title,why,next,extra={})=>findings.push({priority,title,why,next,tone:priority>=50?'suspect':'trace',issue:'continuity',
       from:Math.min(g.from,g.to),to:Math.max(g.from,g.to),route:routeDescription(s,g),pair,...extra,
       active:rows.some(r=>r.key===activeKey)});
     const output=r=>['seen','weak'].includes(r?.result)?r.strand:r?.result==='swapped'?(r.strand==='tx'?'rx':'tx'):null;
     if(a&&b&&output(a)&&output(a)===output(b)) {
       make(100,'These channel results conflict','Both input strands were recorded at the same output channel.',
         'Confirm A / B labels and test one strand at a time. Recheck the same setup before changing polarity.',
-        {check:traceCheck(a,'Recheck strand A'),branches:[['Separate outputs','Compare with the documented channel map.'],['Still the same output','Verify labels, LC attachment and test setup.']]});
+        {issue:'conflict',check:traceCheck(a,'Recheck strand A'),branches:[['Separate outputs','Compare with the documented channel map.'],['Still the same output','Verify labels, LC attachment and test setup.']]});
       continue;
     }
     const wrong=rows.find(r=>r.result==='wrong');
@@ -547,7 +558,7 @@ function traceAssessment(s) {
     if(wrong || portMismatch) {
       make(90,'The observed route does not match FIM',portMismatch?`Patched port ${patchAt(s,g.to).port}; expected port ${s.ports[g.to-1]}.`:'Light was reported at a different port.',
         'Verify the device, LC follower, MMC serial and FIM destination. Correct the patch only after confirming the mapping, then start a retest.',
-        {branches:[['Mapping matches','Recheck the strand and viewing point.'],['Mapping differs','Correct the confirmed misport, then retest.']]});
+        {issue:'mapping',branches:[['Mapping matches','Recheck the strand and viewing point.'],['Mapping differs','Correct the confirmed misport, then retest.']]});
       continue;
     }
     const dark=rows.find(r=>r.result==='dark');
@@ -559,7 +570,7 @@ function traceAssessment(s) {
       if(farther) {
         make(100,'The location results need a recheck',`Strand ${letter} was dark at ${fiberPointName(dark.to,s)} but seen farther along the same route.`,
           'Confirm the source, strand and patching stayed the same. Recheck the dark point; these observations cannot yet isolate a fault.',
-          {isolation,check:traceCheck(dark,`Recheck ${fiberPointName(dark.to,s)} · ${letter}`)});
+          {issue:'conflict',isolation,check:traceCheck(dark,`Recheck ${fiberPointName(dark.to,s)} · ${letter}`)});
         continue;
       }
       // A dark incoming head already explains why the through-CAS check is
@@ -573,11 +584,11 @@ function traceAssessment(s) {
       const to=earlier?Math.max(earlier.to,dark.to):Math.max(dark.from,dark.to);
       if(!s.vflPointChecks&&!dark.head&&!isOptic(s,dark.to)&&!headPass) {
         make(80,title,why,`Keep the VFL on LC ${letter}. Verify its LC connection, then unplug the incoming MMC at CAS ${dark.to} and check its loose head for light.`,
-          {from,to,isolation,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check:traceCheck({...dark,head:true},`Check loose MMC · strand ${letter}`),
+          {issue:'dark',observation:dark,from,to,isolation,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check:traceCheck({...dark,head:true},`Check loose MMC · strand ${letter}`),
             branches:[['Light at the head','Inspect seating, end faces and the CAS connection.'],['Head also dark','Work back toward the source; check fiber and earlier connections.']]});
       } else if(headPass) {
         make(85,title,why,'Inspect both mating ends; clean and reinspect as needed. Verify seating and the mapped CAS port, then retest through the CAS.',
-          {from,to,isolation,evidencePath:[`MMC head · ${letter} light seen`,`CAS ${dark.to} port · ${letter} dark`],check:traceCheck(dark,`Retest through CAS ${dark.to} · ${letter}`),
+          {issue:'dark',observation:dark,from,to,isolation,evidencePath:[`MMC head · ${letter} light seen`,`CAS ${dark.to} port · ${letter} dark`],check:traceCheck(dark,`Retest through CAS ${dark.to} · ${letter}`),
             branches:[['Light returns','Retest both strands, then verify optical readings.'],['Still dark','Compare a known-good compatible connection to isolate the failing part.']]});
       } else {
         const previous=dark.to-dir;
@@ -587,7 +598,7 @@ function traceAssessment(s) {
         const guide=check?{}:s.simulated?{next:'Verify the source and mapped channel, inspect the individual fiber contacts, then compare one compatible assembly at a time. In a real case, record these checks in Find my problem.'}:comparisonGuide(s,dark.key);
         make(80,title,why,
           check?`Keep the source and strand unchanged. Check ${fiberPointName(previous,s)} to shorten the suspect section.`:guide.next,
-          {from,to,isolation,scope,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check,...guide,
+          {issue:'dark',observation:dark,from,to,isolation,scope,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check,...guide,
             ...(check?{branches:[['Earlier point has light','Investigate the section added after that point.'],['Earlier point is dark','Move toward the source and verify the VFL setup.']]}:{})});
       }
       continue;
@@ -604,14 +615,14 @@ function traceAssessment(s) {
         checkHead?'Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.':head?.result==='seen'?
           'Inspect both mating ends; clean and reinspect as needed. Verify seating and the mapped CAS port, then retest through the CAS.':
           'Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.',
-        {from:Math.min(earlier?.to??weak.from,weak.to),to:Math.max(earlier?.to??weak.from,weak.to),
+        {issue:'weak',from:Math.min(earlier?.to??weak.from,weak.to),to:Math.max(earlier?.to??weak.from,weak.to),
           check:traceCheck({...weak,head:checkHead||weak.head},checkHead?`Check loose MMC · strand ${letter}`:`Recheck ${fiberPointName(weak.to,s)} · ${letter}`)});
       continue;
     }
     if(rows.some(r=>r.result==='swapped')) {
       make(70,'Check the documented strand mapping','Light is present, but at the other illustrated channel.',
         'Compare both strands with the FIM / cable channel map. A / B are illustration labels; do not swap fibers solely because this picture differs.',
-        {check:rows.length===1?traceCheck({...rows[0],strand:rows[0].strand==='tx'?'rx':'tx'},'Check the other strand'):null,
+        {issue:'polarity',check:rows.length===1?traceCheck({...rows[0],strand:rows[0].strand==='tx'?'rx':'tx'},'Check the other strand'):null,
           branches:[['Matches the channel map','Verify TX reaches the intended RX.'],['Does not match','Correct the verified pairing, then retest.']]});
       continue;
     }
@@ -646,6 +657,8 @@ function traceAssessment(s) {
   if(failedLoop) {
     best.caution=`${pointName(failure.side==='remote'?s.count+1:0,s)} · Loop at ${pointName(Number(failedLoop[0]),s)}: ${loopLabels[failedLoop[1]]}. VFL continuity does not clear this optical test.`;
     if(best.priority<50) {
+      const isolated=combinedLoopAssessment(s);
+      best.issue='loop'; best.from=isolated.from; best.to=isolated.to;
       best.title='Visible light does not clear the failed loop'; best.tone='suspect';
       best.next='Verify the loop setup and inspect the connections. Recheck the loop against the optic limits; measure loss if the return remains weak.';
       best.check=null; best.branches=[['Loop passes','Restore the mapped path and verify the live link.'],['Loop still fails','Continue isolating the optic / setup or added fiber section.']];
@@ -657,7 +670,7 @@ function traceAssessment(s) {
   return best;
 }
 
-export function assessment(s) {
+function selectAssessment(s) {
   const basic=basicAssessment(s),stop=traceStop(s);
   if(basic.suggestion?.tool==='loop') basic.branches=[['Next loop passes','Compare with the next accessible point.'],['Next loop fails','Verify its setup; investigate the section added since the last pass.']];
   if(basic.from===0&&basic.to===0&&basic.tone==='suspect') basic.branches=[['Known-good setup passes','Compare the original optic / loop setup one change at a time.'],['Still fails','Check the optic, host state and test compatibility before tracing fiber.']];
@@ -672,6 +685,29 @@ export function assessment(s) {
   // Keep the failed optic test visible while still retaining any VFL findings.
   if(loopEntries(s).some(e=>e.result!=='pass'&&isOptic(s,e.point))&&s.tool==='loop') return {...basic,caution:traces.title};
   return {...traces,lastPass:basic.lastPass};
+}
+
+const causeLabels={
+  'vfl-setup':'VFL source or reference connection',mapping:'Wrong port or fanout',pairing:'End-to-end TX / RX pairing',
+  contacts:'Dirty or loose connection',fiber:'Bend, break, splice or damaged fiber contact',damage:'Damage seen during inspection',
+  assembly:'Original assembly or mating contact',common:'Shared source, mapping or remaining path',
+  'loop-setup':'Loop connector, mapping or attenuation',optic:'Optic or host port',loss:'Excess optical loss',
+  configuration:'Optic compatibility or device configuration','unverified-remote':'Untested remote section or optic'
+};
+export function assessment(s) {
+  const a=selectAssessment(s);
+  let ids=a.causeIds??[];
+  if(!a.complete&&!ids.length) {
+    if(a.issue==='dark') {
+      const c=s.comparisons?.[a.observation?.key]??{};
+      ids=c.source==='fail'?['vfl-setup']:c.inspection==='damage'?['damage']:c.substitute==='light'?['assembly']:c.substitute==='dark'?['common']:
+        [...(!identityConfirmed(s)?['mapping']:[]),'contacts',...(a.isolation?.kind==='mmc-cas-contact'?[]:['fiber'])];
+    } else if(a.issue==='weak') ids=['contacts','fiber'];
+    else if(a.issue==='mapping') ids=['mapping'];
+    else if(a.issue==='polarity') ids=['pairing','mapping'];
+    else if(a.issue==='loop'&&a.tone==='suspect') ids=a.from===a.to?['loop-setup','contacts','optic']:['loop-setup','contacts','fiber'];
+  }
+  return {...a,causes:ids.map(id=>({id,label:causeLabels[id]}))};
 }
 
 export function nextCheckActions(s) {

@@ -122,7 +122,7 @@ test('restored-link observations distinguish local loop success from a resolved 
   s=changeCase(s,{type:'service',value:'bad'});
   assert.equal(s.service,'bad');
   assert.equal(assessment(s).tone,'suspect');
-  assert.deepEqual(assessment(s).suggestion,{point:1,tool:'vfl'});
+  assert.equal(assessment(s).needsIdentity,true);
   s=changeCase(s,{type:'service',value:'good'});
   assert.equal(assessment(s).complete,true);
   s=changeCase(s,{type:'place',kind:'mmc',point:1});

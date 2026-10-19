@@ -1747,3 +1747,31 @@ html[dir="rtl"] .language-picker { direction:ltr; }
 
 .ts-loop-context { display:grid; gap:5px; padding:12px; border-inline-start:3px solid #347cbc; background:#edf5fa; overflow-wrap:anywhere; }
 .ts-loop-context span { color:#4b6577; font-size:14px; }
+/* Compact final verification and evidence-led case findings. */
+.ts-service-check { border:1px solid #c8d7e1; border-radius:10px; background:#f5f8fa; color:#244c67; }
+.ts-service-check > summary { padding:13px 14px; cursor:pointer; min-height:48px; font-size:14px; }
+.ts-service-check > summary > span { display:inline-grid; gap:5px; width:calc(100% - 24px); vertical-align:top; }
+.ts-service-check summary small { font-size:12px; font-weight:400; line-height:1.4; color:#526f83; }
+.ts-service-body { padding:0 14px 14px; font-size:13px; line-height:1.5; }
+.ts-service-body > p:first-child { margin-top:0; }
+.ts-service-body .ts-result-buttons button { flex:1; }
+.ts-service-check > summary:focus-visible,.ts-finding-details > summary:focus-visible { outline:3px solid #347cbc; outline-offset:2px; border-radius:6px; }
+.ts-advice .ts-evidence-pair { margin:10px 0; gap:8px; }
+.ts-advice .ts-evidence-pair > div { padding:9px 10px; gap:3px; }
+.ts-advice .ts-evidence-path { padding:0; margin:10px 0; gap:8px; direction:ltr; }
+.ts-advice .ts-evidence-path > span { padding:9px 10px; }
+html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
+.ts-suspect-area > span { color:#834215; border-color:#dba675; background:#fff0e4; }
+.ts-finding-evidence { line-height:1.5; margin:10px 0; }
+.ts-causes { margin:12px 0; font-size:12px; color:#73501d; }
+.ts-causes > b { font-size:12px; }
+.ts-causes ul { display:flex; flex-wrap:wrap; gap:6px; padding:0; margin:7px 0 0; list-style:none; }
+.ts-causes li { padding:6px 8px; border:1px solid #e1cba6; border-radius:5px; background:#fff9ef; line-height:1.4; }
+.ts-advice .ts-next { border:1px solid #c2d7e5; border-radius:8px; padding:12px; margin-top:12px; background:#f0f6fa; }
+.ts-advice .ts-next p { line-height:1.5; }
+.ts-advice .ts-next-button { width:100%; margin-top:10px; }
+.ts-advice .ts-comparison-options { margin-top:10px; }
+.ts-advice .ts-comparison-options button { flex:1; }
+.ts-finding-details { border-top:1px solid #dce5ea; margin-top:14px; font-size:12px; color:#526f83; line-height:1.5; }
+.ts-finding-details summary { min-height:44px; padding:12px 0; cursor:pointer; }
+.ts-finding-details p { margin:0 0 10px; }
