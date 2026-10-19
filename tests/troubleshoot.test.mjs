@@ -40,7 +40,7 @@ test('real observations require a prepared test and isolate only the evidence-su
   assert.equal(assessment(s).from,1);
   assert.equal(assessment(s).to,2);
   s = record(s,2,'seen','vfl');
-  assert.equal(assessment(s).tone,'trace');
+  assert.equal(assessment(s).tone,'suspect');
   assert.equal(assessment(s).lastPass,1);
   assert.match(assessment(s).why,/does not prove acceptable IR loss/);
   s = record(s,2,'wrong','vfl');
@@ -173,10 +173,10 @@ test('VFL source stays on the LC leg while the viewing point moves through multi
   assert.equal(changeCase(s,{type:'record',result:'dark'}),s);
   s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'dark'});
   assert.deepEqual(s.traces,{'1:tx':'seen','0>2:tx':'dark'});
-  assert.deepEqual([assessment(s).from,assessment(s).to],[0,2]);
+  assert.deepEqual([assessment(s).from,assessment(s).to],[1,2]);
   s=changeCase(s,{type:'trace',from:1,to:2});
   assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','vfl','unplugged']);
-  assert.equal(assessment(s).tone,'neutral');
+  assert.equal(assessment(s).tone,'suspect'); // Earlier route failure remains visible.
 });
 
 test('VFL can start at a passive and trace backward, while invalid routes and normalization remain safe',()=> {

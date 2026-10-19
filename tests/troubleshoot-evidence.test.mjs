@@ -1,0 +1,90 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createCase,changeCase,assessment,nextCheckActions,caseHistory,caseStatus,restoreCaseHistory} from '../troubleshoot-state.mjs';
+const apply=(s,...actions)=>actions.reduce(changeCase,s);
+const observe=(s,result)=>apply(s,{type:'ready',value:true},{type:'record',result});
+const trace=(s,from,to,strand,result)=>observe(apply(s,{type:'trace',from,to},{type:'strand',value:strand}),result);
+
+test('A/B findings persist across selection and branch from the incoming head to the cassette',()=>{
+  let s=trace(createCase(),0,1,'tx','seen');
+  assert.equal(assessment(s).check.strand,'rx');
+  s=trace(s,0,1,'rx','dark');
+  s=changeCase(s,{type:'strand',value:'tx'});
+  assert.match(assessment(s).title,/Strand B is dark/);
+  assert.deepEqual(assessment(s).pair.map(r=>r.result),['seen','dark']);
+  const before=s.history.length;
+  s=apply(s,...nextCheckActions(s));
+  assert.equal(s.strand,'rx');
+  assert.equal(s.patches[1].rear,false);
+  assert.equal(s.history.length,before,'positioning a test never measures it');
+  assert.equal(s.traces['1:rx'],'dark','CAS observation survives opening its incoming head');
+  s=observe(s,'seen');
+  assert.match(assessment(s).title,/MMC \/ CAS connection/);
+  assert.deepEqual([assessment(s).from,assessment(s).to],[1,1]);
+  s=apply(s,...nextCheckActions(s));
+  assert.equal(s.patches[1].rear,true);
+  s=observe(s,'seen');
+  assert.equal(assessment(s).tone,'trace');
+  assert.match(assessment(s).title,/Both strands have visible continuity/);
+  assert.equal(assessment(s).check.to,2,'through-CAS pair success supersedes an incomplete head-only check');
+  assert.notEqual(assessment(s).complete,true);
+  const different=trace(createCase(),0,1,'tx','wrong');
+  assert.match(assessment(different).next,/FIM/);
+  const collision=trace(trace(createCase(),0,1,'tx','seen'),0,1,'rx','swapped');
+  assert.match(assessment(collision).title,/conflict/);
+  const swapped=trace(trace(createCase(),0,1,'tx','swapped'),0,1,'rx','swapped');
+  assert.match(assessment(swapped).title,/documented strand mapping/);
+  const bothDark=trace(trace(createCase(),0,1,'tx','dark'),0,1,'rx','dark');
+  assert.match(assessment(bothDark).title,/Both strands are dark/);
+});
+
+test('last light and first dark bracket only a consistent source, strand and direction',()=>{
+  for(const [from,near,far,outgoing] of [[0,1,2,'front'],[2,1,0,'rear']]) {
+    let s=trace(createCase(),from,near,'rx','seen');
+    s=changeCase(s,{type:'patch',point:near,side:outgoing,connected:true});
+    s=trace(s,from,far,'rx','dark');
+    assert.equal(Object.keys(s.traces).length,2,'connecting onward keeps the upstream observation');
+    assert.deepEqual([assessment(s).from,assessment(s).to],[Math.min(near,far),Math.max(near,far)]);
+    s=changeCase(s,{type:'normalize'});
+    assert.equal(assessment(s).tone,'suspect','removing VFL does not hide unresolved evidence');
+  }
+  const unrelated=trace(trace(createCase(),0,1,'rx','seen'),2,0,'rx','dark');
+  assert.deepEqual([assessment(unrelated).from,assessment(unrelated).to],[0,2]);
+  const otherStrand=trace(trace(createCase(),0,1,'tx','seen'),0,2,'rx','dark');
+  assert.deepEqual([assessment(otherStrand).from,assessment(otherStrand).to],[0,2]);
+  const conflict=trace(trace(createCase(),0,1,'tx','dark'),0,2,'tx','seen');
+  assert.match(assessment(conflict).title,/location results need a recheck/);
+  let weak=observe(apply(createCase(),{type:'select',point:1},{type:'tool',tool:'loop'}),'weak');
+  weak=trace(weak,0,1,'tx','seen');
+  assert.match(assessment(weak).title,/failed loop/);
+  assert.equal(assessment(weak).tone,'suspect');
+});
+
+test('repair rounds preserve history, restore safely, and require explicit restored-link verification',()=>{
+  let s=trace(createCase(),0,1,'rx','dark');
+  assert.equal(caseStatus(s).stage,2);
+  const removed=changeCase(s,{type:'remove'});
+  assert.match(caseStatus(removed).label,/Issue found/);
+  assert.match(assessment(removed).caution,/Unresolved finding/);
+  s=changeCase(s,{type:'retest'});
+  assert.equal(s.round,2);
+  assert.deepEqual(s.traces,{});
+  assert.equal(caseHistory(s)[0].current,false);
+  assert.match(caseStatus(s).label,/Retest/);
+  s=observe(s,'seen');
+  assert.deepEqual(caseHistory(s).map(e=>e.current),[false,true]);
+  const restored=restoreCaseHistory(structuredClone(s),JSON.parse(JSON.stringify(s)));
+  assert.deepEqual(caseHistory(restored),caseHistory(s));
+  assert.equal(changeCase(s,{type:'service',value:'good'}).service,'unknown');
+  s=changeCase(s,{type:'normalize'});
+  assert.notEqual(assessment(s).complete,true);
+  s=changeCase(s,{type:'service',value:'good'});
+  assert.equal(assessment(s).complete,true);
+  assert.equal(caseStatus(s).label,'Link verified');
+  s=changeCase(s,{type:'place',kind:'lc',point:0});
+  assert.notEqual(assessment(s).complete,true);
+  const changed=changeCase(s,{type:'port',point:1,value:25});
+  assert.equal(caseHistory(changed).filter(e=>e.current).length,0);
+  assert.equal(changed.history.length,2);
+  assert.equal(changeCase(createCase(),{type:'service',value:'good'}).service,'unknown');
+});

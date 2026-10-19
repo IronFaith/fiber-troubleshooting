@@ -54,5 +54,6 @@ test('patching a different numbered port preserves the FIM target and invalidate
   assert.deepEqual(normalized.loops,{0:'pass',1:'pass'});
   s=changeCase(s,{type:'patch',point:2,side:'front',connected:true});
   assert.equal(vflEndpoint(s).closed,true);
-  assert.deepEqual(observe(s).traces,{});
+  assert.deepEqual(observe(s).traces,s.traces); // Closed endpoint rejects a new record but keeps the earlier observation.
+  assert.equal(s.traces['0>2:tx'],'seen');
 });

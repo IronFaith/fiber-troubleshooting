@@ -1,6 +1,6 @@
 import {cassetteFront} from './loop-visuals.mjs?v=3';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop} from './troubleshoot-state.mjs?v=8';
+import {assessment,pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop} from './troubleshoot-state.mjs?v=9';
 
 // At the observation cassette, open the onward connection, not the MMC
 // carrying light from the source. The selected port is the viewing face.

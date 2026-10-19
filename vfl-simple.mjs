@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey} from './troubleshoot-state.mjs?v=8';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=9';
+import {patchAt,traceFrom,traceKey} from './troubleshoot-state.mjs?v=9';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=10';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
@@ -68,15 +68,8 @@ function pairChecks(s,point) {
     const base=traceKey({...s,selected:point,strand}).replace(/:head$/,'');
     return {strand,head:s.traces[base+':head'],port:s.traces[base]};
   });
-  const summary=(result,strand)=>!result?'—':result==='seen'?`Light at ${letter(strand)}`:result==='swapped'?`Light at ${letter(strand==='tx'?'rx':'tx')}`:result==='dark'?'No light':'Other port';
-  const selected=rows.find(r=>r.strand===s.strand);
-  let hint='Switch A / B to compare the two strands. Unplug the MMC to check before the CAS connection.';
-  if(selected.head==='seen'&&selected.port==='dark') hint='Light reaches the loose head but is missing through the CAS. Check seating, dirt, the MMC ferrule and the CAS connection.';
-  else if(selected.head==='dark')hint='No light at the loose head: check the VFL / adapter, LC end, fiber and MMC head. This alone does not prove which part is bad.';
-  else if(selected.head==='swapped'||selected.port==='swapped')hint='Light appears on the other channel. Compare both strands with the cable’s documented polarity / channel map.';
-  else if(selected.head==='seen'&&selected.port==='seen')hint='Light was seen before and through this connection on this strand. This checks continuity; optical loss still needs its own test.';
-  const table=rows.some(r=>r.head||r.port)?`<table class="vfl-checks"><caption>Your checks · CAS ${point}</caption><thead><tr><th scope="col">VFL on</th><th scope="col">Loose MMC</th><th scope="col">Through CAS</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${letter(r.strand)}</th><td>${summary(r.head,r.strand)}</td><td>${summary(r.port,r.strand)}</td></tr>`).join('')}</tbody></table>`:'';
-  return table+`<p class="vfl-hint">${hint}</p>`;
+  const summary=(result,strand)=>!result?'Not checked':result==='seen'?`Light at ${letter(strand)}`:result==='swapped'?`Light at ${letter(strand==='tx'?'rx':'tx')}`:result==='dark'?'No light':'Other port';
+  return `<table class="vfl-checks"><caption>Your checks · CAS ${point} · from ${traceFrom(s)===0?'LC legs':`CAS ${traceFrom(s)}`}</caption><thead><tr><th scope="col">VFL on</th><th scope="col">Loose MMC</th><th scope="col">Through CAS</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${letter(r.strand)}</th><td class="${r.head==='dark'?'issue':''}">${summary(r.head,r.strand)}</td><td class="${r.port==='dark'?'issue':''}">${summary(r.port,r.strand)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 export function simpleVfl(s,paused) {
@@ -85,19 +78,20 @@ export function simpleVfl(s,paused) {
   const destination=point?light.kind==='head'?`loose MMC head at CAS ${point}`:`CAS ${point} · Port ${patch.port}`:'loose LC end';
   const select=(field,title,items,current)=>`<label>${title}<select data-field="${field}">${items.map(([v,t])=>`<option value="${v}" ${Number(current)===v?'selected':''}>${t}</option>`).join('')}</select></label>`;
   const points=Array.from({length:s.reach+1},(_,p)=>[p,p?`CAS ${p}`:'LC legs']);
-  const status=light.mode==='expected'?'Expected light · illustration':light.mode==='simulation'?'Simulated fault · illustration':'Your recorded observation';
+  const status=light.mode==='expected'?'Expected path · no result recorded':light.mode==='simulation'?'Simulated fault · illustration':'Your recorded observation';
   const obsLabels={seen:'Same channel',swapped:'Other channel',dark:'No light',wrong:'Different port'};
   const next=point+(forward?1:-1);
   const path=Array.from({length:Math.abs(point-from)+1},(_,i)=>from+i*(forward?1:-1)).map(p=>p?`CAS ${p}`:`LC ${letter(s.strand)}`).join(' → ');
   return `<section class="vfl-simple" aria-label="VFL strand check">
     <div class="vfl-simple-top"><div><h2>Follow the red light</h2><p>Tap an LC leg. Plug or unplug the MMC.</p></div><button type="button" data-action="motion" class="motion-toggle">${paused?'Play arrows':'Pause arrows'}</button></div>
-    <div class="vfl-simple-route">${select('vfl-from','From',points.filter(([p])=>p!==s.selected),from)}${select('vfl-to','Check at',points.filter(([p])=>p!==from),s.selected)}${point?select('vfl-patch-port','Port',Array.from({length:32},(_,i)=>[i+1,i+1]),patch.port):''}</div>
+    <div class="vfl-simple-route">${select('vfl-from','From',points.filter(([p])=>p!==s.selected),from)}${select('vfl-to','Check at',points.filter(([p])=>p!==from),s.selected)}${point?select('vfl-patch-port','Patched port',Array.from({length:32},(_,i)=>[i+1,i+1]),patch.port):''}</div>
+    ${point?`<p class="vfl-hint">FIM destination: CAS ${point} · Port ${s.ports[point-1]}</p>`:''}
     <div class="vfl-strands" role="group" aria-label="Choose VFL strand">${['tx','rx'].map(strand=>`<button type="button" data-vfl-strand="${strand}" aria-pressed="${s.strand===strand}"><b>${from===0?'LC':'Strand'} ${letter(strand)}</b><small>${from===0?strand==='tx'?'Normally TX':'Normally RX':'Trace this strand'}</small></button>`).join('')}</div>
     <div class="vfl-view ${paused?'light-paused':''}"><p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${obsLabels[light.result]}`:''}</p>${Math.abs(point-from)>1?`<p class="vfl-path">Path: ${path}</p>`:''}${diagram(s,false)}${diagram(s,true)}</div>
     <div class="vfl-connect-actions">${point?`<button type="button" ${patchAction(point,incoming,!patch[incoming],patch.port)}>${patch[incoming]?'Unplug MMC':'Plug MMC in'}</button>${next>=0&&next<=s.reach&&next!==from?`<button type="button" data-action="continue-trace">Connect onward → ${next?`CAS ${next}`:'LC legs'}</button>`:''}`:''}</div>
     ${light.blocked?`<p class="vfl-hint">Light exits at the open connection at CAS ${point}, before your selected destination.</p>`:''}
     <div class="vfl-observe" aria-labelledby="test-title"><h3 id="test-title" tabindex="-1">${s.simulated?'Save the simulated check':`What do you see at the ${destination}?`}</h3>
-      ${light.closed?'<p>Unplug the onward connection to check this port.</p><button type="button" data-action="open-vfl-end">Unplug onward MMC</button>':s.simulated?'<button type="button" data-action="run">Record this check</button>':`<div class="vfl-observe-buttons"><button type="button" data-action="result-${s.strand==='tx'?'seen':'swapped'}" aria-pressed="${light.result===(s.strand==='tx'?'seen':'swapped')}">Light at A</button><button type="button" data-action="result-${s.strand==='rx'?'seen':'swapped'}" aria-pressed="${light.result===(s.strand==='rx'?'seen':'swapped')}">Light at B</button><button type="button" data-action="result-dark" aria-pressed="${light.result==='dark'}">No light</button></div><p>Optional: record the real result. The initial glow only shows the expected path.</p>`}
+      ${light.closed?'<p>Unplug the onward connection to check this port.</p><button type="button" data-action="open-vfl-end">Unplug onward MMC</button>':s.simulated?'<button type="button" data-action="run">Record this check</button>':`<div class="vfl-observe-buttons"><button type="button" data-action="result-${s.strand==='tx'?'seen':'swapped'}" aria-pressed="${light.result===(s.strand==='tx'?'seen':'swapped')}">Light at A</button><button type="button" data-action="result-${s.strand==='rx'?'seen':'swapped'}" aria-pressed="${light.result===(s.strand==='rx'?'seen':'swapped')}">Light at B</button><button type="button" data-action="result-dark" aria-pressed="${light.result==='dark'}">No light</button><button type="button" data-action="result-wrong" aria-pressed="${light.result==='wrong'}">Different port</button></div><p>Record the real observation to get your next check. The initial glow is only an illustration.</p>`}
     </div>
     ${point?pairChecks(s,point):''}
     <p class="vfl-hint"><a href="./learn.html#polarity-checks">Learn polarity: see TX / RX and trace both strands →</a></p>

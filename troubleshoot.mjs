@@ -1,8 +1,8 @@
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop} from './troubleshoot-state.mjs?v=8';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=9';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions} from './troubleshoot-state.mjs?v=9';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=10';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=5';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=2';
-import {simpleVfl} from './vfl-simple.mjs?v=2';
+import {simpleVfl} from './vfl-simple.mjs?v=3';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -62,12 +62,15 @@ function restore(raw,simulated) {
     }
   }
   if(s.tool==='link' && Array.isArray(raw.disconnected)) s.disconnected=[...new Set(raw.disconnected.filter(p=>Number.isInteger(p)&&p>=0&&p<=s.reach))];
+  s=restoreCaseHistory(s,raw);
+  s.ready=raw.ready===true && Boolean(s.tool==='loop'?s.loops[s.selected]:s.tool==='vfl'&&!traceStop(s)?.blocked&&!traceStop(s)?.closed&&s.traces[traceKey(s)]);
   return changeCase(s,{type:'service',value:raw.service});
 }
 try {
   const saved=JSON.parse(sessionStorage.getItem(key));
   if(saved) {
     cases={actual:restore(saved.actual,false),simulation:restore(saved.simulation,true)};
+    if(['actual','simulation','guided'].includes(saved.view)) view=saved.view;
   }
 } catch { /* A fresh case is usable without storage. */ }
 function save() { try {sessionStorage.setItem(key,JSON.stringify({...cases,view}));} catch { /* Optional. */ } }
@@ -147,9 +150,9 @@ function controls(s) {
   const hasResults=Object.keys(s.loops).length+Object.keys(s.traces).length>0;
   const result=tool==='loop'?s.loops[point]:s.traces[traceKey(s)];
   if(tool==='link' && s.disconnected?.length) return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">Reconnect the service path</h2><p class="ts-tool-caption">The tool is off. The highlighted LC legs or MMC heads are still unplugged.</p>${button('normalize','Normalize','class="ts-primary"')}<p class="ts-note">Reconnects the illustration and keeps recorded tests. Confirm the real connections before checking health.</p></section>`;
-  if(tool==='link') return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">${s.loops[s.reach]==='pass'?'Check the restored link':hasResults?'Choose the next test':'Place your first test'}</h2>
-    ${s.loops[s.reach]==='pass'&&!s.simulated?`<p class="ts-tool-caption">Remove the loop, restore the mapped connections, then check required local readings and link status. Is the link working now?</p><div class="ts-result-buttons">${button('service-good','Yes · link working',`aria-pressed="${s.service==='good'}"`)}${button('service-bad','No · still a problem',`aria-pressed="${s.service==='bad'}"`)}</div>`:
-      hasResults?'<p class="ts-tool-caption">Place a tool for your next check. Earlier observations stay on the path and in Recorded tests.</p>':`<p class="ts-tool-caption">Drag LC onto the optic to start. If you already have a test set up, place that tool at its matching point.</p>`}</section>`;
+  if(tool==='link') return `<section class="ts-control-card" aria-labelledby="test-title"><h2 id="test-title" tabindex="-1">${canVerifyService(s)?'Check the restored link':hasResults?'Choose the next test':'Place your first test'}</h2>
+    ${canVerifyService(s)?`<p class="ts-tool-caption">Remove test tools, confirm the real mapped connections, then check required local readings and link status. Is the link working now?</p><div class="ts-result-buttons">${button('service-good','Yes · link working',`aria-pressed="${s.service==='good'}"`)}${button('service-bad','No · still a problem',`aria-pressed="${s.service==='bad'}"`)}</div>`:
+      hasResults?'<p class="ts-tool-caption">Place a tool for your next check. Earlier observations stay on the path and in Case history.</p>':`<p class="ts-tool-caption">Drag LC onto the optic to start. If you already have a test set up, place that tool at its matching point.</p>`}</section>`;
   const labels=tool==='loop'?{pass:'Yes · passes',dark:'No · no return light',weak:'Light returns, but weak'}:traceLabels;
   return `<section class="ts-control-card" aria-labelledby="test-title"><div class="ts-section-top"><div><p class="ts-test-location">${tool==='vfl'?'VFL':point===0?'LC loopback':'MMC loopback'} · ${tool==='vfl'?traceName(s):pointName(point)}</p><h2 id="test-title" tabindex="-1">${tool==='loop'?'Does the loop pass?':`What did you see at ${fiberPointName(point)}?`}</h2></div>${button('link','Remove tool','class="ts-remove"')}</div>
     <div class="ts-fields">${tool==='vfl'&&traceFrom(s)>0?select('vfl-source-port',`CAS ${traceFrom(s)} source port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[traceFrom(s)-1]):''}${point?select('port',`CAS ${point} ${tool==='vfl'?'expected':'mapped'} port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[point-1]):''}</div>
@@ -159,30 +162,51 @@ function controls(s) {
     <div class="ts-result-buttons">${s.simulated?button('run','Run this test','class="ts-primary"'):Object.entries(labels).map(([value,label])=>button(`result-${value}`,label,`aria-pressed="${result===value}" ${tool==='vfl'&&!s.ready?'disabled':''}`)).join('')}</div>
     ${result?`<p class="ts-recorded">${s.simulated?'Simulated':'You recorded'}: <b>${tool==='loop'?loopLabels[result]:traceLabels[result]}</b></p>`:'<p class="ts-note">Placing the tool does not record a pass.</p>'}</section>`;
 }
+function caseBar(s) {
+  const status=caseStatus(s);
+  return `<section class="ts-case-bar" aria-label="Case progress"><div><b>${s.simulated?'Practice · ':''}${status.label}</b><span>${status.count} current ${status.count===1?'check':'checks'} · Round ${s.round}</span></div><ol>${['Set up','Test','Isolate','Verify'].map((label,i)=>`<li class="${i===status.stage?'active':i<status.stage?'done':''}" ${i===status.stage?'aria-current="step"':''}><span>${i+1}</span>${label}</li>`).join('')}</ol></section>`;
+}
 function advice(s) {
   const a=assessment(s);
-  const pending=s.tool==='loop'&&!s.loops[s.selected] || s.tool==='vfl'&&!s.traces[traceKey(s)];
-  if(pending&&!traceStop(s)?.blocked&&!traceStop(s)?.closed) return `<section class="ts-advice" aria-labelledby="finding-title"><h2 id="finding-title">Waiting for your result</h2><p>${s.tool==='loop'?s.selected===0?'This test checks the optic with the external fiber bypassed.':`This loop includes the optic and its fiber path to CAS ${s.selected}.`:`This trace checks one isolated strand along ${traceName(s)}.${traceStop(s)?.kind==='head'?' It ends at the loose MMC head, before the cassette.':''}`}</p>${a.lastPass>=0?`<p class="ts-note">✓ Last passing loop: ${pointName(a.lastPass)}. The next section remains unverified.</p>`:''}</section>`;
-  return `<section class="ts-advice ${a.tone}" aria-labelledby="finding-title"><p class="ts-eyebrow">What your ${s.simulated?'simulated ':''}tests tell us</p><h2 id="finding-title">${a.title}</h2>
-    <p>${a.why}</p><div class="ts-next"><b>Next check</b><p>${a.next}</p></div>
-    ${a.suggestion&&!pending?button('next',a.suggestion.tool==='loop'?`Next: ${a.suggestion.point?'MMC':'LC'} loop at ${pointName(a.suggestion.point)}`:a.suggestion.tool==='vfl'?`Trace ${spanName(a.suggestion.point)} with VFL`:'Normalize','class="ts-next-button"'):''}
-    ${a.tone==='suspect'&&s.tool!=='vfl'&&a.from!==0?'<p class="ts-note">Possible causes: contamination, seating, misport, ferrule damage, broken / bent fiber, polarity or a splice. Test results narrow the location; they do not identify a cause by themselves.</p>':''}
+  const pending=s.tool!=='link'&&(!s.ready || (s.tool==='loop'?!s.loops[s.selected]:!s.traces[traceKey(s)]));
+  const hasEvidence=Object.keys(s.loops).length+Object.keys(s.traces).length>0;
+  const waiting=pending&&!hasEvidence&&!traceStop(s)?.blocked&&!traceStop(s)?.closed;
+  const title=waiting?'Ready for your first result':a.title;
+  const why=waiting?(s.tool==='loop'?'Compare TX and returning RX with the optic’s limits.':'The red glow illustrates the expected path. Record what you actually see on the selected strand.'):a.why;
+  const nextLabel=a.check?.label??(a.suggestion?.tool==='loop'?`Next: ${a.suggestion.point?'MMC':'LC'} loop at ${pointName(a.suggestion.point)}`:a.suggestion?.tool==='vfl'?`Trace ${spanName(a.suggestion.point)} with VFL`:'Normalize');
+  return `<section class="ts-advice ${waiting?'':a.tone}" aria-labelledby="finding-title"><p class="ts-eyebrow">${s.simulated?'Simulated findings':'Case findings'}${a.route?` · ${escape(a.route)}`:''}</p><h2 id="finding-title" tabindex="-1">${title}</h2>
+    ${a.pair?`<div class="ts-evidence-pair" aria-label="Recorded strand comparison">${a.pair.map(r=>`<div class="${r.result==='dark'||r.result==='wrong'?'issue':r.result?'recorded':'untested'}"><b>VFL on ${r.strand}</b><span>${r.label}</span></div>`).join('')}</div>`:''}
+    ${a.evidencePath?`<div class="ts-evidence-path" aria-label="Section to investigate"><span>${a.evidencePath[0]}</span><b aria-hidden="true">→</b><span>${a.evidencePath[1]}</span></div>`:''}
+    <p>${why}</p>${a.caution?`<p class="ts-caution">${a.caution}</p>`:''}
+    ${waiting?'':`<div class="ts-next"><b>${a.complete?'Verified by your confirmation':'Next check'}</b><p>${a.next}</p></div>
+    ${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}
+    ${a.branches?`<div class="ts-check-branches" aria-label="How the next result guides you">${a.branches.map(([condition,meaning])=>`<div><b>↳ ${condition}</b><span>${meaning}</span></div>`).join('')}</div>`:''}`}
+    ${pending&&hasEvidence?'<p class="ts-note">Current setup: waiting for a new result. Earlier findings stay visible.</p>':''}
+    ${a.otherIssues?`<p class="ts-note">${a.otherIssues} other recorded ${a.otherIssues===1?'issue':'issues'} remain in this case.</p>`:''}
+    ${!a.complete&&hasEvidence?'<p class="ts-note">Untested strands, onward fiber and the remote device remain unverified.</p>':''}
   </section>`;
 }
+function historyLabel(e) {
+  if(e.kind==='loop') return `Loop · ${pointName(Number(e.key))}${Number(e.key)>0&&e.ports?.[Number(e.key)-1]?` · port ${e.ports[Number(e.key)-1]}`:''}`;
+  const r=parseTraceKey(e.key);
+  return `VFL ${fiberPointName(r.from)} → ${fiberPointName(r.to)}${r.head?' · loose head':''}${e.port?` · port ${e.port}`:''} · strand ${r.strand==='tx'?'A':'B'}`;
+}
+function historyResult(e) {
+  if(e.kind==='loop') return loopLabels[e.result];
+  const strand=parseTraceKey(e.key).strand;
+  return e.result==='seen'?`Light at ${strand==='tx'?'A':'B'}`:e.result==='swapped'?`Light at ${strand==='tx'?'B':'A'}`:traceLabels[e.result];
+}
 function results(s) {
-  const loops=Object.entries(s.loops).map(([p,result])=>button(`review-loop-${p}`,`${pointName(Number(p))} <b>${loopLabels[result]}</b>`,`class="ts-log-entry ${result}"`));
-  const traces=Object.entries(s.traces).map(([id,result])=>{
-    const {from,to,strand,head}=parseTraceKey(id);
-    const label=head&&result==='seen'?'Light at loose head':result==='seen'&&to&&patchAt(s,to).port!==s.ports[to-1]?`Light at patched port ${patchAt(s,to).port}`:traceLabels[result];
-    return button(`review-vfl-${from}-${to}-${strand}${head?'-head':''}`,`VFL · ${fiberPointName(from)} → ${fiberPointName(to)}${head?' loose MMC head':''} · ${strand.toUpperCase()} strand <b>${label}</b>`,'class="ts-log-entry"');
-  });
-  return `<section class="ts-log" aria-label="Recorded tests"><div class="ts-section-top"><h3>${s.simulated?'Simulated':'Recorded'} tests</h3><div class="ts-small-actions">${button('undo','Undo',undo[view].length?'':'disabled')}${button('copy','Copy findings')}${button('reset','New case')}</div></div>
-    ${loops.length+traces.length?`<div class="ts-log-list">${[...loops,...traces].join('')}</div>`:'<p class="ts-note">No tests recorded yet. Moving a loop or VFL does not mark a section as good.</p>'}
-    <p class="ts-note">Saved in this browser tab. Changing the path or mapped ports clears test results. After a repair, start a new case and retest.</p><div id="ts-copy-fallback"></div></section>`;
+  const history=caseHistory(s).reverse();
+  const reviewAction=e=>{if(e.kind==='loop')return `review-loop-${e.key}`;const r=parseTraceKey(e.key);return `review-vfl-${r.from}-${r.to}-${r.strand}${r.head?'-head':''}`;};
+  const entries=history.map(e=>`<li class="ts-history-entry ${e.current?'current':'earlier'}"><span class="ts-history-state">${e.current?'Current':'Earlier'} · round ${e.round}</span><span>${e.current?button(reviewAction(e),escape(historyLabel(e)),'class="ts-history-review"'):escape(historyLabel(e))}</span><b>${historyResult(e)}</b></li>`).join('');
+  return `<section class="ts-log" aria-label="Recorded tests"><div class="ts-section-top"><h3>${s.simulated?'Practice':'Case'} history</h3><div class="ts-small-actions">${button('undo','Undo',undo[view].length?'':'disabled')}${button('retest','Made a change · retest',history.length?'':'disabled')}${button('copy','Copy findings')}${button('reset','New case')}</div></div>
+    ${history.length?`<ol class="ts-history-list">${entries}</ol>`:'<p class="ts-note">No tests recorded. Place a tool, then enter the result you observed.</p>'}
+    <p class="ts-note">Saved in this browser tab · up to 100 checks. Retest keeps earlier checks and starts fresh findings.</p><div id="ts-copy-fallback"></div></section>`;
 }
 function mobileActions(s) {
-  const a=assessment(s), recorded=s.tool==='loop'&&s.loops[s.selected];
-  const action=s.tool==='vfl'||s.tool==='loop'&&!recorded?'test-result':s.tool==='link'&&s.disconnected?.length?'normalize':a.suggestion?'next':'findings';
+  const a=assessment(s), recorded=s.tool==='loop'?s.loops[s.selected]:s.tool==='vfl'?s.traces[traceKey(s)]:null;
+  const action=s.tool!=='link'&&(!recorded||!s.ready)?'test-result':s.tool==='link'&&s.disconnected?.length?'normalize':recorded?'findings':a.check||a.suggestion?'next':'findings';
   const label=action==='test-result'?'Record result':action==='normalize'?'Normalize':action==='next'?'Next check':'See findings';
   const context=s.tool==='vfl'?`VFL · check ${fiberPointName(s.selected)}`:s.tool==='loop'?`${pointName(s.selected)} · ${recorded?loopLabels[recorded]:'loop placed'}`:'Choose a test, then record what you find';
   return `<nav class="ts-mobile-actions" aria-label="Current test actions"><span>${context}</span><div>${button('view-test','View path')}${button(action,label,'class="ts-mobile-primary"')}</div></nav>`;
@@ -201,10 +225,10 @@ function render(preservePosition=false) {
   if(view==='guided') return;
   const s=cases[view];
   if(s.tool==='vfl') {
-    host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${results(s)}${mobileActions(s)}`;
+    host.innerHTML=`${setup(s)}${caseBar(s)}${readings(s)}${tray(s)}${simpleVfl(s,paused)}${advice(s)}${results(s)}${mobileActions(s)}`;
     return;
   }
-  host.innerHTML=`${setup(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normal patching · health not confirmed':`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
+  host.innerHTML=`${setup(s)}${caseBar(s)}${readings(s)}${tray(s)}<div class="ts-live-grid"><section class="ts-map-card" aria-label="Visual test path"><div class="ts-section-top"><div><h2>Your test path</h2><p class="ts-note">${s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normal patching · health not confirmed':`Loop at ${pointName(s.selected)} · ${s.loops[s.selected]?loopLabels[s.loops[s.selected]]:'waiting for your result'}`}</p></div>${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
     ${mobilePoints(s)}<div class="ts-map ${paused?'light-paused':''}" tabindex="0" aria-label="Fiber diagram; scroll horizontally to see the full path">${workbenchDiagram(s)}</div>
     <div class="ts-legend"><span>↔ Scroll to follow the path</span><span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span><span>Dashed: unverified / bypassed</span></div>
     </section>
@@ -215,6 +239,10 @@ function render(preservePosition=false) {
   if(preservePosition&&host.querySelector('.ts-patch-scroll'))host.querySelector('.ts-patch-scroll').scrollLeft=patchScroll;
 }
 
+function showFindings() {
+  host.querySelector('.ts-advice')?.scrollIntoView({block:'start',behavior:'instant'});
+  host.querySelector('#finding-title')?.focus({preventScroll:true});
+}
 function centerMap(focusPoint) {
   const s=cases[view],map=host.querySelector('.ts-map');
   if(!map) return;
@@ -240,7 +268,7 @@ host.addEventListener('change',event=>{
   if(field==='patch-port') {patchConnection({type:'patch',point:Number(event.target.dataset.patchPoint),side:event.target.dataset.patchSide,connected:true,port:Number(value)});host.querySelector('[data-field="patch-port"]')?.focus({preventScroll:true});return;}
   const action=field==='vfl-from'?{type:'trace',from:value,to:s.selected}:field==='vfl-to'?{type:'trace',from:traceFrom(s),to:value}:field==='vfl-source-port'?{type:'port',point:traceFrom(s),value}:field==='ready'?{type:'ready',value:event.target.checked}:field==='point'?{type:'select',point:value}:
     ['tx','rx'].includes(field)?{type:'health',signal:field,value}:field.startsWith('fault-')?{type:'fault',value:{[field.slice(6)]:value}}:{type:field,value};
-  update([action],['count','reach','port','vfl-source-port'].includes(field)?'Path updated. Previous test results cleared.':['vfl-from','vfl-to'].includes(field)?'Trace route updated. Confirm this setup before recording a result.':'');
+  update([action],['count','reach','port','vfl-source-port'].includes(field)?'Path updated. Earlier checks kept in history; current findings cleared.':['vfl-from','vfl-to'].includes(field)?'Trace route updated. Confirm this setup before recording a result.':'');
   if(['vfl-from','vfl-to'].includes(field)) centerMap(Number(value));
   host.querySelector(`[data-field="${field}"]`)?.focus({preventScroll:true});
 });
@@ -287,7 +315,7 @@ host.addEventListener('click',async event=>{
     target?.scrollIntoView({block:'start',behavior:'instant'});
     return;
   }
-  if(action==='findings') {host.querySelector('.ts-advice, .vfl-observe')?.scrollIntoView({block:'start',behavior:'instant'});return;}
+  if(action==='findings') {showFindings();return;}
   if(action==='setup') {setupOpen=!setupOpen;render();return;}
   if(action==='normalize') {normalizeSetup();return;}
   if(action==='check-opening') {update([{type:'trace',from:traceFrom(s),to:traceStop(s).point}],'Check the open end here, then enter your observation.');centerMap();return;}
@@ -306,29 +334,27 @@ host.addEventListener('click',async event=>{
     const text=[s.simulated?'SIMULATED FIBER CASE':'FIBER OBSERVATIONS — entered manually',`Reach: ${pointName(s.reach)}; ${s.count} passives on path`,
       `Mapped ports: ${s.ports.slice(0,s.count).map((p,i)=>`CAS ${i+1} / ${p}`).join(', ')}`,
       ...(!s.simulated?[`Starting local TX: ${statusLabels[s.tx]}; RX: ${s.rx==='good'?'Within optic limits':statusLabels[s.rx]}`]:[`Fault: ${faults[s.fault.kind]}; section ${s.fault.at}`]),
-      ...Object.entries(s.loops).map(([p,r])=>`Loop at ${pointName(Number(p))}: ${loopLabels[r]}`),
-      ...Object.entries(s.traces).map(([id,r])=>{const {from,to,strand,head}=parseTraceKey(id);return `VFL ${fiberPointName(from)} → ${fiberPointName(to)}${head?' loose MMC head':''} / ${strand.toUpperCase()}: ${head&&r==='seen'?'Light at loose head':r==='seen'&&to&&patchAt(s,to).port!==s.ports[to-1]?`Light at patched port ${patchAt(s,to).port}`:traceLabels[r]}`;}),
+      `Case: ${caseStatus(s).label}; round ${s.round}`,
+      ...caseHistory(s).filter(e=>e.current).map(e=>`CURRENT: ${historyLabel(e)} — ${historyResult(e)}`),
       ...Object.entries(s.patches??{}).map(([point,p])=>`Diagram CAS ${point}: port ${p.port}; rear ${patchAt(s,Number(point)).rear?'connected':'unplugged'}, front ${patchAt(s,Number(point)).front?'connected':'unplugged'}`),
       ...(!s.simulated&&s.service!=='unknown'?[`Restored link: ${s.service==='good'?'Required local readings and link normal':'Still has a problem'}`]:[]),
+      ...caseHistory(s).filter(e=>!e.current).map(e=>`EARLIER round ${e.round}: ${historyLabel(e)} — ${historyResult(e)}`),
       a.title,a.why,`Next: ${a.next}`,'Remote and untested lanes remain unverified.'].join('\n');
     try {await navigator.clipboard.writeText(text);target.textContent='Copied';}
     catch {const area=document.createElement('textarea');area.value=text;area.readOnly=true;area.setAttribute('aria-label','Findings to copy');host.querySelector('#ts-copy-fallback').replaceChildren(area);area.select();}
     return;
   }
   if(action==='undo') {if(undo[view].length){cases[view]=undo[view].pop();save();render();}}
+  else if(action==='retest') {update([{type:'retest'}],'Retest started. Earlier checks kept; enter fresh results after your change.');host.querySelector('#test-title')?.focus({preventScroll:true});}
   else if(action==='reset') {undo[view].push(s);cases[view]=createCase(s.simulated);save();render();}
   else if(['loop','vfl','link'].includes(action)) update([{type:'tool',tool:action}]);
   else if(action==='run') update([...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record'}],'Simulated test recorded.');
   else if(action.startsWith('service-')) update([{type:'service',value:action.slice(8)}],'Restored link observation recorded.');
   else if(action.startsWith('result-')) update([...(s.tool==='vfl'&&traceStop(s).blocked?[{type:'trace',from:traceFrom(s),to:traceStop(s).point}]:[]),{type:'ready',value:true},{type:'record',result:action.slice(7)}],'Observation recorded.');
-  else if(action==='next') {const next=assessment(s).suggestion;if(next){if(next.tool==='link')normalizeSetup();else placeTool(next.tool==='vfl'?'vfl':next.point?'mmc':'lc',next.point);}}
+  else if(action==='next') {const actions=nextCheckActions(s),next=assessment(s).suggestion;if(actions.length){update(actions,'Next check set up in the diagram. Match the real setup, then record your result.');host.querySelector('.vfl-observe')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('#test-title')?.focus({preventScroll:true});return;}if(next){if(next.tool==='link')normalizeSetup();else placeTool(next.tool==='vfl'?'vfl':next.point?'mmc':'lc',next.point);}}
   else if(action.startsWith('review-vfl-')) {const [,,from,to,strand,head]=action.split('-');const review=[{type:'trace',from,to},{type:'strand',value:strand}];update(review);if(Boolean(head)!==(traceStop(cases[view])?.kind==='head'))announce('The connections changed. Set up this recorded test again before rechecking.');}
   else if(action.startsWith('review-loop-')) update([{type:'select',point:action.slice(12)},{type:'tool',tool:'loop'}]);
-  if(s.tool==='vfl' && (action.startsWith('result-') || action==='run')) {
-    centerMap();
-    centerPatch();
-    host.querySelector('.vfl-view')?.scrollIntoView({block:'start',behavior:'instant'});
-  }
+  if(action.startsWith('result-') || action==='run' || action.startsWith('service-')) {showFindings();return;}
   host.querySelector(`[data-action="${action}"]`)?.focus({preventScroll:true});
 });
 render();
