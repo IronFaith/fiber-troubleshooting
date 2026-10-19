@@ -9,6 +9,19 @@ const storage=()=>{
 };
 const initial=()=>({round:0,ids:drawRoundIds(0),attempt:startAttempt(),index:0,retry:false,roundAnswers:{},firstScore:0,draftChoices:[],countEvent:{id:'11111111-1111-4111-8111-111111111111',kind:'exam',at:1234}});
 
+test('a connected case resumes the same evidence step with earlier answers intact',()=>{
+  const saved=storage(), ids=drawRoundIds(4), state={...initial(),round:4,ids,index:2,attempt:startAttempt(ids)};
+  state.attempt=recordAnswer(state.attempt,ids[0],0);
+  state.attempt=recordAnswer(state.attempt,ids[1],questions.find(q=>q.id===ids[1]).correct);
+  state.roundAnswers={...state.attempt.answers};
+  saveExam(saved,state);
+  const resumed=loadExam(saved);
+  assert.deepEqual(resumed.attempt.answers,state.roundAnswers);
+  assert.equal(questions.find(q=>q.id===resumed.attempt.ids[resumed.index]).caseStep,3);
+  assert.equal(Object.hasOwn(resumed.attempt.answers,ids[2]),false);
+  assert.equal(recordAnswer(resumed.attempt,ids[0],1),resumed.attempt);
+});
+
 test('exam reload preserves submitted answers, locked feedback, pending selections and the counting identity',()=>{
   const saved=storage(), state=initial();
   state.attempt=recordAnswer(state.attempt,'no-light',1);

@@ -1,8 +1,8 @@
-import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=1';
+import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=2';
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=6';
+import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=7';
 
-import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=11';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=12';
 import {loadPatchBest} from './patch-practice-data.mjs?v=2';
 
 const host = document.querySelector('#quiz');
@@ -155,6 +155,7 @@ function renderQuestion() {
     <div class="quiz-progress-label"><span>${retry ? 'Practice' : 'Question'} ${index+1} of ${attempt.ids.length}</span><span>${levelTitle(selectedLevel)} · ${allTopics[question.topic]}</span></div>
     <progress class="quiz-progress" value="${index}" max="${attempt.ids.length}" aria-label="Questions answered"></progress>
     <h2 id="quiz-title" class="quiz-question" tabindex="-1">${question.prompt}</h2>
+    ${question.caseStudy ? '<p class="connected-case-note">One case · new observations at each step</p>' : ''}
     ${visual ? '<p class="q-tap-hint">Tap your answer in the picture. Keyboard: Tab, then Enter.</p>' : ''}
     <div id="quiz-scene">${quizVisual(question)}</div>
     <div id="quiz-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -282,7 +283,7 @@ function renderResults() {
       ${nextRound !== null ? '<button type="button" class="quiz-primary" id="quiz-continue">Try the next 5 questions</button>' : ''}
       ${progress.missed.length ? `<button type="button" class="${progress.passed ? 'quiz-secondary' : 'quiz-primary'}" id="quiz-retry">Retry ${progress.missed.length} missed ${progress.missed.length === 1 ? 'question' : 'questions'}</button>` : ''}
       <button type="button" class="${nextRound === null && progress.passed ? 'quiz-primary' : 'quiz-secondary'}" id="quiz-all">Choose another exam</button>
-      <button type="button" class="quiz-secondary" id="quiz-restart">${currentRound===0?'Retake this exam':'Retake with a fresh mix'}</button>
+      <button type="button" class="quiz-secondary" id="quiz-restart">${questions.find(q=>q.id===fullRoundIds[0])?.caseStudy?'Retake this case':currentRound===0?'Retake this exam':'Retake with a fresh mix'}</button>
       <a class="quiz-lesson-link" href="#progress">My progress</a>
       <a class="quiz-lesson-link" href="./learn.html">Stop here · back to lessons</a>
     </div>

@@ -1,5 +1,5 @@
 import {questionVariants} from './quiz-variants.mjs?v=1';
-import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=1';
+import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=2';
 export const topics = ['Spot the problem', 'Check the connection', 'Understand the light', 'Narrow down the problem'];
 export const roundDescriptions = [
   'Read the signs and consider what could cause them.',
@@ -164,8 +164,8 @@ export function drawRoundIds(topic, random = Math.random) {
     const pool=questions.filter(q=>q.id===id || q.variantOf===id);
     return pool[Math.min(pool.length-1,Math.floor(random()*pool.length))].id;
   });
-  // Keep the first beginner round gentle and in teaching order.
-  if(topic!==0) for(let i=ids.length-1;i>0;i--) {
+  // Preserve teaching order for the first beginner round and the connected case.
+  if(topic!==0 && !questions.find(q=>q.id===ids[0])?.caseStudy) for(let i=ids.length-1;i>0;i--) {
     const j=Math.min(i,Math.floor(random()*(i+1)));
     [ids[i],ids[j]]=[ids[j],ids[i]];
   }
@@ -175,7 +175,7 @@ export function validRoundIds(topic, ids) {
   const slots=roundQuestionIds(topic);
   if(!Number.isInteger(topic) || slots.length!==5 || !Array.isArray(ids) || ids.length!==5) return false;
   const selected=ids.map(id=>questions.find(q=>q.id===id&&q.topic===topic)).filter(Boolean);
-  return selected.length===5 && new Set(selected.map(q=>q.variantOf||q.id)).size===5 && selected.every(q=>slots.includes(q.variantOf||q.id));
+  return selected.length===5 && new Set(selected.map(q=>q.variantOf||q.id)).size===5 && selected.every(q=>slots.includes(q.variantOf||q.id)) && (!selected.some(q=>q.caseStudy) || ids.every((id,i)=>id===slots[i]));
 }
 
 export function skillsFor(topic, answers) {

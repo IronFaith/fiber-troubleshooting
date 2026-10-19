@@ -1,6 +1,7 @@
 import {cassetteFront, loopIllustration} from './loop-visuals.mjs?v=3';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {lightFlow} from './light-visuals.mjs?v=1';
+import {connectedCaseVisual} from './connected-case.mjs?v=1';
 import {caseVisual} from './exam-evidence.mjs?v=1';
 
 const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
@@ -114,7 +115,8 @@ function bendChange(answered) {
 export function quizVisual(question,{answered=false,choice=null}={}) {
   const kind=question.visual;
   let body='';
-  if(kind.startsWith('lldp-')) {
+  if(kind==='connected-case') body=connectedCaseVisual(question.caseStep,{answered});
+  else if(kind.startsWith('lldp-')) {
     const missing=kind==='lldp-missing', purpose=kind==='lldp-purpose';
     const device=kind==='lldp-device'?'Device C':'Device B';
     const port=kind==='lldp-port'?'7/5':'7/1';

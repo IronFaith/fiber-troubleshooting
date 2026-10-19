@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {questions,roundsForLevel,roundQuestionIds,startAttempt,recordAnswer,resultsFor,roundProgress,loadQuizProgress,saveQuizProgress,recordRoundProgress,apprenticeRank} from '../quiz-data.mjs';
+import {questions,roundsForLevel,roundQuestionIds,drawRoundIds,validRoundIds,startAttempt,recordAnswer,resultsFor,roundProgress,loadQuizProgress,saveQuizProgress,recordRoundProgress,apprenticeRank} from '../quiz-data.mjs';
 const complete=(topic,miss=0)=>{
   let attempt=startAttempt(roundQuestionIds(topic));
   for(const [index,id] of attempt.ids.entries()) {
@@ -10,6 +10,13 @@ const complete=(topic,miss=0)=>{
   }
   return attempt;
 };
+
+test('the connected case always advances in evidence order and rejects a reordered saved case',()=>{
+  const ordered=roundQuestionIds(4);
+  for(const random of [()=>0,()=>0.5,()=>0.999]) assert.deepEqual(drawRoundIds(4,random),ordered);
+  assert.equal(validRoundIds(4,ordered),true);
+  assert.equal(validRoundIds(4,[ordered[1],ordered[0],...ordered.slice(2)]),false);
+});
 
 test('level progress preserves existing beginner scores and levels independently of Intermediate',()=>{
   const values=new Map([['fiber-quiz-progress-v1',JSON.stringify({scores:[4,5,null,4]})]]);

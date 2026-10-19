@@ -2,7 +2,7 @@ export const chapters = [
   {key:'optics', title:'Optics, fiber & light', summary:'Know the parts → read the light → check the path', groups:[
     {title:'Know the parts', topics:[['optics','Optics, TX / RX & VFL'],['path','Fiber, LC & the passive path'],['trace-loops','From device data to light']]},
     {title:'Read the light', topics:[['readings','Power readings & allowed limits'],['polarity-checks','Polarity: connect TX to RX']]},
-    {title:'Check the path', topics:[['loopbacks','LC & MMC loopbacks'],['compare-loops','Use loops to narrow the problem'],['cleaning','Dirt, seating & tight bends'],['fault-evidence','Ferrules, fiber & splice faults'],['change-evidence','Make one change, then retest'],['vfl','Trace with red VFL light'],['test-evidence','Continuity versus optical loss']]}
+    {title:'Check the path', topics:[['loopbacks','LC & MMC loopbacks'],['compare-loops','Use loops to narrow the problem'],['cleaning','Dirt, seating & tight bends'],['fault-evidence','Ferrules, fiber & splice faults'],['change-evidence','Make one change, then retest'],['vfl','Trace with red VFL light'],['test-evidence','Continuity versus optical loss'],['connected-case','Work one case from both ends']]}
   ]},
   {key:'devices', title:'How devices communicate', summary:'Find the device → follow the route → confirm the endpoints', groups:[
     {title:'Locate & connect', topics:[['position','Read a rack position'],['ends','Local, remote & the chain of passives'],['viewpoint','See the same path from either end'],['ports','Confirm the device and ports'],['lldp-neighbors','LLDP: did I connect to the right device?']]}

@@ -3,12 +3,13 @@ import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
 import { rackIllustration } from './rack-visuals.mjs?v=7';
 import { mountCommunicationRoute } from './communication-route.mjs?v=2';
-import { mountCourse, learningEntry } from './course.mjs?v=8';
+import { mountCourse, learningEntry } from './course.mjs?v=9';
 import { mountReference, linkLessonTerms } from './reference.mjs?v=11';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=12';
 import { mountLightJourney } from './loop-lesson.mjs?v=5';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
+import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=1';
 import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=8';
 
 function el(tag, className = '', text = '') {
@@ -123,7 +124,7 @@ function renderLesson(lesson) {
       <div id="vfl-picture"></div>
       <p class="lesson-takeaway">VFL helps trace continuity and mapping. Measure optical loss separately with a source and power meter or loss test set.</p>
     </section>
-    ${vflReasoningLesson()}
+    ${vflReasoningLesson()}${connectedCaseLesson()}
     <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>`;
   setupLesson(lesson);
   example('ir-picture', 'Optic infrared light', [], opticPicture);
@@ -134,6 +135,7 @@ function renderLesson(lesson) {
   example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
   example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
   mountReasoningLessons(lesson);
+  mountConnectedCase(lesson);
   mountPolarityLesson(lesson);
 }
 

@@ -2,6 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {translate,translateLines,readLanguage,saveLanguage,languageKey,languageDirection,formatBidi} from '../locale.mjs';
 import {searchReference} from '../reference-data.mjs';
+import {connectedCaseQuestions} from '../connected-case.mjs';
+
+test('every connected-case question, answer and explanation is translated in all learner languages',()=>{
+  for(const language of ['es','fr','ar']) for(const source of ['Example RX limits: −3.00 to +3.00 dBm','Other required lanes','Not yet checked']) assert.notEqual(translate(source,language),source);
+  for(const language of ['es','fr','ar']) for(const question of connectedCaseQuestions) {
+    for(const source of [question.prompt,question.skill,question.explanation,question.reveal,...question.choices]) {
+      assert.notEqual(translate(source,language),source,`${language}: ${source}`);
+    }
+  }
+});
 
 test('Spanish translates findings and composed diagram labels while preserving technical values',()=>{
   assert.equal(translate('Loop · Local optic','es'),'Loopback · Óptico local');

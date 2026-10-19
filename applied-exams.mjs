@@ -1,50 +1,12 @@
-// All scenarios are fictional. Their reasoning is taught in the linked chapters.
+import {connectedCaseQuestions} from './connected-case.mjs?v=1';
+// Fictional cases taught in the linked chapters.
 export const appliedTopics = ['Read the evidence', 'Follow the whole connection'];
 export const appliedDescriptions = [
-  'Compare loop results, trace limits and changes before choosing the next check.',
+  'Work one case from both ends: loops, mapping, strands and final verification.',
   'Connect device data, direction, rack location, FIM and individual fiber paths.'
 ];
 export const appliedQuestions = [
-  {
-    id:'applied-loop-boundary',topic:4,visual:'case-loops',skill:'Bound the suspect section',
-    prompt:'The same pair is tested with valid loops. Nothing else changes. Which conclusion is supported?',
-    choices:['The failure is beyond CAS 2; both passives have now been tested.', 'The added CAS 1 → CAS 2 span and its connections need investigation; the exact cause is unknown.', 'The fiber between CAS 1 and CAS 2 is definitely broken.', 'The local optic must be intermittent because the CAS 2 loop failed.'],correct:1,
-    explanation:'Compare what each loop adds. Passing at CAS 1 and failing at CAS 2 narrows the next investigation to the added section, including its connections. A valid loop result does not name the failed part.',
-    choiceReasons:['The route beyond CAS 2 is outside all three loops.', 'This follows the boundary between the passed test and the failed test.', 'A break is one possibility; contamination, seating, mapping or loss can also fit.', 'There is no evidence of an intermittent optic in this unchanged, valid test sequence.'],
-    reveal:'Investigate the added section; do not invent a cause.',lesson:'learn.html#compare-loops'
-  },
-  {
-    id:'applied-vfl-loss',topic:4,visual:'case-loss',skill:'Separate continuity from loss',
-    prompt:'VFL reaches the expected port and strand. After the mapped link is restored, RX is still low. Which two conclusions fit?',
-    choices:['The visible trace supports continuity and mapping for the tested strand.', 'The trace proves the network-light loss is acceptable.', 'The reading is below the supplied limit; optical loss and connections still need investigation.', 'The passive must be failing to generate enough light.'],correct:[0,2],
-    explanation:'The red-light test and the RX reading answer different questions. −4.40 is below this example’s −3.00 minimum. Trace success cannot replace an appropriate optical loss test or the final link-health check.',
-    choiceReasons:['It reached the expected destination on the strand actually tested.', 'VFL does not measure acceptable loss at the service wavelength.', 'A correct route can still lose too much light. Inspect connections and measure loss as appropriate.', 'A passive passes light; it does not generate it.'],
-    reveal:'Correct destination + weak RX: continuity is not enough.',lesson:'learn.html#test-evidence'
-  },
-  {
-    id:'applied-polarity',topic:4,visual:'case-polarity',skill:'Know what a loop cannot prove',
-    prompt:'A valid MMC loop returns light within limits. After restoring service, RX is dark. End-to-end strand pairing has not been checked. What is the best next check?',
-    choices:['Repeat the identical successful loop; another pass will establish end-to-end polarity.', 'Replace the local optic because its service RX is dark.', 'Treat the remote device as failed because the passive loop passed.', 'Verify that each TX lands on the intended RX, using the FIM strand map.'],correct:3,
-    explanation:'The loop established a return path for the tested pair. It did not prove the restored TX-to-RX assignments. Verify the unchecked mapping before concluding which component failed.',
-    choiceReasons:['A repeat of the same loop does not test the missing end-to-end assignment.', 'Dark RX alone does not outweigh the passed loop or identify the cause.', 'The remote device was not included in the local loop.', 'This tests the remaining uncertainty. A pair can close a loop even with swapped end-to-end assignments.'],
-    reveal:'A return loop and correct service polarity are different checks.',lesson:'learn.html#polarity-checks'
-  },
-  {
-    id:'applied-channel-cause',topic:4,visual:'case-channel',skill:'Keep multiple causes open',
-    prompt:'The optic passes its direct loop. One mapped channel fails when the external path is added. Which conclusions are justified? Select all that apply.',
-    choices:['Other working channels prove the entire MMC head and every fiber are good.', 'Contamination or a damaged ferrule affecting this channel remains possible.', 'Damage, a bend, a poor splice or incorrect routing on this channel remains possible.', 'These results alone cannot distinguish the exact cause.'],correct:[1,2,3],
-    explanation:'A fanout contains separate paths. A problem can affect a single channel while others work. Inspect and test the affected path and interfaces; a dark channel is not a diagnosis of ferrule damage or a splice failure.',
-    choiceReasons:['Working channels do not verify an untested or failing channel.', 'The ferrule aligns fibers; contamination or damage can affect selected paths.', 'These faults can produce a similar symptom on the affected path.', 'The evidence narrows the investigation but does not identify a particular defect.'],
-    reveal:'Follow the failed channel; keep its possible causes open.',lesson:'learn.html#fault-evidence',relatedLessons:[['Chapter 3 · separate fanout paths','patching.html#mmc-fanout']]
-  },
-  {
-    id:'applied-change-log',topic:4,visual:'case-changes',skill:'Interpret improvements carefully',
-    prompt:'After two changes, RX is within the supplied range. Link status and the other required lanes are still unchecked. Which report is accurate?',
-    choices:['The observed RX improved; the exact contribution of each change is unknown. Check remaining lanes and link status.', 'The bend caused the issue because RX improved after the work.', 'The new reading proves the full link is repaired.', 'The connector was the cause because seating was the last action.'],correct:0,
-    explanation:'Relieving a bend and reseating before measuring prevents you from separating their effects. The new reading is useful evidence, but closing the issue requires the remaining readings and link check.',
-    choiceReasons:['It separates the observed improvement from assumptions and names the unfinished checks.', 'The reseat could also have contributed; neither action was measured on its own.', 'One reading does not cover all required lanes or confirm a working link.', 'Action order alone does not establish which change caused the improvement.'],
-    reveal:'Record what improved and what remains unverified.',lesson:'learn.html#change-evidence'
-  },
+  ...connectedCaseQuestions,
   {
     id:'applied-data-journey',topic:5,visual:'case-data',skill:'Explain data conversion',
     prompt:'Device A sends data to Device B through two cassettes. Which description correctly explains the conversions?',
