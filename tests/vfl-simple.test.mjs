@@ -33,7 +33,7 @@ test('light follows the first physical opening automatically, including the loos
   light=vflEndpoint(s,{preview:true});
   assert.equal(light.point,2);
   assert.equal(light.kind,'port');
-  s=changeCase(s,{type:'trace',from:2,to:0});
+  s=changeCase(s,{type:'trace',from:3,to:0});
   assert.equal(vflEndpoint(s,{preview:true})?.kind,'lc');
   assert.equal(vflEndpoint(s,{preview:true})?.emitting,true);
 });

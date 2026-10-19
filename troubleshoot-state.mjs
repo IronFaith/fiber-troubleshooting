@@ -27,7 +27,7 @@ export const loopSource = s => s.loopSide==='remote'?s.count+1:0;
 export const loopResults = (s,side=s.loopSide) => side==='remote'?(s.remoteLoops??{}):s.loops;
 export const loopResult = (s,point=s.selected) => loopResults(s)[point];
 export const loopEntries = s => ['local','remote'].flatMap(side=>Object.entries(loopResults(s,side)).map(([point,result])=>({point:Number(point),result,side})));
-export const traceFrom = state => state.vflFrom ?? Math.max(0,state.selected-1);
+export const traceFrom = state => state.vflFrom ?? 0;
 export const traceName = state => `${fiberPointName(traceFrom(state),state)} → ${fiberPointName(state.selected,state)}`;
 // Keep adjacent legacy keys so existing saved observations still belong to
 // exactly the same section. Longer / reverse routes include both endpoints.
@@ -38,7 +38,7 @@ export function parseTraceKey(key) {
   const to=Number(match[2]),from=match[1]===undefined?to-1:Number(match[1]);
   return from<0 || from===to ? null : {from,to,strand:match[3],...(match[4]?{head:true}:{})};
 }
-const validTrace = (state,from,to) => [from,to].every(p=>Number.isInteger(p)&&p>=0&&p<=state.reach) && from!==to;
+const validTrace = (state,from,to) => [from,to].every(p=>Number.isInteger(p)&&p>=0&&p<=state.reach) && isOptic(state,from) && from!==to;
 
 export function createCase(simulated = false) {
   return { simulated, endpointAccessVersion:1, started:false, round:1, history:[], identity:{}, comparisons:{}, count: 2, reach: 3, selected: 0, ports: [12,12,12,12], tool: 'link',
@@ -51,7 +51,7 @@ const lossResult = fault => ['dirty','loose','ferrule','bend','splice'].includes
 export function canPlaceTool(state,kind,point) {
   const p=Number(point);
   return Number.isInteger(p) && p>=0 && p<=state.reach &&
-    (kind==='lc' ? isOptic(state,p) : kind==='vfl' ? state.reach>=1 : kind==='mmc' && p>0&&p<=state.count);
+    (kind==='lc' ? isOptic(state,p) : kind==='vfl' ? state.reach>=1&&isOptic(state,p) : kind==='mmc' && p>0&&p<=state.count);
 }
 
 // Physical setup is separate from earlier optical observations.
@@ -145,14 +145,12 @@ export function changeCase(state, action) {
     }
     case 'place':
       if(!canPlaceTool(s,action.kind,action.point)) return state;
-      if(action.kind==='vfl' && action.atSource) {
+      if(action.kind==='vfl') {
         const from=Number(action.point);
         s.selected=s.tool==='vfl' && s.selected!==from?s.selected:from<s.reach?from+1:from-1;
         s.vflFrom=from;
       } else {
-        // Fiber-section shortcuts retain their original adjacent route.
-        s.selected=action.kind==='vfl'?Math.max(1,Number(action.point)):Number(action.point);
-        s.vflFrom=Math.max(0,s.selected-1);
+        s.selected=Number(action.point);
       }
       s.started=true; s.tool=action.kind==='vfl'?'vfl':'loop';
       if(s.tool==='loop'&&isOptic(s,s.selected)) s.loopSide=s.selected===0?'local':'remote';
@@ -202,12 +200,16 @@ export function changeCase(state, action) {
       break;
     }
     case 'select':
-      s.selected = bounded(action.point,0,s.reach); s.vflFrom=Math.max(0,s.selected-1); s.ready = false;
+      s.selected = bounded(action.point,0,s.reach); s.ready = false;
       if(isOptic(s,s.selected)) s.loopSide=s.selected===0?'local':'remote';
       if (s.selected === 0 && s.tool === 'vfl') s.tool = 'link';
       break;
     case 'tool':
-      if (!['link','loop','vfl'].includes(action.tool) || (action.tool === 'vfl' && s.selected === 0)) return state;
+      if (!['link','loop','vfl'].includes(action.tool) || (action.tool === 'vfl' && s.reach === 0)) return state;
+      if(action.tool==='vfl'&&!validTrace(s,traceFrom(s),s.selected)) {
+        s.vflFrom=loopSource(s)<=s.reach?loopSource(s):0;
+        if(s.selected===s.vflFrom)s.selected=s.vflFrom===0?1:s.count;
+      }
       s.tool = action.tool; s.ready = false; s.disconnected=[];
       if(s.tool!=='link') {s.started=true; s.service='unknown';} break;
     case 'service':
@@ -255,7 +257,7 @@ export function changeCase(state, action) {
         appendObservation(s,'loop',String(s.selected),result);
       } else {
         const stop=traceStop(s);
-        if(stop?.blocked||stop?.closed) return state;
+        if(!validTrace(s,traceFrom(s),s.selected)||stop?.blocked||stop?.closed) return state;
         const result = s.simulated ? simulatedTrace(s) : action.result;
         if (!Object.hasOwn(traceLabels,result)) return state;
         delete s.comparisons?.[traceKey(s)];
@@ -271,8 +273,7 @@ export function changeCase(state, action) {
   }
   for(const key of Object.keys(s.comparisons??{})) if(s.traces[key]!=='dark') delete s.comparisons[key];
   if (s.tool === 'vfl' && !validTrace(s,traceFrom(s),s.selected)) {
-    if(s.reach===0) s.tool='link';
-    else s.vflFrom=s.selected===0?1:s.selected-1;
+    s.tool='link'; s.ready=false;
   }
   return s;
 }
@@ -378,7 +379,7 @@ function basicAssessment(s) {
       'Check the FIM destination, leader / follower mapping and polarity. Correct the route, then trace again.', shared);
     if (trace === 'dark') return result('Trace this section more closely',
       `No visible light at ${fiberPointName(s.selected,s)} does not identify a break or its exact position along ${traceName(s)}.`,
-      `Verify the VFL and adapter. ${longRoute?'Choose an intermediate CAS to check a shorter route. ':''}Check nearby ports, seating, end faces, bends and damage; use a loss test / OTDR if needed.`, shared);
+      `Verify the VFL and LC connection. ${longRoute?'Choose an intermediate CAS to check a shorter route. ':''}Check nearby ports, seating, end faces, bends and damage; use a loss test / OTDR if needed.`, shared);
     return result('This strand has visible continuity',
       'Red light reached the expected destination. This does not prove acceptable IR loss or optic health.',
       'Trace the other strand, then remove the VFL, restore the mapped path and recheck RX against the optic limits.', shared);
@@ -416,6 +417,11 @@ export function caseHistory(s) {
     !history.slice(index+1).some(e=>e.kind===entry.kind&&e.key===entry.key&&(e.source??'local')===(entry.source??'local'))}));
 }
 export function restoreCaseHistory(s,raw) {
+  // Preserve old CAS-source observations as history, never reassign them to an LC source.
+  const priorTraces={...s.traces};
+  s.traces=Object.fromEntries(Object.entries(s.traces).filter(([key])=>{const r=parseTraceKey(key);return r&&validTrace(s,r.from,r.to);}));
+  if(s.tool==='vfl'&&!validTrace(s,traceFrom(s),s.selected)) {s.tool='link';s.ready=false;}
+
   s.identity=Object.fromEntries(Object.keys(identityLabels).filter(k=>typeof raw.identity?.[k]==='boolean').map(k=>[k,raw.identity[k]]));
   s.comparisons={};
   for(const [key,values] of Object.entries(raw.comparisons??{})) {
@@ -439,7 +445,7 @@ export function restoreCaseHistory(s,raw) {
       ...(Number.isInteger(e.port)&&e.port>=1&&e.port<=32?{port:e.port}:{})})):[];
   if(!s.history.length) {
     for(const {point,result,side} of loopEntries(s)) {appendObservation(s,'loop',String(point),result);s.history.at(-1).source=side;}
-    for(const [key,result] of Object.entries(s.traces)) appendObservation(s,'vfl',key,result);
+    for(const [key,result] of Object.entries(priorTraces)) appendObservation(s,'vfl',key,result);
   }
   s.started=Boolean(raw.started)||s.tool!=='link'||s.history.length>0;
   return s;
@@ -464,8 +470,8 @@ export function comparisonGuide(s,key) {
   const diagnostic=(step,next,extra={})=>({next,diagnostic:{key,step,options:Object.entries(comparisonLabels[step])},...extra});
   const terminal=(next,extra={})=>({next,diagnostic:{key,step:null,options:[]},...extra});
   if(c.source!=='pass') return diagnostic('source',
-    `Check the VFL on a known-good reference using the same adapter / launch channel used for ${letter}. Does the reference pass light?`,
-    c.source==='fail'?{comparisonFinding:'The reference is also dark. Resolve the VFL, adapter, launch lead or coupling before blaming the installed fiber.'}:{});
+    `Check the VFL on a known-good LC reference using the same LC connection used for ${letter}. Does the reference pass light?`,
+    c.source==='fail'?{comparisonFinding:'The reference is also dark. Check the VFL, LC connection and reference lead before blaming the installed fiber.'}:{});
   if(!identityConfirmed(s)) return terminal('Confirm the device / optic socket, follower-to-head serial, CAS ports and expected channel in “Match the physical path”. A working strand can still belong to the wrong fanout.',{needsIdentity:true,comparisonFinding:'The VFL reference passes. The intended fiber identity still needs confirmation.'});
   if(!c.inspection) return diagnostic('inspection',
     `Turn the VFL off and isolate from active gear. Inspect the mapped ${letter} fiber end faces with a compatible inspection probe. Clean and reinspect as needed; check seating and visible bends. Retest the original route before continuing.`,
@@ -473,12 +479,12 @@ export function comparisonGuide(s,key) {
   if(c.inspection==='damage') return terminal('Record which end / component shows damage. Replace or repair it using the approved procedure, then choose “Made a change · retest” and check both strands and optical readings.',
     {comparisonFinding:'Visible damage is a concrete finding. It may explain the dark strand; a post-repair test must confirm recovery.'});
   if(!c.substitute) return diagnostic('substitute',
-    r.head||isOptic(s,r.to)?`Compare one known-good compatible cable / fanout in place of the suspect assembly, keeping the same source, adapter and mapped ${letter} channel. Record the replacement result; the diagram still shows the original observations.`:
+    r.head||isOptic(s,r.to)?`Compare one known-good compatible cable / fanout in place of the suspect assembly, keeping the same VFL, LC attachment and mapped ${letter} channel. Record the replacement result; the diagram still shows the original observations.`:
     `Compare one known-good compatible mating lead / connection at CAS ${r.to}, keeping the source and mapped ${letter} channel unchanged. Record the comparison separately from the original path.`,
     {comparisonFinding:c.inspection==='clear'?'Clean end faces did not restore continuity. Compare one component at a time.':'End-face condition remains unknown. A compatible spare can still help narrow the assembly.'});
   if(c.substitute==='light') return terminal('The original assembly or its mating contact is implicated. Record the replaced part; use end-face inspection and loss testing to separate connector / ferrule contact from an internal fiber fault. Retest both strands after the actual repair.',
     {comparisonFinding:'The compatible replacement passes where the original did not. This supports an assembly / connection problem; it does not prove a damaged ferrule.'});
-  if(c.substitute==='dark') return terminal('Both assemblies were dark in this setup. Recheck the common adapter / channel, source-side connection and mapping. The original assembly is not cleared. Use a loss test and, where suitable, OTDR to locate an unresolved fault.',
+  if(c.substitute==='dark') return terminal('Both assemblies were dark in this setup. Recheck the VFL, LC attachment and channel mapping. The original assembly is not cleared. Use a loss test and, where suitable, OTDR to locate an unresolved fault.',
     {comparisonFinding:'Replacing that assembly did not restore visible continuity. Investigate what stayed common to both tests.'});
   return terminal('Keep this strand and its connections suspect. Use an optical loss test to quantify loss and a suitable OTDR to locate events, or hand off these recorded checks to someone with access / equipment.',
     {comparisonFinding:'No compatible comparison is available. The evidence does not yet distinguish the termination, bend, break or splice.'});
@@ -506,7 +512,7 @@ function traceAssessment(s) {
     if(a&&b&&output(a)&&output(a)===output(b)) {
       make(100,'These channel results conflict','Both input strands were recorded at the same output channel.',
         'Confirm A / B labels and test one strand at a time. Recheck the same setup before changing polarity.',
-        {check:traceCheck(a,'Recheck strand A'),branches:[['Separate outputs','Compare with the documented channel map.'],['Still the same output','Verify labels, adapter and test setup.']]});
+        {check:traceCheck(a,'Recheck strand A'),branches:[['Separate outputs','Compare with the documented channel map.'],['Still the same output','Verify labels, LC attachment and test setup.']]});
       continue;
     }
     const wrong=rows.find(r=>r.result==='wrong');
@@ -540,7 +546,7 @@ function traceAssessment(s) {
       const from=earlier?Math.min(earlier.to,dark.to):Math.min(dark.from,dark.to);
       const to=earlier?Math.max(earlier.to,dark.to):Math.max(dark.from,dark.to);
       if(!dark.head&&!isOptic(s,dark.to)&&!headPass) {
-        make(80,title,why,`Keep the VFL on ${letter}. Verify the VFL / adapter, then unplug the incoming MMC at CAS ${dark.to} and check its loose head.`,
+        make(80,title,why,`Keep the VFL on LC ${letter}. Verify its LC connection, then unplug the incoming MMC at CAS ${dark.to} and check its loose head for light.`,
           {from,to,...(earlier?{evidencePath:[`${fiberPointName(earlier.to,s)} · ${letter} light seen`,`${fiberPointName(dark.to,s)} · ${letter} dark`]}:{}),check:traceCheck({...dark,head:true},`Check loose MMC · strand ${letter}`),
             branches:[['Light at the head','Inspect seating, end faces and the CAS connection.'],['Head also dark','Work back toward the source; check fiber and earlier connections.']]});
       } else if(headPass) {
@@ -626,6 +632,7 @@ export function assessment(s) {
 export function nextCheckActions(s) {
   const check=assessment(s).check;
   if(!check) return [];
+  if(!validTrace(s,check.from,check.to)) return [];
   const actions=[{type:'trace',from:check.from,to:check.to},{type:'strand',value:check.strand}];
   const direction=Math.sign(check.to-check.from),incoming=direction>0?'rear':'front',outgoing=direction>0?'front':'rear';
   // A guided next check positions the diagram only. It never records a result.

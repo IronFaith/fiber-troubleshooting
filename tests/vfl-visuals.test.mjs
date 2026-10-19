@@ -25,9 +25,9 @@ test('unknown, dark and wrong-port results never show light at the expected cass
 });
 
 test('reverse traces use the other cassette face and Normalize removes the VFL indication', () => {
-  let s=changeCase(createCase(),{type:'trace',from:2,to:1});
+  let s=changeCase(createCase(),{type:'trace',from:3,to:1});
   assert.equal(vflEndpoint(s).face,'rear');
-  s=changeCase(s,{type:'trace',from:2,to:0});
+  s=changeCase(s,{type:'trace',from:3,to:0});
   assert.equal(vflEndpoint(s),null);
   s=changeCase(s,{type:'trace',from:0,to:1});
   s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'seen'});

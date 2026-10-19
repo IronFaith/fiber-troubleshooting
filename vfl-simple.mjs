@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey,isOptic,fiberPointName} from './troubleshoot-state.mjs?v=12';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=13';
+import {patchAt,traceFrom,traceKey,isOptic,fiberPointName} from './troubleshoot-state.mjs?v=13';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=14';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
@@ -83,13 +83,13 @@ export function simpleVfl(s,paused) {
   const status=light.mode==='expected'?'Expected path · no result recorded':light.mode==='simulation'?'Simulated fault · illustration':'Your recorded observation';
   const obsLabels={seen:'Same channel',swapped:'Other channel',dark:'No light',wrong:'Different port'};
   const next=point+(forward?1:-1);
-  const path=Array.from({length:Math.abs(point-from)+1},(_,i)=>from+i*(forward?1:-1)).map(p=>fiberPointName(p,s)).join(' → ');
+  const path=Array.from({length:Math.abs(point-from)+1},(_,i)=>from+i*(forward?1:-1)).map(p=>`<span>${fiberPointName(p,s)}</span>`).join(' → ');
   return `<section class="vfl-simple" aria-label="VFL strand check">
-    <div class="vfl-simple-top"><div><h2>Follow the red light</h2><p>Tap an LC leg. Plug or unplug the MMC.</p></div><button type="button" data-action="motion" class="motion-toggle">${paused?'Play arrows':'Pause arrows'}</button></div>
-    <div class="vfl-simple-route">${select('vfl-from','From',points.filter(([p])=>p!==s.selected),from)}${select('vfl-to','Check at',points.filter(([p])=>p!==from),s.selected)}${atCAS?select('vfl-patch-port','Patched port',Array.from({length:32},(_,i)=>[i+1,i+1]),patch.port):''}</div>
+    <div class="vfl-simple-top"><div><h2>Follow the red light</h2><p>VFL stays on the LC leg. Plug or unplug the MMC to check for light.</p></div><button type="button" data-action="motion" class="motion-toggle">${paused?'Play arrows':'Pause arrows'}</button></div>
+    <div class="vfl-simple-route">${select('vfl-from','VFL attached to',points.filter(([p])=>isOptic(s,p)&&p!==s.selected),from)}${select('vfl-to','Look for light at',points.filter(([p])=>p!==from),s.selected)}${atCAS?select('vfl-patch-port','Patched port',Array.from({length:32},(_,i)=>[i+1,i+1]),patch.port):''}</div>
     ${atCAS?`<p class="vfl-hint">FIM destination: CAS ${point} · Port ${s.ports[point-1]}</p>`:''}
     <div class="vfl-strands" role="group" aria-label="Choose VFL strand">${['tx','rx'].map(strand=>`<button type="button" data-vfl-strand="${strand}" aria-pressed="${s.strand===strand}"><b>${sourceLC?'LC':'Strand'} ${letter(strand)}</b><small>${sourceLC?(strand==='tx')===(from===0)?'Normally TX':'Normally RX':'Trace this strand'}</small></button>`).join('')}</div>
-    <div class="vfl-view ${paused?'light-paused':''}"><p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${obsLabels[light.result]}`:''}</p>${Math.abs(point-from)>1?`<p class="vfl-path">Path: ${path}</p>`:''}${diagram(s,false)}${diagram(s,true)}</div>
+    <div class="vfl-view ${paused?'light-paused':''}"><p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${obsLabels[light.result]}`:''}</p>${Math.abs(point-from)>1?`<p class="vfl-path"><span>Path:</span> ${path}</p>`:''}${diagram(s,false)}${diagram(s,true)}</div>
     <div class="vfl-connect-actions">${atCAS?`<button type="button" ${patchAction(point,incoming,!patch[incoming],patch.port)}>${patch[incoming]?'Unplug MMC':'Plug MMC in'}</button>${next>=0&&next<=s.reach&&next!==from?`<button type="button" data-action="continue-trace">Connect onward → ${fiberPointName(next,s)}</button>`:''}`:''}</div>
     ${light.blocked?`<p class="vfl-hint">Light exits at the open connection at CAS ${point}, before your selected destination.</p>`:''}
     <div class="vfl-observe" aria-labelledby="test-title"><h3 id="test-title" tabindex="-1">${s.simulated?'Save the simulated check':`What do you see at the ${destination}?`}</h3>
@@ -97,6 +97,6 @@ export function simpleVfl(s,paused) {
     </div>
     ${atCAS?pairChecks(s,point):''}
     <p class="vfl-hint"><a href="./learn.html#polarity-checks">Learn polarity: see TX / RX and trace both strands →</a></p>
-    <p class="vfl-fine">A / B illustrate one pair, not MMC pin numbers. Follow your actual channel map. Use isolated fiber and the matching VFL adapter; view light indirectly.</p>
+    <p class="vfl-fine">A / B illustrate one pair, not MMC pin numbers. Follow your actual channel map. Attach VFL only to disconnected LC legs; view light indirectly at the MMC or CAS.</p>
   </section>`;
 }

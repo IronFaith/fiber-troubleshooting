@@ -39,9 +39,9 @@ test('VFL coverage keeps strands, loose heads and suspect connections distinct f
   assert.equal(pathCoverage(s).spans[0].lanes.rx.status,'vfl','light reaches the head; the cassette connection is suspect');
   s=normal(trace(s,0,1,'rx','seen'));
   assert.equal(pathCoverage(s).points[1].issue,false);
-  const reverse=normal(trace(trace(createCase(),2,1,'rx','seen'),2,0,'rx','dark'));
-  assert.deepEqual(pathCoverage(reverse).spans.map(p=>[p.lanes.tx.status,p.lanes.rx.status]),[['unknown','suspect'],['unknown','vfl'],['unknown','unknown']]);
-  const reverseOptic=normal(trace(loop(createCase(),0,'pass'),1,0,'rx','dark'));
+  const reverse=normal(trace(trace(createCase(),3,1,'rx','seen'),3,0,'rx','dark'));
+  assert.deepEqual(pathCoverage(reverse).spans.map(p=>[p.lanes.tx.status,p.lanes.rx.status]),[['unknown','suspect'],['unknown','vfl'],['unknown','vfl']]);
+  const reverseOptic=normal(trace(loop(createCase(),0,'pass'),3,0,'rx','dark'));
   assert.equal(pathCoverage(reverseOptic).optic,'pass','VFL on disconnected fiber does not mark the optic as failed');
   assert.equal(pathCoverage(reverseOptic).points[0].issue,false);
   const mixed=normal(trace(loop(createCase(),1,'pass'),0,1,'rx','dark'));

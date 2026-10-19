@@ -6,7 +6,7 @@ const record=(s,result)=>apply(s,{type:'ready',value:true},{type:'record',result
 const mapped=s=>Object.keys(identityLabels).reduce((v,key)=>changeCase(v,{type:'identity',key,value:true}),s);
 const compare=(s,step,value,key='2>1:rx:head')=>changeCase(s,{type:'comparison',key,step,value});
 function splitPair() {
-  let s=apply(createCase(),{type:'trace',from:2,to:1},{type:'patch',point:1,side:'front',connected:false});
+  let s=apply(changeCase(createCase(),{type:'count',value:1}),{type:'trace',from:2,to:1},{type:'patch',point:1,side:'front',connected:false});
   s=record(s,'seen');
   return record(changeCase(s,{type:'strand',value:'rx'}),'dark');
 }
@@ -81,8 +81,8 @@ test('comparison outcomes remain scoped and stale evidence cannot clear a fault'
   assert.deepEqual(changed.comparisons,{});
   const unchecked=changeCase(prepared,{type:'identity',key:'channels',value:false});
   assert.deepEqual(unchecked.comparisons,{});
-  const other=record(apply(prepared,{type:'trace',from:1,to:2},{type:'strand',value:'rx'}),'dark');
-  assert.equal(comparisonGuide(other,'2:rx').diagnostic.step,'source','reverse direction needs its own reference check');
+  const other=record(apply(prepared,{type:'trace',from:0,to:1},{type:'strand',value:'rx'}),'dark');
+  assert.equal(comparisonGuide(other,'1:rx').diagnostic.step,'source','reverse direction needs its own reference check');
   const invalid=restoreCaseHistory(splitPair(),{comparisons:{'2>1:rx:head':{source:'made-up',substitute:'light'}},identity:{optic:'true'},history:[{kind:'comparison',key:'bad~source',result:'pass',round:1}]});
   assert.deepEqual(invalid.comparisons,{});
   assert.equal(identityConfirmed(invalid),false);

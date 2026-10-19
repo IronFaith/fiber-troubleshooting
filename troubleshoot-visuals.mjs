@@ -1,6 +1,6 @@
 import {cassetteFront} from './loop-visuals.mjs?v=3';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage,isOptic,loopSource,loopResult} from './troubleshoot-state.mjs?v=12';
+import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage,isOptic,loopSource,loopResult} from './troubleshoot-state.mjs?v=13';
 
 // At the observation cassette, open the onward connection, not the MMC
 // carrying light from the source. The selected port is the viewing face.
@@ -210,7 +210,7 @@ export function workbenchDiagram(s) {
   for (let i=1;i<=s.count+1;i++) {
     const cx=(centers[i-1]+centers[i])/2;
     const span=coverage.spans[i-1];
-    drawing += `<g class="ts-fiber-target" ${i<=s.reach?`data-span="${i}" role="button" tabindex="0" aria-label="VFL on fiber from ${pointName(i-1,s)} to ${pointName(i,s)}"`:''}><rect class="ts-fiber-hit" x="${cx-127}" y="382" width="254" height="87" rx="8"/><text class="ts-span-name" x="${cx}" y="401">${i===1?'LC leg → MMC head':i===s.count+1?`CAS ${i-1} → Remote LC legs`:`CAS ${i-1} → CAS ${i}`}</text>
+    drawing += `<g role="img" aria-label="Fiber section: ${pointName(i-1,s)} → ${pointName(i,s)}"><rect class="ts-fiber-summary" x="${cx-127}" y="382" width="254" height="87" rx="8"/><text class="ts-span-name" x="${cx}" y="401">${i===1?'LC leg → MMC head':i===s.count+1?`CAS ${i-1} → Remote LC legs`:`CAS ${i-1} → CAS ${i}`}</text>
       ${['tx','rx'].map((strand,index)=>`<rect class="ts-coverage-badge ${span.lanes[strand].status}" x="${cx-111}" y="${410+index*27}" width="222" height="24" rx="6"/><text class="ts-span-status" x="${cx}" y="${426+index*27}">${coverageLabel(span.lanes[strand],strand)}</text>`).join('')}</g>`;
   }
   if (s.simulated && s.fault.kind!=='none') {

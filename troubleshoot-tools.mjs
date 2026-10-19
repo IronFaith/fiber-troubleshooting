@@ -12,11 +12,11 @@ export function toolArt(kind) {
 export function mountToolDrag(host,{select,place,remove,valid,announce,getSelected,activate=select}) {
   let drag=null,ignoreClickUntil=0;
   function destination(x,y) {
-    const el=document.elementFromPoint(x,y)?.closest('[data-span],[data-point],.ts-tool-tray');
+    const el=document.elementFromPoint(x,y)?.closest('[data-point],.ts-tool-tray');
     if(!el || !host.contains(el)) return null;
     if(el.matches('.ts-tool-tray')) return {el,remove:true,valid:drag.mounted};
-    const point=Number(el.dataset.span??el.dataset.point);
-    return {el,point,atSource:!el.hasAttribute('data-span'),valid:(!el.hasAttribute('data-span') || drag.kind==='vfl') && valid(drag.kind,point)};
+    const point=Number(el.dataset.point);
+    return {el,point,atSource:true,valid:valid(drag.kind,point)};
   }
   function reset() {
     if(!drag) return;

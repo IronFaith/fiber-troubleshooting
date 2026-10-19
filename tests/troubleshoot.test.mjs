@@ -82,7 +82,7 @@ test('placing a dragged tool accepts only matching reachable hardware and never 
   s=place('mmc',1);
   assert.equal(s.selected,1);
   assert.deepEqual(s.loops,{0:'pass'});
-  s=place('vfl',2);
+  s=place('vfl',3);
   assert.equal(s.tool,'vfl');
   assert.deepEqual(s.traces,{});
   s=changeCase(s,{type:'reach',value:1});
@@ -140,8 +140,8 @@ test('the displayed connections follow the active LC, MMC and VFL setup', () => 
   assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','loop','plugged']);
   s=changeCase(s,{type:'place',kind:'vfl',point:0});
   assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['vfl','unplugged','plugged']);
-  s=changeCase(s,{type:'place',kind:'vfl',point:2});
-  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','vfl','unplugged']);
+  s=changeCase(s,{type:'place',kind:'vfl',point:3});
+  assert.deepEqual([0,1,2,3].map(p=>connectionAt(s,p)),['plugged','unplugged','plugged','vfl']);
 });
 
 test('removal leaves test connections open; normalization reconnects without claiming health or losing evidence', () => {
@@ -174,25 +174,25 @@ test('VFL source stays on the LC leg while the viewing point moves through multi
   s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'dark'});
   assert.deepEqual(s.traces,{'1:tx':'seen','0>2:tx':'dark'});
   assert.deepEqual([assessment(s).from,assessment(s).to],[1,2]);
-  s=changeCase(s,{type:'trace',from:1,to:2});
-  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','vfl','unplugged']);
+  s=changeCase(s,{type:'trace',from:3,to:2});
+  assert.deepEqual([0,1,2,3].map(p=>connectionAt(s,p)),['plugged','plugged','unplugged','vfl']);
   assert.equal(assessment(s).tone,'suspect'); // Earlier route failure remains visible.
 });
 
-test('VFL can start at a passive and trace backward, while invalid routes and normalization remain safe',()=> {
-  let s=changeCase(changeCase(createCase(),{type:'reach',value:2}),{type:'place',kind:'vfl',point:2,atSource:true});
-  assert.deepEqual([s.vflFrom,s.selected],[2,1]);
-  s=changeCase(s,{type:'trace',from:2,to:0});
-  assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['unplugged','plugged','vfl']);
-  assert.equal(changeCase(s,{type:'trace',from:2,to:2}),s);
-  assert.equal(changeCase(s,{type:'trace',from:0,to:3}),s);
+test('VFL can start at remote LC legs and trace backward, while invalid routes and normalization remain safe',()=> {
+  let s=changeCase(createCase(),{type:'place',kind:'vfl',point:3,atSource:true});
+  assert.deepEqual([s.vflFrom,s.selected],[3,2]);
+  s=changeCase(s,{type:'trace',from:3,to:0});
+  assert.deepEqual([0,1,2,3].map(p=>connectionAt(s,p)),['unplugged','plugged','plugged','vfl']);
+  assert.equal(changeCase(s,{type:'trace',from:3,to:3}),s);
+  assert.equal(changeCase(s,{type:'trace',from:0,to:4}),s);
   s=changeCase(changeCase(s,{type:'ready',value:true}),{type:'record',result:'seen'});
-  assert.deepEqual(s.traces,{'2>0:tx':'seen'});
+  assert.deepEqual(s.traces,{'3>0:tx':'seen'});
   s=changeCase(s,{type:'remove'});
-  assert.deepEqual(s.disconnected,[2,0]);
+  assert.deepEqual(s.disconnected,[3,0]);
   s=changeCase(s,{type:'normalize'});
   assert.deepEqual([0,1,2].map(p=>connectionAt(s,p)),['plugged','plugged','plugged']);
-  assert.deepEqual(s.traces,{'2>0:tx':'seen'});
+  assert.deepEqual(s.traces,{'3>0:tx':'seen'});
   assert.equal(s.service,'unknown');
 });
 
@@ -200,9 +200,9 @@ test('simulated VFL checks the selected route rather than only the last segment'
   let s=changeCase(createCase(true),{type:'fault',value:{kind:'break',at:1,strand:'tx'}});
   s=changeCase(s,{type:'trace',from:0,to:2});
   assert.equal(simulatedTrace(s),'dark');
-  s=changeCase(s,{type:'trace',from:2,to:0});
+  s=changeCase(s,{type:'trace',from:3,to:0});
   assert.equal(simulatedTrace(s),'dark');
-  s=changeCase(s,{type:'trace',from:1,to:2});
+  s=changeCase(s,{type:'trace',from:3,to:2});
   assert.equal(simulatedTrace(s),'seen');
   s=changeCase(s,{type:'trace',from:0,to:2});
   s=changeCase(s,{type:'strand',value:'rx'});

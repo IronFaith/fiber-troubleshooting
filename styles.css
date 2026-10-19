@@ -1164,7 +1164,7 @@ h3 { font-size:17px; line-height:1.3; margin:0; }
 .ts-tool-ghost svg { width:100%; height:100%; }
 .ts-drag-source { opacity:.55; }
 .ts-map [data-mounted-tool] { cursor:grab; touch-action:none; user-select:none; }
-.ts-fiber-hit { fill:#edf2f655; stroke:transparent; stroke-width:2; }
+.ts-fiber-hit,.ts-fiber-summary { fill:#edf2f655; stroke:transparent; stroke-width:2; }
 .ts-fiber-target[data-span] { cursor:pointer; }
 .ts-fiber-target:focus-visible { outline:none; }
 .ts-fiber-target:focus-visible .ts-fiber-hit { stroke:#245b91; }

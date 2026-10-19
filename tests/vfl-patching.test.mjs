@@ -22,7 +22,7 @@ test('unplugging the incoming MMC moves the observation to its loose head; recon
 });
 
 test('an open intermediate connector stops a forward or reverse trace and prevents claiming light beyond it',()=>{
-  for(const [from,to,side] of [[0,2,'front'],[2,0,'rear']]) {
+  for(const [from,to,side] of [[0,2,'front'],[3,0,'rear']]) {
     let s=apply(createCase(),{type:'trace',from,to},{type:'patch',point:1,side,connected:false});
     assert.equal(vflEndpoint(s).point,1);
     assert.equal(vflEndpoint(s).blocked,true);

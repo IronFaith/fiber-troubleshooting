@@ -39,7 +39,7 @@ test('A/B findings persist across selection and branch from the incoming head to
 });
 
 test('last light and first dark bracket only a consistent source, strand and direction',()=>{
-  for(const [from,near,far,outgoing] of [[0,1,2,'front'],[2,1,0,'rear']]) {
+  for(const [from,near,far,outgoing] of [[0,1,2,'front'],[3,2,1,'rear']]) {
     let s=trace(createCase(),from,near,'rx','seen');
     s=changeCase(s,{type:'patch',point:near,side:outgoing,connected:true});
     s=trace(s,from,far,'rx','dark');
@@ -48,8 +48,8 @@ test('last light and first dark bracket only a consistent source, strand and dir
     s=changeCase(s,{type:'normalize'});
     assert.equal(assessment(s).tone,'suspect','removing VFL does not hide unresolved evidence');
   }
-  const unrelated=trace(trace(createCase(),0,1,'rx','seen'),2,0,'rx','dark');
-  assert.deepEqual([assessment(unrelated).from,assessment(unrelated).to],[0,2]);
+  const unrelated=trace(trace(createCase(),0,1,'rx','seen'),3,0,'rx','dark');
+  assert.deepEqual([assessment(unrelated).from,assessment(unrelated).to],[0,3]);
   const otherStrand=trace(trace(createCase(),0,1,'tx','seen'),0,2,'rx','dark');
   assert.deepEqual([assessment(otherStrand).from,assessment(otherStrand).to],[0,2]);
   const conflict=trace(trace(createCase(),0,1,'tx','dark'),0,2,'tx','seen');

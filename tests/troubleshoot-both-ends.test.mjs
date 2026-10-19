@@ -36,10 +36,10 @@ test('VFL traces from either disconnected LC end preserve direction and independ
   s=trace(s,3,2,'rx','dark');
   assert.equal(assessment(s).tone,'suspect');
   assert.deepEqual(s.traces,{'3>2:tx':'seen','3>2:rx':'dark'});
-  s=trace(s,2,3,'rx','seen');
+  s=trace(s,0,3,'rx','seen');
   assert.equal(traceStop(s).kind,'lc');
   assert.equal(traceStop(s).point,3);
-  assert.equal(s.traces['3:rx'],'seen');
+  assert.equal(s.traces['0>3:rx'],'seen');
   s=changeCase(s,{type:'normalize'});
   assert.equal(pathCoverage(s).remoteOptic,'unknown','visible continuity does not prove the remote optic');
   assert.equal(Object.keys(s.traces).length,3);
