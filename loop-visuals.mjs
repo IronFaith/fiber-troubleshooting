@@ -20,16 +20,10 @@ export function cassetteFront({port = 12, inserted = false, patched = false, nam
       `<path class="cassette-opening" d="M${x-4} ${y+5} h8 v14 h-8z"/>`+
       `<path class="cassette-key" d="M${x-2} ${y+3} h4"/>`;
     if (selected && inserted) drawing +=
-      `<path class="loop-jacket" d="M${x-3} ${y+25} C${x-18} ${y+62} ${x+21} ${y+62} ${x+3} ${y+25}"/>`+
-      `<path class="loop-cord" d="M${x-3} ${y+25} C${x-18} ${y+62} ${x+21} ${y+62} ${x+3} ${y+25}"/>`+
-      `<rect class="hardware-plug" x="${x-5}" y="${y+4}" width="10" height="24" rx="2"/>`+
-      `<path class="hardware-grip" d="M${x-3} ${y+14} h6 m-6 4 h6 m-6 4 h6"/>`+
-      `<rect class="hardware-boot" x="${x-4}" y="${y+27}" width="8" height="8" rx="1"/>`;
+      `<g transform="translate(${x-24*.32} ${y+4+83*.32}) rotate(-90) scale(.32)">${mmcLoopback(0,0,{compact:true})}</g>`;
     if (selected && patched) drawing +=
-      `<path class="loop-jacket" d="M${x} ${y+26} V${y+59}"/><path class="loop-cord" d="M${x} ${y+26} V${y+59}"/>`+
-      `<rect class="hardware-plug" x="${x-5}" y="${y+4}" width="10" height="24" rx="2"/>`+
-      `<path class="hardware-grip" d="M${x-3} ${y+14} h6 m-6 4 h6 m-6 4 h6"/>`+
-      `<rect class="hardware-boot" x="${x-4}" y="${y+27}" width="8" height="8" rx="1"/>`;
+      `<path class="loop-jacket" d="M${x} ${y+28} V${y+59}"/><path class="loop-cord" d="M${x} ${y+28} V${y+59}"/>`+
+      `<g transform="translate(${x-24*.24} ${y+4+83*.24}) rotate(-90) scale(.24)">${mmcHead(0,0,false)}</g>`;
     drawing += '</g>';
   }
   return `<g class="hardware-art">${drawing}</g>`;
@@ -48,16 +42,51 @@ function lcPlug(x,y) {
     '<path class="hardware-grip" d="M5 9 V19 M10 9 V19 M15 9 V19"/></g>';
 }
 
-// Side view: a keyed head, its latch, grip, ferrule nose and cable boot.
+// Original schematic based on US Conec's MMC product photo: green housing,
+// black push-pull boot and recessed ferrule. No fiber count or pin map implied.
+// Keep the cable entry (-20,24) and mating tip (83,24) stable for existing scenes.
 export function mmcHead(x,y,label = true) {
-  return `<g transform="translate(${x} ${y})">
-    <rect class="hardware-boot" x="-20" y="15" width="24" height="18" rx="4"/>
-    <path class="hardware-plug" d="M0 4 H64 L73 10 V38 L64 44 H0 Z"/>
-    <path class="hardware-metal" d="M73 12 H83 V36 H73 Z"/>
-    <path class="hardware-latch" d="M28 0 H65 L72 7 H31 Z"/>
-    <path class="hardware-grip" d="M7 10 V38 M13 10 V38 M19 10 V38"/>
-    <path class="mmc-rail" d="M25 11 H67 M25 37 H67"/>
-    ${label ? text(46,29,'MMC','hardware-tiny hardware-center') : ''}</g>`;
+  return `<g class="mmc-connector" transform="translate(${x} ${y})" stroke-linejoin="round">
+    <path d="M-21 15 Q-24 24 -21 33 L-15 30 H26 V18 H-15 Z" fill="#303637" stroke="#172526" stroke-width="1.2"/>
+    <path d="M-17 24 H28" fill="none" stroke="#edd244" stroke-width="5"/>
+    ${[-12,-5,2,9,16].map(x=>`<path d="M${x} 17 v14" stroke="#1c2527" stroke-width="3.5"/><path d="M${x-1} 18 v4" stroke="#606969" stroke-width="1"/>`).join('')}
+    <path d="M23 15 H38 L44 11 H52 V38 H25 Q21 38 21 34 V19 Z" fill="#30383a" stroke="#172526" stroke-width="1.2"/>
+    <path d="M40 15 H76 L79 18 V36 H44 L40 33 Z" fill="#26b565" stroke="#10613c" stroke-width="1.2"/>
+    <path d="M43 17 H75 M44 18 V31" fill="none" stroke="#81e3a1" stroke-width="1.2"/>
+    <path d="M44 34 H76 V36 H44 Z" fill="#158449"/>
+    <path d="M79 19 H83 V33 H79 Z" fill="#bac4bd" stroke="#425650" stroke-width="1"/>
+    <path d="M82 20 V32" stroke="#5f7068" stroke-width="1.3"/>
+    <path d="M26 15 L34 7 H43 L48 11 H74 V15 H48 L43 12 H36 L32 16 Z" fill="#282f32" stroke="#172526" stroke-width="1.2"/>
+    <path d="M34 9 H42 L47 13 H71" fill="none" stroke="#5f696b" stroke-width="1"/>
+    <path d="M27 32 H37 M47 31 H55 L59 27 H74 V32" fill="none" stroke="#167847" stroke-width=".8"/>
+    ${label ? '<text x="60" y="25" text-anchor="middle" fill="#dbf6e4" font-family="Segoe UI,sans-serif" font-size="7" font-weight="700">MMC</text>' : ''}</g>`;
+}
+
+// One connector, one boot, and a jacketed fiber return loop, as in Sylex's
+// published MMC loopback photo. The compact drawing shortens the lead to fit
+// a cassette overview; neither view specifies internal fiber pairing.
+export function mmcLoopback(x=0,y=0,{compact=false,label=false}={}) {
+  const loop=compact?'M-48 24 C-96 24 -96 -16 -61 -16 C-28 -16 -25 24 -48 24':'M-64 24 C-137 24 -137 -30 -82 -30 C-30 -30 -26 24 -64 24';
+  const junction=compact?-48:-64;
+  return `<g class="mmc-loopback" transform="translate(${x} ${y})" stroke-linecap="round" stroke-linejoin="round">
+    <path d="${loop} M${junction} 24 H-20" fill="none" stroke="#a78a16" stroke-width="7"/>
+    <path d="${loop} M${junction} 24 H-20" fill="none" stroke="#f3d53f" stroke-width="4.8"/>
+    <path d="${loop}" fill="none" stroke="#fff29a" stroke-width="1" transform="translate(0 -1.2)"/>
+    <rect x="${junction-7}" y="19.5" width="14" height="9" rx="2.5" fill="#343b3d" stroke="#1e292b" stroke-width=".8"/>
+    <path d="M${junction-4} 21 H${junction+4}" stroke="#6c7474" stroke-width="1"/>
+    ${mmcHead(0,0,label)}</g>`;
+}
+
+export function mmcLoopbackConnection(name='CAS 1',port=12) {
+  return `<g class="hardware-art">
+    ${text(14,19,`${name} · Port ${port}`,'hardware-small')}
+    <rect class="hardware-metal" x="24" y="35" width="49" height="78" rx="4"/>
+    <circle class="cassette-screw" cx="32" cy="43" r="2"/><circle class="cassette-screw" cx="32" cy="105" r="2"/>
+    <path d="M58 48 H88 L94 55 V96 L88 102 H58 Z" fill="#4d9272" stroke="#225e43" stroke-width="1.5"/>
+    <path d="M85 57 H98 V91 H85 Z" fill="#1d392d" stroke="#98cdb3"/>
+    <g transform="translate(175 50) scale(-1 1)">${mmcLoopback()}</g>
+    ${text(228,123,'MMC loopback','hardware-center hardware-small')}
+  </g>`;
 }
 
 export function patchRouteIllustration() {
@@ -140,9 +169,9 @@ export function loopIllustration(kind = 'direct') {
       </g>`};
   }
 
-  const out = 'M65 278 H292 Q330 278 330 298';
-  const back = 'M330 298 Q330 318 292 318 H65';
-  const lightPath = `${out} Q330 318 292 318 H65`;
+  const out = 'M65 278 H100 Q112 278 120 290 L137 296 H322 C351 296 351 258 330 258';
+  const back = 'M330 258 C310 258 308 300 322 300 H137 L120 306 Q112 318 100 318 H65';
+  const lightPath = `${out} C310 258 308 300 322 300 H137 L120 306 Q112 318 100 318 H65`;
   return {height:382, label:'CAS 1 cassette with ports 1 through 16 on the top row and 17 through 32 on the bottom row. An MMC loopback is inserted at port 12. The enlarged side view shows the optic and fiber feeding the opposite side of that adapter; light turns around inside the loopback.',
     caption:'MMC loopback inserted · tests the optic and fiber to this port. One pair shown.', lightPath,
     drawing:`${cassetteFront({inserted:true})}<g class="hardware-art">
@@ -153,19 +182,15 @@ export function loopIllustration(kind = 'direct') {
       <rect class="hardware-metal" x="13" y="266" width="58" height="64" rx="4"/>
       <rect class="optic-opening" x="48" y="271" width="18" height="15" rx="2"/><rect class="optic-opening" x="48" y="310" width="18" height="15" rx="2"/>
       ${text(39,301,'Optic','hardware-small hardware-center')}
-      ${cable(lightPath)}
+      ${cable('M65 278 H100 Q112 278 120 290 L137 298 M65 318 H100 Q112 318 120 306 L137 298')}
       <g transform="translate(95 264) scale(-.75 1)">${lcPlug(0,0)}${lcPlug(0,40)}</g>
-      <path class="hardware-plug" d="M184 266 H211 L220 272 V324 L211 330 H184 Z"/>
-      <path class="hardware-grip" d="M191 272 V324 M197 272 V324 M203 272 V324"/>
-      <rect class="cassette-adapter" x="220" y="259" width="23" height="78" rx="2"/>
-      <path class="cassette-seam" d="M228 262 V334 M236 262 V334"/>
-      <path class="hardware-plug" d="M243 271 L249 266 H279 V330 H249 L243 325 Z"/>
-      <path class="hardware-latch" d="M247 264 H271 V270 H247 Z"/>
-      <path class="hardware-grip" d="M252 275 V321 M258 275 V321 M264 275 V321"/>
-      <rect class="hardware-boot" x="279" y="271" width="14" height="14" rx="3"/><rect class="hardware-boot" x="279" y="311" width="14" height="14" rx="3"/>
+      ${mmcHead(137,274)}
+      <rect class="cassette-adapter" x="220" y="276" width="23" height="43" rx="2"/>
+      <path class="cassette-seam" d="M228 279 V316 M236 279 V316"/>
+      <g transform="translate(293 274) scale(-.6 1)">${mmcLoopback(0,0,{compact:true})}</g>
       ${signal(out,back)}
       ${lightSource(65,278)}
-      <path class="hardware-tx-arrow" d="M137 274 l7 4 -7 4"/><path class="hardware-rx-arrow" d="M144 314 l-7 4 7 4"/>
+      <path class="hardware-tx-arrow" d="M99 274 l7 4 -7 4"/><path class="hardware-rx-arrow" d="M106 314 l-7 4 7 4"/>
       ${text(130,265,'TX starts here →','hardware-small hardware-center')}${text(130,340,'RX ← loop return','hardware-small hardware-center')}
       ${text(130,365,'LC + fiber','hardware-small hardware-center')}${text(200,353,'Head','hardware-small hardware-center')}
       ${text(231,367,'Adapter','hardware-tiny hardware-center')}${text(309,353,'Loopback','hardware-small hardware-center')}

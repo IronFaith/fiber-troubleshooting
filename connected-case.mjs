@@ -1,4 +1,4 @@
-import {cassetteFront} from './loop-visuals.mjs?v=3';
+import {cassetteFront} from './loop-visuals.mjs?v=4';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 
 // One supplied case, in chronological order. Answers never invent test results.

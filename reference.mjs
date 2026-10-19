@@ -1,7 +1,7 @@
 import {translate,getLanguage,formatBidi} from './locale.mjs?v=7';
 import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=11';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
-import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=3';
+import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=4';
 
 const text = (x,y,label) => `<text x="${x}" y="${y}" text-anchor="middle">${label}</text>`;
 const line = (x,y,end,color='#277bc2') => `<path d="M${x} ${y} H${end}" fill="none" stroke="${color}" stroke-width="5"/><path d="M${end-8} ${y-6} l8 6 -8 6" fill="none" stroke="${color}" stroke-width="3"/>`;

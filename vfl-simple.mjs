@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
 import {patchAt,traceFrom,traceKey,isOptic,fiberPointName} from './troubleshoot-state.mjs?v=13';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=14';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=15';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;

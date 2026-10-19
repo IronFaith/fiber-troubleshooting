@@ -1,5 +1,5 @@
-import {communicationRack} from './rack-visuals.mjs?v=7';
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=3';
+import {communicationRack} from './rack-visuals.mjs?v=8';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=4';
 import {lightFlow} from './light-visuals.mjs?v=1';
 
 const nodes=[

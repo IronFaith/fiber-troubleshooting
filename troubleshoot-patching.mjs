@@ -1,4 +1,4 @@
-import {mmcHead} from './loop-visuals.mjs?v=3';
+import {mmcHead} from './loop-visuals.mjs?v=4';
 
 // One pointer path for touch and mouse; every drag has a tap/keyboard equivalent.
 export function mountPatchDrag(host,commit,announce) {

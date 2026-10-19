@@ -1,9 +1,10 @@
 import {translateLines} from './locale.mjs?v=7';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,identityConfirmed,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=13';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=14';
-import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=6';
-import {mountPatchDrag} from './troubleshoot-patching.mjs?v=2';
-import {simpleVfl} from './vfl-simple.mjs?v=7';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=15';
+import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=7';
+import {mountPatchDrag} from './troubleshoot-patching.mjs?v=3';
+import {simpleVfl} from './vfl-simple.mjs?v=8';
+import {mmcLoopbackConnection} from './loop-visuals.mjs?v=4';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -182,6 +183,7 @@ function controls(s) {
   return `<section class="ts-control-card" aria-labelledby="test-title"><div class="ts-section-top"><div><p class="ts-test-location">${tool==='vfl'?'VFL':isOptic(s,point)?'LC loopback':'MMC loopback'} · ${tool==='vfl'?traceName(s):pointName(point,s)}</p><h2 id="test-title" tabindex="-1">${tool==='loop'?'Does the loop pass?':`What did you see at ${fiberPointName(point,s)}?`}</h2></div>${button('link','Remove tool','class="ts-remove"')}</div>
     <div class="ts-fields">${tool==='loop'&&!isOptic(s,point)&&s.reach===s.count+1?select('loop-side','Optic under test',[['local','Local optic'],['remote','Remote optic']],s.loopSide):''}${!isOptic(s,point)?select('port',`CAS ${point} ${tool==='vfl'?'expected':'mapped'} port`,Array.from({length:32},(_,i)=>[i+1,i+1]),s.ports[point-1]):''}</div>
     ${tool==='loop'?`<p class="ts-loop-context"><b>${isOptic(s,point)?`${pointName(point,s)} · TX → loop → RX`:`Light path: ${pointName(loopSource(s),s)} → ${pointName(point,s)} → ${pointName(loopSource(s),s)}`}</b><span>${isOptic(s,point)?'Direct loop · external fiber bypassed':`Loop faces ${pointName(loopSource(s),s)}. Read returning RX at that device.`}</span></p>`:''}
+    ${tool==='loop'&&!isOptic(s,point)?`<svg class="ts-loop-closeup" viewBox="0 0 360 140" role="img" aria-label="MMC loopback">${mmcLoopbackConnection(`CAS ${point}`,s.ports[point-1])}</svg>`:''}
     <p class="ts-tool-caption">${tool==='loop'?'Use the correct loop mapping and required attenuation. Check TX and returning RX against this optic’s limits.':`The VFL supplies red light at ${fiberPointName(traceFrom(s),s)}. Check the isolated fiber end at ${fiberPointName(point,s)}. ${traceFrom(s)===0||point===0?'The optic-side LC leg is unplugged; the optic itself is not part of this trace.':''}`}</p>
     ${tool==='vfl'?select('strand','Strand to trace',[['tx','Normally local TX → remote RX'],['rx','Normally remote TX → local RX']],s.strand):''}
     ${s.simulated?'<p class="ts-prepared">Practice only · results come from the chosen fault.</p>':tool==='vfl'?`<label class="ts-ready"><input type="checkbox" data-field="ready" ${s.ready?'checked':''}><span>The test fiber is disconnected from the optics; VFL is attached to an LC leg.</span></label>`:''}

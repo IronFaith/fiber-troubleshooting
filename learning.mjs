@@ -1,16 +1,16 @@
 import {mountSiteCounter} from './site-counter.mjs?v=7';
 import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=1';
-import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=3';
-import { rackIllustration } from './rack-visuals.mjs?v=7';
-import { mountCommunicationRoute } from './communication-route.mjs?v=2';
+import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=4';
+import { rackIllustration } from './rack-visuals.mjs?v=8';
+import { mountCommunicationRoute } from './communication-route.mjs?v=3';
 import { mountCourse, learningEntry } from './course.mjs?v=9';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=11';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=12';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
-import { mountPatchPractice } from './patch-practice.mjs?v=12';
-import { mountLightJourney } from './loop-lesson.mjs?v=5';
+import { mountPatchPractice } from './patch-practice.mjs?v=13';
+import { mountLightJourney } from './loop-lesson.mjs?v=6';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=1';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=8';
+import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=2';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=9';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);

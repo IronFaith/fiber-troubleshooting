@@ -1,4 +1,4 @@
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=3';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=4';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {lightFlow} from './light-visuals.mjs?v=1';
 

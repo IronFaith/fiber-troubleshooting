@@ -1,4 +1,4 @@
-import {connectedCaseQuestions} from './connected-case.mjs?v=1';
+import {connectedCaseQuestions} from './connected-case.mjs?v=2';
 // Fictional cases taught in the linked chapters.
 export const appliedTopics = ['Read the evidence', 'Follow the whole connection'];
 export const appliedDescriptions = [

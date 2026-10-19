@@ -1,8 +1,8 @@
-import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=2';
+import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=3';
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=7';
+import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=8';
 
-import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=12';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=13';
 import {loadPatchBest} from './patch-practice-data.mjs?v=2';
 
 const host = document.querySelector('#quiz');

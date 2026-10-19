@@ -1,4 +1,4 @@
-import {cassetteFront} from './loop-visuals.mjs?v=3';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=4';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
 import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage,isOptic,loopSource,loopResult} from './troubleshoot-state.mjs?v=13';
 
@@ -51,14 +51,14 @@ function passiveFace(s,point,mode) {
     const {x,y,emitting,face}=active?endpoint:{emitting:false,face:forward?'front':'rear'};
     const cassette=cassetteFront({name:`CAS ${point}`,port:patch.port,patched:patch[forward?'front':'rear']}).replace('front view',`${face} view`);
     return cassette+`<g class="hardware-art ts-vfl-port-view" aria-label="Incoming MMC ${incomingSeated?'seated':'unplugged'}; ${face} port ${patch.port}">
-      <path class="loop-jacket" d="M12 194 H47"/><path class="loop-cord" d="M12 194 H47"/>
-      <rect class="hardware-plug" x="${incomingSeated?45:29}" y="184" width="32" height="20" rx="3"/><rect class="cassette-adapter" x="76" y="181" width="12" height="26" rx="2"/>
+      <path class="loop-jacket" d="M2 194 H${incomingSeated?25:12}"/><path class="loop-cord" d="M2 194 H${incomingSeated?25:12}"/>
+      <g transform="translate(${incomingSeated?34.5:21.5} 182) scale(.5)">${mmcHead(0,0,false)}</g><rect class="cassette-adapter" x="76" y="181" width="12" height="26" rx="2"/>
       <text class="hardware-label hardware-small" x="12" y="178">${incomingSeated?'Incoming MMC':'Loose MMC head'}</text>
       ${emitting?`<circle class="ts-port-glow" cx="${x}" cy="${y}" r="17"/>${lightSource(x,y,'red')}<path class="ts-port-emission" d="M${x} ${y} l-12 24 h24 Z"/>`:''}
     </g>`;
   }
   return cassetteFront({name:`CAS ${point}`,port:s.ports[point-1],inserted:mode==='loop',patched:mode==='plugged'})+
-    (mode==='plugged'?'':`<g class="hardware-art ts-parked-head"><path class="loop-jacket" d="M1 189 H19"/><path class="loop-cord" d="M1 189 H19"/><rect class="hardware-plug" x="19" y="180" width="43" height="18" rx="3"/><rect class="hardware-metal" x="62" y="184" width="10" height="10"/><text class="hardware-label hardware-small" x="81" y="194">Head unplugged</text></g>`);
+    (mode==='plugged'?'':`<g class="hardware-art ts-parked-head"><path class="loop-jacket" d="M1 194 H13"/><path class="loop-cord" d="M1 194 H13"/><g transform="translate(23 182) scale(.5)">${mmcHead(0,0,false)}</g><text class="hardware-label hardware-small" x="81" y="194">Head unplugged</text></g>`);
 }
 
 function recordedNodeCaption(s,coverage,point) {

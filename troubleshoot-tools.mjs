@@ -1,8 +1,9 @@
+import {mmcLoopback} from './loop-visuals.mjs?v=4';
 export const toolNames={lc:'LC loopback',mmc:'MMC loopback',vfl:'VFL'};
 export function toolArt(kind) {
+  if(kind==='mmc') return `<svg viewBox="0 0 230 92" aria-hidden="true">${mmcLoopback(142,42,{label:true})}</svg>`;
   const cord='<path d="M38 19 C10 19 10 57 38 57" fill="none" stroke="#b3983a" stroke-width="8"/><path d="M38 19 C10 19 10 57 38 57" fill="none" stroke="#f3db67" stroke-width="4"/>';
   const plugs=kind==='lc'?`${cord}<g fill="#b5d3e0" stroke="#496e83" stroke-width="2"><rect x="36" y="11" width="32" height="16" rx="3"/><rect x="36" y="49" width="32" height="16" rx="3"/></g><path d="M67 16 h10 v6 H67 M67 54 h10 v6 H67" fill="#c5ced5" stroke="#647581"/>`:
-    kind==='mmc'?`${cord}<rect x="36" y="6" width="39" height="64" rx="7" fill="#d4ba61" stroke="#756030" stroke-width="2"/><rect x="63" y="19" width="21" height="38" rx="3" fill="#dae0df" stroke="#637780" stroke-width="2"/><path d="M70 25 v26 M77 25 v26" stroke="#738487" stroke-width="2"/>`:
     '<path d="M65 36 H91" stroke="#d53250" stroke-width="4"/><circle cx="92" cy="36" r="5" fill="#e6425c"/><rect x="15" y="23" width="50" height="26" rx="10" fill="#b8334d" stroke="#7b2940" stroke-width="2"/><rect x="58" y="27" width="12" height="18" rx="2" fill="#d4dce0"/><path d="M27 30 v12 M32 30 v12" stroke="#f7b4bd" stroke-width="2"/>';
   return `<svg viewBox="0 0 105 78" aria-hidden="true">${plugs}</svg>`;
 }

@@ -28,6 +28,8 @@ The fiber steps retain a schematic of the current isolated segment: disconnected
 
 Technical references: [Cisco optical troubleshooting](https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html), [Fluke fiber troubleshooting](https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber), [US Conec MMC polarity](https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment).
 
+MMC hardware illustrations use a green connector housing, a black ribbed push-pull boot and a single yellow jacketed return loop, informed by the [US Conec MMC connector](https://www.usconec.com/connectors/mmc-connectors) and [Sylex MMC loopback](https://www.sylex.sk/product/mmc-16f-loopback/) product photos. These original SVG schematics are shared by the tool tray, drag preview, cassette connections and learning diagrams; the workbench also enlarges the seated loopback at the selected CAS port. No manufacturer photos, dimensions, fiber-count specifications or internal pin mapping are reproduced.
+
 ## Development
 
 The shared footer counter displays browsing visits and completed exams using a separate Cloudflare Worker. See [`counter/README.md`](counter/README.md) for counting rules and deployment. Local preview uses its own Worker and test totals.
