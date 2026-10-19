@@ -1,5 +1,5 @@
-import {translate,getLanguage} from './locale.mjs?v=2';
-import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=8';
+import {translate,getLanguage,formatBidi} from './locale.mjs?v=3';
+import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=9';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=3';
 
@@ -120,6 +120,7 @@ export function mountReference(menuPanel, closeMenu, menuButton) {
 const inlineTerms={optic:'optic',LC:'lc',MMC:'mmc',CAS:'cas',fanout:'fanout',follower:'follower',ferrule:'ferrule',TX:'tx',RX:'rx',IR:'ir',dBm:'dbm',attenuation:'attenuation',polarity:'polarity',loopback:'loopback',VFL:'vfl',continuity:'continuity',misport:'misport',splice:'splice',local:'local-remote',remote:'local-remote',FIM:'fim',LLDP:'lldp'};
 Object.assign(inlineTerms,{'óptico':'optic',ramal:'follower','férula':'ferrule','atenuación':'attenuation',polaridad:'polarity',continuidad:'continuity',empalme:'splice',remoto:'local-remote'});
 Object.assign(inlineTerms,{optique:'optic',branche:'follower','férule':'ferrule','atténuation':'attenuation','polarité':'polarity','continuité':'continuity','épissure':'splice',distant:'local-remote'});
+Object.assign(inlineTerms,{'الوحدة الضوئية':'optic','وحدة ضوئية':'optic','الفرع':'follower','الفيرول':'ferrule','فيرول':'ferrule','التوهين':'attenuation','القطبية':'polarity','الاستمرارية':'continuity','حلقة العودة':'loopback','اللحام':'splice','الفان آوت':'fanout'});
 const termPattern=new RegExp(`(?<![\\p{L}\\p{N}_])(${Object.keys(inlineTerms).join('|')})(?![\\p{L}\\p{N}_])`,'giu');
 const paragraphSources=new WeakMap();
 const termIds=Object.fromEntries(Object.entries(inlineTerms).map(([word,id])=>[word.toLowerCase(),id]));
@@ -132,7 +133,7 @@ export function linkLessonTerms(root) {
       paragraph.dataset.i18nManaged='';
       paragraph.innerHTML=paragraphSources.get(paragraph);
       const sourceWalker=document.createTreeWalker(paragraph,NodeFilter.SHOW_TEXT);
-      while(sourceWalker.nextNode()) sourceWalker.currentNode.nodeValue=translate(sourceWalker.currentNode.nodeValue);
+      while(sourceWalker.nextNode()) sourceWalker.currentNode.nodeValue=formatBidi(translate(sourceWalker.currentNode.nodeValue));
       const walker=document.createTreeWalker(paragraph,NodeFilter.SHOW_TEXT,{acceptNode:node=>node.parentElement.closest('a,button')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
       const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
       nodes.forEach(node=>{

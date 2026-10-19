@@ -1,7 +1,9 @@
-import {spanishMessages} from './spanish.mjs?v=2';
-import {frenchMessages} from './french.mjs?v=1';
-export const languages=Object.freeze({en:'English',es:'Español',fr:'Français'});
+import {spanishMessages} from './spanish.mjs?v=3';
+import {frenchMessages} from './french.mjs?v=2';
+import {arabicMessages} from './arabic.mjs?v=1';
+export const languages=Object.freeze({en:'English',es:'Español',fr:'Français',ar:'العربية'});
 export const isLanguage=value=>Object.hasOwn(languages,value);
+export const languageDirection=language=>language==='ar'?'rtl':'ltr';
 export const languageKey='fiber-language-v1';
 const clean=value=>String(value).replace(/\s+/g,' ').trim();
 const escapeRegex=value=>value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -23,7 +25,7 @@ function compileCatalog(messages) {
   patterns.sort((a,b)=>b.fixed-a.fixed);
   return {exact,patterns,cache:new Map()};
 }
-const catalogs=new Map([['es',compileCatalog(spanishMessages)],['fr',compileCatalog(frenchMessages)]]);
+const catalogs=new Map([['es',compileCatalog(spanishMessages)],['fr',compileCatalog(frenchMessages)],['ar',compileCatalog(arabicMessages)]]);
 export function getLanguage() {
   const language=typeof document!=='undefined'?document.documentElement.lang:'en';
   return isLanguage(language)?language:'en';
@@ -90,3 +92,13 @@ export function translate(value,language=getLanguage(),depth=0) {
   return original.match(/^\s*/)[0]+result+original.match(/\s*$/)[0];
 }
 export const translateLines=(value,language=getLanguage())=>String(value).split('\n').map(line=>translate(line,language)).join('\n');
+
+// Isolate technical runs for display in Arabic, without changing stored values
+// or translated message keys. Also keep signs, slash ports and path arrows together.
+const technicalToken=String.raw`(?:[+−-]?/?[0-9]+(?:[./–-][0-9]+)*(?![A-Za-z0-9])|[A-Za-z0-9][A-Za-z0-9]*(?:[._/-][A-Za-z0-9]+)*)`;
+const technicalRuns=new RegExp(String.raw`\u2066[^\u2069]*\u2069|${technicalToken}(?:(?:[ \t]+|[ \t]*[/→←↔=–][ \t]*)${technicalToken})*`,'g');
+export function formatBidi(value,language=getLanguage()) {
+  const text=String(value);
+  if(languageDirection(language)!=='rtl') return text;
+  return text.replace(technicalRuns,run=>run.startsWith('\u2066')?run:`\u2066${run}\u2069`);
+}

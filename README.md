@@ -80,8 +80,10 @@ Chapter 1’s device communication lesson (`learn.html#trace-loops`) teaches the
 
 ## Languages
 
-The header offers English, neutral Latin American Spanish, and French. The `fiber-language-v1` browser preference is independent of exam progress and troubleshooting state. `?lang=es` and `?lang=fr` open the corresponding language directly.
+The header offers English, neutral Latin American Spanish, French, and Modern Standard Arabic. The `fiber-language-v1` browser preference is independent of exam progress and troubleshooting state. `?lang=es`, `?lang=fr`, and `?lang=ar` open the corresponding language directly.
 
-`spanish.mjs` and `french.mjs` contain translations keyed by English phrases; numbered placeholders preserve dynamic values. **Every new or changed learner-facing item must be updated in all three languages in the same change**, including lessons, exams and feedback, diagrams and accessible labels, glossary, simulations, troubleshooting guidance, navigation, and badges. Keep both catalogs’ English keys aligned and preserve placeholders and technical identifiers. The locale tests check catalog parity and placeholders; check the translated experience as well, including mobile layout.
+`spanish.mjs`, `french.mjs`, and `arabic.mjs` contain translations keyed by English phrases; numbered placeholders preserve dynamic values. **Every new or changed learner-facing item must be updated in all four languages in the same change**, including lessons, exams and feedback, diagrams and accessible labels, glossary, simulations, troubleshooting guidance, navigation, and badges. Keep all catalogs’ English keys aligned and preserve placeholders and technical identifiers. The locale tests check catalog parity and placeholders; check the translated experience as well, including mobile layout.
 
-`locale.mjs` handles messages and preferences, while `i18n.mjs` translates displayed text and accessible labels without changing form values, equipment IDs, answers, or stored results. Inline lesson definitions and glossary search support all three languages. No translation API or external service is used.
+`locale.mjs` handles messages and preferences, while `i18n.mjs` translates displayed text and accessible labels without changing form values, equipment IDs, answers, or stored results. Inline lesson definitions and glossary search support all four languages. No translation API or external service is used.
+
+Arabic uses `dir="rtl"` for reading and navigation; hardware diagrams, physical port positions, and numeric scales retain left-to-right coordinates. `formatBidi` isolates technical runs in displayed Arabic text so signs and IDs keep their order. Switching languages restores the matching direction and preserves learning state.

@@ -2379,5 +2379,9 @@ export const spanishMessages = [
   ["loose MMC head", "cabezal MMC suelto"],
   ["VFL {0} · A {1} · B {2}", "VFL {0} · A {1} · B {2}"],
   ["{0} to +{1}", "{0} a +{1}"],
-  ["Then check your answers.", "Luego revisa tus respuestas."]
+  ["Then check your answers.", "Luego revisa tus respuestas."],
+  ["Rack", "Rack"],
+  ["Local", "Local"],
+  ["Fanout", "Fanout"],
+  ["Following {0} TX → {1} RX.", "Sigue {0} TX → {1} RX."],
 ];

@@ -9519,5 +9519,9 @@ export const frenchMessages = [
   [
     "Then check your answers.",
     "Puis vérifiez vos réponses."
-  ]
+  ],
+  ["Rack", "Baie"],
+  ["Local", "Local"],
+  ["Fanout", "Épanouissement"],
+  ["Following {0} TX → {1} RX.", "Suivi de {0} TX → {1} RX."],
 ];

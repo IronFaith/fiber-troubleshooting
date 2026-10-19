@@ -1618,7 +1618,7 @@ body:has(.reference-dialog[open]) { overflow:hidden; }
 .language-picker { display:flex; align-items:center; gap:5px; order:3; flex-shrink:0; min-height:44px; padding:0 8px; background:white; border:1px solid #bdcbd5; border-radius:6px; color:#173b59; }
 .language-picker select { max-width:105px; min-height:42px; border:0; background:transparent; color:inherit; font:inherit; font-size:13px; cursor:pointer; }
 .language-picker select:focus-visible { outline:3px solid #347cbc; outline-offset:2px; }
-:is(html[lang="es"],html[lang="fr"]) .ts-small-actions,:is(html[lang="es"],html[lang="fr"]) .ts-section-top { flex-wrap:wrap; }
+:is(html[lang="es"],html[lang="fr"],html[lang="ar"]) .ts-small-actions,:is(html[lang="es"],html[lang="fr"],html[lang="ar"]) .ts-section-top { flex-wrap:wrap; }
 @media(max-width:650px) {
   header { position:relative; flex-wrap:wrap; }
   header .brand { flex-basis:100%; }
@@ -1626,4 +1626,21 @@ body:has(.reference-dialog[open]) { overflow:hidden; }
   header .learn-nav { position:static; margin-left:auto; }
   header .learn-menu { max-width:100%; }
   .language-picker { margin-left:0; }
+}
+
+/* Arabic reading order changes; physical hardware, coordinates and scales do not. */
+html[lang="ar"] body { line-height:1.65; }
+html[lang="ar"] :is(h1,h2,h3,h4,.eyebrow,.topic-position) { letter-spacing:normal; }
+html[dir="rtl"] :is(.menu-reference,.trail-choice,.branch,.quiz-answer,.progress-badge,.quiz-pick,.quiz-target,.ts-next-button,.ts-log-entry,.exam-level,.ts-tool-pick span,.course-toggle,.course-continue,figcaption,.vfl-checks caption,.vfl-checks th,.vfl-checks td) { text-align:right; }
+html[dir="rtl"] .learn-menu { left:0; right:auto; }
+html[dir="rtl"] .learn-toggle::after { margin-left:0; margin-right:7px; }
+html[dir="rtl"] .reference-dialog { inset:0 auto 0 0; border-left:0; border-right:1px solid #bdcbd5; }
+html[dir="rtl"] .reference-entry summary { padding-right:0; padding-left:28px; }
+html[dir="rtl"] .reference-entry summary::after { left:4px; right:auto; }
+html[dir="rtl"] :is(svg,.lab-workbench,.lab-cas-scroll,.q-cas-scroll,.ts-map,.q-gauge,.q-gauge-scale,.lldp-path,.lldp-link,.q-lldp-route,.q-action-sequence,.case-loop-stops,.position-parts,.patch-mapping,.journey-steps,.comm-steps,.vfl-strands,.reading-values) { direction:ltr; }
+html[dir="rtl"] svg text { letter-spacing:normal; }
+html[dir="rtl"] :is(.position-parts button,.journey-steps button,.comm-steps button,.vfl-strands button) { unicode-bidi:isolate; }
+html[dir="rtl"] .language-picker { direction:ltr; }
+@media(max-width:650px) {
+  html[dir="rtl"] header .learn-nav { margin-left:0; margin-right:auto; }
 }

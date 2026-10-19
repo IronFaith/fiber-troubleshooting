@@ -1,4 +1,4 @@
-import {translate,readLanguage,saveLanguage,getLanguage,languages,isLanguage,languageKey} from './locale.mjs?v=2';
+import {translate,readLanguage,saveLanguage,getLanguage,languages,isLanguage,languageKey,languageDirection,formatBidi} from './locale.mjs?v=3';
 // Display-only localization: IDs, field values and all learning / case state
 // remain unchanged. Keep each source node so switching back restores English.
 const textSources=new WeakMap(),attributeSources=new WeakMap();
@@ -7,12 +7,13 @@ const attributes=['aria-label','aria-valuetext','title','alt','placeholder'];
 let storage;try{storage=window.localStorage;}catch{/* Language works without storage. */}
 let language=readLanguage(storage,location.search);
 document.documentElement.lang=language;
+document.documentElement.dir=languageDirection(language);
 const titleSource=document.title;
 function localizeText(node) {
   if(!node.parentElement||node.parentElement.closest(ignored))return;
   const previous=textSources.get(node),current=node.nodeValue;
   const source=previous&&current===previous.output?previous.source:current;
-  const output=translate(source,language);
+  const output=formatBidi(translate(source,language),language);
   textSources.set(node,{source,output});if(output!==current)node.nodeValue=output;
 }
 function localizeAttributes(element) {
@@ -47,12 +48,12 @@ const observer=new MutationObserver(records=>{
 });
 observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:attributes});
 const selector=document.createElement('label');selector.className='language-picker';selector.dataset.noI18n='';
-selector.innerHTML=`<span aria-hidden="true">◎</span><select aria-label="Language / Idioma / Langue">${Object.entries(languages).map(([code,label])=>`<option value="${code}" lang="${code}">${label}</option>`).join('')}</select>`;
+selector.innerHTML=`<span aria-hidden="true">◎</span><select aria-label="Language / Idioma / Langue / اللغة">${Object.entries(languages).map(([code,label])=>`<option value="${code}" lang="${code}">${label}</option>`).join('')}</select>`;
 const select=selector.querySelector('select');select.value=language;
 document.querySelector('header')?.append(selector);
 function switchLanguage(next,persist=true) {
   if(!isLanguage(next))return;
-  language=next;document.documentElement.lang=next;select.value=next;
+  language=next;document.documentElement.lang=next;document.documentElement.dir=languageDirection(next);select.value=next;
   if(persist)saveLanguage(storage,next);
   document.title=translate(titleSource,next);
   localize();
