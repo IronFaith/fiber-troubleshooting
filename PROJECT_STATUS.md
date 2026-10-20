@@ -8,26 +8,25 @@ Updated: **2026-10-19**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Consolidate the passing-loop animation onto the actual yellow fiber and hardware, with visibly joined LC/MMC cable ends and no duplicate lower light diagram.
-- **Accepted scope — 2026-10-19:** The user's latest instruction supersedes the earlier separate evidence-rail layout. Keep mapped ports, source direction, recorded findings, motion controls and all four languages. After Normalize, a recorded historical setup is labeled as earlier; an installed tool shows its own actual connections and keeps earlier section findings. Continue automatically updating repository instructions/status whenever accepted preferences change.
-- **Completed and live:** [`b159a34`](https://github.com/IronFaith/fiber-troubleshooting/commit/b159a342af390256ad90a4a9de30c808ce8e8066) joins the yellow hardware cords, draws the MMC/LC return on the actual loopback and removes the lower light diagram. Final `npm run check` passed all 118 tests; browser verification passed 71 scenarios. The exact Pages deployment succeeded and all 18 changed application files matched both the served files and the browser-verified code.
+- **Current objective:** Fix misaligned fibers, connectors and light in the troubleshooting hardware and VFL views.
+- **Accepted scope — 2026-10-19:** Small visual corrections on the existing tool. Preserve the newer connected loop animation, earlier-setup labels after Normalize, section findings, all four languages and stacked mobile layout. No changes to evidence rules, stored cases or exams.
+- **Completed and live:** [`54e25f0`](https://github.com/IronFaith/fiber-troubleshooting/commit/54e25f0b1f7e15e21c351187f236532145f1da16) aligns LC cable exits with their connector boots and light overlays, smooths cassette-to-cassette cable joins, centers VFL/MMC channels and clears overlapping VFL captions. Integrated upstream changes through 75f56d1 before publication. Final checks passed all 118 tests; desktop/mobile visuals and translated captions were inspected. The exact Pages deployment succeeded and all 10 changed application files matched their served contents.
 - **Resolved defect:** UI-01 now uses wrapping captions within the hardware card; all four languages and both loop directions passed rendered checks.
-- **Remaining work / next action:** The consolidated hardware animation and automatic instruction/status handoff requests are complete. No application implementation, agreed next change or blocker is pending. Resume from these notes when a new request is accepted.
+- **Remaining work / next action:** This alignment milestone is complete. No implementation or blocker remains for this request; continue from this release when a new change is accepted.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`b159a34`](https://github.com/IronFaith/fiber-troubleshooting/commit/b159a342af390256ad90a4a9de30c808ce8e8066): **Animate passing loops on the connected yellow-fiber hardware view**.
+The latest application release is [`54e25f0`](https://github.com/IronFaith/fiber-troubleshooting/commit/54e25f0b1f7e15e21c351187f236532145f1da16): **Align LC fibers, VFL channels and cassette cable joins**.
 
-- Consolidated the animation onto the yellow LC legs, cables, enlarged MMC mating heads and the loopback cord. The TX/return halves meet on the physical loop; the separate lower blue/teal light diagram is removed. Mapped cassette ports remain highlighted and compact A/B section findings remain visible.
-- Desktop cable ends join between cards. Mobile follows connecting cords between stacked components and alongside inline result controls. Signals follow the same cord geometry; cassette port grids remain clear.
-- A currently installed tool shows its own connections. After Normalize, a supported earlier loop is labeled “Recorded loop · earlier setup”. Previous section findings remain when tools change; open VFL viewing connections stay open. No animation invents a real observation or certifies live service. Weak results remain amber, and practice faults retain their clearly labeled simulation.
-- Resolved UI-01: connection captions wrap within their hardware cards in all four languages, for local and remote loops. Translated section badges stay clear of the connecting cords.
-- Verification: final `npm run check` passed all 118 tests. [Browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39356294893) passed 71 scenarios at 1728, 1400 and 390 pixels, plus local/remote loops in English, Spanish, French and Arabic with reduced-motion and Play checks. Checks establish the complete internal cord joins, signal alignment on yellow fiber, no cassette-grid intersections, no duplicate lower diagram and readable captions. Desktop, stacked mobile, remote and translated screenshots were inspected.
-- [GitHub Pages deployment succeeded for the exact application commit](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39356556061). All 18 changed application files matched their served contents and the browser-verified version. Temporary browser tooling was removed before publication.
-- AGENTS.md and README.md now record the user's one-hardware-view preference. The automatic instruction/status update and chat resumption policy remains mandatory.
+- The optic drawing and its animated light now use the same LC boot exit, including disconnected legs. The VFL output meets the LC tip precisely.
+- Cassette-to-cassette bridges use one consistent cable jacket around the two channel paths, removing thick seams at card edges. Intermediate connections distinguish incoming and onward MMCs.
+- The VFL close-up centers the MMC body, adapter and viewing face around its two channels. Desktop channel B is level with its destination; mobile fibers enter the connector boot. Head captions stay clear of result controls and cable bends.
+- Preserved the latest connected-loop implementation and historical-setup labeling from upstream through [75f56d1](https://github.com/IronFaith/fiber-troubleshooting/commit/75f56d1e2ca2cccaf4bfc6ad4637ed28ec74ffe3). The earlier UI-01 wrapping fix remains in place.
+- Verification after integration: `npm run check` passed all 118 tests and `git diff --check` passed. Rendered desktop loop/Normalize and mobile VFL views were inspected; Spanish mobile and French/Arabic caption fit were checked. No browser JavaScript errors were reported. No new learner wording or storage changes were introduced.
+- [The exact application deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39358073594). All 10 changed HTML/CSS/JavaScript files matched the live served contents. README and this handoff describe the final merged implementation.
 
 ## What is in place
 
@@ -45,6 +44,7 @@ The latest application release is [`b159a34`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`54e25f0`](https://github.com/IronFaith/fiber-troubleshooting/commit/54e25f0b1f7e15e21c351187f236532145f1da16) | Precise LC/VFL cable joins, centered MMC channels and viewing faces, consistent cassette bridge thickness and unobstructed translated captions. |
 | [`b159a34`](https://github.com/IronFaith/fiber-troubleshooting/commit/b159a342af390256ad90a4a9de30c808ce8e8066) | Connected yellow hardware cords carry the passing-loop animation; removed duplicate lower light rails, preserved mapped ports and section findings, and resolved UI-01 in all four languages. |
 | [`a98967d`](https://github.com/IronFaith/fiber-troubleshooting/commit/a98967d8f9594e517ae175ede937887ca1964319) | Corrected the screenshot-reported overlay regression: connected loop returns stay in the evidence diagram and leave cassette artwork clear. Saved automatic instruction/status updates and the resumption handoff policy. |
 | [`ebf8c8e`](https://github.com/IronFaith/fiber-troubleshooting/commit/ebf8c8ed3a4e66ea669e294680c45eaadf2239b8) | Connected passing-loop animation through mapped hardware, with the return to the tested optic restored on desktop and mobile. Earlier span evidence remains visible. |
