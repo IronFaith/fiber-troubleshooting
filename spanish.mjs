@@ -1,5 +1,7 @@
 // Neutral Latin American Spanish. Keep numbered placeholders and technical identifiers intact.
 export const spanishMessages = [
+  ["History","Historial"],
+  ["Why this check?","¿Por qué esta comprobación?"],
   ["Case details", "Detalles del caso"],
   ["Recorded continuity", "Continuidad registrada"],
   ["Recorded section: {0} → {1}; {2}; {3}", "Tramo registrado: {0} → {1}; {2}; {3}"],

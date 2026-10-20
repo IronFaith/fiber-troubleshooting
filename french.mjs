@@ -1,5 +1,7 @@
 // French learner-facing messages. Keep English keys aligned with spanish.mjs.
 export const frenchMessages = [
+  ["History","Historique"],
+  ["Why this check?","Pourquoi ce contrôle ?"],
   ["Case details", "Détails du cas"],
   ["Recorded continuity", "Continuité enregistrée"],
   ["Recorded section: {0} → {1}; {2}; {3}", "Section enregistrée : {0} → {1} ; {2} ; {3}"],

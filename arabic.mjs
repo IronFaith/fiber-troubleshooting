@@ -1,5 +1,7 @@
 // Modern Standard Arabic. Keep English keys aligned with all translation catalogs.
 export const arabicMessages = [
+  ["History","السجل"],
+  ["Why this check?","لماذا هذا الفحص؟"],
   ["Case details", "تفاصيل الحالة"],
   ["Recorded continuity", "الاستمرارية المسجلة"],
   ["Recorded section: {0} → {1}; {2}; {3}", "المقطع المسجل: {0} → {1}؛ {2}؛ {3}"],
