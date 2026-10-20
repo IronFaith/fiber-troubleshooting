@@ -10,22 +10,23 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Make exams check understanding of lessons and the purpose of actions, starting with the looping concepts beginners find difficult.
 - **Accepted scope — 2026-10-20:** Explain why to loop, where to loop, what each location includes, what passing/failing supports and what remains untested. Align the existing Beginner loop questions and feedback with that lesson. Preserve five-question exams, earned scores and badges; include all four learner languages.
-- **Implemented:** Chapter 1 now introduces loop purpose before the diagrams, compares direct LC and passive MMC scope, explains the direct-failure response and restored-link checks, and connects each new loop location to the added test section. The Beginner exam asks for both supported reasons to loop and interprets a failed added span. Its diagram uses Port 28 rather than the lesson’s Port 12 and reserves the suspect-section label for feedback.
+- **Completed and live:** [`cc163b4`](https://github.com/IronFaith/fiber-troubleshooting/commit/cc163b4f9bf76477d95854fa53236556849dd171) introduces loop purpose before the diagrams, compares direct LC and passive MMC scope, explains the direct-failure response and restored-link checks, and connects each new loop location to the added test section. The Beginner exam asks for both supported reasons to loop and interprets a failed added span. Its diagram uses Port 28 rather than the lesson’s Port 12 and reserves the suspect-section label for feedback.
 - **Browser verification:** English lesson and exam feedback reviewed at desktop width; Spanish, French and Arabic lesson and loop-question text checked at 390 pixels without page overflow. An incomplete loop-purpose answer was marked for review; both correct reasons scored correctly. Reload resumed the attempt; language switching preserved both selected answers. No console errors were reported.
-- **Automated verification:** The focused quiz/session/level/locale/course checks and final `npm run check` passed; all 120 existing tests pass. No new test framework or tests were needed for these content changes.
+- **Automated verification:** The focused quiz/session/level/locale/course checks and final `npm run check` passed; all 120 existing tests pass. `git diff --check` passed. A direct data check confirmed complete-set scoring, old-draft rejection, earned-score retention and translation of both loop questions. No new test framework or tests were needed for these content changes.
 - **Compatibility:** `loop-purpose` replaces the old single-answer `direct-loop` question. Unfinished Narrow down the problem drafts using the old ID are intentionally discarded; saved scores and badges remain. Other valid exam drafts still resume.
-- **Remaining work / next action:** Commit and publish this milestone, then verify the exact GitHub Pages deployment and served runtime files. Further lesson/exam expansions are not part of this milestone.
+- **Remaining work / next action:** This focused looping milestone is complete. The exact application deployment succeeded and all 20 changed runtime files matched their committed bytes on GitHub Pages. Further lesson/exam expansions are not part of this milestone.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-**Loop purpose and beginner comprehension** is verified locally and awaiting deployment verification. The prior verified application release is [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f), the responsive troubleshooting layout.
+The latest application release is [`cc163b4`](https://github.com/IronFaith/fiber-troubleshooting/commit/cc163b4f9bf76477d95854fa53236556849dd171): **Loop purpose and beginner comprehension**.
 
 - The new lesson and assessments are described in the handoff above and the README. The standing instruction is now to teach an action’s purpose and evidence limits before testing them.
 - Loop principles were checked against [Juniper’s physical-loopback documentation](https://www.juniper.net/documentation/us/en/software/junos/interfaces-ethernet/topics/topic-map/ethernet-fast-and-gigabit-loopback-testing.html) and [interface troubleshooting guidance](https://www.juniper.net/documentation/us/en/software/junos/interfaces-fundamentals/topics/topic-map/troubleshooting-interfaces.html). LC/MMC and CAS arrangements remain this site’s conventions.
 - Existing troubleshooting evidence, hardware geometry, saved cases, counters and Intermediate questions are unchanged. Changes in their importing modules only refresh versioned translation dependencies.
+- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39404644130). SHA-256 comparisons confirmed that all 20 changed runtime files served by GitHub Pages match this application commit.
 
 ## What is in place
 
@@ -43,6 +44,7 @@ Each future milestone must refresh this handoff with the latest objective, accep
 
 | Commit | Delivered change |
 | --- | --- |
+| [`cc163b4`](https://github.com/IronFaith/fiber-troubleshooting/commit/cc163b4f9bf76477d95854fa53236556849dd171) | Purpose-first looping lesson, explicit test boundaries and follow-up, two-reason Beginner assessment and clearer added-span reasoning in all four languages. |
 | [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f) | Dedicated portrait cable channel and compact desktop path, attached result panels, aligned remote LC entry and correct installed-loop animation when both directions passed. |
 | [`90b5abc`](https://github.com/IronFaith/fiber-troubleshooting/commit/90b5abc61ff1f753090eab979781461d89a44d79) | Normalize removes LC/MMC loopback drawings, reconnects service fibers and retains recorded passes and checked-path highlighting. |
 | [`54e25f0`](https://github.com/IronFaith/fiber-troubleshooting/commit/54e25f0b1f7e15e21c351187f236532145f1da16) | Precise LC/VFL cable joins, centered MMC channels and viewing faces, consistent cassette bridge thickness and unobstructed translated captions. |
@@ -58,7 +60,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The looping content and assessment update is implemented and locally verified. Publication verification remains pending. No reproduced application defect remains open for this milestone.
+The looping content and assessment update is complete and verified live. No reproduced application defect or publication task remains open for this milestone.
 
 This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
 
