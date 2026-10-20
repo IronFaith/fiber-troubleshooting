@@ -1,5 +1,8 @@
 // Neutral Latin American Spanish. Keep numbered placeholders and technical identifiers intact.
 export const spanishMessages = [
+  ["Recorded loop · earlier setup", "Bucle registrado · montaje anterior"],
+  ["Yellow: fiber · amber: investigate", "Amarillo: fibra · ámbar: investigar"],
+
   ["Front port open","Puerto frontal abierto"],
   ["Rear port open","Puerto trasero abierto"],
   ["Bend, break, splice or damaged ferrule contact","Curva cerrada, rotura, empalme o contacto de férula dañado"],

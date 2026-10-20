@@ -1,5 +1,8 @@
 // Modern Standard Arabic. Keep English keys aligned with all translation catalogs.
 export const arabicMessages = [
+  ["Recorded loop · earlier setup", "حلقة مسجلة · توصيل سابق"],
+  ["Yellow: fiber · amber: investigate", "أصفر: ألياف · كهرماني: افحص"],
+
   ["Front port open","المنفذ الأمامي مفتوح"],
   ["Rear port open","المنفذ الخلفي مفتوح"],
   ["Bend, break, splice or damaged ferrule contact","انحناء أو قطع أو مشكلة لحام أو تلف في تلامس الفيرول"],
