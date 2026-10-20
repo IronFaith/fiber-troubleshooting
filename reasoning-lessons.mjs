@@ -166,7 +166,7 @@ export function mountLldpLesson(root) {
     show('match');
   }));
   root.querySelector('.lesson-motion')?.addEventListener('click',()=>{if(timer) finish();});
-  root.addEventListener('coursevisibility',()=>{if(root.hidden&&timer) finish();});
+  root.addEventListener('coursevisibility',()=>{if((root.hidden||demo.closest('.lesson-section')?.hidden)&&timer) finish();});
   show('match');
 }
 

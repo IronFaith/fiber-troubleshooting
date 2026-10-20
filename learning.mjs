@@ -3,15 +3,15 @@ import {vflPen} from './test-tool-visuals.mjs?v=1';
 import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=2';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=5';
 import { rackIllustration } from './rack-visuals.mjs?v=9';
-import { mountCommunicationRoute } from './communication-route.mjs?v=4';
-import { mountCourse, learningEntry } from './course.mjs?v=9';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=31';
+import { mountCommunicationRoute } from './communication-route.mjs?v=5';
+import { mountCourse, learningEntry } from './course.mjs?v=10';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=32';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=14';
-import { mountLightJourney } from './loop-lesson.mjs?v=7';
+import { mountLightJourney } from './loop-lesson.mjs?v=8';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=3';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=11';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=12';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -76,7 +76,7 @@ document.addEventListener('keydown', event => {
 
 const lesson = document.querySelector('#lesson');
 
-function renderLesson(lesson) {
+function renderLesson(lesson,markupOnly=false) {
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 1</p><button type="button" class="lesson-motion"></button></div>
     <p class="lesson-intro">Follow the light from the optic, through the fiber, to the test.</p>
@@ -102,7 +102,7 @@ function renderLesson(lesson) {
       <h3 id="trace-loops-title">How two devices communicate through fiber</h3>
       <p class="section-intro">Device A’s data → optic → fiber and CAS connections → optic → Device B.</p>
       <div id="light-journey"></div>
-      <p class="picture-note">This is a simplified overview. <a href="./devices.html#ends">Follow the full example through rack, distribution and room-passage passives in Chapter 2 →</a></p>
+      <p class="picture-note">This is a simplified overview. <a href="./devices.html#ends">Follow the full route through rack, distribution and room-passage passives →</a></p>
     </section>
     <section id="loopbacks" class="lesson-section" aria-labelledby="loop-title">
       <h3 id="loop-title">Why loop the light back?</h3>
@@ -138,14 +138,17 @@ function renderLesson(lesson) {
     </section>
     ${vflReasoningLesson()}${connectedCaseLesson()}
     <p class="lesson-sources">References: <a href="https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber" target="_blank" rel="noopener noreferrer">Fluke: light sources & tracing</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: optic health</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC mapping</a></p>`;
-  setupLesson(lesson);
-  example('ir-picture', 'Optic infrared light', [], opticPicture);
-  example('red-picture', 'Visible red VFL light', [], redPicture);
-  example('path-picture', 'Fiber route', [], pathPicture);
-  example('loop-picture', 'Loop location', ['LC at optic', 'MMC at passive'], loopPicture);
-  mountLightJourney(document.getElementById('light-journey'));
-  example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture);
-  example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture);
+  if(markupOnly)return;
+  setupLesson(lesson);mountOptics(lesson);
+}
+function mountOptics(lesson) {
+  example('ir-picture', 'Optic infrared light', [], opticPicture,lesson);
+  example('red-picture', 'Visible red VFL light', [], redPicture,lesson);
+  example('path-picture', 'Fiber route', [], pathPicture,lesson);
+  example('loop-picture', 'Loop location', ['LC at optic', 'MMC at passive'], loopPicture,lesson);
+  if(lesson.querySelector('#light-journey'))mountLightJourney(lesson.querySelector('#light-journey'));
+  example('fault-picture', 'Connection condition', ['Clean', 'Dirty', 'Unseated', 'Tight bend'], faultPicture,lesson);
+  example('vfl-picture', 'VFL observation', ['Light seen', 'No light', 'Wrong port'], vflPicture,lesson);
   mountReasoningLessons(lesson);
   mountConnectedCase(lesson);
   mountPolarityLesson(lesson);
@@ -173,8 +176,9 @@ function setupLesson(lesson) {
   requestAnimationFrame(scrollToSection);
 }
 
-function example(id, label, choices, draw) {
-  const host = document.getElementById(id);
+function example(id, label, choices, draw,root=document) {
+  const host = root.querySelector(`#${id}`);
+  if(!host)return;
   const controls = el('div', 'lesson-options');
   controls.setAttribute('role', 'group'); controls.setAttribute('aria-label', label);
   const figure = el('figure', 'lesson-figure');
@@ -266,7 +270,7 @@ function vflPicture(selected) {
     text(180,347,seen ? 'Light reaches port 12 ✓' : wrong ? 'Light reaches port 13 · check mapping' : 'Port 12 dark · location unknown','class="small" text-anchor="middle"')};
 }
 
-function renderDevicesLesson(lesson) {
+function renderDevicesLesson(lesson,markupOnly=false) {
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 2</p><button type="button" class="lesson-motion"></button></div>
     <p class="lesson-intro">Find the device. Confirm the port. Follow its connection.</p>
@@ -302,8 +306,12 @@ function renderDevicesLesson(lesson) {
     ${lldpLesson()}
     <p class="lesson-sources">Position format and rack connection: your site examples. References: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC gender and polarity</a>.</p>
 `;
-  setupLesson(lesson);
-  const positionFigure = document.querySelector('#position-picture');
+  if(markupOnly)return;
+  setupLesson(lesson);mountDevices(lesson);
+}
+function mountDevices(lesson) {
+  const positionFigure = lesson.querySelector('#position-picture');
+  if(positionFigure) {
   const positionCaption = el('figcaption'); positionCaption.setAttribute('aria-live', 'polite');
   const parts = [...lesson.querySelectorAll('[data-position]')];
   function selectPosition(selected) {
@@ -314,7 +322,8 @@ function renderDevicesLesson(lesson) {
   }
   parts.forEach((button, index) => button.addEventListener('click', () => selectPosition(index)));
   selectPosition(0);
-  mountCommunicationRoute(document.getElementById('ends-picture'));
+  }
+  if(lesson.querySelector('#ends-picture'))mountCommunicationRoute(lesson.querySelector('#ends-picture'));
   mountLldpLesson(lesson);
 }
 
@@ -365,7 +374,7 @@ function positionPicture(selected) {
   return {caption:captions[selected],drawing};
 }
 
-function renderPatchingLesson(lesson) {
+function renderPatchingLesson(lesson,markupOnly=false) {
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 3</p><button type="button" class="lesson-motion"></button></div>
     <p class="lesson-intro">Match the optic position, the follower and its MMC head.</p>
@@ -413,12 +422,15 @@ function renderPatchingLesson(lesson) {
     <p class="lesson-sources">Port mapping and fanout: your site examples. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
     <a class="next-chapter" href="./quiz.html">Open Exams →</a>
     <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
-  setupLesson(lesson);
-  setupPatchExample();
-  setupRackExample();
-  example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture);
-  example('fanout-picture', 'Choose a fanout follower', Array.from({length:12}, (_, index) => `Leg ${index+1}`), fanoutPicture);
-  example('mmc-patch-picture', 'MMC patching steps', ['1 · Match', '2 · Prepare', '3 · Seat'], mmcPatchPicture);
+  if(markupOnly)return;
+  setupLesson(lesson);mountPatching(lesson);
+}
+function mountPatching(lesson) {
+  if(lesson.querySelector('#patch-picture'))setupPatchExample();
+  if(lesson.querySelector('#rack-picture'))setupRackExample();
+  example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture,lesson);
+  example('fanout-picture', 'Choose a fanout follower', Array.from({length:12}, (_, index) => `Leg ${index+1}`), fanoutPicture,lesson);
+  example('mmc-patch-picture', 'MMC patching steps', ['1 · Match', '2 · Prepare', '3 · Seat'], mmcPatchPicture,lesson);
 }
 
 function renderSimulations() {
@@ -433,7 +445,7 @@ function renderSimulations() {
       <div id="patch-lab" class="patch-lab"></div>
       <p class="picture-note">Each ticket is a separate training example using your site's 1 / 5 mapping. Matching a port does not prove light or link health. On site: confirm FIM, inspect/clean, seat fully, and check optic health.</p>
     </section>
-    <a class="next-chapter" href="./patching.html">Review Chapter 3: FIM, LC & MMC patching →</a>
+    <a class="next-chapter" href="./patching.html">Review FIM, LC & MMC patching →</a>
     <a class="next-chapter" href="./quiz.html">Exams →</a>`;
   setupLesson(lesson);
   mountPatchPractice(document.getElementById('patch-lab'));
@@ -510,6 +522,24 @@ function mmcPatchPicture(selected) {
   return mmcPatchingIllustration(selected);
 }
 
+function renderStage(body,stage) {
+  // Move only uninitialized markup. Interactive closures then belong to their new stage.
+  const sources=[renderLesson,renderDevicesLesson,renderPatchingLesson].map(render=>{
+    const source=document.createElement('div');render(source,true);return source;
+  });
+  body.innerHTML='<div class="chapter-heading"><p class="chapter-count"></p><button type="button" class="lesson-motion"></button></div>';
+  const used=new Set();
+  for(const id of stage.sections) {
+    const source=sources.find(item=>item.querySelector(`#${id}`));
+    used.add(source);body.append(source.querySelector(`#${id}`));
+  }
+  const references=document.createElement('details');references.className='course-sources';
+  references.innerHTML='<summary>References</summary>';
+  for(const source of used)for(const item of source.querySelectorAll(':scope > .lesson-sources'))references.append(item);
+  body.append(references);
+  setupLesson(body);mountOptics(body);mountDevices(body);mountPatching(body);
+}
+
 if (lesson) {
   if (lesson.dataset.chapter === 'patching' && location.hash === '#patch-practice') location.replace('./simulations.html#patch-practice');
   else if (['devices', 'patching'].includes(lesson.dataset.chapter)) {
@@ -517,7 +547,7 @@ if (lesson) {
   } else if (lesson.dataset.chapter === 'simulations') renderSimulations();
   else {
     courseLink.setAttribute('aria-current', 'page');
-    mountCourse(lesson, [renderLesson, renderDevicesLesson, renderPatchingLesson], linkLessonTerms);
+    mountCourse(lesson, renderStage, linkLessonTerms);
   }
 }
 

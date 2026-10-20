@@ -1,201 +1,133 @@
-export const chapters = [
-  {key:'optics', title:'Optics, fiber & light', summary:'Know the parts → read the light → check the path', groups:[
-    {title:'Know the parts', topics:[['optics','Optics, TX / RX & VFL'],['path','Fiber, LC & the passive path'],['trace-loops','From device data to light']]},
-    {title:'Read the light', topics:[['readings','Power readings & allowed limits'],['polarity-checks','Polarity: connect TX to RX']]},
-    {title:'Check the path', topics:[['loopbacks','LC & MMC loopbacks'],['compare-loops','Use loops to narrow the problem'],['cleaning','Dirt, seating & tight bends'],['fault-evidence','Ferrules, fiber & splice faults'],['change-evidence','Make one change, then retest'],['vfl','Trace with red VFL light'],['test-evidence','Continuity versus optical loss'],['connected-case','Work one case from both ends']]}
-  ]},
-  {key:'devices', title:'How devices communicate', summary:'Find the device → follow the route → confirm the endpoints', groups:[
-    {title:'Locate & connect', topics:[['position','Read a rack position'],['ends','Local, remote & the chain of passives'],['viewpoint','See the same path from either end'],['ports','Confirm the device and ports'],['lldp-neighbors','LLDP: did I connect to the right device?']]}
-  ]},
-  {key:'patching', title:'FIM & patching', summary:'Read the assignment → choose the position → match the connections', groups:[
-    {title:'Map & patch', topics:[['fim-path','Read the FIM connection assignment'],['lc-position','Choose the LC optic position'],['rack-path','Follow the fiber inside the rack'],['mmc-fanout','Match the MMC head & followers'],['worked-ticket','Work through a complete ticket']]}
-  ]}
-].map(chapter=>({...chapter,sections:chapter.groups.flatMap(group=>group.topics.map(([id])=>id))}));
-
-const takeaways = {
-  optics:'The optic carries device data as infrared light. A VFL supplies separate red light for tracing.',
-  'trace-loops':'Devices exchange data; their optics convert it. The fiber and passives carry the light between them.',
-  loopbacks:'A loopback checks the return path up to its location. Anything beyond that point is still untested.',
-  'change-evidence':'Record the reading, change one thing, then retest. An improvement is not the same as a verified repair.',
-  position:'Read the whole location: building, room, row, rack and elevation each narrow the search.',
-  ends:'Follow every mapped passive between the devices. Local and remote each have a sending and a receiving path.',
-  viewpoint:'Changing your viewpoint swaps the names local and remote, not the job of TX or RX.',
-  'rack-path':'Follow the assigned LC leg from the optic to its MMC head and CAS port.',
-  'worked-ticket':'Match location, optic orientation, follower, head and CAS port together, then verify health.'
-};
-
-export function coursePosition(hash = '', saved = '') {
-  const anchor = hash.replace(/^#/, '');
-  const index = chapters.findIndex((chapter, i) => anchor === `chapter-${i+1}` || chapter.sections.includes(anchor));
-  if (index !== -1) return {index, anchor};
-  const topic = chapters.findIndex(chapter => chapter.sections.includes(saved));
-  if (topic !== -1) return {index:topic, anchor:saved};
-  const remembered = chapters.findIndex((chapter,i) => chapter.key === saved || saved === `chapter-${i+1}`);
-  const fallback = remembered === -1 ? 0 : remembered;
-  return {index:fallback, anchor:`chapter-${fallback+1}`};
+import {chapters,lessonSupport,takeaways,legacyCourseAnchors,lessonNavigation} from './course-data.mjs?v=1';
+export {chapters,lessonNavigation};
+const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function resolvePosition(value) {
+  const anchor=legacyCourseAnchors[value]??value;
+  const index=chapters.findIndex((stage,i)=>anchor===`stage-${i+1}`||stage.sections.includes(anchor));
+  if(index!==-1)return {index,anchor};
+  const keyed=chapters.findIndex(stage=>stage.key===anchor);
+  return keyed===-1?null:{index:keyed,anchor:`stage-${keyed+1}`};
 }
-
+export function coursePosition(hash='',saved='') {
+  return resolvePosition(hash.replace(/^#/,''))??resolvePosition(saved)??{index:0,anchor:'stage-1'};
+}
 export function learningEntry(storage) {
-  let saved = '';
-  try { saved = storage.getItem('fiber-learn-chapter-v1') || ''; } catch { /* Optional. */ }
-  const position = coursePosition('', saved);
-  const chapter = chapters[position.index];
-  const topic = chapter.groups.flatMap(group=>group.topics).find(([id])=>id===position.anchor);
-  const valid = chapters.some((item,i)=>item.key===saved || saved===`chapter-${i+1}` || item.sections.includes(saved));
-  return {href:`./learn.html#${position.anchor}`, action:valid?'Continue learning':'Start learning', title:topic?.[1] || chapter.title};
+  let saved='';
+  try {saved=storage?.getItem('fiber-learn-chapter-v1')||'';} catch {/* Reading remains available. */}
+  const position=coursePosition('',saved),stage=chapters[position.index];
+  return {href:`./learn.html#${position.anchor}`,action:resolvePosition(saved)?'Continue learning':'Start learning',title:lessonSupport[position.anchor]?.[0]??stage.title};
 }
-
-export function courseDestination(pathname, hash = '') {
-  const page = pathname.split('/').at(-1);
-  if (!['learn.html','devices.html','patching.html'].includes(page)) return null;
-  if (page === 'patching.html' && hash === '#patch-practice') return null;
-  return hash || (page === 'devices.html' ? '#chapter-2' : page === 'patching.html' ? '#chapter-3' : '#chapter-1');
+export function courseDestination(pathname,hash='') {
+  const page=pathname.split('/').at(-1);
+  if(!['learn.html','devices.html','patching.html'].includes(page))return null;
+  if(page==='patching.html'&&hash==='#patch-practice')return null;
+  return hash||(page==='devices.html'?'#chapter-2':page==='patching.html'?'#chapter-3':'#stage-1');
 }
-
-export function mountCourse(host, renderers, onChapter = () => {}) {
-  const storageKey = 'fiber-learn-chapter-v1';
-  let saved = '';
-  try { saved = localStorage.getItem(storageKey) || ''; } catch { /* Reading remains available without storage. */ }
+export function mountCourse(host,renderStage,onChapter=()=>{}) {
+  const storageKey='fiber-learn-chapter-v1';
+  let saved='';
+  try {saved=localStorage.getItem(storageKey)||'';} catch {/* Optional. */}
   host.classList.add('course');
-  host.innerHTML = `<h2 id="course-title">Your learning path</h2>
-    <p class="lesson-intro">Start with the parts, follow the connections, then practice patching. Choose a chapter or continue where you left off.</p>
+  host.innerHTML=`<h2 id="course-title">Your learning path</h2>
+    <p class="lesson-intro">Five stages, one lesson at a time. Learn the purpose, explore the example, then check your understanding.</p>
     <div id="contents" class="course-contents" hidden>
       <button type="button" class="contents-toggle">Close contents <span aria-hidden="true">×</span></button>
       <nav class="contents-panel" aria-labelledby="contents-title">
-      <div class="contents-heading"><h3 id="contents-title">Table of contents</h3><button type="button" class="course-reference" data-reference="" aria-haspopup="dialog">Quick reference</button></div>
-      ${chapters.map((chapter,i)=>`<details class="contents-chapter"><summary><span class="contents-number">${i+1}</span><span>${chapter.title}<small>${chapter.summary}</small></span></summary>
-        <a class="contents-start" href="#chapter-${i+1}">Start chapter ${i+1}</a>
-        ${chapter.groups.map(group=>`<div class="contents-group"><h4>${group.title}</h4><ul>${group.topics.map(([id,label])=>`<li><a href="#${id}">${label}</a></li>`).join('')}</ul></div>`).join('')}
-      </details>`).join('')}
-      <p class="contents-note">Dotted-underlined terms open a definition. Your place is saved on this device.</p>
+        <div class="contents-heading"><h3 id="contents-title">Table of contents</h3><button type="button" class="course-reference" data-reference="" aria-haspopup="dialog">Quick reference</button></div>
+        ${chapters.map((stage,i)=>`<details class="contents-chapter"><summary><span class="contents-number">${i+1}</span><span>${stage.title}<small>${stage.summary}</small></span></summary>
+          <a class="contents-start" href="#stage-${i+1}">Start stage ${i+1}</a>
+          <div class="contents-group"><ul>${stage.sections.map(id=>`<li><a href="#${id}">${lessonSupport[id][0]}</a></li>`).join('')}</ul></div></details>`).join('')}
+        <p class="contents-note">Dotted-underlined terms open a definition. Your place is saved on this device.</p>
       </nav>
     </div>
-    <div class="course-chapters">${chapters.map((chapter,i) => `
-      <section class="course-chapter" id="chapter-${i+1}">
-        <h2 class="course-chapter-heading"><button type="button" class="course-toggle" id="chapter-toggle-${i+1}" aria-expanded="false" aria-controls="chapter-body-${i+1}">
-          <span class="course-number" aria-hidden="true">${i+1}</span><span><strong>${chapter.title}</strong><span class="course-summary">${chapter.summary}</span></span><span class="course-chevron" aria-hidden="true">⌄</span>
-        </button></h2>
-        <div class="course-chapter-body" id="chapter-body-${i+1}" data-chapter="${chapter.key}" role="region" aria-labelledby="chapter-toggle-${i+1}" hidden></div>
-      </section>`).join('')}</div>`;
-  const bodies = [...host.querySelectorAll('.course-chapter-body')];
-  const toggles = [...host.querySelectorAll('.course-toggle')];
-  const mounted = new Set();
-
-  function show(position, {scroll=false, focus=false} = {}) {
-    host.querySelector('#contents').hidden = true;
-    const {index, anchor} = position;
-    bodies.forEach((body,i) => {
-      body.hidden = i !== index;
-      toggles[i].setAttribute('aria-expanded', String(i === index));
-      body.dispatchEvent(new Event('coursevisibility'));
-    });
-    const body = bodies[index];
-    if (!mounted.has(index)) {
-      renderers[index](body);
-      body.querySelector('.chapter-count').textContent = `Chapter ${index+1} of ${chapters.length}`;
-      const backToChapters = document.createElement('button');
-      backToChapters.type = 'button'; backToChapters.className = 'course-outline'; backToChapters.textContent = 'Contents ↑';
-      backToChapters.addEventListener('click', () => navigate('#contents'));
-      body.querySelector('.chapter-heading').insertBefore(backToChapters, body.querySelector('.lesson-motion'));
-      const reference = document.createElement('button');
-      reference.type='button';reference.className='course-reference';reference.textContent='Reference';reference.dataset.reference='';reference.setAttribute('aria-haspopup','dialog');
-      body.querySelector('.chapter-heading').insertBefore(reference,body.querySelector('.lesson-motion'));
-      body.querySelector('.lesson-jumps')?.remove();
-      const topicFragment=document.createDocumentFragment();
-      let topicNumber=0;
-      chapters[index].groups.forEach(group=>group.topics.forEach(([id])=>{
-        const section=body.querySelector(`#${id}`);
-        if(!section) return;
-        const label=document.createElement('p');label.className='topic-position';
-        label.textContent=`${index+1}.${++topicNumber} · ${group.title}`;section.prepend(label);
-        if(takeaways[id] && !section.querySelector('.lesson-takeaway')) {
+    <div class="course-chapters">${chapters.map((stage,i)=>`<section class="course-chapter" id="stage-${i+1}">
+      <h2 class="course-chapter-heading"><button type="button" class="course-toggle" id="stage-toggle-${i+1}" aria-expanded="false" aria-controls="stage-body-${i+1}">
+        <span class="course-number" aria-hidden="true">${i+1}</span><span><strong>${stage.title}</strong><span class="course-summary">${stage.summary}</span></span><span class="course-chevron" aria-hidden="true">⌄</span>
+      </button></h2>
+      <div class="course-chapter-body" id="stage-body-${i+1}" data-chapter="${stage.key}" role="region" aria-labelledby="stage-toggle-${i+1}" hidden></div>
+    </section>`).join('')}</div>`;
+  const bodies=[...host.querySelectorAll('.course-chapter-body')],toggles=[...host.querySelectorAll('.course-toggle')],mounted=new Set();
+  const remember=id=>{saved=id;try {localStorage.setItem(storageKey,id);}catch {/* Optional. */}};
+  function show(position,{scroll=false,focus=false}={}) {
+    host.querySelector('#contents').hidden=true;
+    const {index,anchor}=position,stage=chapters[index],body=bodies[index];
+    const topic=stage.sections.includes(anchor)?anchor:stage.sections[0],number=stage.sections.indexOf(topic);
+    bodies.forEach((item,i)=>{item.hidden=i!==index;toggles[i].setAttribute('aria-expanded',String(i===index));});
+    if(!mounted.has(index)) {
+      renderStage(body,stage);
+      body.querySelector('.chapter-count').textContent=`Stage ${index+1} of ${chapters.length}`;
+      const controls=document.createElement('div');controls.className='course-reading-tools';
+      controls.innerHTML='<button type="button" class="course-outline">Contents ↑</button><button type="button" class="course-reference" data-reference="" aria-haspopup="dialog">Reference</button>';
+      controls.querySelector('.course-outline').addEventListener('click',()=>navigate('#contents'));
+      body.querySelector('.chapter-heading').insertBefore(controls,body.querySelector('.lesson-motion'));
+      const select=document.createElement('label');select.className='course-lesson-picker';
+      select.innerHTML=`<span>Lesson in this stage</span><select aria-label="Lesson in this stage">${stage.sections.map(id=>`<option value="${id}">${lessonSupport[id][0]}</option>`).join('')}</select>`;
+      select.querySelector('select').addEventListener('change',event=>navigate(`#${event.target.value}`,true));
+      body.querySelector('.chapter-heading').after(select);
+      stage.sections.forEach((id,i)=>{
+        const section=body.querySelector(`#${id}`),[,goal,question,answer]=lessonSupport[id];
+        const label=document.createElement('p');label.className='topic-position';label.textContent=`Lesson ${i+1} of ${stage.sections.length}`;section.prepend(label);
+        const objective=document.createElement('p');objective.className='lesson-objective';
+        objective.innerHTML=`<b>What you’ll learn</b><span>${escape(goal)}</span>`;section.querySelector('h3').after(objective);
+        if(takeaways[id]&&!section.querySelector('.lesson-takeaway')) {
           const takeaway=document.createElement('p');takeaway.className='lesson-takeaway';takeaway.textContent=takeaways[id];section.append(takeaway);
         }
-        topicFragment.append(section);
-      }));
-      body.querySelector('.lesson-intro').after(topicFragment);
-      onChapter(body);
-      if (index < chapters.length-1) {
-        const next = document.createElement('button');
-        next.type = 'button'; next.className = 'course-continue';
-        next.textContent = `Continue → ${chapters[index+1].title}`;
-        next.addEventListener('click', () => navigate(`#chapter-${index+2}`, true));
-        body.append(next);
-      }
-      mounted.add(index);
+        const check=document.createElement('div');check.className='lesson-check';
+        check.innerHTML=`<h4>Check your understanding</h4><p>${escape(question)}</p><details><summary>Show explanation</summary><p>${escape(answer)}</p></details>`;section.append(check);
+      });
+      const footer=document.createElement('div');footer.className='course-lesson-footer';body.append(footer);
+      onChapter(body);mounted.add(index);
     }
-    saved = anchor;
-    try { localStorage.setItem(storageKey, saved); } catch { /* Storage is optional. */ }
+    stage.sections.forEach(id=>{body.querySelector(`#${id}`).hidden=id!==topic;});
+    bodies.forEach(item=>item.dispatchEvent(new Event('coursevisibility')));
+    body.querySelector('.course-lesson-picker select').value=topic;
+    const {previous,next}=lessonNavigation(topic),last=number===stage.sections.length-1;
+    body.querySelector('.course-lesson-footer').innerHTML=`
+      ${last?`<div class="course-stage-finish"><h3>Put this stage into practice</h3>
+        <a class="course-practice-link" href="${stage.practice[1]}">${stage.practice[0]} →</a>
+        ${stage.exam?`<a class="course-practice-link" href="${stage.exam[1]}"><span>Related exam</span>: <span>${stage.exam[0]}</span> →</a>`:''}</div>`:''}
+      <nav class="course-topic-nav" aria-label="Lesson navigation">
+        ${previous?`<a href="#${previous}"><small>Previous lesson</small><span>${lessonSupport[previous][0]}</span></a>`:'<span></span>'}
+        ${next?`<a href="#${next}" class="course-next"><small>Next lesson</small><span>${lessonSupport[next][0]} →</span></a>`:'<a href="./quiz.html#intermediate" class="course-next">Choose an Intermediate exam →</a>'}
+      </nav>`;
+    remember(topic);
     host.querySelectorAll('.course-contents a').forEach(link=>{
-      if(link.getAttribute('href')===`#${anchor}`) link.setAttribute('aria-current','location');
-      else link.removeAttribute('aria-current');
+      if(link.getAttribute('href')===`#${topic}`)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');
     });
-    if (focus) (body.querySelector(`#${anchor} h3`) || toggles[index]).focus({preventScroll:true});
-    if (scroll) requestAnimationFrame(() => {
-      const target = document.getElementById(anchor);
-      if (target && host.contains(target)) {
-        target.scrollIntoView({block:'start'});
-        if(focus && target.classList.contains('lesson-section')) {
-          const heading=target.querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});
-        }
-      }
+    if(scroll||focus)requestAnimationFrame(()=>{
+      const section=body.querySelector(`#${topic}`),heading=section.querySelector('h3');
+      if(scroll)section.scrollIntoView({block:'start'});
+      if(focus){heading.tabIndex=-1;heading.focus({preventScroll:true});}
     });
-  }
-  function collapse(index) {
-    bodies[index].hidden = true;
-    toggles[index].setAttribute('aria-expanded', 'false');
-    bodies[index].dispatchEvent(new Event('coursevisibility'));
-  }
-  function navigate(hash, focus=false) {
-    if(hash==='#contents') {
-      if(location.hash!==hash) history.pushState(null,'',hash);
-      showContents(); return;
-    }
-    const position = coursePosition(hash, saved);
-    if (location.hash !== `#${position.anchor}`) history.pushState(null, '', `#${position.anchor}`);
-    show(position, {scroll:true, focus});
   }
   function showContents() {
-    const contents=host.querySelector('#contents');
-    contents.hidden = false;
+    const contents=host.querySelector('#contents');contents.hidden=false;
     contents.scrollIntoView({block:'start'});contents.querySelector('.contents-toggle').focus({preventScroll:true});
   }
-  host.querySelector('.contents-toggle').addEventListener('click', () => navigate(`#${coursePosition('', saved).anchor}`, true));
-  toggles.forEach((button,i) => button.addEventListener('click', () => {
-    if (!bodies[i].hidden) collapse(i);
-    else navigate(`#chapter-${i+1}`, true);
+  function navigate(hash,focus=false) {
+    if(hash==='#contents'){if(location.hash!==hash)history.pushState(null,'',hash);showContents();return;}
+    const position=coursePosition(hash,saved);
+    if(location.hash!==`#${position.anchor}`)history.pushState(null,'',`#${position.anchor}`);
+    show(position,{scroll:true,focus});
+  }
+  host.querySelector('.contents-toggle').addEventListener('click',()=>navigate(`#${saved}`,true));
+  toggles.forEach((button,i)=>button.addEventListener('click',()=>{
+    if(!bodies[i].hidden){bodies[i].hidden=true;button.setAttribute('aria-expanded','false');bodies[i].dispatchEvent(new Event('coursevisibility'));}
+    else navigate(`#stage-${i+1}`,true);
   }));
-  host.addEventListener('click', event => {
-    const anchor = event.target.closest('a');
-    if (!anchor || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || anchor.target || anchor.hasAttribute('download')) return;
-    const url = new URL(anchor.href);
-    if (url.origin !== location.origin) return;
-    const destination = courseDestination(url.pathname, url.hash);
-    if (destination === null) return;
-    event.preventDefault(); navigate(destination, true);
+  host.addEventListener('click',event=>{
+    const anchor=event.target.closest('a');
+    if(!anchor||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||anchor.target||anchor.hasAttribute('download'))return;
+    const url=new URL(anchor.href);
+    if(url.origin!==location.origin)return;
+    const destination=courseDestination(url.pathname,url.hash);
+    if(destination===null)return;
+    event.preventDefault();navigate(destination,true);
   });
   document.addEventListener('course:navigate',event=>navigate(event.detail,true));
-  window.addEventListener('hashchange', () => location.hash==='#contents'?showContents():show(coursePosition(location.hash, saved), {scroll:true}));
-  const hadHash = Boolean(location.hash);
-  const initial = coursePosition(location.hash, saved);
-  if (!hadHash) history.replaceState(null, '', `#${initial.anchor}`);
-  show(initial, {scroll:location.hash!=='#contents' && (hadHash || chapters[initial.index].sections.includes(initial.anchor))});
-  if(location.hash==='#contents') requestAnimationFrame(showContents);
-  let scrollPending = false;
-  window.addEventListener('scroll', () => {
-    if(scrollPending || !host.querySelector('#contents').hidden) return;
-    scrollPending = true;
-    requestAnimationFrame(() => {
-      scrollPending = false;
-      const body = bodies.find(item=>!item.hidden);
-      if(!body) return;
-      const sections = [...body.querySelectorAll('.lesson-section')].filter(section=>chapters.some(chapter=>chapter.sections.includes(section.id)));
-      const line = Math.min(180, window.innerHeight / 3);
-      const current = sections.find(section=>{const box=section.getBoundingClientRect();return box.top<=line && box.bottom>line;});
-      if(!current || current.id===saved) return;
-      saved = current.id;
-      try { localStorage.setItem(storageKey,saved); } catch { /* Optional. */ }
-      history.replaceState(null,'',`#${saved}`);
-    });
-  }, {passive:true});
+  window.addEventListener('hashchange',()=>location.hash==='#contents'?showContents():show(coursePosition(location.hash,saved),{scroll:true}));
+  const initial=coursePosition(location.hash,saved),hadHash=Boolean(location.hash);
+  if(location.hash!=='#contents')history.replaceState(null,'',`#${initial.anchor}`);
+  show(initial,{scroll:hadHash&&location.hash!=='#contents'});
+  if(location.hash==='#contents')requestAnimationFrame(showContents);
 }

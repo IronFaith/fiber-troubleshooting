@@ -1,8 +1,8 @@
-import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=6';
+import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=7';
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
 import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=11';
 
-import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=16';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor,examDestination} from './quiz-data.mjs?v=17';
 import {loadPatchBest} from './patch-practice-data.mjs?v=2';
 import {loopTopic,loopTitle,loopDescription} from './loop-exam.mjs?v=1';
 
@@ -20,7 +20,8 @@ let {scores:savedScores,canSave} = loadQuizProgress(progressStorage);
 let {scores:appliedScores} = loadQuizProgress(progressStorage,'intermediate');
 let {scores:loopScores} = loadQuizProgress(progressStorage,'loop');
 let suspended=loadExam(progressStorage), fullRoundIds=[], draftChoices=[];
-let selectedLevel=['beginner','intermediate'].includes(location.hash.slice(1))?location.hash.slice(1):null;
+let recommendedRound=examDestination(location.hash);
+let selectedLevel=recommendedRound!==null?(levelFor(recommendedRound)==='intermediate'?'intermediate':'beginner'):['beginner','intermediate'].includes(location.hash.slice(1))?location.hash.slice(1):null;
 const levelTitle=level=>level==='intermediate'?'Intermediate':'Beginner';
 const activeScores=()=>currentRound===loopTopic?loopScores:selectedLevel==='intermediate'?appliedScores:savedScores;
 const displayLevel=topic=>levelFor(topic)==='loop'?'beginner':levelFor(topic);
@@ -42,6 +43,7 @@ function showResume() {
   host.querySelector('h2').after(panel);
   panel.querySelector('button').addEventListener('click',()=>{
     const saved=suspended;
+    recommendedRound=null;
     currentRound=saved.round; fullRoundIds=[...saved.ids]; attempt=saved.attempt; index=saved.index;
     retry=saved.retry; roundAnswers=saved.roundAnswers; firstScore=saved.firstScore; draftChoices=saved.draftChoices;
     countEvent=retry?null:saved.countEvent?{...saved.countEvent,at:Date.now()}:startExamCount();
@@ -58,6 +60,7 @@ function begin(ids, isRetry = false) {
 }
 
 function beginRound(topic) {
+  recommendedRound=null;
   selectedLevel=displayLevel(topic);
   history.replaceState(null,'',`${location.pathname}#${selectedLevel}`);
   currentRound = topic;
@@ -73,12 +76,12 @@ function renderIntro() {
   const patchBest=loadPatchBest(progressStorage).best;
   if(!selectedLevel) {
     const counts=[savedScores.filter(s=>s>=4).length+(patchBest>=4?1:0)+(loopScores[0]>=4?1:0),appliedScores.filter(s=>s>=4).length];
-    host.innerHTML=`<h2 id="quiz-title" tabindex="-1">Exams</h2><p class="lesson-intro">Choose a level. Every exam has five questions and draws from the chapters.</p>
+    host.innerHTML=`<h2 id="quiz-title" tabindex="-1">Exams</h2><p class="lesson-intro">Choose a level. Every exam has five questions and draws from the lessons.</p>
       <a class="quiz-lesson-link" href="#progress">My progress · ${apprenticeRank(savedScores).title}</a>
       <div class="exam-levels">${['beginner','intermediate'].map((level,i)=>`<button type="button" class="exam-level" data-level="${level}">
         ${quizThumbnail(i===0?2:3)}<span><strong>${levelTitle(level)}</strong><b>${i===0?'Foundations':'Applied troubleshooting'}</b><span>${i===0?'Recognize parts, read the signs and make the basic checks.':'Combine observations, explain the limits of a test and choose your next check.'}</span><small>${counts[i]} of ${i===0?6:2} exams passed · choose any exam</small><em>Open ${levelTitle(level)} →</em></span></button>`).join('')}</div>
       <p class="picture-note">Beginner includes four Apprentice exams, Loopbacks and hands-on patching. Intermediate combines those ideas in mixed scenarios. Choose any exam; there is no required order.</p>
-      <a class="quiz-lesson-link" href="./learn.html">Explore the chapters</a>`;
+      <a class="quiz-lesson-link" href="./learn.html">Explore the lessons</a>`;
     showResume();
     host.querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>chooseLevel(b.dataset.level)));
     return;
@@ -87,14 +90,14 @@ function renderIntro() {
   const rank = apprenticeRank(savedScores);
   host.innerHTML = `<button type="button" class="quiz-picker-back" id="exam-levels">← Exam levels</button><p class="chapter-count">5 questions per exam · choose freely</p>
     <h2 id="quiz-title" tabindex="-1">${levelTitle(selectedLevel)} · ${beginner?'Foundations':'Applied troubleshooting'}</h2>
-    <p class="lesson-intro">${beginner?'Understand the parts, interpret a clear observation and choose a sensible first check.':'Use the same chapter knowledge in situations with several clues. Separate what is known from what still needs checking.'}</p>
+    <p class="lesson-intro">${beginner?'Understand the parts, interpret a clear observation and choose a sensible first check.':'Use the same lesson knowledge in situations with several clues. Separate what is known from what still needs checking.'}</p>
     ${beginner?(rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Pass the four Apprentice exams with 4/5 to advance through Fiber Apprentice I–IV. Loopbacks and patching earn separate badges.</p>'):appliedCard()}
     <div class="quiz-picker">${[...roundsForLevel(selectedLevel),...(beginner?[loopTopic]:[])].map((topic,i) => {
       const score = topic===loopTopic?loopScores[0]:scores[i];
       const passed = score !== null && score >= 4;
-      return `<button type="button" class="quiz-pick${passed ? ' quiz-pick-passed' : ''}" data-round="${topic}">
+      return `<button type="button" class="quiz-pick${passed ? ' quiz-pick-passed' : ''}${topic===recommendedRound?' quiz-pick-recommended':''}" data-round="${topic}">
         ${quizThumbnail(beginner?topic:i===0?3:2)}<span class="quiz-pick-content">
-          <strong>${allTopics[topic]}</strong><span class="quiz-pick-description">${allDescriptions[topic]}</span>
+          ${topic===recommendedRound?'<small class="exam-lesson-label">From your lesson</small>':''}<strong>${allTopics[topic]}</strong><span class="quiz-pick-description">${allDescriptions[topic]}</span>
           <span class="quiz-pick-status">${score === null ? 'Not taken' : `${passed ? '✓ Passed' : 'Keep practicing'} · Best result ${score}/5`}</span>
           <span class="quiz-pick-action">${score === null ? 'Start exam' : 'Retake exam'} →</span>
         </span></button>`;
@@ -104,9 +107,13 @@ function renderIntro() {
   showResume();
   host.querySelectorAll('[data-round]').forEach(button => button.addEventListener('click',() => beginRound(Number(button.dataset.round))));
   host.querySelector('#exam-levels').addEventListener('click',()=>chooseLevel(null));
+  if(recommendedRound!==null)requestAnimationFrame(()=>{
+    const card=host.querySelector(`[data-round="${recommendedRound}"]`);card?.focus({preventScroll:true});card?.scrollIntoView({block:'center'});
+  });
 }
 
 function chooseLevel(level) {
+  recommendedRound=null;
   selectedLevel=level;
   history.replaceState(null,'',`${location.pathname}${level?`#${level}`:''}`);
   showQuizPicker();
@@ -304,7 +311,8 @@ function renderResults() {
 }
 
 window.addEventListener('hashchange',()=>{
-  selectedLevel=['beginner','intermediate'].includes(location.hash.slice(1))?location.hash.slice(1):null;
+  recommendedRound=examDestination(location.hash);
+  selectedLevel=recommendedRound!==null?displayLevel(recommendedRound):['beginner','intermediate'].includes(location.hash.slice(1))?location.hash.slice(1):null;
   showQuizPicker();
 });
 function refreshProgress() {

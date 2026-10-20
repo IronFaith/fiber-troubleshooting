@@ -12,6 +12,10 @@ export const allTopics = [...topics,...appliedTopics,loopTitle];
 export const allDescriptions = [...roundDescriptions,...appliedDescriptions,loopDescription];
 export const levelFor = topic => topic === loopTopic ? 'loop' : topic >= topics.length ? 'intermediate' : 'beginner';
 export const roundsForLevel = level => level === 'loop' ? [loopTopic] : level === 'intermediate' ? [4,5] : [0,1,2,3];
+export function examDestination(hash) {
+  const destinations={'#exam-understand-light':2,'#exam-loopbacks':loopTopic,'#exam-read-evidence':4};
+  return Object.hasOwn(destinations,hash)?destinations[hash]:null;
+}
 
 // Site examples and fictional training readings, not installed-optic limits.
 export const questions = [

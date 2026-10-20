@@ -8,14 +8,13 @@ Updated: **2026-10-20**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Review the lessons and course structure after the user reported that the material feels unstructured.
-- **Accepted scope — 2026-10-20:** Inspect the existing lessons, navigation and exam connections, then recommend focused improvements. A course reorganization or new lesson functionality has not yet been approved.
-- **Review findings:** Chapter 1 contains 13 topics; Chapters 2 and 3 contain five each. Chapter 1 ends with a two-ended troubleshooting case that uses FIM and endpoint identity before the later mapping and LLDP lessons. It is a long continuous chapter with chapter-level continuation. Chapter 2 has no in-content exam link; Chapter 3 ends with a general Exams link. The existing Beginner exam names do not directly match chapter names.
-- **Proposed direction, not approved implementation:** Reuse existing material in five shorter stages: equipment/light basics; identify and map the connection; interpret readings; choose and perform tests; isolate and verify recovery. Give lessons a consistent purpose → visual/example → result meaning and limits → short understanding check → next lesson/practice/exam pattern. Move the combined case after its prerequisites. Preserve existing artwork, anchors, scores and badges.
-- **Review verification:** Inspected `course.mjs`, lesson renderers, reasoning/case content and exam lesson links; checked all three chapters in the live desktop browser. Suggestions on worked examples, explanation questions and retrieval practice are informed by the [IES organizing-instruction guide](https://ies.ed.gov/ncee/wwc/PracticeGuide/1). These are design recommendations, not learner-outcome measurements.
-- **Application baseline:** Case findings release [`de62030`](https://github.com/IronFaith/fiber-troubleshooting/commit/de620306d0d621a2652c989d2625af1c876781e3) remains live. Its exact Pages deployment and all 20 changed runtime files were verified; all 126 tests passed. No application code changed during this course review.
-- **Remaining work / next action:** Present the review and proposed first pass. Await the user's chosen implementation scope; do not treat this proposal as an approved redesign.
-- **Blockers / missing input:** No blocker for the review. Field-tool inventory remains unconfirmed; existing Case findings states requirements and offers unavailable-tool/access guidance.
+- **Current objective:** Improve the lesson structure so beginners learn each action’s purpose, interpretation and limits before assessment.
+- **Accepted scope — 2026-10-20:** The user approved the five-stage progression proposed in the course review. Reuse all 23 lessons and existing artwork, move the combined case last, add consistent objectives and unscored checks, and connect practice/exams. Preserve bookmarks, scores, badges and cases.
+- **Completed locally:** Five stages with one visible lesson, selector, Previous/Next, optional contents and exact-lesson resume. All 23 lessons include a short objective and revealable explanation. Stage links target existing practice and exams; saved attempts remain available. New learner content is translated into Spanish, French and Arabic.
+- **Verification:** Final `npm run check` passed all 129 tests. Browser checks covered all 23 lessons, cross-stage navigation, explanations, fanout selection/seating, flipped LC mapping, LLDP, polarity, loop comparison, the final case and stopping playback when leaving a lesson. Mobile explanations fit in English, Spanish, French and Arabic without page overflow. The exam handoff retained an existing 5/5 score and resumed its unfinished second question; the old Chapter 3 link opened FIM.
+- **Latest verified application baseline:** Case findings release [`de62030`](https://github.com/IronFaith/fiber-troubleshooting/commit/de620306d0d621a2652c989d2625af1c876781e3), with 126 passing tests and exact Pages runtime verification.
+- **Remaining work / next action:** Publish this verified milestone and confirm the exact Pages deployment and served runtime files.
+- **Blockers / missing input:** No implementation blocker. Field-tool inventory remains unconfirmed; Case findings already states requirements and offers unavailable-tool/access guidance.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
@@ -32,7 +31,7 @@ The latest application release is [`de62030`](https://github.com/IronFaith/fiber
 
 | Area | Current behavior |
 | --- | --- |
-| Learn | Three connected chapters covering optics/light/testing, device communication and locations/LLDP, and FIM/patching. Optional contents and a visual quick reference support navigation. |
+| Learn | Five stages covering equipment, connection identity, readings, tests, and isolation. All 23 lessons have objectives and unscored explanation checks; one lesson is visible at a time, with optional contents, reference, resume and practice/exam links. |
 | Simulations and Exams | Interactive LC/MMC patching, selectable five-question Beginner and Intermediate exams, saved attempts, local best scores and Fiber Apprentice badges. Questions are supported by lesson material. |
 | Troubleshooting | One test workspace with local/remote tools, editable CAS points, physical identity checks, inline results and compact findings. The path stacks on mobile. |
 | Evidence | Loop and VFL coverage remain separate. Findings show the bounded area, source/strand, observations, possible causes, ordered steps, required tools, outcome meanings and unavailable-tool/access guidance. Unknown sections and contradictory results stay visible. |

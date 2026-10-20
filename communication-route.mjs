@@ -219,6 +219,7 @@ export function mountCommunicationRoute(host) {
       focusMap();
     }
   });
+  panel.addEventListener('coursevisibility',()=>{if(panel.hidden||host.closest('.lesson-section')?.hidden)stop();});
   new MutationObserver(()=>{ if(panel.classList.contains('light-paused')) stop(); }).observe(panel,{attributes:true,attributeFilter:['class']});
   document.addEventListener('visibilitychange',()=> { if(document.hidden) stop(); });
   draw();

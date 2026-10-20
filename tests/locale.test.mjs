@@ -3,6 +3,25 @@ import assert from 'node:assert/strict';
 import {translate,translateLines,readLanguage,saveLanguage,languageKey,languageDirection,formatBidi} from '../locale.mjs';
 import {searchReference} from '../reference-data.mjs';
 import {connectedCaseQuestions} from '../connected-case.mjs';
+import {chapters,lessonSupport} from '../course-data.mjs';
+
+test('course objectives, self-checks, stages and navigation translate in every learner language',()=>{
+  const messages=[
+    ...Object.values(lessonSupport).flat(),
+    ...chapters.flatMap(stage=>[stage.title,stage.summary,stage.practice[0],...(stage.exam?[stage.exam[0]]:[])]),
+    'Five stages, one lesson at a time. Learn the purpose, explore the example, then check your understanding.',
+    'Stage 3 of 5','Start stage 2','Lesson 4 of 7','Lesson in this stage','What you’ll learn',
+    'Check your understanding','Show explanation','Put this stage into practice','Related exam',
+    'Lesson navigation','Previous lesson','Next lesson','Choose an Intermediate exam','From your lesson',
+    'Follow the full route through rack, distribution and room-passage passives →','Review FIM, LC & MMC patching →',
+    'Choose a level. Every exam has five questions and draws from the lessons.','Explore the lessons',
+    'Use the same lesson knowledge in situations with several clues. Separate what is known from what still needs checking.'
+  ];
+  for(const language of ['es','fr','ar'])for(const source of messages) {
+    if(language==='es'&&source==='Loopbacks')continue; // Established Spanish technical term.
+    assert.notEqual(translate(source,language),source,`${language}: ${source}`);
+  }
+});
 
 test('new-case actions and recorded VFL path labels translate in all learner languages',()=>{
   for(const language of ['es','fr','ar']) for(const message of ["Loop results need rechecking","A loop failed at CAS 1, but a farther loop passed from the same optic.","Recheck the earlier loop with the same optic, pair and limits. Inspect its seating and verify its mapping; a later pass does not explain the earlier failure.","Earlier light confirms this source and strand at that point. Confirm the physical mapping before blaming a component.","Switch off the VFL. Inspect the connectors and bends between CAS 1 and CAS 2. Clean and reinspect as needed, then retest strand B from the same LC.","This strand passed at the earlier point. Focus on the added cable and its mating connections.","Compare the added cable / assembly between CAS 1 and CAS 2 with a known-good compatible one. Keep the same source, strand and ports; record whether the replacement passes.","CAS CAS 1 · port layout","Rear · female MMC","Front · male MMC","Rear MMC","Front MMC","Fanout head","Onward cable","Unplugged","Port CAS 1 · MMC mating point","CAS CAS 1 connection: the rear female MMC fanout head mates with the front male MMC onward cable at the selected port.","CAS CAS 1 connection: two MMC mating connectors. Follow the actual cable record.","Fanout head · female MMC","Front · extension unplugged","Rear · extension unplugged",'History','Why this check?','Recorded continuity','Recorded loop · earlier setup','Yellow: fiber · amber: investigate','Red dashed: VFL passed','Fiber diagram; scroll down to follow the path','Case details','Pass','No return light','Weak return','New case started','Choose your path, then place a tool to begin.',
