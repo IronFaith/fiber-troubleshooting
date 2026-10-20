@@ -8,25 +8,24 @@ Updated: **2026-10-19**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Fix misaligned fibers, connectors and light in the troubleshooting hardware and VFL views.
-- **Accepted scope — 2026-10-19:** Small visual corrections on the existing tool. Preserve the newer connected loop animation, earlier-setup labels after Normalize, section findings, all four languages and stacked mobile layout. No changes to evidence rules, stored cases or exams.
-- **Completed and live:** [`54e25f0`](https://github.com/IronFaith/fiber-troubleshooting/commit/54e25f0b1f7e15e21c351187f236532145f1da16) aligns LC cable exits with their connector boots and light overlays, smooths cassette-to-cassette cable joins, centers VFL/MMC channels and clears overlapping VFL captions. Integrated upstream changes through 75f56d1 before publication. Final checks passed all 118 tests; desktop/mobile visuals and translated captions were inspected. The exact Pages deployment succeeded and all 10 changed application files matched their served contents.
+- **Current objective:** Normalize must remove the loopback illustration and reconnect service fibers after a passing test.
+- **Accepted scope — 2026-10-19:** Show the current physical setup at all times. Normalize removes LC/MMC loopbacks from either end; retain recorded passes, history and supported checked-path highlighting. This supersedes the earlier decision to redraw historical loopbacks after Normalize.
+- **Completed and live:** [`90b5abc`](https://github.com/IronFaith/fiber-troubleshooting/commit/90b5abc61ff1f753090eab979781461d89a44d79) removes the historical-loop override from the hardware renderer. Local/remote LC/MMC regression coverage and desktop/mobile browser checks passed. All 119 tests pass; the exact deployment succeeded and all four changed application files matched their served contents.
 - **Resolved defect:** UI-01 now uses wrapping captions within the hardware card; all four languages and both loop directions passed rendered checks.
-- **Remaining work / next action:** This alignment milestone is complete. No implementation or blocker remains for this request; continue from this release when a new change is accepted.
+- **Remaining work / next action:** The Normalize correction is complete. No implementation or blocker remains for this request.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`54e25f0`](https://github.com/IronFaith/fiber-troubleshooting/commit/54e25f0b1f7e15e21c351187f236532145f1da16): **Align LC fibers, VFL channels and cassette cable joins**.
+The latest application release is [`90b5abc`](https://github.com/IronFaith/fiber-troubleshooting/commit/90b5abc61ff1f753090eab979781461d89a44d79): **Remove loopback illustrations when the path is normalized**.
 
-- The optic drawing and its animated light now use the same LC boot exit, including disconnected legs. The VFL output meets the LC tip precisely.
-- Cassette-to-cassette bridges use one consistent cable jacket around the two channel paths, removing thick seams at card edges. Intermediate connections distinguish incoming and onward MMCs.
-- The VFL close-up centers the MMC body, adapter and viewing face around its two channels. Desktop channel B is level with its destination; mobile fibers enter the connector boot. Head captions stay clear of result controls and cable bends.
-- Preserved the latest connected-loop implementation and historical-setup labeling from upstream through [75f56d1](https://github.com/IronFaith/fiber-troubleshooting/commit/75f56d1e2ca2cccaf4bfc6ad4637ed28ec74ffe3). The earlier UI-01 wrapping fix remains in place.
-- Verification after integration: `npm run check` passed all 118 tests and `git diff --check` passed. Rendered desktop loop/Normalize and mobile VFL views were inspected; Spanish mobile and French/Arabic caption fit were checked. No browser JavaScript errors were reported. No new learner wording or storage changes were introduced.
-- [The exact application deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39358073594). All 10 changed HTML/CSS/JavaScript files matched the live served contents. README and this handoff describe the final merged implementation.
+- Root cause: the renderer replaced a plugged connection with a historical loop whenever a supported earlier pass existed. Normalize had already reconnected the stored setup, but the illustration overrode it.
+- Hardware now follows the actual connection state. An installed loop remains visible after recording Pass; Normalize removes it and draws the reconnected LC/MMC service path. Pass labels, recorded coverage, history and findings remain available.
+- Applies to local and remote LC/MMC loops, desktop and stacked mobile. Existing translated connection labels are reused in all four languages. No evidence rules, storage formats or exam behavior changed.
+- Verification: one focused regression checks installed-tool visibility, removal after Normalize and preserved history/coverage for both ends and both tool types. `npm run check` passed all 119 tests; `git diff --check` passed. Desktop and 390-pixel mobile browser checks showed no loopback after Normalize and retained the CAS pass and light highlighting; no JavaScript errors were reported.
+- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39358897326). All four changed application files matched the live site. AGENTS.md and README.md now require current-setup drawings after Normalize.
 
 ## What is in place
 
@@ -44,6 +43,7 @@ The latest application release is [`54e25f0`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`90b5abc`](https://github.com/IronFaith/fiber-troubleshooting/commit/90b5abc61ff1f753090eab979781461d89a44d79) | Normalize removes LC/MMC loopback drawings, reconnects service fibers and retains recorded passes and checked-path highlighting. |
 | [`54e25f0`](https://github.com/IronFaith/fiber-troubleshooting/commit/54e25f0b1f7e15e21c351187f236532145f1da16) | Precise LC/VFL cable joins, centered MMC channels and viewing faces, consistent cassette bridge thickness and unobstructed translated captions. |
 | [`b159a34`](https://github.com/IronFaith/fiber-troubleshooting/commit/b159a342af390256ad90a4a9de30c808ce8e8066) | Connected yellow hardware cords carry the passing-loop animation; removed duplicate lower light rails, preserved mapped ports and section findings, and resolved UI-01 in all four languages. |
 | [`a98967d`](https://github.com/IronFaith/fiber-troubleshooting/commit/a98967d8f9594e517ae175ede937887ca1964319) | Corrected the screenshot-reported overlay regression: connected loop returns stay in the evidence diagram and leave cassette artwork clear. Saved automatic instruction/status updates and the resumption handoff policy. |
