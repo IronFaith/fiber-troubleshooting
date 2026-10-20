@@ -1,5 +1,6 @@
 // French learner-facing messages. Keep English keys aligned with spanish.mjs.
 export const frenchMessages = [
+  ["All lessons are open. Jump to a topic below or scroll through the five stages.","Toutes les leçons sont ouvertes. Accédez à un sujet ci-dessous ou parcourez les cinq étapes."],
   ["Strand {0}","Fibre {0}"],
   ["Test point","Point de test"],
   ["Steps, tools and result meanings","Étapes, outils et interprétation"],

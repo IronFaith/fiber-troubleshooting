@@ -3,12 +3,12 @@ import {vflPen} from './test-tool-visuals.mjs?v=1';
 import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=2';
 import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=5';
 import { rackIllustration } from './rack-visuals.mjs?v=9';
-import { mountCommunicationRoute } from './communication-route.mjs?v=5';
-import { mountCourse, learningEntry } from './course.mjs?v=10';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=33';
+import { mountCommunicationRoute } from './communication-route.mjs?v=6';
+import { mountCourse, learningEntry } from './course.mjs?v=11';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=34';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=14';
-import { mountLightJourney } from './loop-lesson.mjs?v=8';
+import { mountLightJourney } from './loop-lesson.mjs?v=9';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=3';
 import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=12';
@@ -156,9 +156,11 @@ function mountOptics(lesson) {
 
 function setupLesson(lesson) {
   let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let active = true;
   const motion = lesson.querySelector('.lesson-motion');
-  function updateMotion() {
-    lesson.classList.toggle('light-paused', paused || lesson.hidden);
+  function updateMotion(event) {
+    if(event?.detail?.topic)active=Boolean(lesson.querySelector(`#${event.detail.topic}`));
+    lesson.classList.toggle('light-paused', paused || lesson.hidden || !active);
     const patching = ['patching', 'simulations'].includes(lesson.dataset.chapter);
     motion.textContent = paused ? (patching ? 'Play animation' : 'Play light') : (patching ? 'Pause animation' : 'Pause light');
     motion.setAttribute('aria-label', paused ? 'Play all animations' : 'Pause all animations');

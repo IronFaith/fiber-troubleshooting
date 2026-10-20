@@ -77,7 +77,7 @@ export function mountLightJourney(host) {
     <p class="journey-status" role="status" aria-live="polite"></p>
     <p class="picture-note">Both devices can send and receive at once. Explore one direction at a time; this example uses a separate fiber path for each. Port 12 and elevation 30 are teaching examples. Blue represents invisible IR; fiber jackets do not glow.</p>`;
   const panel=host.closest('.course-chapter-body, #lesson');
-  panel.addEventListener('coursevisibility',()=>{if(running&&(panel.hidden||host.closest('.lesson-section')?.hidden))stop('Resume journey');});
+  panel.addEventListener('coursevisibility',event=>{if(running&&(panel.hidden||host.closest('.lesson-section')?.hidden||(event.detail?.topic&&event.detail.topic!==host.closest('.lesson-section')?.id)))stop('Resume journey');});
   const play=host.querySelector('.journey-play');
   let path, pulse, segments, lengths, starts, total, dataStart, dataEnd;
   let selected=-1, elapsed=0, running=false, frame=0, lastTime=0;

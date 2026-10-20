@@ -1,5 +1,6 @@
 // Neutral Latin American Spanish. Keep numbered placeholders and technical identifiers intact.
 export const spanishMessages = [
+  ["All lessons are open. Jump to a topic below or scroll through the five stages.","Todas las lecciones están abiertas. Ve a un tema de la lista o desplázate por las cinco etapas."],
   ["Strand {0}","Fibra {0}"],
   ["Test point","Punto de prueba"],
   ["Steps, tools and result meanings","Pasos, herramientas e interpretación"],

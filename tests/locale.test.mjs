@@ -9,7 +9,7 @@ test('course objectives, self-checks, stages and navigation translate in every l
   const messages=[
     ...Object.values(lessonSupport).flat(),
     ...chapters.flatMap(stage=>[stage.title,stage.summary,stage.practice[0],...(stage.exam?[stage.exam[0]]:[])]),
-    'Five stages, one lesson at a time. Learn the purpose, explore the example, then check your understanding.',
+    'All lessons are open. Jump to a topic below or scroll through the five stages.',
     'Stage 3 of 5','Start stage 2','Lesson 4 of 7','Lesson in this stage','What you’ll learn',
     'Check your understanding','Show explanation','Put this stage into practice','Related exam',
     'Lesson navigation','Previous lesson','Next lesson','Choose an Intermediate exam','From your lesson',

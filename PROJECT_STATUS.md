@@ -8,13 +8,13 @@ Updated: **2026-10-20**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Make troubleshooting findings scannable and correctly follow the user's combined loop/VFL field sequence.
-- **Accepted scope — 2026-10-20:** Keep the existing workspace; replace the paragraph-heavy findings with a suspect span/strand, compact test table and one next action. Fix premature loop repetition during VFL isolation. Ferrule degradation remains a hypothesis until supported by inspection or comparison.
-- **Completed and published:** Findings show current same-source loop and A/B VFL results, with unknown channels explicit. Steps/tools/outcomes and possible causes are expandable. Partial VFL passes continue through the failed loop boundary while its optical failure remains suspect. The reported sequence isolates the dark strand and contacts between the first and onward passives, from either end and for either strand. English, Spanish, French and Arabic ship together.
-- **Verification:** Final `npm run check` passed all 131 tests, including two focused regressions. Browser checks reproduced optic pass → CAS 1 pass → CAS 2 failure, both VFL channels passing at CAS 1 and one dark at CAS 2; identity confirmation advances to inspection. Desktop and mobile findings, four-language mobile overflow, expandable instructions, Normalize, reload and a fresh retest at the failed strand were checked without browser errors; earlier checks stayed in History. Existing tests also caught and verified retention of the suspect optical-loop status during partial VFL checks.
+- **Current objective:** Make lessons easy to browse and find again after the course was condensed too aggressively.
+- **Accepted scope — 2026-10-20:** Keep the five stages and all existing material. Open every lesson and the topic index; remove stage accordions and the one-lesson selector. Keep optional self-check explanations, quick reference, saved place and practice/exam handoffs.
+- **Completed locally:** All 23 lesson bodies and topic links are visible. Readers can scroll continuously, use browser Find or jump directly to a topic. Scrolling and topic links remember the current lesson with the existing storage key. Inactive-stage animations pause and leaving a guided light journey stops it. English, Spanish, French and Arabic ship together.
+- **Verification:** Existing course/locale checks passed, then final `npm run check` passed all 131 tests. Browser checks confirmed 23 visible lessons and links, no duplicate IDs, desktop and mobile layouts, all four languages without horizontal overflow, direct topic navigation, scroll/reload/resume, journey stopping, legacy FIM bookmarks and the Loopbacks exam handoff. No browser errors were reported.
 - **Latest verified application release:** [`dfa9587`](https://github.com/IronFaith/fiber-troubleshooting/commit/dfa9587fb6f653f1bd75fb19a07eec006fbd56bd). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39504542434) succeeded; SHA-256 checks confirmed all 20 changed runtime files served by Pages match the application commit.
-- **Remaining work / next action:** The requested milestone is complete. Use further field feedback to choose any later changes.
-- **Blockers / missing input:** None. No extra tools or confirmed ferrule damage are assumed.
+- **Remaining work / next action:** Publish the open-lesson update and verify its exact Pages deployment and changed served files.
+- **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
@@ -32,7 +32,7 @@ The latest application release is [`dfa9587`](https://github.com/IronFaith/fiber
 
 | Area | Current behavior |
 | --- | --- |
-| Learn | Five stages covering equipment, connection identity, readings, tests, and isolation. All 23 lessons have objectives and unscored explanation checks; one lesson is visible at a time, with optional contents, reference, resume and practice/exam links. |
+| Learn | Five stages covering equipment, connection identity, readings, tests, and isolation. All 23 lessons and the topic index stay open for browsing and browser Find. Objectives, unscored explanation checks, reference, scroll/topic resume and practice/exam links remain available. |
 | Simulations and Exams | Interactive LC/MMC patching, selectable five-question Beginner and Intermediate exams, saved attempts, local best scores and Fiber Apprentice badges. Questions are supported by lesson material. |
 | Troubleshooting | One test workspace with local/remote tools, editable CAS points, physical identity checks, inline results and compact findings. The path stacks on mobile. |
 | Evidence | Loop and VFL coverage remain separate. Findings show the suspect span/strand, a compact current-source results table and one next action, with steps/tools/outcomes and causes expandable. Missing channels and unresolved optical failures stay explicit. |
@@ -64,7 +64,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The compact findings and VFL guidance milestone is complete and verified live. No other redesign or curriculum work is queued.
+The open-lesson update is implemented and locally verified; exact deployment verification is pending. The earlier compact findings and VFL guidance remain complete and verified live. No other redesign or curriculum work is queued.
 
 ## Boundaries to preserve
 

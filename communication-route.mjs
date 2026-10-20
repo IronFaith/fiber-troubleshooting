@@ -219,7 +219,7 @@ export function mountCommunicationRoute(host) {
       focusMap();
     }
   });
-  panel.addEventListener('coursevisibility',()=>{if(panel.hidden||host.closest('.lesson-section')?.hidden)stop();});
+  panel.addEventListener('coursevisibility',event=>{if(panel.hidden||host.closest('.lesson-section')?.hidden||(event.detail?.topic&&event.detail.topic!==host.closest('.lesson-section')?.id))stop();});
   new MutationObserver(()=>{ if(panel.classList.contains('light-paused')) stop(); }).observe(panel,{attributes:true,attributeFilter:['class']});
   document.addEventListener('visibilitychange',()=> { if(document.hidden) stop(); });
   draw();

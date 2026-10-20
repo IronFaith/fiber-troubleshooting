@@ -1,5 +1,6 @@
 // Modern Standard Arabic. Keep English keys aligned with all translation catalogs.
 export const arabicMessages = [
+  ["All lessons are open. Jump to a topic below or scroll through the five stages.","جميع الدروس مفتوحة. انتقل إلى أحد الموضوعات أدناه أو مرّر الصفحة عبر المراحل الخمس."],
   ["Strand {0}","الليف {0}"],
   ["Test point","نقطة الاختبار"],
   ["Steps, tools and result meanings","الخطوات والأدوات وتفسير النتائج"],
