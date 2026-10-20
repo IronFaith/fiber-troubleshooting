@@ -10,23 +10,23 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Clean up the troubleshooting diagram with dedicated desktop and mobile layouts, based on the user's two screenshots.
 - **Accepted scope — 2026-10-20:** Keep the existing workflow and evidence. Desktop uses compact horizontal cards; mobile uses a straight cable channel beside stacked cards, with upright cassette maps and vertically arranged enlarged MMC connections. Keep cables out of result controls and retain Normalize behavior.
-- **Implemented locally:** Responsive geometry, attached result panels, calmer card styling, direct remote LC cable entry on desktop and removal of idle tool-handle outlines. A reproduced dual-source defect is fixed: when both ends passed at one CAS, the animation must follow the currently installed loop's source.
+- **Completed and live:** [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f) delivers responsive geometry, attached result panels, calmer card styling, direct remote LC cable entry on desktop and removal of idle tool-handle outlines. A reproduced dual-source defect is fixed: when both ends passed at one CAS, the animation must follow the currently installed loop's source.
 - **Browser verification:** 320-pixel French/Arabic/Spanish and 390-pixel English mobile views have no page overflow or clipped hardware captions; 1024/1440-pixel desktop and one/four-CAS paths fit or scroll within the map. Normalize removed all loopbacks and retained recorded passes. VFL result recording retained its scroll position, and no console errors were reported.
 - **Automated verification:** `npm run check` passed all 120 tests. One focused regression was added for the reproduced dual-source animation defect; existing Normalize coverage remains passing. `git diff --check` passed.
-- **Remaining work / next action:** Publish the application commit and verify its exact Pages deployment and affected served files. The prior live application release remains listed below until that verification completes.
+- **Remaining work / next action:** This responsive-layout request is complete. The exact application deployment succeeded and all ten changed runtime files matched their served contents. No implementation or blocker remains.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`90b5abc`](https://github.com/IronFaith/fiber-troubleshooting/commit/90b5abc61ff1f753090eab979781461d89a44d79): **Remove loopback illustrations when the path is normalized**.
+The latest application release is [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f): **Dedicated desktop and mobile troubleshooting layouts**.
 
-- Root cause: the renderer replaced a plugged connection with a historical loop whenever a supported earlier pass existed. Normalize had already reconnected the stored setup, but the illustration overrode it.
-- Hardware now follows the actual connection state. An installed loop remains visible after recording Pass; Normalize removes it and draws the reconnected LC/MMC service path. Pass labels, recorded coverage, history and findings remain available.
-- Applies to local and remote LC/MMC loops, desktop and stacked mobile. Existing translated connection labels are reused in all four languages. No evidence rules, storage formats or exam behavior changed.
-- Verification: one focused regression checks installed-tool visibility, removal after Normalize and preserved history/coverage for both ends and both tool types. `npm run check` passed all 119 tests; `git diff --check` passed. Desktop and 390-pixel mobile browser checks showed no loopback after Normalize and retained the CAS pass and light highlighting; no JavaScript errors were reported.
-- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39358897326). All four changed application files matched the live site. AGENTS.md and README.md now require current-setup drawings after Normalize.
+- Desktop cards fit the available width, keeping longer paths scrollable within the workspace. Remote LC legs enter directly from the previous CAS. Tool handles retain their hit areas without permanent dashed boxes.
+- Mobile places the enlarged MMC connections vertically in a straight cable channel beside stacked cards. Upright port maps, wrapping captions and result buttons stay clear of the cable. Loop controls are attached to the selected card; connector and light geometry share the same transforms.
+- Fixed a reproduced dual-source animation defect: if local and remote loops passed at the same CAS, the installed loop now uses its current source instead of drawing an earlier return loop on the opposite side. Both recorded passes remain available.
+- Verification: `npm run check` passed all 120 tests, including one added regression for that defect and existing Normalize coverage. `git diff --check` passed. Browser checks covered 320–1440-pixel layouts, all four languages, local/remote loop directions, one/four-CAS paths, VFL scroll preservation and Normalize retaining results while removing loopbacks.
+- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39401274969); all ten changed runtime files matched the live site. No case-storage, evidence-rule, exam or counter changes were made.
 
 ## What is in place
 
@@ -44,6 +44,7 @@ The latest application release is [`90b5abc`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f) | Dedicated portrait cable channel and compact desktop path, attached result panels, aligned remote LC entry and correct installed-loop animation when both directions passed. |
 | [`90b5abc`](https://github.com/IronFaith/fiber-troubleshooting/commit/90b5abc61ff1f753090eab979781461d89a44d79) | Normalize removes LC/MMC loopback drawings, reconnects service fibers and retains recorded passes and checked-path highlighting. |
 | [`54e25f0`](https://github.com/IronFaith/fiber-troubleshooting/commit/54e25f0b1f7e15e21c351187f236532145f1da16) | Precise LC/VFL cable joins, centered MMC channels and viewing faces, consistent cassette bridge thickness and unobstructed translated captions. |
 | [`b159a34`](https://github.com/IronFaith/fiber-troubleshooting/commit/b159a342af390256ad90a4a9de30c808ce8e8066) | Connected yellow hardware cords carry the passing-loop animation; removed duplicate lower light rails, preserved mapped ports and section findings, and resolved UI-01 in all four languages. |
@@ -58,7 +59,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-No unresolved defect is recorded for the current milestone. UI-01 (the Spanish loop-status caption overflow at 390 × 844) is resolved by wrapping connection captions in a larger card area. Local and remote passing-loop views in English, Spanish, French and Arabic passed rendered caption checks in [browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39356294893).
+No unresolved defect or publication work is recorded for this milestone. The reported mobile cable/control overlap and oversized horizontal layout have been addressed. Earlier Normalize and translated-caption fixes remain covered by tests and rendered checks.
 
 This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
 
