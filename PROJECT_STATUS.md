@@ -15,6 +15,14 @@ The latest application release is [`989b711`](https://github.com/IronFaith/fiber
 
 ## What is in place
 
+### Pending release — connected passing-loop animation
+
+- Restored the connected optic → mapped CAS ports → loopback → optic return animation lost when cumulative evidence replaced the manual diagram with separate span indicators.
+- Local and remote routes follow their recorded source and return point; Normalize and tool changes preserve supported evidence. Conflicting or unrecorded tests do not draw a confirmed loop.
+- [Browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39350514842) passed 26 desktop/mobile, evidence, language and motion scenarios. Both halves meet without a gap; routes fit their rendered bounds. The four learner languages retain their existing labels and state.
+- Final `npm run check` passed all 118 tests, including existing coverage, case history and locale checks.
+- Exact GitHub Pages deployment verification is pending publication of this milestone.
+
 | Area | Current behavior |
 | --- | --- |
 | Learn | Three connected chapters covering optics/light/testing, device communication and locations/LLDP, and FIM/patching. Optional contents and a visual quick reference support navigation. |
