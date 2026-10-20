@@ -1815,11 +1815,14 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-path-scene { margin:0 auto; direction:ltr; }
 .ts-path-scene > svg { display:block; width:100%; max-width:none; color:#245b91; }
 .ts-hardware-flow { pointer-events:none; }
+.ts-map .ts-weak-flow .light-flow { --light-color:#b78323; }
 .ts-hardware-flow .learn-signal { stroke-width:1.8; stroke-dasharray:none; }
 .ts-hardware-vfl .learn-signal { stroke-width:1.8; stroke-dasharray:5 7; }
 .ts-hardware-flow .flow-arrow { transform:scale(.65); }
 .ts-cas-connection .loop-jacket { stroke-width:9; }
 .ts-cas-connection .loop-cord { stroke-width:6.8; }
+.ts-external-cord .loop-jacket { stroke-width:4.8; }
+.ts-external-cord .loop-cord { stroke-width:3.4; }
 .ts-open-cord { fill:white; stroke:#8a7134; stroke-width:1.5; }
 .ts-hardware-caption { font:12px/1.35 'Segoe UI',sans-serif; text-align:center; color:#3e627b; }
 .ts-hardware-caption .ts-node-caption { margin-top:3px; color:#516e82; }
@@ -1843,12 +1846,12 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-stacked-node > svg { display:block; width:100%; height:auto; color:#245b91; }
 .ts-stacked-node .ts-inline-loop { width:calc(100% - 14px); margin:0 auto; }
 .ts-mobile-loop-row { position:relative; padding-bottom:8px; }
-.ts-panel-cords { position:absolute; right:0; top:0; width:14px; height:100%; pointer-events:none; }
+.ts-panel-cords { position:absolute; right:0; top:0; width:18px; height:100%; pointer-events:none; }
 .ts-panel-cords .flow-arrow { display:none; }
 .ts-mobile-cord-junction { position:relative; width:270px; max-width:100%; }
 .ts-cord-bridge { display:block; width:100%; height:auto; }
 .ts-mobile-cord-junction .ts-cord-status { position:absolute; top:0; left:26px; right:26px; }
-.ts-mobile-cord-junction .ts-cord-status > div { flex-wrap:wrap; }
+.ts-mobile-cord-junction .ts-cord-status > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
 
 .ts-stack-fault { margin:8px 0 4px; color:#9e3a46; font-size:12px; text-align:center; }
 .ts-loop-slot { padding-bottom:4px; }

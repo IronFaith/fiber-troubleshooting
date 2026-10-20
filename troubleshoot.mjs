@@ -306,7 +306,7 @@ function render(preservePosition=false) {
   const freshCase=newCaseStarted?`<section class="ts-new-case" aria-labelledby="new-case-title"><div role="status"><h2 id="new-case-title" tabindex="-1">New case started</h2><p>Choose your path, then place a tool to begin.</p></div>${button('undo','Undo')}</section>`:'';
   const status=s.tool==='vfl'?'VFL on fiber':s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`${s.loopSide==='remote'?'Remote loop':'Local loop'} at ${pointName(s.selected,s)} · ${loopResult(s)?loopLabels[loopResult(s)]:'waiting for your result'}`;
   const stacked=stackedPath.matches;
-  const recorded=!s.simulated||stacked||s.tool==='vfl';
+  const recorded=!s.simulated||s.tool!=='link';
   const legend=recorded?'<span class="ts-key-ir">Blue / teal: loop checked</span><span class="ts-key-red">Red dashed: VFL passed</span><span>Yellow: fiber · amber: investigate</span>':'<span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span>';
   const path=`<div class="ts-recorded-key"><p>${recorded?'Recorded checks, not live light.':'Practice only · results come from the chosen fault.'}</p><div class="ts-legend">${legend}</div></div><div class="ts-map ${stacked?'is-stacked':''} ${paused?'light-paused':''}" tabindex="0" aria-label="${stacked?'Fiber diagram; scroll down to follow the path':'Fiber diagram; scroll horizontally to see the full path'}">${workbenchDiagram(s,s.tool==='loop'?loopControls(s):'',{stacked,recordedOnly:s.tool==='vfl'})}</div>`;
   const visual=s.tool==='vfl'?simpleVfl(s,paused,{embedded:true,recordedPath:`<h3 class="ts-continuity-title">Recorded continuity</h3>${path}`}):`${path}${s.tool==='link'?controls(s):''}`;

@@ -1,7 +1,7 @@
 import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=5';
 import {lcConnector,lcLoopback,vflPen} from './test-tool-visuals.mjs?v=1';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {pointName,loopLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,patchAt,traceStop,recordedContinuity,isOptic,loopResult,loopEntries} from './troubleshoot-state.mjs?v=21';
+import {pointName,loopLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,patchAt,traceStop,recordedContinuity,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=21';
 
 // At the observation cassette, open the onward connection, not the MMC
 // carrying light from the source. The selected port is the viewing face.
@@ -151,7 +151,8 @@ function laneFlow(path,lane,direction,kind='ir') {
   return `<g class="ts-hardware-flow ts-hardware-${kind}" data-strand="${lane}" data-direction="${direction}">${lightFlow(path,kind==='vfl'?'red':lane==='tx'?'ir':'return-ir')}</g>`;
 }
 function flowOnCord(path,reverse,lane,strand) {
-  let flow=lane.ir?laneFlow(strand==='tx'?path:reverse,strand,strand==='tx'?1:-1):'';
+  const color=lane.irStrand??strand,direction=color==='tx'?1:-1;
+  let flow=lane.ir?`<g class="${lane.weak?'ts-weak-flow':''}">${laneFlow(direction>0?path:reverse,color,direction)}</g>`:'';
   for(const direction of lane.vflDirections)flow+=laneFlow(direction>0?path:reverse,strand,direction,'vfl');
   return flow;
 }
@@ -160,13 +161,16 @@ function practiceLane(s,span,strand,lane) {
   const f=s.fault,r=simulatedReadings(s),outgoing=strand==='tx';
   const deadSource=f.kind==='optic_tx'&&f.at===(outgoing?0:s.count+1);
   const affected=f.kind!=='none'&&!f.kind.startsWith('optic_')&&(f.strand===strand||f.strand==='both');
-  const dark=affected&&(outgoing?r.farRx:r.rx)==='dark';
+  const dark=affected&&f.kind!=='polarity'&&(outgoing?r.farRx:r.rx)==='dark';
   const through=outgoing?span<f.at:span>f.at;
-  return {...lane,ir:!deadSource&&(!dark||through),vflDirections:[]};
+  const swapped=f.kind==='polarity'&&span>Math.max(1,f.at),irStrand=swapped?(strand==='tx'?'rx':'tx'):strand;
+  return {...lane,ir:!deadSource&&(!dark||through),irStrand,weak:affected&&(outgoing?r.farRx:r.rx)==='weak',vflDirections:[]};
 }
 function section(s,coverage,point,strand) {
   const lane=coverage.spans[point-1]?.lanes[strand];
-  return lane?practiceLane(s,point,strand,lane):{ir:false,vflDirections:[]};
+  if(!lane)return {ir:false,vflDirections:[]};
+  const weak=s.tool==='loop'&&loopResult(s)==='weak'&&point>Math.min(loopSource(s),s.selected)&&point<=Math.max(loopSource(s),s.selected);
+  return weak?{...lane,ir:true,weak:true}:practiceLane(s,point,strand,lane);
 }
 function nodeFlow(s,coverage,point,cx,mode,test) {
   const optic=isOptic(s,point),remote=point===s.count+1;
@@ -182,12 +186,16 @@ function nodeFlow(s,coverage,point,cx,mode,test) {
   }
   const patch=patchAt(s,point),loopSide=s.loopSide==='remote'?'rear':'front';
   const map=d=>transformPath(d,{x:cx-121,y:casTop,sx:casScale});
+  if(s.simulated&&s.tool==='link'&&s.fault.kind==='polarity'&&Math.max(1,s.fault.at)===point) {
+    const a=231.65,b=235.55;
+    return laneFlow(map(`M0 ${a} H158 C174 ${a} 186 ${b} 202 ${b} H360`),'tx',1)+laneFlow(map(`M360 ${a} H202 C186 ${a} 174 ${b} 158 ${b} H0`),'rx',-1);
+  }
   for(const strand of ['tx','rx']) {
     const y=233.6+(strand==='tx'?-1.95:1.95),left=section(s,coverage,point,strand),right=section(s,coverage,point+1,strand);
     const leftTip=patch.rear?180:150,rightTip=patch.front?180:210;
     if(mode==='loop') {
       const local=loopSide==='front',active=local?left:right;
-      const stop=local?180:180,edge=local?0:360;
+      const stop=180,edge=local?0:360;
       drawing+=flowOnCord(map(local?`M${edge} ${y} H${stop}`:`M${stop} ${y} H${edge}`),map(local?`M${stop} ${y} H${edge}`:`M${edge} ${y} H${stop}`),active,strand);
     } else {
       drawing+=flowOnCord(map(`M0 ${y} H${leftTip}`),map(`M${leftTip} ${y} H0`),left,strand);
@@ -195,13 +203,13 @@ function nodeFlow(s,coverage,point,cx,mode,test) {
     }
   }
   if(mode==='loop'&&test) {
-    const remote=test.side==='remote',x=remote?126.05:233.95,sx=remote?.65:-.65;
+    const remote=test.side==='remote',x=remote?126.05:233.95,sx=remote ? .65 : -.65;
     const pair=d=>map(transformPath(d,{x,y:218,sx,sy:.65}));
     const out=remote?'M83 27 H-20 L-48 24 C-25 24 -28 64 -61 64':'M83 21 H-20 L-48 24 C-96 24 -96 64 -61 64';
     const back=remote?'M-61 64 C-96 64 -96 24 -48 24 L-20 27 H83':'M-61 64 C-28 64 -25 24 -48 24 L-20 27 H83';
     // For the reverse source, the return meets the upper lane at y=21.
     const returning=remote?back.replace('L-20 27 H83','L-20 21 H83'):back;
-    drawing+=`<g class="ts-hardware-loop" data-loop-side="${test.side}" data-loop-point="${point}">${laneFlow(pair(out),remote?'rx':'tx',remote?-1:1)}${laneFlow(pair(returning),remote?'tx':'rx',remote?1:-1)}</g>`;
+    drawing+=`<g class="ts-hardware-loop" data-loop-side="${test.side}" data-loop-point="${point}"><g class="${test.result==='weak'?'ts-weak-flow':''}">${laneFlow(pair(out),remote?'rx':'tx',remote?-1:1)}${laneFlow(pair(returning),remote?'tx':'rx',remote?1:-1)}</g></g>`;
   }
   return drawing;
 }
@@ -211,7 +219,7 @@ function nodeCaption(s,point,mode,historical,endpoint) {
   return mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?'VFL on LC leg · optic empty':mode==='unplugged'?isOptic(s,point)?'LC legs unplugged · optic empty':'MMC unplugged · path open':isOptic(s,point)?'LC legs plugged into optic':'MMC head plugged into CAS';
 }
 function hardwareNode(s,coverage,point,cx,tests) {
-  const actual=connectionAt(s,point),test=tests.find(test=>test.point===point),historical=!!test&&actual==='plugged';
+  const actual=connectionAt(s,point),test=tests.find(test=>test.point===point),historical=!!test&&actual==='plugged'&&s.tool==='link';
   const mode=historical?'loop':actual,source=traceFrom(s),trace=s.traces[traceKey(s)],endpoint=vflEndpoint(s);
   const scene=historical?{...s,tool:'loop',selected:point,loopSide:test.side}:s;
   const accessible=point<=s.reach,optic=isOptic(s,point),remote=point===s.count+1;
@@ -241,19 +249,20 @@ function spanLabel(s,coverage,point) {
 }
 function mobileTail(s,point,strand,outgoing) {
   const p=outgoing?(isOptic(s,point)?endpoint(s,point,135,strand):{x:256,y:casY(strand)}):endpoint(s,point,135,strand);
-  const tx=strand==='tx',side=outgoing?(tx?267:259):(tx?3:11);
-  if(outgoing)return {path:`M${p.x} ${p.y} H${side-8} Q${side} ${p.y} ${side} ${p.y+8} V${nodeHeight}`,
-    back:`M${side} ${nodeHeight} V${p.y+8} Q${side} ${p.y} ${side-8} ${p.y} H${p.x}`};
-  return {path:`M${side} 0 V${p.y-8} Q${side} ${p.y} ${side+8} ${p.y} H${p.x}`,
-    back:`M${p.x} ${p.y} H${side+8} Q${side} ${p.y} ${side} ${p.y-8} V0`};
+  const tx=strand==='tx',side=outgoing?(tx?266:258):(tx?4:12),bend=Math.min(8,Math.abs(side-p.x)/2);
+  if(outgoing)return {path:`M${p.x} ${p.y} H${side-bend} Q${side} ${p.y} ${side} ${p.y+bend} V${nodeHeight}`,
+    back:`M${side} ${nodeHeight} V${p.y+bend} Q${side} ${p.y} ${side-bend} ${p.y} H${p.x}`};
+  return {path:`M${side} 0 V${p.y-bend} Q${side} ${p.y} ${side+bend} ${p.y} H${p.x}`,
+    back:`M${p.x} ${p.y} H${side+bend} Q${side} ${p.y} ${side} ${p.y-bend} V0`};
 }
 function mobileBridge(strand) {
-  const tx=strand==='tx',right=tx?267:259,left=tx?3:11,y=tx?66:58;
-  return {path:`M${right} 0 V${y-8} Q${right} ${y} ${right-8} ${y} H${left+8} Q${left} ${y} ${left} ${y+8} V84`,
-    back:`M${left} 84 V${y+8} Q${left} ${y} ${left+8} ${y} H${right-8} Q${right} ${y} ${right} ${y-8} V0`};
+  const tx=strand==='tx',right=tx?266:258,left=tx?4:12,y=tx?86:78;
+  return {path:`M${right} 0 V${y-8} Q${right} ${y} ${right-8} ${y} H${left+8} Q${left} ${y} ${left} ${y+8} V104`,
+    back:`M${left} 104 V${y+8} Q${left} ${y} ${left+8} ${y} H${right-8} Q${right} ${y} ${right} ${y-8} V0`};
 }
 export function workbenchDiagram(s,loopControls='',{stacked=false}={}) {
   const coverage=recordedContinuity(s),tests=supportedLoops(s,coverage);
+  if(s.tool==='loop'&&loopResult(s)==='weak')tests.push({point:s.selected,source:loopSource(s),side:s.loopSide,result:'weak'});
   const centers=Array.from({length:s.count+2},(_,i)=>135+i*290),width=centers.at(-1)+135;
   const fault=point=>s.simulated&&s.fault.kind!=='none'&&s.fault.at===point?`<text class="ts-fault-label" x="135" y="17">Simulated fault ${isOptic(s,point)?'at optic':'in this section'} ↓</text>`:'';
   if(stacked)return `<div class="ts-stacked-path">${centers.map((_,point)=>{
@@ -262,15 +271,15 @@ export function workbenchDiagram(s,loopControls='',{stacked=false}={}) {
     for(const strand of ['tx','rx'])for(const outgoing of [false,true]) {
       if(outgoing?point===s.count+1:point===0)continue;
       const paths=mobileTail(s,point,strand,outgoing),lane=section(s,coverage,outgoing?point+1:point,strand);
-      cords+=cord(paths.path);flows+=flowOnCord(paths.path,paths.back,lane,strand);
+      cords+=`<g class="ts-external-cord">${cord(paths.path)}</g>`;flows+=flowOnCord(paths.path,paths.back,lane,strand);
     }
     const panel=s.selected===point?loopControls:'';
-    const extensions=panel&&point<=s.count?`<svg class="ts-panel-cords" viewBox="0 0 14 100" preserveAspectRatio="none" aria-hidden="true">${['tx','rx'].map(strand=>{const x=strand==='tx'?11:3,lane=section(s,coverage,point+1,strand);return cord(`M${x} 0 V100`)+flowOnCord(`M${x} 0 V100`,`M${x} 100 V0`,lane,strand);}).join('')}</svg>`:'';
-    const bridge=point<=s.count?`<div class="ts-mobile-cord-junction"><svg class="ts-cord-bridge" viewBox="0 0 270 84" aria-hidden="true">${['tx','rx'].map(strand=>{const paths=mobileBridge(strand),lane=section(s,coverage,point+1,strand);return cord(paths.path)+flowOnCord(paths.path,paths.back,lane,strand);}).join('')}</svg>${spanLabel(s,coverage,point+1)}</div>`:'';
+    const extensions=panel&&point<=s.count?`<svg class="ts-panel-cords" viewBox="0 0 18 100" preserveAspectRatio="none" aria-hidden="true">${['tx','rx'].map(strand=>{const x=strand==='tx'?14:6,lane=section(s,coverage,point+1,strand);return `<g class="ts-external-cord">${cord(`M${x} 0 V100`)}</g>`+flowOnCord(`M${x} 0 V100`,`M${x} 100 V0`,lane,strand);}).join('')}</svg>`:'';
+    const bridge=point<=s.count?`<div class="ts-mobile-cord-junction"><svg class="ts-cord-bridge" viewBox="0 0 270 104" aria-hidden="true">${['tx','rx'].map(strand=>{const paths=mobileBridge(strand),lane=section(s,coverage,point+1,strand);return `<g class="ts-external-cord">${cord(paths.path)}</g>`+flowOnCord(paths.path,paths.back,lane,strand);}).join('')}</svg>${spanLabel(s,coverage,point+1)}</div>`:'';
     return `<div class="ts-stacked-node" data-path-node="${point}"><svg viewBox="0 0 270 ${nodeHeight}" role="group">${node.drawing}${cords}${flows}${fault(point)}</svg>${panel?`<div class="ts-mobile-loop-row">${panel}${extensions}</div>`:''}</div>${bridge}`;
   }).join('')}</div>`;
   const nodes=centers.map((cx,point)=>hardwareNode(s,coverage,point,cx,tests));
-  const bridges=coverage.spans.map(span=>['tx','rx'].map(strand=>{const paths=desktopBridge(s,span.point,centers,strand);return cord(paths.path)+flowOnCord(paths.path,paths.back,section(s,coverage,span.point,strand),strand);}).join('')).join('');
+  const bridges=coverage.spans.map(span=>['tx','rx'].map(strand=>{const paths=desktopBridge(s,span.point,centers,strand);return `<g class="ts-external-cord">${cord(paths.path)}</g>`+flowOnCord(paths.path,paths.back,section(s,coverage,span.point,strand),strand);}).join('')).join('');
   // Status badges sit beside their cable ends; there is no second light diagram.
-  return `<div class="ts-path-scene" style="width:${width}px;--cord-sections:${s.count+1}"><svg viewBox="0 0 ${width} ${nodeHeight}" style="height:${nodeHeight}px" role="group">${nodes.map(node=>node.drawing).join('')}${bridges}${nodes.map(node=>node.flow).join('')}</svg><div class="ts-cord-summaries">${coverage.spans.map(span=>spanLabel(s,coverage,span.point)).join('')}</div>${loopControls?`<div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px">${loopControls}</div>`:''}</div>`;
+  return `<div class="ts-path-scene" style="width:${width}px;--cord-sections:${s.count+1}"><svg viewBox="0 0 ${width} ${nodeHeight}" style="height:${nodeHeight}px" role="group">${nodes.map(node=>node.drawing).join('')}${bridges}${nodes.map(node=>node.flow).join('')}${centers.map((cx,point)=>`<g transform="translate(${cx-135} 0)">${fault(point)}</g>`).join('')}</svg><div class="ts-cord-summaries">${coverage.spans.map(span=>spanLabel(s,coverage,span.point)).join('')}</div>${loopControls?`<div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px">${loopControls}</div>`:''}</div>`;
 }

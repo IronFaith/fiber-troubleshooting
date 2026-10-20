@@ -10,18 +10,20 @@ const report=[],failures=[];
 const loop=(point,result='pass',side='local')=>[{type:'place',kind:point===0||point===3?'lc':'mmc',point},{type:'loop-side',value:side},{type:'ready',value:true},{type:'record',result}];
 const scenarios=[
   {name:'reported-normalized-state',actions:[...loop(0),...loop(1),{type:'normalize'}],loops:[['local',1]]},
-  {name:'loop-and-vfl',actions:[...loop(1),{type:'trace',from:0,to:1},{type:'strand',value:'tx'},{type:'ready',value:true},{type:'record',result:'seen'}],loops:[['local',1]]},
+  {name:'loop-and-vfl',actions:[...loop(1),{type:'trace',from:0,to:1},{type:'strand',value:'tx'},{type:'ready',value:true},{type:'record',result:'seen'}],loops:[]},
   {name:'mapped-port-28',actions:[{type:'port',point:1,value:28},...loop(1),{type:'normalize'}],loops:[['local',1]]},
   {name:'four-cas-pass',actions:[{type:'count',value:4},{type:'reach',value:5},{type:'place',kind:'mmc',point:4},{type:'ready',value:true},{type:'record',result:'pass'},{type:'normalize'}],loops:[['local',4]]},
   {name:'one-cas-remote',actions:[{type:'count',value:1},...loop(1,'pass','remote'),{type:'normalize'}],loops:[['remote',1]]},
   {name:'local-pass',actions:loop(1),loops:[['local',1]]},
   {name:'local-farther-pass',actions:[...loop(1),...loop(2)],loops:[['local',2]]},
-  {name:'failed-onward',actions:[...loop(1),...loop(2,'dark')],loops:[['local',1]]},
+  {name:'failed-onward',actions:[...loop(1),...loop(2,'dark')],loops:[]},
   {name:'remote-pass',actions:loop(2,'pass','remote'),loops:[['remote',2]]},
   {name:'normalized-both-ends',actions:[...loop(1),...loop(2,'pass','remote'),{type:'normalize'}],loops:[['local',1],['remote',2]]},
   {name:'conflicting-loops',actions:[...loop(1,'dark'),...loop(2)],loops:[]},
-  {name:'vfl-after-loop',actions:[...loop(1),{type:'place',kind:'vfl',point:0}],loops:[['local',1]]},
+  {name:'vfl-after-loop',actions:[...loop(1),{type:'place',kind:'vfl',point:0}],loops:[]},
   {name:'normalized-direct',actions:[...loop(0),{type:'normalize'}],loops:[['local',0]]},
+  {name:'weak-loop',actions:loop(1,'weak'),loops:[['local',1]]},
+  ...['polarity','break','dirty','optic_tx'].map(kind=>({name:`practice-${kind}`,simulated:true,actions:[{type:'fault',value:{kind,at:1,strand:'tx',severity:kind==='dirty'?'weak':'dark'}}],loops:[]})),
   {name:'unrecorded',actions:[{type:'place',kind:'mmc',point:1}],loops:[]},
   {name:'retest',actions:[...loop(1),{type:'retest'}],loops:[]},
   {name:'changed-port',actions:[...loop(1),{type:'port',point:1,value:28}],loops:[]},
@@ -31,14 +33,20 @@ try {
     const context=await browser.newContext({viewport:{width,height:900}}),page=await context.newPage(),errors=[];
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto('http://127.0.0.1:4182/');
-    await page.evaluate(async actions=>{
+    await page.evaluate(async ({actions,simulated})=>{
       const {createCase,changeCase}=await import('./troubleshoot-state.mjs?v=21');
-      const actual=actions.reduce(changeCase,createCase());
-      sessionStorage.setItem('fiber-workbench-v1',JSON.stringify({actual,simulation:createCase(true),view:'actual'}));
-    },scenario.actions);
+      const actual=actions.reduce(changeCase,createCase(!!simulated));
+      sessionStorage.setItem('fiber-workbench-v1',JSON.stringify({actual:simulated?createCase():actual,simulation:simulated?actual:createCase(true),view:simulated?'simulation':'actual'}));
+    },{actions:scenario.actions,simulated:scenario.simulated});
     await page.reload({waitUntil:'networkidle'});
     await page.waitForTimeout(100);
-    const result=await page.evaluate(()=>({
+    const result=await page.evaluate(()=>{
+      const yellows=[...document.querySelectorAll('.ts-map .loop-cord,.ts-map [stroke="#f0cd55"]')];
+      const samples=yellows.flatMap(path=>Array.from({length:101},(_,i)=>{const p=path.getPointAtLength(path.getTotalLength()*i/100);return new DOMPoint(p.x,p.y).matrixTransform(path.getScreenCTM());}));
+      const connectors=[...document.querySelectorAll('.ts-map .mmc-connector,.ts-map .lc-connector')].map(el=>el.getBoundingClientRect());
+      const offCord=[...document.querySelectorAll('.ts-map .ts-hardware-flow .learn-signal')].flatMap(path=>Array.from({length:21},(_,i)=>{const p=path.getPointAtLength(path.getTotalLength()*i/20),q=new DOMPoint(p.x,p.y).matrixTransform(path.getScreenCTM());return {x:q.x,y:q.y};})).filter(q=>!connectors.some(r=>q.x>=r.left-1&&q.x<=r.right+1&&q.y>=r.top-1&&q.y<=r.bottom+1)&&samples.every(p=>Math.hypot(p.x-q.x,p.y-q.y)>4));
+      return {offCord,
+
       flows:[...document.querySelectorAll('.ts-hardware-flow .learn-signal')].map(path=>{const start=path.getPointAtLength(0),end=path.getPointAtLength(path.getTotalLength()),m=path.getScreenCTM(),a=new DOMPoint(start.x,start.y).matrixTransform(m),b=new DOMPoint(end.x,end.y).matrixTransform(m);return {strand:path.closest('[data-strand]').dataset.strand,kind:path.closest('.ts-hardware-vfl')?'vfl':'ir',a:[a.x,a.y],b:[b.x,b.y]};}),
       loops:[...document.querySelectorAll('.ts-hardware-loop')].map(group=>{
         const [out,back]=group.querySelectorAll('.learn-signal');
@@ -54,30 +62,38 @@ try {
       }),
       duplicateDiagram:!!document.querySelector('.ts-recorded-routes,.ts-stacked-span,.ts-stacked-direct-loop'),
       captions:[...document.querySelectorAll('.ts-hardware-caption')].map(el=>({overflow:el.getBoundingClientRect().bottom>el.parentElement.getBoundingClientRect().bottom+1,text:el.textContent})),
-      service:JSON.parse(sessionStorage.getItem('fiber-workbench-v1')).actual.service,
+      service:(()=>{const s=JSON.parse(sessionStorage.getItem('fiber-workbench-v1'));return s[s.view].service;})(),
       horizontalOverflow:document.documentElement.scrollWidth>innerWidth,
-    }));
+    };});
     await page.locator('.ts-map').screenshot({path:`loop-qa-output/${scenario.name}-${width}.png`});
     report.push({width,scenario:scenario.name,...result,errors});
     try {
     assert.deepEqual(errors,[],`${scenario.name}: browser errors`);
     assert.deepEqual(result.loops.map(r=>[r.side,r.point]),scenario.loops,`${scenario.name} at ${width}`);
     assert.ok(result.loops.every(r=>r.gap<.01&&r.finite&&r.withinBounds&&r.onHardware&&!r.overlapsHardware),`${scenario.name}: disconnected or clipped route`);
+    assert.deepEqual(result.offCord,[],`${scenario.name}: animation must follow the yellow fiber`);
+    assert.ok(result.captions.every(c=>!c.overflow),'captions must fit');
+    if(scenario.loops.length&&scenario.name!=='weak-loop'&&scenario.name!=='normalized-direct') {
+      const flows=result.flows.filter(f=>f.kind==='ir'),near=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1])<.1;
+      const starts=flows.filter(f=>!flows.some(g=>near(g.b,f.a))),ends=flows.filter(f=>!flows.some(g=>near(f.b,g.a)));
+      assert.equal(starts.length,scenario.loops.length,`${scenario.name}: only TX source ends may start a circuit`);
+      assert.equal(ends.length,scenario.loops.length,`${scenario.name}: only RX source ends may end a circuit`);
+    }
     assert.equal(result.duplicateDiagram,false,'one hardware animation diagram');
     assert.equal(result.service,'unknown','a loop pass must not verify live service');
-    if(scenario.name==='loop-and-vfl') assert.ok(await page.locator('.ts-hardware-vfl .learn-signal.red').count(),'VFL evidence must remain separate');
+    if(scenario.name==='loop-and-vfl') {assert.ok(await page.locator('.ts-hardware-ir .learn-signal').count(),'recorded loop sections remain');assert.ok(await page.locator('.ts-hardware-vfl .learn-signal.red').count(),'VFL evidence must remain separate');}
     if(width===390)assert.equal(result.horizontalOverflow,false);
     }catch(error){failures.push({scenario:scenario.name,width,error:error.message});}
     await context.close();
   }
-  for(const language of ['en','es','fr','ar']) {
+  for(const language of ['en','es','fr','ar']) for(const side of ['local','remote']) {
     const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'}),page=await context.newPage();
     await page.goto('http://127.0.0.1:4182/');
     await page.evaluate(async ({actions,language})=>{
       const {createCase,changeCase}=await import('./troubleshoot-state.mjs?v=21');
       sessionStorage.setItem('fiber-workbench-v1',JSON.stringify({actual:actions.reduce(changeCase,createCase()),simulation:createCase(true),view:'actual'}));
       localStorage.setItem('fiber-language-v1',language);
-    },{actions:loop(1),language});
+    },{actions:loop(side==='local'?1:2,'pass',side),language});
     await page.reload({waitUntil:'networkidle'});
     await page.waitForTimeout(100);
     assert.equal(await page.locator('.ts-hardware-loop').count(),1);
@@ -88,8 +104,12 @@ try {
     const offsets=[];
     for(let i=0;i<2;i++) {offsets.push(await page.locator('.ts-hardware-loop .flow-arrow').first().evaluate(el=>getComputedStyle(el).offsetDistance));await page.waitForTimeout(150);}
     assert.notEqual(offsets[0],offsets[1],'the connected loop arrow must move');
-    await page.locator('.ts-map').screenshot({path:`loop-qa-output/mobile-${language}.png`});
-    report.push({language,reducedMotion:true,playRestoresMotion:true,offsets});
+    await page.locator('.ts-map').screenshot({path:`loop-qa-output/mobile-${language}-${side}.png`});
+    const captions=await page.locator('.ts-hardware-caption').evaluateAll(els=>els.map(el=>({text:el.textContent,overflow:el.getBoundingClientRect().bottom>el.parentElement.getBoundingClientRect().bottom+1})));
+    const labels=await page.locator('.ts-mobile-cord-junction').evaluateAll(els=>els.map(el=>{const r=el.querySelector('.ts-cord-status').getBoundingClientRect(),svg=el.querySelector('svg').getBoundingClientRect();return {labelBottom:r.bottom,cableTop:svg.top+78*svg.width/270};}));
+    assert.ok(captions.every(c=>!c.overflow),'translated connection captions fit');
+    assert.ok(labels.every(l=>l.labelBottom<l.cableTop-3),'section captions stay clear of the yellow cord');
+    report.push({language,side,captions,labels,reducedMotion:true,playRestoresMotion:true,offsets});
     await context.close();
   }
   console.log('Verified',report.length,'browser scenarios');
