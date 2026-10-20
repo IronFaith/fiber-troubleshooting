@@ -10,22 +10,24 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Consolidate the passing-loop animation onto the actual yellow fiber and hardware, with visibly joined LC/MMC cable ends and no duplicate lower light diagram.
 - **Accepted scope — 2026-10-19:** The user's latest instruction supersedes the earlier separate evidence-rail layout. Keep mapped ports, source direction, recorded findings, motion controls and all four languages. After Normalize, a recorded historical setup is labeled as earlier; an installed tool shows its own actual connections and keeps earlier section findings. Continue automatically updating repository instructions/status whenever accepted preferences change.
-- **Implementation verified; deployment pending:** Branch `codex/hardware-loop-path` joins the hardware cords, draws the MMC/LC return on the actual loopback and removes the lower rails. Final `npm run check` passed all 118 tests. Browser verification passed 71 scenarios at 1728, 1400 and 390 pixels, including local/remote tests in all four languages and motion controls. The new implementation is not live until deployment and affected files are verified.
+- **Completed and live:** [`b159a34`](https://github.com/IronFaith/fiber-troubleshooting/commit/b159a342af390256ad90a4a9de30c808ce8e8066) joins the yellow hardware cords, draws the MMC/LC return on the actual loopback and removes the lower light diagram. Final `npm run check` passed all 118 tests; browser verification passed 71 scenarios. The exact Pages deployment succeeded and all 18 changed application files matched both the served files and the browser-verified code.
 - **Resolved defect:** UI-01 now uses wrapping captions within the hardware card; all four languages and both loop directions passed rendered checks.
-- **Next action:** Publish the browser-verified change and refresh this handoff with exact deployment and served-file evidence. No further application implementation is pending.
+- **Remaining work / next action:** The consolidated hardware animation and automatic instruction/status handoff requests are complete. No application implementation, agreed next change or blocker is pending. Resume from these notes when a new request is accepted.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`a98967d`](https://github.com/IronFaith/fiber-troubleshooting/commit/a98967d8f9594e517ae175ede937887ca1964319): **Keep loop animation clear of cassette visuals and maintain chat handoffs**.
+The latest application release is [`b159a34`](https://github.com/IronFaith/fiber-troubleshooting/commit/b159a342af390256ad90a4a9de30c808ce8e8066): **Animate passing loops on the connected yellow-fiber hardware view**.
 
-- Removed the added overlay crossing the CAS grid. The connected TX-to-RX loop return stays on the evidence rails below desktop hardware cards; mobile returns join the lanes within their recorded section. Cassette grids, connector art and labels stay clear.
-- Local and remote tests retain their direction, return point and evidence after Normalize or tool changes. VFL remains a separate red route; retests, conflicts and mapped-port changes still determine which loop evidence is supported. Existing four-language labels and saved state are preserved.
-- Verification: final `npm run check` passed all 118 tests. [Browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39353077050) passed 52 scenarios at 1728, 1400 and 390 pixels, plus all four languages and motion controls. Checks establish that recorded loops meet without a gap, stay on their evidence rails and do not intersect cassette artwork. Screenshots of the user's normalized local-optic/CAS-1 passing state, mobile layout and combined loop/VFL results were inspected.
-- [GitHub Pages deployment succeeded for the exact application commit](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39353360474). All 10 changed application files matched their served contents and the browser-verified version. The temporary browser workflow was removed before publication.
-- Standing instructions now require automatic documentation updates for accepted instruction/decision changes and a maintained handoff so another chat can resume from the repository.
+- Consolidated the animation onto the yellow LC legs, cables, enlarged MMC mating heads and the loopback cord. The TX/return halves meet on the physical loop; the separate lower blue/teal light diagram is removed. Mapped cassette ports remain highlighted and compact A/B section findings remain visible.
+- Desktop cable ends join between cards. Mobile follows connecting cords between stacked components and alongside inline result controls. Signals follow the same cord geometry; cassette port grids remain clear.
+- A currently installed tool shows its own connections. After Normalize, a supported earlier loop is labeled “Recorded loop · earlier setup”. Previous section findings remain when tools change; open VFL viewing connections stay open. No animation invents a real observation or certifies live service. Weak results remain amber, and practice faults retain their clearly labeled simulation.
+- Resolved UI-01: connection captions wrap within their hardware cards in all four languages, for local and remote loops. Translated section badges stay clear of the connecting cords.
+- Verification: final `npm run check` passed all 118 tests. [Browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39356294893) passed 71 scenarios at 1728, 1400 and 390 pixels, plus local/remote loops in English, Spanish, French and Arabic with reduced-motion and Play checks. Checks establish the complete internal cord joins, signal alignment on yellow fiber, no cassette-grid intersections, no duplicate lower diagram and readable captions. Desktop, stacked mobile, remote and translated screenshots were inspected.
+- [GitHub Pages deployment succeeded for the exact application commit](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39356556061). All 18 changed application files matched their served contents and the browser-verified version. Temporary browser tooling was removed before publication.
+- AGENTS.md and README.md now record the user's one-hardware-view preference. The automatic instruction/status update and chat resumption policy remains mandatory.
 
 ## What is in place
 
@@ -43,6 +45,7 @@ The latest application release is [`a98967d`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`b159a34`](https://github.com/IronFaith/fiber-troubleshooting/commit/b159a342af390256ad90a4a9de30c808ce8e8066) | Connected yellow hardware cords carry the passing-loop animation; removed duplicate lower light rails, preserved mapped ports and section findings, and resolved UI-01 in all four languages. |
 | [`a98967d`](https://github.com/IronFaith/fiber-troubleshooting/commit/a98967d8f9594e517ae175ede937887ca1964319) | Corrected the screenshot-reported overlay regression: connected loop returns stay in the evidence diagram and leave cassette artwork clear. Saved automatic instruction/status updates and the resumption handoff policy. |
 | [`ebf8c8e`](https://github.com/IronFaith/fiber-troubleshooting/commit/ebf8c8ed3a4e66ea669e294680c45eaadf2239b8) | Connected passing-loop animation through mapped hardware, with the return to the tested optic restored on desktop and mobile. Earlier span evidence remains visible. |
 | [`989b711`](https://github.com/IronFaith/fiber-troubleshooting/commit/989b711a7bc8d3cd1057e8373690289fc6b5a2a5) | Explicit female-to-male MMC mating detail at the CAS. |
