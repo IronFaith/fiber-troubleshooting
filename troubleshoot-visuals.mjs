@@ -213,28 +213,26 @@ function nodeFlow(s,coverage,point,cx,mode,test) {
   }
   return drawing;
 }
-function nodeCaption(s,point,mode,historical,endpoint) {
-  if(historical)return 'Recorded loop · earlier setup';
+function nodeCaption(s,point,mode,endpoint) {
   if(endpoint?.point===point&&endpoint.kind!=='lc')return endpoint.kind==='head'?'MMC head unplugged · CAS bypassed':endpoint.closed?'Both sides patched · path continues':`${displayedCasFace(s,point,endpoint.face)==='front'?'Front':'Rear'} port open`;
   return mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?'VFL on LC leg · optic empty':mode==='unplugged'?isOptic(s,point)?'LC legs unplugged · optic empty':'MMC unplugged · path open':isOptic(s,point)?'LC legs plugged into optic':'MMC head plugged into CAS';
 }
 function hardwareNode(s,coverage,point,cx,tests) {
-  const actual=connectionAt(s,point),test=tests.find(test=>test.point===point),historical=!!test&&actual==='plugged'&&s.tool==='link';
-  const mode=historical?'loop':actual,source=traceFrom(s),trace=s.traces[traceKey(s)],endpoint=vflEndpoint(s);
-  const scene=historical?{...s,tool:'loop',selected:point,loopSide:test.side}:s;
+  const mode=connectionAt(s,point),test=tests.find(test=>test.point===point);
+  const source=traceFrom(s),trace=s.traces[traceKey(s)],endpoint=vflEndpoint(s);
   const accessible=point<=s.reach,optic=isOptic(s,point),remote=point===s.count+1;
-  const value=historical?'pass':loopResult(s,point),cxClasses=`${s.selected===point?' ts-selected':''}${s.tool==='vfl'&&source===point?' ts-vfl-source':''}${!accessible?' ts-inaccessible':''}${value?' ts-observed-'+value:''}${coverage.points[point]?.issue?' ts-coverage-suspect':coverage.points[point]?.loop==='pass'?' ts-coverage-passed':''}`;
-  const result=s.tool==='vfl'&&point===source?'VFL source':s.tool==='vfl'&&point===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):!accessible?'Outside your reach':actual==='loop'&&!value?'Enter your loop result':recordedNodeCaption(s,coverage,point);
+  const value=loopResult(s,point),cxClasses=`${s.selected===point?' ts-selected':''}${s.tool==='vfl'&&source===point?' ts-vfl-source':''}${!accessible?' ts-inaccessible':''}${value?' ts-observed-'+value:''}${coverage.points[point]?.issue?' ts-coverage-suspect':coverage.points[point]?.loop==='pass'?' ts-coverage-passed':''}`;
+  const result=s.tool==='vfl'&&point===source?'VFL source':s.tool==='vfl'&&point===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):!accessible?'Outside your reach':mode==='loop'&&!value?'Enter your loop result':recordedNodeCaption(s,coverage,point);
   let art=optic?`<svg x="${cx-107}" y="${opticTop}" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,s.tool==='vfl'&&s.selected===point,null,remote,point,value)}</svg>`:
-    `<svg x="${cx-121}" y="${casTop}" width="242" height="${320*casScale}" viewBox="0 0 360 320">${passiveFace(scene,point,mode,true)}</svg>`;
+    `<svg x="${cx-121}" y="${casTop}" width="242" height="${320*casScale}" viewBox="0 0 360 320">${passiveFace(s,point,mode,true)}</svg>`;
   if(optic&&mode==='loop'&&test)art=art.replace('class="lc-loopback"',`class="lc-loopback ts-hardware-loop" data-loop-side="${test.side}" data-loop-point="${point}"`);
-  const handle=actual==='loop'?`<rect class="ts-tool-handle" data-mounted-tool="${optic?'lc':'mmc'}" x="${optic?cx-50:cx-26}" y="${optic?opticTop+49:casTop+218*casScale-16}" width="${optic?72:100}" height="72" rx="9"><title>Drag this loop to move it, or return it to the tray</title></rect>`:'';
+  const handle=mode==='loop'?`<rect class="ts-tool-handle" data-mounted-tool="${optic?'lc':'mmc'}" x="${optic?cx-50:cx-26}" y="${optic?opticTop+49:casTop+218*casScale-16}" width="${optic?72:100}" height="72" rx="9"><title>Drag this loop to move it, or return it to the tray</title></rect>`:'';
   const drawing=`<g class="ts-node${cxClasses}" ${accessible?`role="button" tabindex="0" data-point="${point}" aria-pressed="${s.selected===point}" aria-label="${s.tool==='vfl'&&point!==source?'Check light at':'Select'} ${pointName(point,s)}${optic?'':`, port ${s.ports[point-1]}`}"`:''}>
     <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="${cardHeight}" rx="12"/>
     <text class="ts-node-title" x="${cx}" y="59">${remote?'Remote optic':point===0?'Local optic':`CAS ${point} · Port ${patchAt(s,point).port}`}</text>${art}${handle}
-    <foreignObject x="${cx-124}" y="294" width="248" height="68"><div xmlns="http://www.w3.org/1999/xhtml" class="ts-hardware-caption"><div class="ts-connection-label ${mode==='plugged'?'':'open'}">${nodeCaption(s,point,mode,historical,endpoint)}</div><div class="ts-node-caption">${result}</div></div></foreignObject>
+    <foreignObject x="${cx-124}" y="294" width="248" height="68"><div xmlns="http://www.w3.org/1999/xhtml" class="ts-hardware-caption"><div class="ts-connection-label ${mode==='plugged'?'':'open'}">${nodeCaption(s,point,mode,endpoint)}</div><div class="ts-node-caption">${result}</div></div></foreignObject>
   </g>`;
-  return {drawing,flow:nodeFlow(scene,coverage,point,cx,mode,test),mode,historical};
+  return {drawing,flow:nodeFlow(s,coverage,point,cx,mode,test),mode};
 }
 function desktopBridge(s,point,centers,strand) {
   const left=isOptic(s,point-1)?endpoint(s,point-1,centers[point-1],strand):{x:centers[point-1]+121,y:casY(strand)};
