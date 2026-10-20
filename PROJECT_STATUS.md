@@ -10,23 +10,23 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Make lessons easy to browse and find again after the course was condensed too aggressively.
 - **Accepted scope — 2026-10-20:** Keep the five stages and all existing material. Open every lesson and the topic index; remove stage accordions and the one-lesson selector. Keep optional self-check explanations, quick reference, saved place and practice/exam handoffs.
-- **Completed locally:** All 23 lesson bodies and topic links are visible. Readers can scroll continuously, use browser Find or jump directly to a topic. Scrolling and topic links remember the current lesson with the existing storage key. Inactive-stage animations pause and leaving a guided light journey stops it. English, Spanish, French and Arabic ship together.
+- **Completed and published:** All 23 lesson bodies and topic links are visible. Readers can scroll continuously, use browser Find or jump directly to a topic. Scrolling and topic links remember the current lesson with the existing storage key. Inactive-stage animations pause and leaving a guided light journey stops it. English, Spanish, French and Arabic ship together.
 - **Verification:** Existing course/locale checks passed, then final `npm run check` passed all 131 tests. Browser checks confirmed 23 visible lessons and links, no duplicate IDs, desktop and mobile layouts, all four languages without horizontal overflow, direct topic navigation, scroll/reload/resume, journey stopping, legacy FIM bookmarks and the Loopbacks exam handoff. No browser errors were reported.
-- **Latest verified application release:** [`dfa9587`](https://github.com/IronFaith/fiber-troubleshooting/commit/dfa9587fb6f653f1bd75fb19a07eec006fbd56bd). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39504542434) succeeded; SHA-256 checks confirmed all 20 changed runtime files served by Pages match the application commit.
-- **Remaining work / next action:** Publish the open-lesson update and verify its exact Pages deployment and changed served files.
+- **Latest verified application release:** [`acca914`](https://github.com/IronFaith/fiber-troubleshooting/commit/acca914ca7fa64902fcc3431955da4b6ce3f84b5). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39505715242) succeeded; SHA-256 checks confirmed all 19 changed runtime files served by Pages match the application commit.
+- **Remaining work / next action:** The requested milestone is complete. Use further field feedback to choose any later changes.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`dfa9587`](https://github.com/IronFaith/fiber-troubleshooting/commit/dfa9587fb6f653f1bd75fb19a07eec006fbd56bd): **Compact troubleshooting findings and continuous VFL isolation**.
+The latest application release is [`acca914`](https://github.com/IronFaith/fiber-troubleshooting/commit/acca914ca7fa64902fcc3431955da4b6ce3f84b5): **Open lessons and visible topic index**.
 
-- The findings lead with the bounded span and suspect strand, then a compact loop/VFL table and one next action. Detailed steps, tools, outcome meanings and causes remain available on demand.
-- A failed onward loop no longer prematurely sends a partially completed VFL investigation back to looping. Its suspect status stays visible; both VFL channels passing still cannot clear that optical failure.
-- The user's combined sequence identifies the dark strand and its contacts in the added span. It does not assert that the ferrule is degraded. Earlier rounds and opposite-source results are not reused as this source's current evidence.
-- Two focused tests cover continued tracing and the combined evidence summary in both directions and on either channel. Final validation: 131 tests, desktop/mobile browser checks, translated mobile views, Normalize and reload. Existing saved-case keys remain unchanged.
-- Cache versions include changed modules and their importers. The [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39504542434) succeeded, and all 20 affected runtime files matched the commit byte for byte.
+- All five stages and 23 lesson bodies stay open. The visible topic index exposes every lesson directly; stage headings no longer collapse content and the one-lesson selector is removed.
+- Full existing explanations, diagrams, objectives and understanding checks remain. Self-check answers and source lists are still optional. Quick reference and stage practice/exam handoffs remain available.
+- Scrolling or following topic links saves the reader's place. Existing topic IDs, legacy chapter bookmarks, scores and attempts stay compatible. Guided journeys stop when the reader leaves their topic, while inactive-stage animation is paused.
+- Final validation: 131 tests, desktop/mobile browser checks, all four languages, scroll/reload/resume, legacy FIM links and the Loopbacks exam handoff. All 23 lessons and topic links were visible without duplicate IDs or mobile overflow.
+- Cache versions include changed modules and their importers. The [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39505715242) succeeded, and all 19 affected runtime files matched the commit byte for byte.
 
 ## What is in place
 
@@ -44,6 +44,7 @@ The latest application release is [`dfa9587`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`acca914`](https://github.com/IronFaith/fiber-troubleshooting/commit/acca914ca7fa64902fcc3431955da4b6ce3f84b5) | All 23 lessons and the topic index stay open; scrolling saves the current lesson. Full material, old anchors and practice/exam links preserved. 131 tests passed; exact Pages deployment and all 19 changed runtime files verified. |
 | [`dfa9587`](https://github.com/IronFaith/fiber-troubleshooting/commit/dfa9587fb6f653f1bd75fb19a07eec006fbd56bd) | Compact loop/VFL evidence table, suspect strand/span and expandable instructions; VFL continues to the failed boundary while optical failure remains suspect. 131 tests passed; exact Pages deployment and all 20 changed runtime files verified. |
 | [`0ec2d71`](https://github.com/IronFaith/fiber-troubleshooting/commit/0ec2d71706fac5993524ad1b758582f9a6e0a5ef) | Five guided stages, 23 objectives and understanding checks, lesson navigation/resume and direct exam handoffs. 129 tests passed; exact Pages deployment and all 24 changed runtime files verified. |
 | [`de62030`](https://github.com/IronFaith/fiber-troubleshooting/commit/de620306d0d621a2652c989d2625af1c876781e3) | Clearer isolation findings with steps, required tools, result meanings and unavailable-tool/access guidance. 126 tests passed; [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39412096880) and all 20 changed runtime files verified. |
@@ -64,7 +65,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The open-lesson update is implemented and locally verified; exact deployment verification is pending. The earlier compact findings and VFL guidance remain complete and verified live. No other redesign or curriculum work is queued.
+The open-lesson update is complete and verified live. The earlier compact findings and VFL guidance remain complete and verified live. No other redesign or curriculum work is queued.
 
 ## Boundaries to preserve
 
