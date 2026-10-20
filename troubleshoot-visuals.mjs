@@ -142,7 +142,7 @@ function supportedLoops(s,coverage) {
   });
 }
 const opticScale=214/300,casScale=242/360;
-const opticTop=97,casTop=81,cardHeight=314,nodeHeight=354;
+const opticTop=97,casTop=81,cardHeight=332,nodeHeight=372;
 const casY=lane=>casTop+(233.6+(lane==='tx'?-1.95:1.95))*casScale;
 const endpoint=(s,point,cx,lane)=>isOptic(s,point)?
   {x:cx-107+(point===0?292:8)*opticScale,y:opticTop+(lane==='tx'?184:202)*opticScale}:
@@ -232,7 +232,7 @@ function hardwareNode(s,coverage,point,cx,tests) {
   const drawing=`<g class="ts-node${cxClasses}" ${accessible?`role="button" tabindex="0" data-point="${point}" aria-pressed="${s.selected===point}" aria-label="${s.tool==='vfl'&&point!==source?'Check light at':'Select'} ${pointName(point,s)}${optic?'':`, port ${s.ports[point-1]}`}"`:''}>
     <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="${cardHeight}" rx="12"/>
     <text class="ts-node-title" x="${cx}" y="59">${remote?'Remote optic':point===0?'Local optic':`CAS ${point} · Port ${patchAt(s,point).port}`}</text>${art}${handle}
-    <foreignObject x="${cx-124}" y="294" width="248" height="50"><div xmlns="http://www.w3.org/1999/xhtml" class="ts-hardware-caption"><div class="ts-connection-label ${mode==='plugged'?'':'open'}">${nodeCaption(s,point,mode,historical,endpoint)}</div><div class="ts-node-caption">${result}</div></div></foreignObject>
+    <foreignObject x="${cx-124}" y="294" width="248" height="68"><div xmlns="http://www.w3.org/1999/xhtml" class="ts-hardware-caption"><div class="ts-connection-label ${mode==='plugged'?'':'open'}">${nodeCaption(s,point,mode,historical,endpoint)}</div><div class="ts-node-caption">${result}</div></div></foreignObject>
   </g>`;
   return {drawing,flow:nodeFlow(scene,coverage,point,cx,mode,test),mode,historical};
 }
