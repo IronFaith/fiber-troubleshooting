@@ -10,24 +10,24 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Make troubleshooting isolation clearer and usable: identify where to check, explain the evidence, and give short next steps with required tools and alternatives when tools or access are missing.
 - **Accepted scope — 2026-10-20:** Improve Case findings within the existing workspace, using the current evidence engine. Preserve source/strand/round boundaries, conflicting results, hardware, exams, badges and the separate IR/VFL display. Include English, Spanish, French and Arabic.
-- **Implemented:** Findings now lead with the bounded area, source and strand. They show supporting observations, possible causes, ordered steps, required tools and outcome meanings. An unavailable reference remains unresolved; unavailable inspection/spares lead to an appropriate comparison or test handoff. Copy findings includes the area and action plan.
+- **Completed and live:** [`de62030`](https://github.com/IronFaith/fiber-troubleshooting/commit/de620306d0d621a2652c989d2625af1c876781e3). Findings now lead with the bounded area, source and strand. They show supporting observations, possible causes, ordered steps, required tools and outcome meanings. An unavailable reference remains unresolved; unavailable inspection/spares lead to an appropriate comparison or test handoff. Copy findings includes the area and action plan.
 - **Retest:** Made a change · retest is available directly in findings for failed VFL or loop tests. It starts a fresh round at the failed source, strand and boundary; earlier checks remain in History. Conflicting observations require a recheck rather than this repair reset.
 - **Browser verification:** Tested remote-source B light at CAS 2 followed by darkness at CAS 1: findings identify CAS 1 ↔ CAS 2 and both observations. Exercised unavailable inspection/spare paths and confirmed retest returned to remote B at CAS 1 with eight earlier checks retained and no current passes. Tested a missing local reference, reload, and resuming inspection after a real reference result. Reviewed desktop and 390-pixel mobile views in all four languages, including translated source/endpoints/tools and Arabic; no page overflow.
 - **Automated verification:** Final `npm run check` passed all 126 tests. Three new focused tests cover unavailable reference handling, same-strand/source section guidance and fresh retest/history behavior. Existing locale, evidence, exam and diagram checks pass.
 - **Compatibility:** No storage-key changes or score/badge migrations. The new reference-unavailable outcome is stored in existing scoped comparison records. Current evidence remains separate from prior rounds; physical layouts and Light view behavior are unchanged.
-- **Remaining work / next action:** Publish this application change and verify its exact Pages deployment and served files.
+- **Remaining work / next action:** This milestone is complete. Its exact Pages deployment succeeded; all 20 changed runtime files matched the application commit. A live browser check confirmed the new guidance and current script/style versions. No additional work is queued.
 - **Blockers / missing input:** No blocker. A fixed field-tool inventory was not confirmed; each action states its requirements and provides an unavailable-tool/access path.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`83bbcae`](https://github.com/IronFaith/fiber-troubleshooting/commit/83bbcaef27f130442bc5040d420b05fcea36f5ec): **Dedicated loop exam, MMC badge and separate IR/VFL coverage views**.
+The latest application release is [`de62030`](https://github.com/IronFaith/fiber-troubleshooting/commit/de620306d0d621a2652c989d2625af1c876781e3): **Clearer isolation findings with actionable checks and tool requirements**.
 
-- This builds on the purpose-first looping lesson in [`cc163b4`](https://github.com/IronFaith/fiber-troubleshooting/commit/cc163b4f9bf76477d95854fa53236556849dd171). The new exam, badge and screenshot overlap fix are described in the handoff above and README.
-- Loop principles were checked against [Juniper’s physical-loopback documentation](https://www.juniper.net/documentation/us/en/software/junos/interfaces-ethernet/topics/topic-map/ethernet-fast-and-gigabit-loopback-testing.html) and [interface troubleshooting guidance](https://www.juniper.net/documentation/us/en/software/junos/interfaces-fundamentals/topics/topic-map/troubleshooting-interfaces.html). LC/MMC and CAS arrangements remain this site’s conventions.
-- Existing evidence rules, hardware geometry, scores, Apprentice ranks, counters and Intermediate questions are preserved. The new display selector filters signal overlays without changing observations. Runtime URL versions were refreshed for the changed modules and their importers.
-- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39407630875). SHA-256 comparisons confirmed that all 21 changed runtime files served by GitHub Pages match this application commit. Final checks passed all 123 tests; the final illustration-only feedback adjustment also passed syntax and browser checks.
+- Case findings identifies the tested area, source and strand; it explains the supporting observations and provides steps, required tools, result meanings and a missing-tool/access path. A new explicit unavailable-reference outcome cannot substitute for a passing test.
+- Guidance was checked against [Fluke’s fiber troubleshooting documentation](https://www.flukenetworks.com/edocs/white-paper-troubleshooting-fiber) and [Cisco’s inspect/clean/reinspect procedures](https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html). LC/MMC and CAS arrangements remain this site’s conventions. Visible continuity, measured loss and restored service remain separate conclusions.
+- Existing evidence rules, hardware geometry, Light view, scores, badges, counters and exams are preserved. A repair retest returns to the failed setup, including the first failing loop boundary from the tested end, while keeping earlier rounds in History. Runtime URL versions were refreshed for changed modules and their importers.
+- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39412096880). SHA-256 comparisons confirmed that all 20 changed runtime files served by GitHub Pages match this application commit. Final `npm run check` passed all 126 tests; desktop, mobile, translated and live browser checks are recorded above.
 
 ## What is in place
 
@@ -62,7 +62,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The Case findings change is implemented and locally verified. Its exact deployment and served-file verification are pending. No additional feature work is queued.
+The Case findings change is complete and verified live. No reproduced defect or publication task remains open for this milestone. No additional feature work is queued.
 
 This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
 
