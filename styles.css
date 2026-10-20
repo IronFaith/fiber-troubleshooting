@@ -1813,9 +1813,8 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-workspace-state { margin:4px 0; min-height:20px; color:#526f83; font-size:12px; }
 .ts-workspace .ts-map { margin:0 -4px; padding:0; }
 .ts-path-scene { margin:0 auto; direction:ltr; }
-.ts-path-scene,.ts-stacked-path { position:relative; }
-.ts-recorded-loop-overlay { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
-.ts-recorded-loop-overlay .learn-signal { stroke-width:3; }
+.ts-recorded-loop .learn-signal { stroke-dasharray:none; stroke-width:4; }
+.ts-stacked-direct-loop { display:block; width:100%; height:auto; }
 .ts-path-scene > svg { display:block; width:100%; max-width:none; color:#245b91; }
 .ts-recorded-base { fill:none; stroke:#ccd7de; stroke-width:4; stroke-dasharray:4 8; stroke-linecap:round; }
 .ts-recorded-base.suspect { stroke:#bc8531; stroke-dasharray:7 6; }

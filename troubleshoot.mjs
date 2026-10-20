@@ -1,9 +1,9 @@
 import {translateLines} from './locale.mjs?v=21';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=21';
-import {workbenchDiagram,mountRecordedLoops} from './troubleshoot-visuals.mjs?v=27';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=28';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=8';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=4';
-import {simpleVfl} from './vfl-simple.mjs?v=23';
+import {simpleVfl} from './vfl-simple.mjs?v=24';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -12,7 +12,6 @@ let view='actual', cases={actual:createCase(),simulation:createCase(true)};
 let selectedTool=null,setupOpen=false,newCaseStarted=false;
 let serviceCheckOpen=false,historyOpen=false,guidanceDetailsOpen=false;
 let deferPortRender=false,portRenderPending=false;
-let clearRecordedLoops=()=>{};
 const undo={actual:[],simulation:[]};
 let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const stackedPath=matchMedia('(max-width:700px)');
@@ -296,7 +295,6 @@ function results(s) {
     <p class="ts-note">Saved in this browser tab · up to 100 checks. Retest keeps earlier checks and starts fresh findings.</p><div id="ts-copy-fallback"></div></section>`;
 }
 function render(preservePosition=false) {
-  clearRecordedLoops();
   portRenderPending=false;
   const scrollLeft=host.querySelector('.ts-map')?.scrollLeft??0;
   const pathScroll=host.querySelector('.ts-path-bar')?.scrollLeft??0;
@@ -318,7 +316,6 @@ function render(preservePosition=false) {
     <div class="ts-case-actions">${button('history',`<span>History</span><span class="ts-history-count">${caseHistory(s).length}</span>`,`aria-expanded="${historyOpen}" aria-controls="ts-case-history"`)}${button('undo','Undo',undo[view].length?'':'disabled')}${button('reset','New case')}</div>
     <div id="ts-case-history" ${historyOpen?'':'hidden'}>${results(s)}</div></section>`;
   host.querySelector('.ts-path-bar').scrollLeft=pathScroll;
-  clearRecordedLoops=mountRecordedLoops(host.querySelector('.ts-map'),s);
   if(host.querySelector('.ts-map')) {if(preservePosition)host.querySelector('.ts-map').scrollLeft=scrollLeft;else centerMap();}
 }
 

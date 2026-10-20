@@ -4,9 +4,22 @@ Updated: **2026-10-19**. This is a maintained snapshot, not an automatic health 
 
 [Live course](https://ironfaith.github.io/fiber-troubleshooting/) · [Standing instructions](AGENTS.md) · [Current behavior](README.md) · [Counter operations](counter/README.md) · [Deployment history](https://github.com/IronFaith/fiber-troubleshooting/actions)
 
+## Resume in another chat
+
+Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. These maintained files provide the project handoff; older plans remain historical references.
+
+- **Latest user objective:** Correct the confusing loop overlay shown in the user's screenshot and keep GitHub notes current whenever project instructions or decisions change, so another chat can resume from the repository.
+- **Accepted instruction update — 2026-10-19:** Automatically update AGENTS.md and this status whenever an instruction, preference, accepted scope or lasting decision changes, even if no application code changes. Refresh affected README descriptions when behavior changes. Verify, commit and push the notes as part of the authorized milestone without waiting for another reminder.
+- **Work in progress:** The overlay is removed and the connected return is drawn inside the dedicated evidence rails. The normalized local-optic/CAS-1 passing case from the screenshot has been reproduced and inspected on desktop and mobile. Final checks passed all 118 tests; [browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39353077050) passed 52 scenarios, including checks that recorded loops stay clear of cassette artwork. Exact deployment verification is pending publication of this milestone.
+- **Remaining work:** UI-01 remains the recorded mobile caption defect, with reproduction and acceptance criteria under Outstanding work. The current milestone addresses the reported loop-visual regression and saves the instruction/handoff policy.
+
+Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action. Keep observed defects, unverified questions and optional proposals distinct.
+
 ## Current release
 
 The latest application release is [`ebf8c8e`](https://github.com/IronFaith/fiber-troubleshooting/commit/ebf8c8ed3a4e66ea669e294680c45eaadf2239b8): **Restore connected passing-loop animation in the test path**.
+
+**Reported visual regression:** The user supplied a screenshot showing that this release's added overlay crosses the CAS grid and creates confusing branches above the evidence rails. The checks below established connectivity and deployment, but did not prevent this layout defect. A corrective release is in progress.
 
 - Restored the connected optic → mapped CAS ports → loopback → optic return animation lost when cumulative evidence replaced the manual diagram with separate span indicators.
 - Local and remote routes follow their recorded source and return point; Normalize and tool changes preserve supported evidence. Conflicting or unrecorded tests do not draw a confirmed loop. All four learner languages retain their existing labels and saved state.
@@ -62,4 +75,4 @@ No other unresolved defect was established by this documentation review; that is
 
 ## Keeping this current
 
-For each completed milestone, update the relevant README description, add a concise release entry here, and move resolved issues out of Outstanding work with their fixing commit. Record new lasting decisions in AGENTS.md. Only label a release live after its exact deployment and affected files are verified. Keep old design plans as historical records, not current instructions.
+For each accepted instruction or decision change, update AGENTS.md and this status automatically, including documentation-only milestones. For implementation milestones, refresh the relevant README description, add concise release evidence here, and move resolved issues out of Outstanding work with their fixing commit. Update the resumption handoff before concluding work, then commit and push the notes with the authorized milestone. Record any unpushed state or missing input if blocked. Only label a release live after its exact deployment and affected files are verified. Keep old design plans as historical records, not current instructions.
