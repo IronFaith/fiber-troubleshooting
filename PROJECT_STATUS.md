@@ -10,23 +10,23 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Make troubleshooting findings scannable and correctly follow the user's combined loop/VFL field sequence.
 - **Accepted scope — 2026-10-20:** Keep the existing workspace; replace the paragraph-heavy findings with a suspect span/strand, compact test table and one next action. Fix premature loop repetition during VFL isolation. Ferrule degradation remains a hypothesis until supported by inspection or comparison.
-- **Completed locally:** Findings show current same-source loop and A/B VFL results, with unknown channels explicit. Steps/tools/outcomes and possible causes are expandable. Partial VFL passes continue through the failed loop boundary while its optical failure remains suspect. The reported sequence isolates the dark strand and contacts between the first and onward passives, from either end and for either strand. English, Spanish, French and Arabic ship together.
-- **Verification:** Final `npm run check` passed all 131 tests, including two focused regressions. Browser checks reproduced optic pass → CAS 1 pass → CAS 2 failure, both VFL channels passing at CAS 1 and one dark at CAS 2; identity confirmation advances to inspection. Desktop and mobile findings, four-language mobile overflow, expandable instructions, Normalize and reload were checked without browser errors. Existing tests also caught and verified retention of the suspect optical-loop status during partial VFL checks.
-- **Latest verified application release:** [`0ec2d71`](https://github.com/IronFaith/fiber-troubleshooting/commit/0ec2d71706fac5993524ad1b758582f9a6e0a5ef). The new findings milestone is locally verified; publication verification is pending.
-- **Remaining work / next action:** Publish this milestone through main and verify its exact Pages deployment and affected runtime files.
+- **Completed and published:** Findings show current same-source loop and A/B VFL results, with unknown channels explicit. Steps/tools/outcomes and possible causes are expandable. Partial VFL passes continue through the failed loop boundary while its optical failure remains suspect. The reported sequence isolates the dark strand and contacts between the first and onward passives, from either end and for either strand. English, Spanish, French and Arabic ship together.
+- **Verification:** Final `npm run check` passed all 131 tests, including two focused regressions. Browser checks reproduced optic pass → CAS 1 pass → CAS 2 failure, both VFL channels passing at CAS 1 and one dark at CAS 2; identity confirmation advances to inspection. Desktop and mobile findings, four-language mobile overflow, expandable instructions, Normalize, reload and a fresh retest at the failed strand were checked without browser errors; earlier checks stayed in History. Existing tests also caught and verified retention of the suspect optical-loop status during partial VFL checks.
+- **Latest verified application release:** [`dfa9587`](https://github.com/IronFaith/fiber-troubleshooting/commit/dfa9587fb6f653f1bd75fb19a07eec006fbd56bd). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39504542434) succeeded; SHA-256 checks confirmed all 20 changed runtime files served by Pages match the application commit.
+- **Remaining work / next action:** The requested milestone is complete. Use further field feedback to choose any later changes.
 - **Blockers / missing input:** None. No extra tools or confirmed ferrule damage are assumed.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-**Compact troubleshooting findings and continuous VFL isolation** are verified locally and awaiting publication.
+The latest application release is [`dfa9587`](https://github.com/IronFaith/fiber-troubleshooting/commit/dfa9587fb6f653f1bd75fb19a07eec006fbd56bd): **Compact troubleshooting findings and continuous VFL isolation**.
 
 - The findings lead with the bounded span and suspect strand, then a compact loop/VFL table and one next action. Detailed steps, tools, outcome meanings and causes remain available on demand.
 - A failed onward loop no longer prematurely sends a partially completed VFL investigation back to looping. Its suspect status stays visible; both VFL channels passing still cannot clear that optical failure.
 - The user's combined sequence identifies the dark strand and its contacts in the added span. It does not assert that the ferrule is degraded. Earlier rounds and opposite-source results are not reused as this source's current evidence.
 - Two focused tests cover continued tracing and the combined evidence summary in both directions and on either channel. Final validation: 131 tests, desktop/mobile browser checks, translated mobile views, Normalize and reload. Existing saved-case keys remain unchanged.
-- Cache versions include changed modules and their importers. Exact deployment and served-file verification are pending.
+- Cache versions include changed modules and their importers. The [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39504542434) succeeded, and all 20 affected runtime files matched the commit byte for byte.
 
 ## What is in place
 
@@ -44,6 +44,7 @@ Each future milestone must refresh this handoff with the latest objective, accep
 
 | Commit | Delivered change |
 | --- | --- |
+| [`dfa9587`](https://github.com/IronFaith/fiber-troubleshooting/commit/dfa9587fb6f653f1bd75fb19a07eec006fbd56bd) | Compact loop/VFL evidence table, suspect strand/span and expandable instructions; VFL continues to the failed boundary while optical failure remains suspect. 131 tests passed; exact Pages deployment and all 20 changed runtime files verified. |
 | [`0ec2d71`](https://github.com/IronFaith/fiber-troubleshooting/commit/0ec2d71706fac5993524ad1b758582f9a6e0a5ef) | Five guided stages, 23 objectives and understanding checks, lesson navigation/resume and direct exam handoffs. 129 tests passed; exact Pages deployment and all 24 changed runtime files verified. |
 | [`de62030`](https://github.com/IronFaith/fiber-troubleshooting/commit/de620306d0d621a2652c989d2625af1c876781e3) | Clearer isolation findings with steps, required tools, result meanings and unavailable-tool/access guidance. 126 tests passed; [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39412096880) and all 20 changed runtime files verified. |
 | [`83bbcae`](https://github.com/IronFaith/fiber-troubleshooting/commit/83bbcaef27f130442bc5040d420b05fcea36f5ec) | Five-question Loopbacks exam, separate MMC badge at 4/5 and IR/VFL Light view selector. Apprentice scores preserved; 123 tests passed, exact Pages deployment succeeded and all 21 changed runtime files matched. |
@@ -63,7 +64,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The compact findings and VFL guidance milestone is implemented and locally verified. Publication verification remains. No other redesign or curriculum work is queued.
+The compact findings and VFL guidance milestone is complete and verified live. No other redesign or curriculum work is queued.
 
 ## Boundaries to preserve
 
