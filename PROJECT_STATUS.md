@@ -8,25 +8,24 @@ Updated: **2026-10-20**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Clean up the troubleshooting diagram with dedicated desktop and mobile layouts, based on the user's two screenshots.
-- **Accepted scope — 2026-10-20:** Keep the existing workflow and evidence. Desktop uses compact horizontal cards; mobile uses a straight cable channel beside stacked cards, with upright cassette maps and vertically arranged enlarged MMC connections. Keep cables out of result controls and retain Normalize behavior.
-- **Completed and live:** [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f) delivers responsive geometry, attached result panels, calmer card styling, direct remote LC cable entry on desktop and removal of idle tool-handle outlines. A reproduced dual-source defect is fixed: when both ends passed at one CAS, the animation must follow the currently installed loop's source.
-- **Browser verification:** 320-pixel French/Arabic/Spanish and 390-pixel English mobile views have no page overflow or clipped hardware captions; 1024/1440-pixel desktop and one/four-CAS paths fit or scroll within the map. Normalize removed all loopbacks and retained recorded passes. VFL result recording retained its scroll position, and no console errors were reported.
-- **Automated verification:** `npm run check` passed all 120 tests. One focused regression was added for the reproduced dual-source animation defect; existing Normalize coverage remains passing. `git diff --check` passed.
-- **Remaining work / next action:** This responsive-layout request is complete. The exact application deployment succeeded and all ten changed runtime files matched their served contents. No implementation or blocker remains.
+- **Current objective:** Make exams check understanding of lessons and the purpose of actions, starting with the looping concepts beginners find difficult.
+- **Accepted scope — 2026-10-20:** Explain why to loop, where to loop, what each location includes, what passing/failing supports and what remains untested. Align the existing Beginner loop questions and feedback with that lesson. Preserve five-question exams, earned scores and badges; include all four learner languages.
+- **Implemented:** Chapter 1 now introduces loop purpose before the diagrams, compares direct LC and passive MMC scope, explains the direct-failure response and restored-link checks, and connects each new loop location to the added test section. The Beginner exam asks for both supported reasons to loop and interprets a failed added span. Its diagram uses Port 28 rather than the lesson’s Port 12 and reserves the suspect-section label for feedback.
+- **Browser verification:** English lesson and exam feedback reviewed at desktop width; Spanish, French and Arabic lesson and loop-question text checked at 390 pixels without page overflow. An incomplete loop-purpose answer was marked for review; both correct reasons scored correctly. Reload resumed the attempt; language switching preserved both selected answers. No console errors were reported.
+- **Automated verification:** The focused quiz/session/level/locale/course checks and final `npm run check` passed; all 120 existing tests pass. No new test framework or tests were needed for these content changes.
+- **Compatibility:** `loop-purpose` replaces the old single-answer `direct-loop` question. Unfinished Narrow down the problem drafts using the old ID are intentionally discarded; saved scores and badges remain. Other valid exam drafts still resume.
+- **Remaining work / next action:** Commit and publish this milestone, then verify the exact GitHub Pages deployment and served runtime files. Further lesson/exam expansions are not part of this milestone.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f): **Dedicated desktop and mobile troubleshooting layouts**.
+**Loop purpose and beginner comprehension** is verified locally and awaiting deployment verification. The prior verified application release is [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f), the responsive troubleshooting layout.
 
-- Desktop cards fit the available width, keeping longer paths scrollable within the workspace. Remote LC legs enter directly from the previous CAS. Tool handles retain their hit areas without permanent dashed boxes.
-- Mobile places the enlarged MMC connections vertically in a straight cable channel beside stacked cards. Upright port maps, wrapping captions and result buttons stay clear of the cable. Loop controls are attached to the selected card; connector and light geometry share the same transforms.
-- Fixed a reproduced dual-source animation defect: if local and remote loops passed at the same CAS, the installed loop now uses its current source instead of drawing an earlier return loop on the opposite side. Both recorded passes remain available.
-- Verification: `npm run check` passed all 120 tests, including one added regression for that defect and existing Normalize coverage. `git diff --check` passed. Browser checks covered 320–1440-pixel layouts, all four languages, local/remote loop directions, one/four-CAS paths, VFL scroll preservation and Normalize retaining results while removing loopbacks.
-- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39401274969); all ten changed runtime files matched the live site. No case-storage, evidence-rule, exam or counter changes were made.
+- The new lesson and assessments are described in the handoff above and the README. The standing instruction is now to teach an action’s purpose and evidence limits before testing them.
+- Loop principles were checked against [Juniper’s physical-loopback documentation](https://www.juniper.net/documentation/us/en/software/junos/interfaces-ethernet/topics/topic-map/ethernet-fast-and-gigabit-loopback-testing.html) and [interface troubleshooting guidance](https://www.juniper.net/documentation/us/en/software/junos/interfaces-fundamentals/topics/topic-map/troubleshooting-interfaces.html). LC/MMC and CAS arrangements remain this site’s conventions.
+- Existing troubleshooting evidence, hardware geometry, saved cases, counters and Intermediate questions are unchanged. Changes in their importing modules only refresh versioned translation dependencies.
 
 ## What is in place
 
@@ -59,7 +58,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-No unresolved defect or publication work is recorded for this milestone. The reported mobile cable/control overlap and oversized horizontal layout have been addressed. Earlier Normalize and translated-caption fixes remain covered by tests and rendered checks.
+The looping content and assessment update is implemented and locally verified. Publication verification remains pending. No reproduced application defect remains open for this milestone.
 
 This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
 

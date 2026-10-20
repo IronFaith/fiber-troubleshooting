@@ -120,17 +120,18 @@ export const questions = [
     reveal:'Lane 3: −40 needs investigation', lesson:'learn.html#readings'
   },
   {
-    id:'direct-loop', topic:3, visual:'direct-loop', skill:'Interpret local loop results',
-    prompt:'The approved direct optic loop passes. The restored link still fails. What next?',
-    choices:['Mark the remote optic healthy because the local loop passed.', 'Extend the test to the next accessible passive using the mapped loop.', 'Replace the local optic before checking any connected fiber.'], correct:1,
-    explanation:'The local optic passed this test. Extend outward through the fiber and connections you can reach. A direct loop does not test the long route or remote optic.',
-    reveal:'Checked locally; extend the tested path', lesson:'learn.html#loopbacks'
+    id:'loop-purpose', topic:3, visual:'direct-loop', skill:'Explain why and where to loop',
+    prompt:'The direct LC loop passed, but the restored link still fails. Why was that loop useful? Select TWO supported statements.',
+    choices:['It tested local TX and RX without relying on the installed fiber route or remote optic.', 'It proved that the remote optic can receive the local signal.', 'It gave a local passing result to compare with a later loop that adds fiber and connections.', 'It repaired the service path, so the remaining failure can be ignored.'], correct:[0,2],
+    explanation:'The short loop returns local TX to local RX. It checks that small path and gives you a starting result before extending to an accessible passive. It neither reaches the remote optic nor repairs service. After testing, remove the loop and verify the restored connection.',
+    reveal:'A loop isolates a test path; moving it changes what you test.', lesson:'learn.html#loopbacks',
+    relatedLessons:[['Compare loop locations','learn.html#compare-loops']]
   },
   {
     id:'passive-loop', topic:3, visual:'sections', interaction:'visual', skill:'Interpret local loop results',
-    prompt:'Read the loop results. Which section should you investigate next?',
+    prompt:'The direct and CAS 1 loops passed. The CAS 2 loop failed. Which added section does that comparison tell you to investigate?',
     choices:['A · local optic to CAS 1', 'B · CAS 1 to CAS 2, including its connections', 'C · beyond CAS 2 toward the remote device'], correct:1,
-    explanation:'The direct loop and CAS 1 loop passed. The CAS 2 loop failed, so first verify that loop setup, then investigate the added span and its connections. This does not locate a break. Beyond CAS 2 is untested.',
+    explanation:'Moving the loop from CAS 1 to CAS 2 adds section B to the outgoing and return paths. First verify the failed loop setup, then investigate this added fiber and its connections. Section A passed the earlier test; section C and the remote optic were outside both CAS loops. This comparison narrows the search but does not identify a broken part.',
     reveal:'B is suspect. Verify the loop setup, then isolate this span.', lesson:'learn.html#compare-loops'
   },
   {

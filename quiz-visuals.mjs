@@ -48,9 +48,9 @@ function trace(question,answered,choice) {
   const section=(index,status)=>target(question,index,`<span class="q-trace-line" aria-hidden="true"><svg viewBox="0 0 40 60">${cord('M20 0 V60')}${answered && index===0 ? lightFlow('M20 0 V60') : ''}</svg></span><span><b>${['A · Optic → CAS 1','B · CAS 1 → CAS 2','C · Beyond CAS 2'][index]}</b><small>${status}</small></span>`,answered,choice);
   return `<div class="q-trace">${node(svg(opticFace('trace-optic'),354),'Local optic','Direct loop: pass')}
     ${section(0,answered ? 'Checked to CAS 1' : 'First section')}
-    ${node(cassette('CAS 1',12),'CAS 1 · Port 12','Loop here: pass')}
-    ${section(1,answered ? 'Suspect span + connections' : 'Added section')}
-    ${node(cassette('CAS 2',12),'CAS 2 · Port 12','Loop here: fail')}
+    ${node(cassette('CAS 1',28),'CAS 1 · Port 28','Loop here: pass')}
+    ${section(1,answered ? 'Suspect span + connections' : 'Fiber between passives')}
+    ${node(cassette('CAS 2',28),'CAS 2 · Port 28','Loop here: fail')}
     ${section(2,'Not tested')}
     <div class="q-trace-remote">Remote device · other room / building · not tested</div></div>`;
 }

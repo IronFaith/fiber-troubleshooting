@@ -1,4 +1,4 @@
-import {translateLines} from './locale.mjs?v=22';
+import {translateLines} from './locale.mjs?v=23';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=21';
 import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=32';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=8';

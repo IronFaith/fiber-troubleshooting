@@ -5,13 +5,13 @@ import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPa
 import { rackIllustration } from './rack-visuals.mjs?v=9';
 import { mountCommunicationRoute } from './communication-route.mjs?v=4';
 import { mountCourse, learningEntry } from './course.mjs?v=9';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=28';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=29';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=14';
 import { mountLightJourney } from './loop-lesson.mjs?v=7';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=3';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=10';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=11';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -105,11 +105,22 @@ function renderLesson(lesson) {
       <p class="picture-note">This is a simplified overview. <a href="./devices.html#ends">Follow the full example through rack, distribution and room-passage passives in Chapter 2 →</a></p>
     </section>
     <section id="loopbacks" class="lesson-section" aria-labelledby="loop-title">
-      <h3 id="loop-title">Bring TX light back to RX</h3>
-      <p class="section-intro">Move the loop to see what you are testing.</p>
+      <h3 id="loop-title">Why loop the light back?</h3>
+      <p class="section-intro">When a link fails, either optic or the fiber between them could be involved. A loop gives the local optic a return path so you can test a smaller part of the connection.</p>
+      <div class="reason-example"><h4>Same optic sends and receives</h4>
+        <p>Normally, local TX sends toward remote RX. For this test, a loop joins the outgoing path to the return path: local TX → loop → local RX. The remote optic is outside this test.</p>
+        <p>The loop does not create light or repair the link. It returns the tested optic’s own light. Its location decides which fiber and connections the test includes.</p>
+      </div>
+      <h4>Choose the location to answer your question</h4>
       <div id="loop-picture"></div>
-      <div class="learning-readings"><span><b>RX +0.25</b> your good example</span><span><b>RX −40</b> your no-light indication</span></div>
-      <p class="picture-note">dBm examples. Check every lane against the optic’s limits. Use the correct loop mapping and any required attenuation.</p>
+      <div class="reason-two-up">
+        <div class="reason-example"><h4>LC at the optic · can it send and receive?</h4><p>A direct LC loop leaves the installed fiber route out. A pass supports the local TX and RX under this test. If it fails, check the approved setup and loop lead, inspect and clean as needed, then use a compatible known-good comparison. It does not blame the remote end.</p></div>
+        <div class="reason-example"><h4>MMC at a passive · does the added path work?</h4><p>After a direct pass, a mapped MMC loop at an accessible CAS adds the outgoing and return fibers and their connections up to that point. A pass supports that tested pair; the onward route and remote optic remain untested.</p></div>
+      </div>
+      <p class="lesson-takeaway">Ask: why this test, where does the light turn back, what is included, and what remains untested?</p>
+      <p class="picture-note">Use the site-approved loop mapping, compatible lead and any required attenuation. Judge a pass by the required readings and test criteria for the installed optic, not just the presence of light. Never look into a fiber end.</p>
+      <p class="picture-note">After testing, remove the loop, Normalize the mapped connection, and verify the required readings, endpoint identity and live link.</p>
+      <p class="lesson-sources"><a href="https://www.juniper.net/documentation/us/en/software/junos/interfaces-ethernet/topics/topic-map/ethernet-fast-and-gigabit-loopback-testing.html" target="_blank" rel="noopener noreferrer">Juniper · physical loopback testing ↗</a></p>
     </section>
     ${readingLesson()}${loopReasoningLesson()}${polarityLesson()}
     <section id="cleaning" class="lesson-section" aria-labelledby="fault-title">
@@ -211,7 +222,7 @@ function pathPicture() {
 function loopPicture(selected) {
   const art = loopIllustration(selected ? 'passive' : 'direct');
   return {...art, hardware:true, drawing:art.drawing + lightFlow(art.lightPath),
-    caption:selected ? 'MMC loop at CAS 1 Port 12: tests the optic + fiber to this port. Beyond the loop is untested. One pair illustrated.' : 'LC loop inserted: TX returns to RX at the optic. The longer fiber route is outside this test.'};
+    caption:selected ? 'MMC at CAS 1 / 12: local TX → outgoing fiber → loop → return fiber → local RX. The optic, this pair and its connections are included; beyond CAS 1 is not.' : 'LC at the optic: local TX → short loop lead → local RX. This checks the local optic without the installed fiber route or remote optic.'};
 }
 function faultPicture(selected) {
   const captions = [

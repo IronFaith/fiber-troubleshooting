@@ -19,7 +19,8 @@ export function readingLesson() {
 
 export function loopReasoningLesson() {
   return `<section id="compare-loops" class="lesson-section" aria-labelledby="compare-title"><h3 id="compare-title">Move the loop, grow the tested section</h3>
-    <p class="section-intro">Worked case: same pair, valid loop mapping and attenuation, no other changes between tests. Explore each step.</p>
+    <p class="section-intro">Start small, then add one section. Each new loop still returns to the same local RX. Compare what changed when you moved it.</p>
+    <p class="picture-note">Worked case: same pair, valid loop mapping and attenuation, no other changes between tests. Explore each step.</p>
     <div class="lesson-options" role="group" aria-label="Worked loop sequence"><button type="button" data-worked-loop="0">1 · Direct loop</button><button type="button" data-worked-loop="1">2 · Loop at CAS 1</button><button type="button" data-worked-loop="2">3 · Loop at CAS 2</button></div>
     <figure id="worked-loop" class="reason-example" aria-live="polite"></figure>
     <p class="lesson-takeaway">Compare the last passing test with the next failure. Investigate the added fiber <b>and its connections</b>. Recheck the failed loop setup first. A failure does not prove a break or name its exact position.</p>

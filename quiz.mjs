@@ -1,8 +1,8 @@
-import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=4';
+import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=5';
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=9';
+import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=10';
 
-import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=14';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=15';
 import {loadPatchBest} from './patch-practice-data.mjs?v=2';
 
 const host = document.querySelector('#quiz');
@@ -159,7 +159,7 @@ function renderQuestion() {
     ${visual ? '<p class="q-tap-hint">Tap your answer in the picture. Keyboard: Tab, then Enter.</p>' : ''}
     <div id="quiz-scene">${quizVisual(question)}</div>
     <div id="quiz-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
-    ${multiple ? `<p class="quiz-selection-hint" id="quiz-selection-hint">${selectedLevel==='intermediate'?'Select all supported answers.':'Select all that could cause it.'} Then check your answers.</p>` : ''}
+    ${multiple ? `<p class="quiz-selection-hint" id="quiz-selection-hint">Select all supported answers. Then check your answers.</p>` : ''}
     ${visual ? '' : `<div class="quiz-answers" role="group" aria-labelledby="quiz-title"${multiple ? ' aria-describedby="quiz-selection-hint"' : ''}>${question.choices.map((choice,i) => multiple
       ? `<label class="quiz-answer quiz-multiple"><input type="checkbox" value="${i}"><span>${selectedLevel==='intermediate'?`<b>${String.fromCharCode(65+i)}.</b> `:''}${choice}<span class="quiz-answer-state"></span></span></label>`
       : `<button type="button" class="quiz-answer" data-choice="${i}"><span class="quiz-letter" aria-hidden="true">${String.fromCharCode(65+i)}</span><span>${choice}<span class="quiz-answer-state"></span></span></button>`).join('')}</div>`}
