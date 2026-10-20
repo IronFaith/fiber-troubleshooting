@@ -10,24 +10,24 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Add a dedicated Loopbacks exam and MMC loopback badge, and fix overlapping loop IR / VFL markings reported in mobile and desktop screenshots.
 - **Accepted scope — 2026-10-20:** Five questions aligned with the existing looping lessons; a separate 4/5 badge using existing MMC artwork; preserve Apprentice I–IV and all existing scores. Add an IR/VFL display selector on the existing hardware path, keeping recorded results and conflicts. Include English, Spanish, French and Arabic.
-- **Implemented:** Loopbacks is available under Beginner and My progress, bringing the badge count to eight. Two taught scenarios have independent exam IDs; three new questions cover location, failed-setup validation and restored service. The badge requires a complete attempt; retries remain practice.
+- **Completed and live:** [`83bbcae`](https://github.com/IronFaith/fiber-troubleshooting/commit/83bbcaef27f130442bc5040d420b05fcea36f5ec) adds Loopbacks under Beginner and My progress, bringing the badge count to eight. Two taught scenarios have independent exam IDs; three new questions cover location, failed-setup validation and restored service. The badge requires a complete attempt; retries remain practice. The location question reveals the connected test diagram only after an answer.
 - **Overlap fix:** Light view shows either blue/teal IR coverage or red dashed VFL coverage. All section findings remain; Normalize removes the tool and preserves evidence plus the view. Tool placement chooses the matching view. Cases and the view survive reload.
 - **Browser verification:** Completed the loop exam at 5/5, saw the MMC badge in My progress and confirmed the existing Apprentice I rank stayed unchanged. Recreated local-optic/CAS-1 passes with conflicting A evidence and passing B VFL to CAS 2. IR view showed three IR overlays and zero VFL overlays; VFL view showed six VFL overlays and zero IR overlays. Recorded labels stayed identical; Normalize left zero loopback drawings. Reviewed desktop and 390-pixel mobile layouts, the earned badge, translated light controls and Arabic exam without page overflow. Reload retained the selected VFL view; no console errors.
 - **Automated verification:** Narrow quiz/session/locale/coverage checks passed after correcting the new resume test to put a pending selection on a multiple-answer question. Final `npm run check` passed all 123 tests. Three focused tests cover loop grading/translations, separate scores/badge threshold and attempt resume. No new framework.
 - **Compatibility:** Existing storage keys and draft IDs remain. Loop progress uses `fiber-loop-progress-v1`; optional `lightLayer` is added to the existing tab case record. Old cases default to a view matching their tool. Existing Apprentice and Intermediate behavior remains.
-- **Remaining work / next action:** Publish this checked milestone, verify its exact Pages deployment and changed served files, then record the release evidence below.
+- **Remaining work / next action:** This milestone is complete. The exact Pages deployment succeeded and all 21 changed runtime files matched their committed bytes. No additional work is queued.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`cc163b4`](https://github.com/IronFaith/fiber-troubleshooting/commit/cc163b4f9bf76477d95854fa53236556849dd171): **Loop purpose and beginner comprehension**.
+The latest application release is [`83bbcae`](https://github.com/IronFaith/fiber-troubleshooting/commit/83bbcaef27f130442bc5040d420b05fcea36f5ec): **Dedicated loop exam, MMC badge and separate IR/VFL coverage views**.
 
-- The new lesson and assessments are described in the handoff above and the README. The standing instruction is now to teach an action’s purpose and evidence limits before testing them.
+- This builds on the purpose-first looping lesson in [`cc163b4`](https://github.com/IronFaith/fiber-troubleshooting/commit/cc163b4f9bf76477d95854fa53236556849dd171). The new exam, badge and screenshot overlap fix are described in the handoff above and README.
 - Loop principles were checked against [Juniper’s physical-loopback documentation](https://www.juniper.net/documentation/us/en/software/junos/interfaces-ethernet/topics/topic-map/ethernet-fast-and-gigabit-loopback-testing.html) and [interface troubleshooting guidance](https://www.juniper.net/documentation/us/en/software/junos/interfaces-fundamentals/topics/topic-map/troubleshooting-interfaces.html). LC/MMC and CAS arrangements remain this site’s conventions.
-- Existing troubleshooting evidence, hardware geometry, saved cases, counters and Intermediate questions are unchanged. Changes in their importing modules only refresh versioned translation dependencies.
-- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39404644130). SHA-256 comparisons confirmed that all 20 changed runtime files served by GitHub Pages match this application commit.
+- Existing evidence rules, hardware geometry, scores, Apprentice ranks, counters and Intermediate questions are preserved. The new display selector filters signal overlays without changing observations. Runtime URL versions were refreshed for the changed modules and their importers.
+- [The exact deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39407630875). SHA-256 comparisons confirmed that all 21 changed runtime files served by GitHub Pages match this application commit. Final checks passed all 123 tests; the final illustration-only feedback adjustment also passed syntax and browser checks.
 
 ## What is in place
 
@@ -61,7 +61,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The dedicated loop exam, badge and light-view fix are implemented and checked locally. Publication and exact served-file verification remain before closing this milestone.
+The dedicated loop exam, MMC badge and light-view fix are complete and verified live. No reproduced defect or publication task remains open for this milestone.
 
 This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
 
