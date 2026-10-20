@@ -6,14 +6,16 @@ Updated: **2026-10-19**. This is a maintained snapshot, not an automatic health 
 
 ## Resume in another chat
 
-Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. These maintained files provide the project handoff; older plans remain historical references.
+Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Latest user objective:** Correct the confusing loop overlay shown in the user's screenshot and keep GitHub notes current whenever project instructions or decisions change, so another chat can resume from the repository.
-- **Accepted instruction update — 2026-10-19:** Automatically update AGENTS.md and this status whenever an instruction, preference, accepted scope or lasting decision changes, even if no application code changes. Refresh affected README descriptions when behavior changes. Verify, commit and push the notes as part of the authorized milestone without waiting for another reminder.
-- **Completed work:** The confusing overlay is removed, the clean connected return is deployed in `a98967d`, and the automatic instruction/status handoff rule is saved in AGENTS.md, README.md and this file. Verification and exact deployment evidence are below.
-- **Remaining work and next action:** UI-01 remains the recorded mobile caption defect, with reproduction and acceptance criteria under Outstanding work. It is available for the next UI milestone. The loop-visual correction and handoff-policy requests are complete; no application implementation is in progress or blocker recorded.
+- **Current objective:** Consolidate the passing-loop animation onto the actual yellow fiber and hardware, with visibly joined LC/MMC cable ends and no duplicate lower light diagram.
+- **Accepted scope — 2026-10-19:** The user's latest instruction supersedes the earlier separate evidence-rail layout. Keep mapped ports, source direction, recorded findings, motion controls and all four languages. Recorded historical setups must be distinguished from the currently installed tool. Continue automatically updating repository instructions/status whenever accepted preferences change.
+- **In progress:** Branch `codex/hardware-loop-path` joins the hardware cords, draws the MMC/LC return on the actual loopback and removes the lower rails. Browser visual verification and final checks are pending; these changes are not live yet.
+- **Open defect:** UI-01 was the narrow Spanish SVG caption overflow. Wrapping captions are included in this milestone and need rendered verification before marking it resolved.
+- **Next action:** Inspect browser screenshots and physical cord joins, resolve any regressions, run the final repository check, publish the verified change and refresh this handoff with deployment evidence.
+- **Blockers / missing input:** None.
 
-Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action. Keep observed defects, unverified questions and optional proposals distinct.
+Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 

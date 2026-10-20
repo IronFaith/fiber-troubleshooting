@@ -109,14 +109,14 @@ function coverageLabel(lane,strand) {
 // Translate the component's own cord geometry into the enclosing scene. Using
 // the same geometry for the yellow cord and the signal prevents floating routes.
 function transformPath(path,{x=0,y=0,sx=1,sy=sx}={}) {
-  const parts=path.match(/[MHVQC]|-?\d*\.?\d+/g);let at=0,out='',px=0,py=0;
+  const parts=path.match(/[MLHVQC]|-?\d*\.?\d+/g);let at=0,out='',px=0,py=0;
   const n=()=>Number(parts[at++]), xy=(a,b)=>`${+(x+a*sx).toFixed(5)} ${+(y+b*sy).toFixed(5)}`;
   while(at<parts.length) {
     const op=parts[at++];
     if(op==='H'){px=n();out+=` L${xy(px,py)}`;}
     else if(op==='V'){py=n();out+=` L${xy(px,py)}`;}
     else {
-      const count={M:1,Q:2,C:3}[op],points=[];
+      const count={M:1,L:1,Q:2,C:3}[op],points=[];
       for(let i=0;i<count;i++){px=n();py=n();points.push(xy(px,py));}
       out+=` ${op}${points.join(' ')}`;
     }

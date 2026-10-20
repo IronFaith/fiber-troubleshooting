@@ -6,7 +6,7 @@ const server=spawn(process.execPath,['preview.mjs']);
 await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);});
 await mkdir('loop-qa-output',{recursive:true});
 const browser=await chromium.launch();
-const report=[];
+const report=[],failures=[];
 const loop=(point,result='pass',side='local')=>[{type:'place',kind:point===0||point===3?'lc':'mmc',point},{type:'loop-side',value:side},{type:'ready',value:true},{type:'record',result}];
 const scenarios=[
   {name:'reported-normalized-state',actions:[...loop(0),...loop(1),{type:'normalize'}],loops:[['local',1]]},
@@ -53,12 +53,13 @@ try {
           withinBounds:points.every(p=>{const q=new DOMPoint(p.x,p.y).matrixTransform(out.getScreenCTM()),r=svg.getBoundingClientRect();return q.x>=r.left-1&&q.y>=r.top-1&&q.x<=r.right+1&&q.y<=r.bottom+1;})};
       }),
       duplicateDiagram:!!document.querySelector('.ts-recorded-routes,.ts-stacked-span,.ts-stacked-direct-loop'),
-      captions:[...document.querySelectorAll('.ts-hardware-caption')].map(el=>({overflow:el.scrollHeight>el.clientHeight+1,text:el.textContent})),
+      captions:[...document.querySelectorAll('.ts-hardware-caption')].map(el=>({overflow:el.getBoundingClientRect().bottom>el.parentElement.getBoundingClientRect().bottom+1,text:el.textContent})),
       service:JSON.parse(sessionStorage.getItem('fiber-workbench-v1')).actual.service,
       horizontalOverflow:document.documentElement.scrollWidth>innerWidth,
     }));
     await page.locator('.ts-map').screenshot({path:`loop-qa-output/${scenario.name}-${width}.png`});
     report.push({width,scenario:scenario.name,...result,errors});
+    try {
     assert.deepEqual(errors,[],`${scenario.name}: browser errors`);
     assert.deepEqual(result.loops.map(r=>[r.side,r.point]),scenario.loops,`${scenario.name} at ${width}`);
     assert.ok(result.loops.every(r=>r.gap<.01&&r.finite&&r.withinBounds&&r.onHardware&&!r.overlapsHardware),`${scenario.name}: disconnected or clipped route`);
@@ -66,6 +67,7 @@ try {
     assert.equal(result.service,'unknown','a loop pass must not verify live service');
     if(scenario.name==='loop-and-vfl') assert.ok(await page.locator('.ts-hardware-vfl .learn-signal.red').count(),'VFL evidence must remain separate');
     if(width===390)assert.equal(result.horizontalOverflow,false);
+    }catch(error){failures.push({scenario:scenario.name,width,error:error.message});}
     await context.close();
   }
   for(const language of ['en','es','fr','ar']) {
@@ -91,6 +93,7 @@ try {
     await context.close();
   }
   console.log('Verified',report.length,'browser scenarios');
+  assert.deepEqual(failures,[]);
 } finally {
   await writeFile('loop-qa-output/report.json',JSON.stringify(report,null,2));
   await browser.close();server.kill();
