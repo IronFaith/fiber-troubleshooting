@@ -1,6 +1,6 @@
 # Project instructions
 
-Read [PROJECT_STATUS.md](PROJECT_STATUS.md) for the latest verified release and outstanding work. The [README](README.md) describes current behavior; [counter/README.md](counter/README.md) covers the separate Cloudflare counter. Direct user instructions take precedence over these project defaults.
+At the start of project work or when resuming in another chat, fetch the latest repository state and read this file and [PROJECT_STATUS.md](PROJECT_STATUS.md) before making changes. The [README](README.md) describes current behavior; [counter/README.md](counter/README.md) covers the separate Cloudflare counter. Direct user instructions take precedence over these project defaults.
 
 ## Scope and workflow
 
@@ -27,7 +27,7 @@ Read [PROJECT_STATUS.md](PROJECT_STATUS.md) for the latest verified release and 
 - Assume an unknown fault in Find my problem. Keep Practice a known fault separate; tool placement and animation never create a real test result.
 - Show the evidence, possible causes and a specific next check. Distinguish untested, passing, failed and conflicting evidence. Do not identify a failed ferrule or optic from a symptom alone.
 - Keep results separated by source device, strand, viewing point and test round. Support both local and remote checks, but leave inaccessible equipment unverified. Preserve contradictory observations for rechecking rather than silently clearing them with a farther pass.
-- Draw a passing loop as a connected animated route from the tested optic through the mapped CAS ports, around the loopback and back to that optic. Separate blue/teal span indicators are not sufficient. Preserve recorded routes when tools move or Normalize is used; keep conflicting and untested sections unconfirmed.
+- Draw a passing loop as a connected animated TX → loopback → RX return on the dedicated test-path rails. Keep the cassette grids, connector illustrations and labels clear; associate the loop with the existing source and mapped CAS/port labels. Preserve recorded routes when tools move or Normalize is used; keep conflicting and untested sections unconfirmed. Review the rendered layout as well as connectivity, including the normalized local-optic/CAS-1 passing case; a route fitting its SVG bounds alone does not establish that the visuals are correct.
 - Use the last valid same-strand passing point to narrow the added section. VFL continuity does not certify acceptable infrared loss, optic health or restored service. Final link verification remains separate.
 - Keep device/optic socket, LC follower/MMC head serial, CAS route/ports and strand mapping confirmations in the test panel. A passing test can still belong to the wrong path.
 - The user's cassette layout is 32 ports: 1–16 on top and 17–32 below. At the rack CAS, the rear female MMC fanout head mates with the front male MMC onward connector. Mirror the remote rack as appropriate; do not assume all intermediate assemblies share these genders.
@@ -38,8 +38,12 @@ Read [PROJECT_STATUS.md](PROJECT_STATUS.md) for the latest verified release and 
 
 ## Maintaining the project record
 
+- Automatically record every accepted change to project instructions, user preferences, scope or lasting decisions in this file and PROJECT_STATUS.md, including instruction-only changes. Do this as part of the current milestone without waiting for the user to ask again. Revise superseded instructions so the current rules remain clear.
 - Update PROJECT_STATUS.md in the same milestone when behavior, verified releases, known issues or agreed next work change. Include concise evidence and commit links for completed releases; do not mark deployment verified before it succeeds.
 - Refresh affected README passages instead of only appending new descriptions that contradict older ones. Add lasting user decisions here so future work does not depend on conversation history.
+- Keep a concise resumption handoff in PROJECT_STATUS.md: the latest user objective and accepted scope, completed work and verification, work still in progress, open defects, blockers or missing inputs, and the next agreed action. Record enough context to resume without the prior conversation; identify any reference material that is still unavailable.
+- Before reporting a milestone complete or handing off authorized project work, verify the notes against the actual repository state, commit and push the relevant documentation to GitHub along with the work. If publication is blocked, record the local state and blocker and tell the user what is still unpushed. Instruction-only updates follow the documentation verification rule above.
+- A resuming chat must use the current instructions and handoff, inspect relevant changes since the recorded release, and continue accepted work. Keep this project's record scoped to this repository; other projects retain their own instructions. Historical plans and inaccessible prior chats are not evidence of new approved scope.
 - Separate observed defects, unverified questions and optional suggestions. Do not turn a proposed feature into approved work or claim an unperformed audit is complete.
 - Keep creator/developer notes in these documents rather than adding explanatory clutter to learner pages. Contributor documentation is in English; learner-facing content follows the language rules below.
 

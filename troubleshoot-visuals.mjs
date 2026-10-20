@@ -148,11 +148,11 @@ function coverageOverlay(s,coverage,centers) {
   return drawing;
 }
 
-function recordedLane(lane,strand,start,end,vertical=false) {
+function recordedLane(lane,strand,start,end,vertical=false,paintIr=true) {
   const path=(direction,offset=0)=>vertical?`M${start[0]+offset} ${direction>0?start[1]:end[1]} V${direction>0?end[1]:start[1]}`:
     `M${direction>0?start[0]:end[0]} ${start[1]+offset} H${direction>0?end[0]:start[0]}`;
   let drawing=`<path class="ts-recorded-base ${lane.issue?'suspect':''}" d="${path(1)}"/>`;
-  if(lane.ir) drawing+=`<g class="ts-recorded-ir">${lightFlow(path(strand==='tx'?1:-1),strand==='tx'?'ir':'return-ir')}</g>`;
+  if(lane.ir&&paintIr) drawing+=`<g class="ts-recorded-ir">${lightFlow(path(strand==='tx'?1:-1),strand==='tx'?'ir':'return-ir')}</g>`;
   for(const direction of lane.vflDirections) drawing+=`<g class="ts-recorded-vfl">${lightFlow(path(direction,lane.ir?9:0),'red')}</g>`;
   if(lane.issue) {
     const x=(start[0]+end[0])/2,y=(start[1]+end[1])/2;
@@ -160,106 +160,56 @@ function recordedLane(lane,strand,start,end,vertical=false) {
   }
   return drawing;
 }
-function recordedSpan(s,span,vertical,centers) {
+function recordedSpan(s,span,vertical,centers,loops=[]) {
   const name=span.point===1?'LC leg → MMC head':span.point===s.count+1?`CAS ${span.point-1} → Remote LC legs`:`CAS ${span.point-1} → CAS ${span.point}`;
-  const label=span.lanes;
+  const label=span.lanes,returns=loops.filter(test=>span.point===(test.side==='local'?test.point:test.point+1)&&test.point!==test.source);
   if(vertical) return `<svg class="ts-stacked-span" viewBox="0 0 270 160" role="img" aria-label="Recorded section: ${pointName(span.point-1,s)} → ${pointName(span.point,s)}; ${coverageLabel(label.tx,'tx')}; ${coverageLabel(label.rx,'rx')}">
     <text class="ts-span-name" x="135" y="18">${name}</text>
-    ${['tx','rx'].map((strand,i)=>{const x=i?264:6,labelX=i?202:68,lane=label[strand];return `<text class="ts-recorded-channel" x="${labelX}" y="39">${i?'B':'A'}</text>${recordedLane(lane,strand,[x,0],[x,160],true)}<text class="ts-span-status" x="${labelX}" y="150">${coverageLabel(lane,strand).slice(4)}</text>`;}).join('')}
+    ${['tx','rx'].map((strand,i)=>{const x=i?202:68,lane=label[strand];return `<text class="ts-recorded-channel" x="${x}" y="39">${i?'B':'A'}</text>${recordedLane(lane,strand,[x,64],[x,125],true,!returns.length)}<text class="ts-span-status" x="${x}" y="150">${coverageLabel(lane,strand).slice(4)}</text>`;}).join('')}
+    ${returns.map(test=>recordedLoop(test)).join('')}
   </svg>`;
   const cx=(centers[span.point-1]+centers[span.point])/2;
   return `<g role="img" aria-label="Recorded section: ${pointName(span.point-1,s)} → ${pointName(span.point,s)}; ${coverageLabel(label.tx,'tx')}; ${coverageLabel(label.rx,'rx')}">
-    ${['tx','rx'].map((strand,i)=>recordedLane(label[strand],strand,[centers[span.point-1],30+i*46],[centers[span.point],30+i*46])).join('')}
+    ${['tx','rx'].map((strand,i)=>{const covered=loops.some(test=>span.point>Math.min(test.source,test.point)&&span.point<=Math.max(test.source,test.point));return recordedLane(label[strand],strand,[centers[span.point-1],30+i*46],[centers[span.point],30+i*46],false,!covered);}).join('')}
     <rect class="ts-fiber-summary" x="${cx-127}" y="102" width="254" height="87" rx="8"/><text class="ts-span-name" x="${cx}" y="121">${name}</text>
     ${['tx','rx'].map((strand,i)=>`<rect class="ts-coverage-badge ${label[strand].status}" x="${cx-111}" y="${130+i*27}" width="222" height="24" rx="6"/><text class="ts-span-status" x="${cx}" y="${146+i*27}">${coverageLabel(label[strand],strand)}</text>`).join('')}
   </g>`;
 }
 
-// Join the recorded pair through its mapped ports and around the loopback.
-// Measure the rendered nodes so inline result controls and translated mobile
-// layouts cannot leave gaps. This depicts a recorded test, not the current link.
-export function mountRecordedLoops(map,s) {
-  const scene=map?.querySelector('.ts-stacked-path,.ts-path-scene');
-  if(!scene||!scene.querySelector('.ts-recorded-routes,.ts-stacked-span')) return ()=>{};
-  const coverage=recordedContinuity(s);
-  const tests=['local','remote'].flatMap(side=>{
+// Recorded loop returns belong on the evidence rails, clear of hardware art.
+function recordedLoops(s,coverage) {
+  return ['local','remote'].flatMap(side=>{
     const source=side==='local'?0:s.count+1;
     const passes=loopEntries(s).filter(test=>test.side===side&&test.result==='pass'&&
       !coverage.points[source].issue&&coverage.spans.filter(span=>span.point>Math.min(source,test.point)&&span.point<=Math.max(source,test.point))
         .every(span=>Object.values(span.lanes).every(lane=>lane.ir&&lane[side==='local'?'localLoop':'remoteLoop'])));
     const selected=s.tool==='loop'&&s.loopSide===side?passes.find(test=>test.point===s.selected):null;
     const test=selected??passes.sort((a,b)=>side==='local'?b.point-a.point:a.point-b.point)[0];
-    return test?[{...test,source}]:[];
+    return test&&!(test.point===source&&connectionAt(s,source)==='loop')?[{...test,source}]:[];
   });
-  if(!tests.length) return ()=>{};
-  const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  overlay.classList.add('ts-recorded-loop-overlay');
-  overlay.setAttribute('aria-hidden','true');
-  scene.append(overlay);
-  let frame;
-  const draw=()=>{
-    const bounds=scene.getBoundingClientRect(),stacked=scene.classList.contains('ts-stacked-path');
-    const point=(element,x,y)=>{const p=new DOMPoint(x,y).matrixTransform(element.getScreenCTM());return {x:p.x-bounds.left,y:p.y-bounds.top};};
-    const nodes=Array.from({length:s.count+2},(_,i)=>{
-      const node=scene.querySelector(`[data-loop-node="${i}"]`),svg=node.querySelector('svg'),card=node.querySelector('.ts-node-card').getBoundingClientRect();
-      const remote=i===s.count+1;
-      const port=isOptic(s,i)?null:point(svg,31.5+((s.ports[i-1]-1)%16)*19.8,(s.ports[i-1]<=16?59:137)+12);
-      return {port,svg,left:card.left-bounds.left-1,right:card.right-bounds.left+1,top:card.top-bounds.top,bottom:card.bottom-bounds.top,
-        tx:isOptic(s,i)?point(svg,remote?8:292,remote?202:184):null,
-        rx:isOptic(s,i)?point(svg,remote?8:292,remote?184:202):null};
-    });
-    const rails=scene.querySelector('.ts-recorded-routes');
-    overlay.setAttribute('viewBox',`0 0 ${bounds.width} ${bounds.height}`);
-    overlay.innerHTML=tests.map(test=>{
-      const remote=test.side==='remote',direction=remote?-1:1,source=nodes[test.source],target=nodes[test.point];
-      let out,back;
-      if(test.point===test.source) {
-        if(connectionAt(s,test.source)==='loop') return '';
-        const tx=point(source.svg,168,remote?127:81),rx=point(source.svg,168,remote?81:127),bend=tx.x-60,mid=(tx.y+rx.y)/2;
-        out=`M${tx.x} ${tx.y} H${bend+14} Q${bend} ${tx.y} ${bend} ${mid}`;
-        back=`M${bend} ${mid} Q${bend} ${rx.y} ${bend+14} ${rx.y} H${rx.x}`;
-      } else if(stacked) {
-        const outX=remote?source.right:source.left,backX=remote?source.left:source.right;
-        out=`M${source.tx.x} ${source.tx.y} H${backX} V${remote?source.top-6:source.bottom+6} H${outX}`;
-        for(let i=test.source+direction;i!==test.point;i+=direction) {
-          const p=nodes[i].port;
-          out+=` V${p.y} H${p.x} V${p.y+direction*8} H${outX}`;
-        }
-        const p=target.port,bend=p.x+direction*24,mid=p.y+direction*12;
-        out+=` V${p.y} H${p.x} Q${bend} ${p.y} ${bend} ${mid}`;
-        back=`M${bend} ${mid} Q${bend} ${p.y+direction*24} ${p.x} ${p.y+direction*24} H${backX} V${source.rx.y} H${source.rx.x}`;
-      } else {
-        const outY=point(rails,0,remote?76:30).y,backY=point(rails,0,remote?30:76).y;
-        const sourceEdge=remote?source.left-8:source.right+8;
-        out=`M${source.tx.x} ${source.tx.y} H${sourceEdge} V${outY}`;
-        for(let i=test.source+direction;i!==test.point;i+=direction) {
-          const node=nodes[i],p=node.port,entry=remote?node.right+8:node.left-8,exit=remote?node.left-8:node.right+8;
-          out+=` H${entry} V${p.y} H${p.x} H${exit} V${outY}`;
-        }
-        const p=target.port,entry=remote?target.right+8:target.left-8,bend=p.x+direction*24,mid=p.y+12;
-        out+=` H${entry} V${p.y} H${p.x} Q${bend} ${p.y} ${bend} ${mid}`;
-        back=`M${bend} ${mid} Q${bend} ${p.y+24} ${p.x} ${p.y+24} H${entry-direction*7} V${backY}`;
-        for(let i=test.point-direction;i!==test.source;i-=direction) {
-          const node=nodes[i],p=node.port,entry=remote?node.left-8:node.right+8,exit=remote?node.right+8:node.left-8;
-          back+=` H${entry} V${p.y+12} H${p.x} H${exit} V${backY}`;
-        }
-        back+=` H${sourceEdge+direction*7} V${source.rx.y} H${source.rx.x}`;
-      }
-      return `<g class="ts-recorded-loop" data-loop-side="${test.side}" data-loop-point="${test.point}">${lightFlow(out,remote?'return-ir':'ir')}${lightFlow(back,remote?'ir':'return-ir')}</g>`;
-    }).join('');
-  };
-  const schedule=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(draw);};
-  const observer=new ResizeObserver(schedule);
-  observer.observe(scene);
-  schedule();
-  return ()=>{observer.disconnect();cancelAnimationFrame(frame);overlay.remove();};
+}
+function recordedLoop(test,centers) {
+  const remote=test.side==='remote';
+  let out,back;
+  if(centers) {
+    const source=centers[test.source],target=centers[test.point],bend=target+(remote?-24:24),outY=remote?76:30,backY=remote?30:76;
+    out=`M${source} ${outY} H${target} Q${bend} ${outY} ${bend} 53`;
+    back=`M${bend} 53 Q${bend} ${backY} ${target} ${backY} H${source}`;
+  } else if(remote) {
+    out='M202 125 V64 Q202 48 135 48';
+    back='M135 48 Q68 48 68 64 V125';
+  } else {
+    out='M68 64 V118 Q68 134 135 134';
+    back='M135 134 Q202 134 202 118 V64';
+  }
+  return `<g class="ts-recorded-loop" data-loop-side="${test.side}" data-loop-point="${test.point}">${lightFlow(out,remote?'return-ir':'ir')}${lightFlow(back,remote?'ir':'return-ir')}</g>`;
 }
 function recordedDiagram(s,nodeDrawings,centers,loopControls,stacked) {
-  const coverage=recordedContinuity(s),width=centers.at(-1)+135;
+  const coverage=recordedContinuity(s),loops=recordedLoops(s,coverage),width=centers.at(-1)+135;
   const faultAt=(point,optic)=>s.simulated&&s.fault.kind!=='none'&&s.fault.at===point&&(s.fault.kind.startsWith('optic_')||point===0)===optic?`<p class="ts-stack-fault">Simulated fault ${optic?'at optic':'in this section'} ↓</p>`:'';
-  if(stacked) return `<div class="ts-stacked-path">${nodeDrawings.map((node,i)=>`<div class="ts-stacked-node" data-path-node="${i}">${faultAt(i,true)}<svg viewBox="${i*290} 28 270 ${isOptic(s,i)?228:308}" role="group">${node}</svg>${s.selected===i?loopControls:''}</div>${coverage.spans[i]?faultAt(i+1,false)+recordedSpan(s,coverage.spans[i],true):''}`).join('')}</div>`;
+  if(stacked) return `<div class="ts-stacked-path">${nodeDrawings.map((node,i)=>`<div class="ts-stacked-node" data-path-node="${i}">${faultAt(i,true)}<svg viewBox="${i*290} 28 270 ${isOptic(s,i)?228:308}" role="group">${node}</svg>${loops.filter(test=>test.source===i&&test.point===i).map(test=>`<svg class="ts-stacked-direct-loop" viewBox="${i*290} 0 270 100" aria-hidden="true">${recordedLoop(test,centers)}</svg>`).join('')}${s.selected===i?loopControls:''}</div>${coverage.spans[i]?faultAt(i+1,false)+recordedSpan(s,coverage.spans[i],true,null,loops):''}`).join('')}</div>`;
   return `<div class="ts-path-scene" style="width:${width}px"><svg viewBox="0 0 ${width} 336" style="height:336px" role="group">${nodeDrawings.join('')}</svg>${loopControls?`<div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px;${isOptic(s,s.selected)?'margin-top:-80px':''}">${loopControls}</div>`:''}
-    <svg class="ts-recorded-routes" viewBox="0 0 ${width} 196" style="height:196px" role="group"><text class="ts-recorded-channel" x="40" y="34">A</text><text class="ts-recorded-channel" x="40" y="80">B</text>${coverage.spans.map(span=>recordedSpan(s,span,false,centers)).join('')}</svg></div>`;
+    <svg class="ts-recorded-routes" viewBox="0 0 ${width} 196" style="height:196px" role="group"><text class="ts-recorded-channel" x="40" y="34">A</text><text class="ts-recorded-channel" x="40" y="80">B</text>${coverage.spans.map(span=>recordedSpan(s,span,false,centers,loops)).join('')}${loops.map(test=>recordedLoop(test,centers)).join('')}</svg></div>`;
 }
 
 export function workbenchDiagram(s,loopControls='',{stacked=false,recordedOnly=false}={}) {
@@ -280,7 +230,7 @@ export function workbenchDiagram(s,loopControls='',{stacked=false,recordedOnly=f
     const mode=connectionAt(s,i), isLoop=mode==='loop';
     const handleX=isOptic(s,i)?cx-50:cx-121+(31.5+((s.ports[i-1]-1)%16)*19.8)*242/360-32;
     const handleY=isOptic(s,i)?117:81+(s.ports[i-1]<=16?59:137)*140/208-7;
-    drawing += `<g data-loop-node="${i}" class="ts-node${s.selected===i ? ' ts-selected' : ''}${tracing&&from===i?' ts-vfl-source':''}${!accessible ? ' ts-inaccessible' : ''}${loopResult(s,i)?' ts-observed-'+loopResult(s,i):''}${coverage.points[i]?.issue?' ts-coverage-suspect':coverage.points[i]?.loop==='pass'?' ts-coverage-passed':''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="${tracing&&i!==from?'Check light at':'Select'} ${i===0&&tracing?'optic-side LC leg':pointName(i,s)}${!isOptic(s,i) ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
+    drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${tracing&&from===i?' ts-vfl-source':''}${!accessible ? ' ts-inaccessible' : ''}${loopResult(s,i)?' ts-observed-'+loopResult(s,i):''}${coverage.points[i]?.issue?' ts-coverage-suspect':coverage.points[i]?.loop==='pass'?' ts-coverage-passed':''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="${tracing&&i!==from?'Check light at':'Select'} ${i===0&&tracing?'optic-side LC leg':pointName(i,s)}${!isOptic(s,i) ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
       <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="${218+extra}" rx="12"/>
       <text class="ts-node-title" x="${cx}" y="59">${remote ? 'Remote optic' : i===0 ? 'Local optic' : `CAS ${i} · Port ${patchAt(s,i).port}`}</text>
       ${i===0 || remote ? `<svg x="${cx-107}" y="68" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,tracing&&s.selected===i,normalized&&isOptic(s,i)?remote?{optic:coverage.remoteOptic,txThrough:s.count+1-coverage.remoteTxThrough}:coverage:null,remote,i,loopResult(s,i))}</svg>` :
