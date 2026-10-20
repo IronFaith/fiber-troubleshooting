@@ -53,19 +53,17 @@ function cassetteConnection(s,point,mode) {
   const connectors=['rear','front'].map((side,i)=>{
     const face=displayedCasFace(s,point,side),female=fanout&&face==='rear';
     const loop=mode==='loop'&&side===loopSide,seated=loop||patch[side];
-    const x=i?(seated?295:318):(seated?65:42),scale=i?'-.65 .65':'.65 .65';
+    const x=i?(seated?234:264):(seated?126:96),scale=i?'-.65 .65':'.65 .65';
     const name=fanout?(female?'Rear · female MMC':'Front · male MMC'):(face==='rear'?'Rear MMC':'Front MMC');
-    return `${caption(i?278:82,207,name)}<g transform="translate(${x} 218) scale(${scale})">${loop?mmcLoopback(0,0,{compact:true}):mmcHead(0,0,false)}${fanout&&!female?'<path d="M83 21 h7 M83 31 h7" stroke="#556862" stroke-width="2"/>':female?'<circle cx="82" cy="21" r="1.8" fill="#263a32"/><circle cx="82" cy="31" r="1.8" fill="#263a32"/>':''}</g>${caption(i?278:82,278,loop?'MMC loopback':fanout&&female?'Fanout head':seated?'Onward cable':'Unplugged')}`;
+    return `${caption(i?278:82,207,name)}${loop?'':`<path class="loop-jacket" d="M${i?360:0} 234 H${x+(i?14:-14)}"/><path class="loop-cord" d="M${i?360:0} 234 H${x+(i?14:-14)}"/>`}<g transform="translate(${x} 218) scale(${scale})">${loop?mmcLoopback(0,0,{compact:true}):mmcHead(0,0,false)}${fanout&&!female?'<path d="M83 21 h7 M83 31 h7" stroke="#556862" stroke-width="2"/>':female?'<circle cx="82" cy="21" r="1.8" fill="#263a32"/><circle cx="82" cy="31" r="1.8" fill="#263a32"/>':''}</g>${caption(i?278:82,278,loop?'MMC loopback':fanout&&female?'Fanout head':seated?'Onward cable':'Unplugged')}`;
   }).join('');
   const endpoint=vflEndpoint(s),lit=endpoint?.point===point&&endpoint.emitting;
-  const faceX=endpoint?.face==='rear'?121:239;
-  return `<g class="hardware-art ts-cas-connection" role="img" aria-label="${fanout?`CAS ${point} connection: rear female fanout head, front male MMC extension. Simplified site example.`:`CAS ${point} connection: two MMC mating connectors. Follow the actual cable record.`}">
-    <rect x="124" y="218" width="112" height="34" rx="4" fill="#e3f0e7" stroke="#3d785d" stroke-width="2"/>
-    <path class="loop-jacket" d="M0 234 H44 M316 234 H360"/><path class="loop-cord" d="M0 234 H44 M316 234 H360"/>
-    <path d="M124 229 H236 M124 241 H236" fill="none" stroke="#b8c9bd" stroke-width="2" stroke-dasharray="4 4"/>
-    ${caption(180,240,'CAS')}${connectors}
+  const faceX=endpoint?.kind==='head'?(endpoint.face==='rear'?150:210):180;
+  return `<g class="hardware-art ts-cas-connection" role="img" aria-label="${fanout?`CAS ${point} connection: the rear female MMC fanout head mates with the front male MMC onward cable at the selected port.`:`CAS ${point} connection: two MMC mating connectors. Follow the actual cable record.`}">
+    <rect x="158" y="218" width="44" height="34" rx="4" fill="#e3f0e7" stroke="#3d785d" stroke-width="2"/>
+    ${connectors}
     ${lit?lightSource(faceX,234,'red'):''}
-    ${caption(180,305,`Port ${patch.port} · connection detail`)}
+    ${caption(180,305,`Port ${patch.port} · MMC mating point`)}
   </g>`;
 }
 function passiveFace(s,point,mode,detailed=false) {
