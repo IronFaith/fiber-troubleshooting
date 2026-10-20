@@ -6,22 +6,14 @@ Updated: **2026-10-19**. This is a maintained snapshot, not an automatic health 
 
 ## Current release
 
-The latest application release is [`989b711`](https://github.com/IronFaith/fiber-troubleshooting/commit/989b711a7bc8d3cd1057e8373690289fc6b5a2a5): **Show MMC female and male connectors mating at the CAS port**.
-
-- The female fanout head and front male MMC meet at the selected CAS port. Unplugging shows a gap; a loopback replaces the onward connection; a reported VFL pass illuminates the exposed face.
-- English, Spanish, French and Arabic include the clarified labels and accessible descriptions. Local and remote rack orientation is preserved.
-- Verification: `npm run check` passed all 118 tests; desktop and translated mobile views were inspected. [GitHub Pages deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39348505818), and all 17 changed application files matched their deployed contents.
-- This documentation refresh changes no application behavior. It records the standing instructions, corrects stale README descriptions and establishes the outstanding-work list below.
-
-## What is in place
-
-### Pending release — connected passing-loop animation
+The latest application release is [`ebf8c8e`](https://github.com/IronFaith/fiber-troubleshooting/commit/ebf8c8ed3a4e66ea669e294680c45eaadf2239b8): **Restore connected passing-loop animation in the test path**.
 
 - Restored the connected optic → mapped CAS ports → loopback → optic return animation lost when cumulative evidence replaced the manual diagram with separate span indicators.
-- Local and remote routes follow their recorded source and return point; Normalize and tool changes preserve supported evidence. Conflicting or unrecorded tests do not draw a confirmed loop.
-- [Browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39350514842) passed 26 desktop/mobile, evidence, language and motion scenarios. Both halves meet without a gap; routes fit their rendered bounds. The four learner languages retain their existing labels and state.
-- Final `npm run check` passed all 118 tests, including existing coverage, case history and locale checks.
-- Exact GitHub Pages deployment verification is pending publication of this milestone.
+- Local and remote routes follow their recorded source and return point; Normalize and tool changes preserve supported evidence. Conflicting or unrecorded tests do not draw a confirmed loop. All four learner languages retain their existing labels and saved state.
+- Verification: final `npm run check` passed all 118 tests. [Browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39350514842) passed 26 desktop/mobile, evidence, language and motion scenarios; both animation halves meet without a gap and stay within their rendered bounds. Screenshots were inspected.
+- [GitHub Pages deployment succeeded for the exact application commit](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39350779499). All 10 changed application files matched their served contents and the browser-verified application files. The temporary browser workflow was removed before publication.
+
+## What is in place
 
 | Area | Current behavior |
 | --- | --- |
@@ -37,6 +29,7 @@ The latest application release is [`989b711`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`ebf8c8e`](https://github.com/IronFaith/fiber-troubleshooting/commit/ebf8c8ed3a4e66ea669e294680c45eaadf2239b8) | Connected passing-loop animation through mapped hardware, with the return to the tested optic restored on desktop and mobile. Earlier span evidence remains visible. |
 | [`989b711`](https://github.com/IronFaith/fiber-troubleshooting/commit/989b711a7bc8d3cd1057e8373690289fc6b5a2a5) | Explicit female-to-male MMC mating detail at the CAS. |
 | [`989caa8`](https://github.com/IronFaith/fiber-troubleshooting/commit/989caa8) | Findings show evidence, possible causes and a specific next check. Earlier same-strand VFL passes narrow the added section; remote loop failures suggest an appropriate next tool; conflicting loops remain available for rechecking. |
 | [`9b503fd`](https://github.com/IronFaith/fiber-troubleshooting/commit/9b503fd) | Physical path confirmations and concise guidance share the test workspace. History and supporting details are optional, rather than permanent separate panels. |
