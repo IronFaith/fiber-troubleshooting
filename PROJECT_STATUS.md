@@ -10,9 +10,9 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Consolidate the passing-loop animation onto the actual yellow fiber and hardware, with visibly joined LC/MMC cable ends and no duplicate lower light diagram.
 - **Accepted scope — 2026-10-19:** The user's latest instruction supersedes the earlier separate evidence-rail layout. Keep mapped ports, source direction, recorded findings, motion controls and all four languages. After Normalize, a recorded historical setup is labeled as earlier; an installed tool shows its own actual connections and keeps earlier section findings. Continue automatically updating repository instructions/status whenever accepted preferences change.
-- **In progress:** Branch `codex/hardware-loop-path` joins the hardware cords, draws the MMC/LC return on the actual loopback and removes the lower rails. Browser visual verification and final checks are pending; these changes are not live yet.
-- **Open defect:** UI-01 was the narrow Spanish SVG caption overflow. Wrapping captions are included in this milestone and need rendered verification before marking it resolved.
-- **Next action:** Inspect browser screenshots and physical cord joins, resolve any regressions, run the final repository check, publish the verified change and refresh this handoff with deployment evidence.
+- **Implementation verified; deployment pending:** Branch `codex/hardware-loop-path` joins the hardware cords, draws the MMC/LC return on the actual loopback and removes the lower rails. Final `npm run check` passed all 118 tests. Browser verification passed 71 scenarios at 1728, 1400 and 390 pixels, including local/remote tests in all four languages and motion controls. The new implementation is not live until deployment and affected files are verified.
+- **Resolved defect:** UI-01 now uses wrapping captions within the hardware card; all four languages and both loop directions passed rendered checks.
+- **Next action:** Publish the browser-verified change and refresh this handoff with exact deployment and served-file evidence. No further application implementation is pending.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
@@ -54,18 +54,9 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-### UI-01 — Spanish loop-status caption overflows a narrow mobile card
+No unresolved defect is recorded for the current milestone. UI-01 (the Spanish loop-status caption overflow at 390 × 844) is resolved by wrapping connection captions in a larger card area. Local and remote passing-loop views in English, Spanish, French and Arabic passed rendered caption checks in [browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39356294893).
 
-**Status:** Observed, not fixed. Next small UI correction; not part of this documentation change.
-
-- Observed on 2026-10-19 at a 390 × 844 viewport, with Spanish selected and an MMC loop placed at CAS 1.
-- The translated “Loop inserted · service fiber unplugged” status extends beyond the cassette card. The MMC mating detail itself fits.
-- Reproduce: open Troubleshoot → choose Español → place an MMC loopback at CAS 1 → inspect the status beneath the cassette.
-- Fix scope: let the status fit or wrap within its card without shrinking the entire path or moving the result controls into another panel.
-- Acceptance: the complete caption remains readable within the card at narrow mobile widths; check the equivalent local/remote loop states in all four languages. Preserve the desktop layout and result-recording behavior.
-- Relevant files: [troubleshoot-visuals.mjs](troubleshoot-visuals.mjs), [styles.css](styles.css), and the translation catalogs if wording needs adjustment.
-
-No other unresolved defect was established by this documentation review; that is not a claim that the entire course has no defects. At the 2026-10-19 review, GitHub had no open issues or pull requests. This file is the current outstanding-work list; no separate tickets were created for this refresh.
+This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
 
 ## Boundaries to preserve
 
