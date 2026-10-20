@@ -1,5 +1,6 @@
 import {questionVariants} from './quiz-variants.mjs?v=1';
 import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=4';
+import {loopTopic,loopTitle,loopDescription,loopQuestions} from './loop-exam.mjs?v=1';
 export const topics = ['Spot the problem', 'Check the connection', 'Understand the light', 'Narrow down the problem'];
 export const roundDescriptions = [
   'Read the signs and consider what could cause them.',
@@ -7,10 +8,10 @@ export const roundDescriptions = [
   'Follow TX and RX, compare limits and check every lane.',
   'Use local loops and VFL observations to choose the next check.'
 ];
-export const allTopics = [...topics,...appliedTopics];
-export const allDescriptions = [...roundDescriptions,...appliedDescriptions];
-export const levelFor = topic => topic >= topics.length ? 'intermediate' : 'beginner';
-export const roundsForLevel = level => level === 'intermediate' ? [4,5] : [0,1,2,3];
+export const allTopics = [...topics,...appliedTopics,loopTitle];
+export const allDescriptions = [...roundDescriptions,...appliedDescriptions,loopDescription];
+export const levelFor = topic => topic === loopTopic ? 'loop' : topic >= topics.length ? 'intermediate' : 'beginner';
+export const roundsForLevel = level => level === 'loop' ? [loopTopic] : level === 'intermediate' ? [4,5] : [0,1,2,3];
 
 // Site examples and fictional training readings, not installed-optic limits.
 export const questions = [
@@ -157,7 +158,8 @@ export const questions = [
   }
 ];
 
-questions.push(...appliedQuestions,...questionVariants);
+// Reuse two taught scenarios with independent IDs so attempts never share answers.
+questions.push(...questions.filter(q=>['loop-purpose','passive-loop'].includes(q.id)).map(q=>({...q,id:`loop-exam-${q.id}`,topic:loopTopic})),...loopQuestions,...appliedQuestions,...questionVariants);
 export const roundQuestionIds = topic => questions.filter(question => question.topic === topic && !question.variantOf).map(question => question.id);
 
 export function drawRoundIds(topic, random = Math.random) {
@@ -233,7 +235,7 @@ export function apprenticeRank(scores) {
   return {level, title:numeral ? `Fiber Apprentice ${numeral}` : 'Fiber Learner', complete:level === topics.length};
 }
 
-const progressKey = level => level === 'intermediate' ? 'fiber-applied-progress-v1' : 'fiber-quiz-progress-v1';
+const progressKey = level => level === 'loop' ? 'fiber-loop-progress-v1' : level === 'intermediate' ? 'fiber-applied-progress-v1' : 'fiber-quiz-progress-v1';
 const emptyScores = level => roundsForLevel(level).map(() => null);
 
 export function loadQuizProgress(storage, level = 'beginner') {
@@ -255,7 +257,7 @@ export function saveQuizProgress(storage, scores, level = 'beginner') {
 }
 
 export function recordRoundProgress(scores, topic, answers, {practice = false, ids = roundQuestionIds(topic)} = {}) {
-  if (practice && levelFor(topic) === 'intermediate') return scores;
+  if (practice && levelFor(topic) !== 'beginner') return scores;
   const result = roundProgress(topic,answers,ids);
   if (!result.complete || result.total !== 5) return scores;
   const index = roundsForLevel(levelFor(topic)).indexOf(topic);

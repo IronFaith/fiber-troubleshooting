@@ -1829,6 +1829,15 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-map .ts-weak-flow .light-flow { --light-color:#b78323; }
 .ts-hardware-flow .learn-signal { stroke-width:1.8; stroke-dasharray:none; }
 .ts-hardware-vfl .learn-signal { stroke-width:1.8; stroke-dasharray:5 7; }
+.ts-light-views { display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; margin:.5rem 0; }
+.ts-light-views > span { font-weight:700; margin-inline-end:.25rem; }
+.ts-light-views button { min-height:44px; padding:.5rem .9rem; border:1px solid #9aadb9; border-radius:.5rem; color:#294e64; background:#fff; font:inherit; font-weight:700; cursor:pointer; }
+.ts-light-views button[aria-pressed="true"] { background:#e5f2fb; color:#164d79; border:2px solid #2874a2; }
+.ts-light-views button[data-action="light-view-vfl"][aria-pressed="true"] { background:#fff0f3; color:#a52842; border-color:#b73250; }
+.ts-map[data-light-layer="ir"] .light-flow.red,
+.ts-map[data-light-layer="ir"] .light-source.red,
+.ts-map[data-light-layer="vfl"] .light-flow:not(.red),
+.ts-map[data-light-layer="vfl"] .light-source:not(.red) { display:none; }
 .ts-hardware-flow .flow-arrow { transform:scale(.65); }
 .ts-cas-connection .loop-jacket { stroke-width:9; }
 .ts-cas-connection .loop-cord { stroke-width:6.8; }

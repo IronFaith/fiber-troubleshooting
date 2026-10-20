@@ -1,9 +1,10 @@
-import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=5';
+import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=6';
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=10';
+import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=11';
 
-import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=15';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor} from './quiz-data.mjs?v=16';
 import {loadPatchBest} from './patch-practice-data.mjs?v=2';
+import {loopTopic,loopTitle,loopDescription} from './loop-exam.mjs?v=1';
 
 const host = document.querySelector('#quiz');
 let attempt, countEvent;
@@ -17,10 +18,12 @@ let progressStorage;
 try { progressStorage = window.localStorage; } catch { /* Quizzes still work without storage. */ }
 let {scores:savedScores,canSave} = loadQuizProgress(progressStorage);
 let {scores:appliedScores} = loadQuizProgress(progressStorage,'intermediate');
+let {scores:loopScores} = loadQuizProgress(progressStorage,'loop');
 let suspended=loadExam(progressStorage), fullRoundIds=[], draftChoices=[];
 let selectedLevel=['beginner','intermediate'].includes(location.hash.slice(1))?location.hash.slice(1):null;
 const levelTitle=level=>level==='intermediate'?'Intermediate':'Beginner';
-const activeScores=()=>selectedLevel==='intermediate'?appliedScores:savedScores;
+const activeScores=()=>currentRound===loopTopic?loopScores:selectedLevel==='intermediate'?appliedScores:savedScores;
+const displayLevel=topic=>levelFor(topic)==='loop'?'beginner':levelFor(topic);
 
 function focusTitle() {
   const title = host.querySelector('h2');
@@ -42,7 +45,7 @@ function showResume() {
     currentRound=saved.round; fullRoundIds=[...saved.ids]; attempt=saved.attempt; index=saved.index;
     retry=saved.retry; roundAnswers=saved.roundAnswers; firstScore=saved.firstScore; draftChoices=saved.draftChoices;
     countEvent=retry?null:saved.countEvent?{...saved.countEvent,at:Date.now()}:startExamCount();
-    selectedLevel=levelFor(currentRound);
+    selectedLevel=displayLevel(currentRound);
     history.replaceState(null,'',`${location.pathname}#${selectedLevel}`);
     renderQuestion();
   });
@@ -55,7 +58,7 @@ function begin(ids, isRetry = false) {
 }
 
 function beginRound(topic) {
-  selectedLevel=levelFor(topic);
+  selectedLevel=displayLevel(topic);
   history.replaceState(null,'',`${location.pathname}#${selectedLevel}`);
   currentRound = topic;
   roundAnswers = {};
@@ -69,25 +72,25 @@ function renderIntro() {
   if(location.hash==='#progress') { renderProgress(); showResume(); return; }
   const patchBest=loadPatchBest(progressStorage).best;
   if(!selectedLevel) {
-    const counts=[savedScores.filter(s=>s>=4).length+(patchBest>=4?1:0),appliedScores.filter(s=>s>=4).length];
+    const counts=[savedScores.filter(s=>s>=4).length+(patchBest>=4?1:0)+(loopScores[0]>=4?1:0),appliedScores.filter(s=>s>=4).length];
     host.innerHTML=`<h2 id="quiz-title" tabindex="-1">Exams</h2><p class="lesson-intro">Choose a level. Every exam has five questions and draws from the chapters.</p>
       <a class="quiz-lesson-link" href="#progress">My progress · ${apprenticeRank(savedScores).title}</a>
       <div class="exam-levels">${['beginner','intermediate'].map((level,i)=>`<button type="button" class="exam-level" data-level="${level}">
-        ${quizThumbnail(i===0?2:3)}<span><strong>${levelTitle(level)}</strong><b>${i===0?'Foundations':'Applied troubleshooting'}</b><span>${i===0?'Recognize parts, read the signs and make the basic checks.':'Combine observations, explain the limits of a test and choose your next check.'}</span><small>${counts[i]} of ${i===0?5:2} exams passed · choose any exam</small><em>Open ${levelTitle(level)} →</em></span></button>`).join('')}</div>
-      <p class="picture-note">Beginner includes four knowledge exams and hands-on patching. Intermediate combines those ideas in mixed scenarios. Choose any exam; there is no required order.</p>
+        ${quizThumbnail(i===0?2:3)}<span><strong>${levelTitle(level)}</strong><b>${i===0?'Foundations':'Applied troubleshooting'}</b><span>${i===0?'Recognize parts, read the signs and make the basic checks.':'Combine observations, explain the limits of a test and choose your next check.'}</span><small>${counts[i]} of ${i===0?6:2} exams passed · choose any exam</small><em>Open ${levelTitle(level)} →</em></span></button>`).join('')}</div>
+      <p class="picture-note">Beginner includes four Apprentice exams, Loopbacks and hands-on patching. Intermediate combines those ideas in mixed scenarios. Choose any exam; there is no required order.</p>
       <a class="quiz-lesson-link" href="./learn.html">Explore the chapters</a>`;
     showResume();
     host.querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>chooseLevel(b.dataset.level)));
     return;
   }
-  const beginner=selectedLevel==='beginner', scores=activeScores();
+  const beginner=selectedLevel==='beginner', scores=beginner?savedScores:appliedScores;
   const rank = apprenticeRank(savedScores);
   host.innerHTML = `<button type="button" class="quiz-picker-back" id="exam-levels">← Exam levels</button><p class="chapter-count">5 questions per exam · choose freely</p>
     <h2 id="quiz-title" tabindex="-1">${levelTitle(selectedLevel)} · ${beginner?'Foundations':'Applied troubleshooting'}</h2>
     <p class="lesson-intro">${beginner?'Understand the parts, interpret a clear observation and choose a sensible first check.':'Use the same chapter knowledge in situations with several clues. Separate what is known from what still needs checking.'}</p>
-    ${beginner?(rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Pass each knowledge exam with 4/5 to advance from Fiber Learner through Fiber Apprentice I–IV. Patching has its own result.</p>'):appliedCard()}
-    <div class="quiz-picker">${roundsForLevel(selectedLevel).map((topic,i) => {
-      const score = scores[i];
+    ${beginner?(rank.level ? rankCard(rank,false,true) : '<p class="section-intro">Pass the four Apprentice exams with 4/5 to advance through Fiber Apprentice I–IV. Loopbacks and patching earn separate badges.</p>'):appliedCard()}
+    <div class="quiz-picker">${[...roundsForLevel(selectedLevel),...(beginner?[loopTopic]:[])].map((topic,i) => {
+      const score = topic===loopTopic?loopScores[0]:scores[i];
       const passed = score !== null && score >= 4;
       return `<button type="button" class="quiz-pick${passed ? ' quiz-pick-passed' : ''}" data-round="${topic}">
         ${quizThumbnail(beginner?topic:i===0?3:2)}<span class="quiz-pick-content">
@@ -96,7 +99,7 @@ function renderIntro() {
           <span class="quiz-pick-action">${score === null ? 'Start exam' : 'Retake exam'} →</span>
         </span></button>`;
     }).join('')}${beginner?`<a class="quiz-pick${patchBest>=4?' quiz-pick-passed':''}" href="./simulations.html?exam=patching#practice">${quizThumbnail(1)}<span class="quiz-pick-content"><strong>Hands-on patching</strong><span class="quiz-pick-description">Place LC and MMC connectors from a mock FIM ticket, including a flipped optic.</span><span class="quiz-pick-status">${patchBest===null?'Not taken':`${patchBest>=4?'✓ Passed':'Keep practicing'} · Best result ${patchBest}/5`}</span><span class="quiz-pick-action">Open patching exam →</span></span></a>`:''}</div>
-    <p class="picture-note">${canSave ? `Scores stay in this browser on this device. ${beginner?'Knowledge-exam best results include retries.':'Intermediate best scores use complete exam attempts; practice retries do not replace them.'}` : 'This browser cannot save progress. You can still choose any exam; results last for this visit.'}</p>
+    <p class="picture-note">${canSave ? `Scores stay in this browser on this device. ${beginner?'Apprentice best results include retries. The Loopbacks badge requires 4/5 on a full exam; practice retries do not change its saved score.':'Intermediate best scores use complete exam attempts; practice retries do not replace them.'}` : 'This browser cannot save progress. You can still choose any exam; results last for this visit.'}</p>
     <a class="quiz-lesson-link" href="./learn.html${beginner?'':'#compare-loops'}">${beginner?'Learn the basics first':'Review the worked examples'}</a>`;
   showResume();
   host.querySelectorAll('[data-round]').forEach(button => button.addEventListener('click',() => beginRound(Number(button.dataset.round))));
@@ -117,7 +120,7 @@ function renderProgress() {
     const classes=`progress-badge${earned?' badge-earned':''}`;
     return topic===null ? `<a class="${classes}" href="./simulations.html?exam=patching#practice">${content}</a>` : `<button type="button" class="${classes}" data-round="${topic}">${content}</button>`;
   };
-  const earned=rank.level+appliedScores.filter(score=>score>=4).length+(patch.best>=4?1:0);
+  const earned=rank.level+appliedScores.filter(score=>score>=4).length+(patch.best>=4?1:0)+(loopScores[0]>=4?1:0);
   host.innerHTML=`<button type="button" class="quiz-picker-back" id="exam-levels">← Exams</button>
     <h2 id="quiz-title" tabindex="-1">My progress</h2>
     ${rankCard(rank,false,true)}
@@ -126,10 +129,10 @@ function renderProgress() {
       return `<li class="rank-tier${level===rank.level?' tier-current':''}"${level===rank.level?' aria-current="step"':''} aria-label="Fiber Apprentice ${['','I','II','III','IV'][level]} · ${status}">${rankEmblem(level)}<strong>${['','I','II','III','IV'][level]}</strong><span>${status}</span></li>`;
     }).join('')}</ol>
     <p class="picture-note">${canSave && patch.canSave?'Saved only in this browser. Clearing site data removes your progress.':'This browser cannot save progress. Results last for this visit.'}</p>
-    <div class="progress-badges-heading"><h3>Your badges</h3><span>${earned} of 7 earned</span></div>
+    <div class="progress-badges-heading"><h3>Your badges</h3><span>${earned} of 8 earned</span></div>
     <p class="section-intro">Earn a badge by passing its exam with 4/5 or better.</p>
     <h4 class="progress-group-title">Beginner</h4>
-    <div class="progress-badges">${topics.map((title,i)=>badge(title,savedScores[i],i)).join('')}${badge('Hands-on patching',patch.best,null)}</div>
+    <div class="progress-badges">${topics.map((title,i)=>badge(title,savedScores[i],i)).join('')}${badge(loopTitle,loopScores[0],loopTopic)}${badge('Hands-on patching',patch.best,null)}</div>
     <h4 class="progress-group-title">Intermediate</h4>
     <div class="progress-badges">${roundsForLevel('intermediate').map((topic,i)=>badge(allTopics[topic],appliedScores[i],topic)).join('')}</div>`;
   host.querySelector('#exam-levels').addEventListener('click',()=>chooseLevel(null));
@@ -237,7 +240,7 @@ function showAnswer(question,choice,moveFocus=true) {
 }
 
 function rankCard(rank, earnedNow, passed) {
-  const note = rank.complete ? 'All four knowledge exams passed. Hands-on patching has its own result.'
+  const note = rank.complete ? 'All four Apprentice exams passed. Loopbacks and patching have their own badges.'
     : !passed && (savedScores[currentRound] ?? 0) < 4 ? 'Get 4/5 in this exam to earn your next Apprentice level.'
     : !passed ? 'Your earned level stays while you practice.'
     : 'One Apprentice level for each beginner knowledge exam passed.';
@@ -259,17 +262,17 @@ function renderResults() {
   const progress = roundProgress(currentRound,roundAnswers,fullRoundIds);
   const nextRound = progress.nextRound;
   const previousRank = apprenticeRank(savedScores);
-  const beginner=selectedLevel==='beginner';
+  const loop=currentRound===loopTopic, beginner=selectedLevel==='beginner'&&!loop;
   const updated=recordRoundProgress(activeScores(),currentRound,roundAnswers,{practice:retry,ids:fullRoundIds});
-  if(beginner) savedScores=updated; else appliedScores=updated;
-  canSave = saveQuizProgress(progressStorage,updated,selectedLevel);
+  if(loop) loopScores=updated; else if(beginner) savedScores=updated; else appliedScores=updated;
+  canSave = saveQuizProgress(progressStorage,updated,levelFor(currentRound));
   const rank = apprenticeRank(savedScores);
   const skills=skillsFor(currentRound,roundAnswers);
   const earnedNow = rank.level > previousRank.level;
-  const title = !beginner&&retry?'Practice complete':!progress.passed ? 'A little more practice' : !beginner?'Intermediate exam passed':rank.complete ? 'Knowledge rounds complete' : earnedNow ? 'Apprentice level earned' : 'Round complete';
+  const title = !beginner&&retry?'Practice complete':!progress.passed ? 'A little more practice' : loop?'Loopbacks badge earned':!beginner?'Intermediate exam passed':rank.complete ? 'Knowledge rounds complete' : earnedNow ? 'Apprentice level earned' : 'Round complete';
   host.innerHTML = `<p class="chapter-count">${levelTitle(selectedLevel)} · ${allTopics[currentRound]} · ${retry?'practice':'exam'} complete</p>
     <h2 id="quiz-title" tabindex="-1">${title}</h2>
-    ${beginner?rankCard(rank,earnedNow,progress.passed):appliedCard()}
+    ${loop?`<section class="quiz-rank loop-exam-result">${examEmblem(loopTopic,loopScores[0]>=4)}<div><h3>${loopTitle}</h3><p>${loopDescription}</p><p>Pass with 4/5 on a complete attempt. Review feedback and practice missed questions, then retake the full exam to improve your saved score.</p></div></section>`:beginner?rankCard(rank,earnedNow,progress.passed):appliedCard()}
     <p class="quiz-score"><strong>${progress.correct}<span> / 5</span></strong> ${retry ? 'answered correctly after practice' : 'correct on your first answer'}</p>
     ${retry ? `<p class="picture-note">Full exam: ${firstScore}/5. This retry: ${result.correct}/${result.total}.${!beginner?' Practice does not change the saved exam score.':''}</p>` : ''}
     <section class="q-skill-recap" aria-label="Skills from this round">
@@ -307,14 +310,15 @@ window.addEventListener('hashchange',()=>{
 function refreshProgress() {
   if(location.hash!=='#progress') return;
   if(canSave) {
-    const beginner=loadQuizProgress(progressStorage), applied=loadQuizProgress(progressStorage,'intermediate');
+    const beginner=loadQuizProgress(progressStorage), applied=loadQuizProgress(progressStorage,'intermediate'), loop=loadQuizProgress(progressStorage,'loop');
     if(beginner.canSave) savedScores=beginner.scores;
     if(applied.canSave) appliedScores=applied.scores;
+    if(loop.canSave) loopScores=loop.scores;
   }
   renderIntro();
 }
 window.addEventListener('storage',event=>{
-  if(event.key===null || ['fiber-quiz-progress-v1','fiber-applied-progress-v1','fiber-patching-best-v1'].includes(event.key)) refreshProgress();
+  if(event.key===null || ['fiber-quiz-progress-v1','fiber-applied-progress-v1','fiber-loop-progress-v1','fiber-patching-best-v1'].includes(event.key)) refreshProgress();
 });
 window.addEventListener('pageshow',event=>{if(event.persisted) refreshProgress();});
 renderIntro();

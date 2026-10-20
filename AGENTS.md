@@ -19,9 +19,11 @@ At the start of project work or when resuming in another chat, fetch the latest 
 - Keep lessons visual with short explanations, optional contents and quick definitions. Avoid a large contents block before the learning material or duplicate navigation.
 - Keep interactive patching practice in Simulations and assessments under Exams. Teach every concept before testing it. Five-question exams and Fiber Apprentice I–IV are learning progress, not field certifications.
 - Teach the purpose of each action before assessing it. Beginner questions should check why a test is useful, where it applies, what its result supports, what remains untested and the next justified step. Use looping as the first focused improvement; keep lesson explanations and assessed concepts aligned.
+- Keep the dedicated five-question Loopbacks exam under Beginner. Its separate badge reuses the existing MMC loopback artwork and requires 4/5 on a full attempt. Preserve the four Apprentice levels and their existing scores; missed-question practice does not change the Loopbacks best score.
 - Keep troubleshooting in **Your test path**: tools, relevant port edits, physical identity checks, results and concise findings belong in that workspace. Avoid new permanent sidebars or separate case-detail panels.
 - Use dedicated responsive test-path layouts: a compact horizontal view on desktop and a stacked mobile view with a straight cable channel alongside upright cassette maps and labels. Keep cables out of result controls; attach the loop result panel to its hardware card. The enlarged mobile MMC connection may turn vertically to follow the path without changing gender, source direction or port numbering. Recording a VFL result must preserve the current checking position. Support touch, keyboard, visible focus and reduced motion.
 - Use **Normalize**, not Restore, for reconnecting the illustrated setup. Normalize preserves applicable recorded evidence and does not assert that the real link is healthy.
+- Keep loop IR and VFL coverage visually separate with the **Light view** selector on the existing hardware diagram. Show one signal type at a time, retain all section results and conflicts, and preserve the view through Normalize and reload. Placing a test tool selects its matching light view.
 
 ## Troubleshooting and site conventions
 

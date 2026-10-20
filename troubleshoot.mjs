@@ -1,4 +1,4 @@
-import {translateLines} from './locale.mjs?v=23';
+import {translateLines} from './locale.mjs?v=24';
 import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=21';
 import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=32';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=8';
@@ -9,6 +9,7 @@ const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
 const key='fiber-workbench-v1';
 let view='actual', cases={actual:createCase(),simulation:createCase(true)};
+let lightLayer='ir';
 let selectedTool=null,setupOpen=false,newCaseStarted=false;
 let serviceCheckOpen=false,historyOpen=false,guidanceDetailsOpen=false;
 let deferPortRender=false,portRenderPending=false;
@@ -83,15 +84,17 @@ try {
   if(saved) {
     cases={actual:restore(saved.actual,false),simulation:restore(saved.simulation,true)};
     if(['actual','simulation','guided'].includes(saved.view)) view=saved.view;
+    lightLayer=['ir','vfl'].includes(saved.lightLayer)?saved.lightLayer:cases[view]?.tool==='vfl'?'vfl':'ir';
   }
 } catch { /* A fresh case is usable without storage. */ }
-function save() { try {sessionStorage.setItem(key,JSON.stringify({...cases,view}));} catch { /* Optional. */ } }
+function save() { try {sessionStorage.setItem(key,JSON.stringify({...cases,view,lightLayer}));} catch { /* Optional. */ } }
 function update(actions, message='',renderNow=true) {
   selectedTool=null;
   newCaseStarted=false;
   undo[view].push(cases[view]);
   if(undo[view].length>30) undo[view].shift();
   cases[view]=actions.reduce(changeCase,cases[view]);
+  if((cases[view].tool!==undo[view].at(-1).tool || actions.some(action=>action.type==='place')) && cases[view].tool!=='link') lightLayer=cases[view].tool==='vfl'?'vfl':'ir';
   if(cases[view].tool==='vfl') cases[view]=changeCase(cases[view],{type:'vfl-point-checks'});
   save();
   if(renderNow) render(true); else portRenderPending=true;
@@ -307,8 +310,8 @@ function render(preservePosition=false) {
   const status=s.tool==='vfl'?'VFL on fiber':s.tool==='link'?s.disconnected?.length?'Connections unplugged · service path open':'Normalized · recorded test coverage':`${s.loopSide==='remote'?'Remote loop':'Local loop'} at ${pointName(s.selected,s)} · ${loopResult(s)?loopLabels[loopResult(s)]:'waiting for your result'}`;
   const stacked=stackedPath.matches;
   const recorded=!s.simulated||s.tool!=='link';
-  const legend=recorded?'<span class="ts-key-ir">Blue / teal: loop checked</span><span class="ts-key-red">Red dashed: VFL passed</span><span>Yellow: fiber · amber: investigate</span>':'<span class="ts-key-ir">Blue / teal: invisible IR</span><span class="ts-key-red">Red: VFL</span>';
-  const path=`<div class="ts-recorded-key"><p>${recorded?'Recorded checks, not live light.':'Practice only · results come from the chosen fault.'}</p><div class="ts-legend">${legend}</div></div><div class="ts-map ${stacked?'is-stacked':''} ${paused?'light-paused':''}" tabindex="0" aria-label="${stacked?'Fiber diagram; scroll down to follow the path':'Fiber diagram; scroll horizontally to see the full path'}">${workbenchDiagram(s,s.tool==='loop'?loopControls(s):'',{stacked,recordedOnly:s.tool==='vfl'})}</div>`;
+  const legend=lightLayer==='ir'?`<span class="ts-key-ir">${recorded?'Blue / teal: loop checked':'Blue / teal: invisible IR'}</span>`:`<span class="ts-key-red">${recorded?'Red dashed: VFL passed':'Red: VFL'}</span>`;
+  const path=`<div class="ts-recorded-key"><p>${recorded?'Recorded checks, not live light.':'Practice only · results come from the chosen fault.'}</p><div class="ts-light-views" role="group" aria-label="Light view"><span>Light view</span>${button('light-view-ir','Loop (IR)',`aria-pressed="${lightLayer==='ir'}"`)}${button('light-view-vfl','VFL',`aria-pressed="${lightLayer==='vfl'}"`)}</div><p class="ts-note">Show one light type at a time. All recorded results stay below.</p><div class="ts-legend">${legend}<span>Yellow: fiber · amber: investigate</span></div></div><div class="ts-map ${stacked?'is-stacked':''} ${paused?'light-paused':''}" data-light-layer="${lightLayer}" tabindex="0" aria-label="${stacked?'Fiber diagram; scroll down to follow the path':'Fiber diagram; scroll horizontally to see the full path'}">${workbenchDiagram(s,s.tool==='loop'?loopControls(s):'',{stacked,recordedOnly:s.tool==='vfl'})}</div>`;
   const visual=s.tool==='vfl'?simpleVfl(s,paused,{embedded:true,recordedPath:`<h3 class="ts-continuity-title">Recorded continuity</h3>${path}`}):`${path}${s.tool==='link'?controls(s):''}`;
   host.innerHTML=`${s.simulated?setup(s):''}<section id="ts-workspace" class="ts-workspace" aria-label="Visual test path">${freshCase}<div class="ts-workspace-heading"><h2>Your test path</h2><div class="ts-cas-count" role="group" aria-label="Passives on path">${button('cas-remove','−',`aria-label="Remove last CAS" ${s.count===1?'disabled':''}`)}<b>${s.count} CAS</b>${button('cas-add','+',`aria-label="Add CAS" ${s.count===4?'disabled':''}`)}</div></div>
     ${pathBar(s)}${identityChecks(s)}${tray(s)}<p class="ts-workspace-state">${status}</p><div class="ts-workspace-test">${visual}</div><div class="ts-workspace-actions">${button('remove-tool','Remove tool',`aria-label="Remove placed tool" ${s.tool==='link'?'disabled':''}`)}${button('motion',paused?'Play arrows':'Pause arrows','class="motion-toggle"')}</div>
@@ -412,6 +415,11 @@ host.addEventListener('click',async event=>{
   const target=event.target.closest('[data-action]');
   if(!target) return;
   const action=target.dataset.action,s=cases[view];
+  if(action==='light-view-ir'||action==='light-view-vfl') {
+    lightLayer=action==='light-view-ir'?'ir':'vfl';save();render(true);
+    host.querySelector(`[data-action="${action}"]`)?.focus({preventScroll:true});
+    return;
+  }
   if(action==='cas-add'||action==='cas-remove') {
     updateVflInPlace([{type:'count',value:s.count+(action==='cas-add'?1:-1)}],'Path updated. Earlier checks kept in history; current findings cleared.',`[data-action="${action}"]`);
     if(host.querySelector(`[data-action="${action}"]`)?.disabled) host.querySelector('.ts-cas-count button:not(:disabled)')?.focus({preventScroll:true});

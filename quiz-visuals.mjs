@@ -1,4 +1,5 @@
-import {cassetteFront, loopIllustration} from './loop-visuals.mjs?v=5';
+import {cassetteFront, loopIllustration, mmcLoopback} from './loop-visuals.mjs?v=5';
+import {lcLoopback} from './test-tool-visuals.mjs?v=1';
 import {opticIllustration} from './patching-visuals.mjs?v=1';
 import {lightFlow} from './light-visuals.mjs?v=1';
 import {connectedCaseVisual} from './connected-case.mjs?v=3';
@@ -147,13 +148,19 @@ export function quizVisual(question,{answered=false,choice=null}={}) {
   else if(kind==='direct-loop') {
     const art=loopIllustration('direct');
     body=`<p class="q-test-results"><strong>Direct loop: pass</strong><span>Restored link: still failing</span></p>${svg(art.drawing,art.height,'Approved direct LC loopback at the local optic. The loop test passed.')}<p class="q-observation">The remote device is in another room.</p>`;
-  } else if(kind==='sections') body=trace(question,answered,choice);
+  } else if(kind==='loop-location') {
+    const art=loopIllustration('passive');
+    body=answered?svg(art.drawing,art.height,art.label):svg(mmcLoopback(142,42),92,'MMC loopback',230);
+  } else if(kind==='loop-tool-lc') body=svg(lcLoopback(115,23),88,'LC loopback',124);
+  else if(kind==='loop-tool-mmc') body=svg(mmcLoopback(142,42),92,'MMC loopback',230);
+  else if(kind==='sections') body=trace(question,answered,choice);
   else if(kind==='vfl-setup') body=vflSetup(answered);
   else body=vfl(kind,answered);
   return `<div class="quiz-evidence ${answered ? 'q-explained' : 'q-before'}">${body}${answered ? `<p class="q-visual-takeaway">${question.reveal}</p>` : ''}</div>`;
 }
 
 export function quizThumbnail(topic) {
+  if(topic===6) return `<span class="q-quiz-thumb" aria-hidden="true">${svg(`<g transform="translate(20 60) scale(1.4)">${mmcLoopback(142,42)}</g>`,250)}</span>`;
   const drawings=[
     '<rect fill="#be2532" x="30" y="30" width="300" height="160" rx="10"/>'+text(180,95,'RX','class="q-white" text-anchor="middle"')+text(180,154,'−40','class="q-white q-thumb-number" text-anchor="middle"'),
     '<rect class="q-cas" x="28" y="25" width="304" height="170" rx="8"/>'+[92,180,268].map(x=>`<rect class="q-adapter" x="${x-25}" y="78" width="50" height="80" rx="4"/><rect class="q-opening" x="${x-15}" y="90" width="30" height="55"/>`).join('')+text(180,64,'CAS','class="q-white" text-anchor="middle"'),
@@ -195,8 +202,9 @@ export function examEmblem(topic,earned) {
     3:`${emblemLine('M42 76 H31 Q24 76 24 69 V38 Q24 28 36 28 H83 Q96 28 96 40 V69 Q96 76 87 76 H77')}${emblemOptic(40,47)}${emblemPulse(60,28)}`,
     patch:`${emblemLine('M45 76 V86 Q45 93 61 93 Q81 93 81 80 V59')}${emblemLc(29,28,.8)}${emblemCas(65,32,.65)}`,
     4:'<rect x="32" y="25" width="56" height="68" rx="6" fill="#e3edf5"/><path d="M43 40 H68 M43 51 H62 M43 62 H55" stroke="#5b7b95" stroke-width="4" stroke-linecap="round"/><circle cx="72" cy="70" r="16" fill="#286453" stroke="#9ce4bd" stroke-width="2"/><path d="m64 70 6 6 11-12" fill="none" stroke="#c8f7df" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
-    5:linkEmblem()
+    5:linkEmblem(),
+    6:`<g transform="translate(9 38) scale(.45)">${mmcLoopback(142,42)}</g>`
   };
-  const tier={0:1,1:2,2:2,3:3,patch:3,4:3,5:4}[topic];
+  const tier={0:1,1:2,2:2,3:3,patch:3,4:3,5:4,6:2}[topic];
   return `<svg class="badge-art exam-emblem${earned?'':' emblem-unearned'}" data-tier="${tier}" viewBox="0 0 120 120" aria-hidden="true" focusable="false">${emblemFrame(tier)}${motifs[topic]}${earned?'<circle cx="94" cy="94" r="13" fill="#246447" stroke="#fff" stroke-width="2"/><path d="m88 94 4 4 8-9" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg>`;
 }
