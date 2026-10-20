@@ -1,5 +1,8 @@
 // French learner-facing messages. Keep English keys aligned with spanish.mjs.
 export const frenchMessages = [
+  ["Recorded loop · earlier setup", "Boucle enregistrée · montage précédent"],
+  ["Yellow: fiber · amber: investigate", "Jaune : fibre · orange : à examiner"],
+
   ["Front port open","Port avant ouvert"],
   ["Rear port open","Port arrière ouvert"],
   ["Bend, break, splice or damaged ferrule contact","Courbure, rupture, épissure ou contact de férule endommagé"],

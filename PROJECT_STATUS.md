@@ -6,14 +6,16 @@ Updated: **2026-10-19**. This is a maintained snapshot, not an automatic health 
 
 ## Resume in another chat
 
-Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. These maintained files provide the project handoff; older plans remain historical references.
+Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Latest user objective:** Correct the confusing loop overlay shown in the user's screenshot and keep GitHub notes current whenever project instructions or decisions change, so another chat can resume from the repository.
-- **Accepted instruction update — 2026-10-19:** Automatically update AGENTS.md and this status whenever an instruction, preference, accepted scope or lasting decision changes, even if no application code changes. Refresh affected README descriptions when behavior changes. Verify, commit and push the notes as part of the authorized milestone without waiting for another reminder.
-- **Completed work:** The confusing overlay is removed, the clean connected return is deployed in `a98967d`, and the automatic instruction/status handoff rule is saved in AGENTS.md, README.md and this file. Verification and exact deployment evidence are below.
-- **Remaining work and next action:** UI-01 remains the recorded mobile caption defect, with reproduction and acceptance criteria under Outstanding work. It is available for the next UI milestone. The loop-visual correction and handoff-policy requests are complete; no application implementation is in progress or blocker recorded.
+- **Current objective:** Consolidate the passing-loop animation onto the actual yellow fiber and hardware, with visibly joined LC/MMC cable ends and no duplicate lower light diagram.
+- **Accepted scope — 2026-10-19:** The user's latest instruction supersedes the earlier separate evidence-rail layout. Keep mapped ports, source direction, recorded findings, motion controls and all four languages. After Normalize, a recorded historical setup is labeled as earlier; an installed tool shows its own actual connections and keeps earlier section findings. Continue automatically updating repository instructions/status whenever accepted preferences change.
+- **Implementation verified; deployment pending:** Branch `codex/hardware-loop-path` joins the hardware cords, draws the MMC/LC return on the actual loopback and removes the lower rails. Final `npm run check` passed all 118 tests. Browser verification passed 71 scenarios at 1728, 1400 and 390 pixels, including local/remote tests in all four languages and motion controls. The new implementation is not live until deployment and affected files are verified.
+- **Resolved defect:** UI-01 now uses wrapping captions within the hardware card; all four languages and both loop directions passed rendered checks.
+- **Next action:** Publish the browser-verified change and refresh this handoff with exact deployment and served-file evidence. No further application implementation is pending.
+- **Blockers / missing input:** None.
 
-Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action. Keep observed defects, unverified questions and optional proposals distinct.
+Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
@@ -52,18 +54,9 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-### UI-01 — Spanish loop-status caption overflows a narrow mobile card
+No unresolved defect is recorded for the current milestone. UI-01 (the Spanish loop-status caption overflow at 390 × 844) is resolved by wrapping connection captions in a larger card area. Local and remote passing-loop views in English, Spanish, French and Arabic passed rendered caption checks in [browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39356294893).
 
-**Status:** Observed, not fixed. Next small UI correction; not part of this documentation change.
-
-- Observed on 2026-10-19 at a 390 × 844 viewport, with Spanish selected and an MMC loop placed at CAS 1.
-- The translated “Loop inserted · service fiber unplugged” status extends beyond the cassette card. The MMC mating detail itself fits.
-- Reproduce: open Troubleshoot → choose Español → place an MMC loopback at CAS 1 → inspect the status beneath the cassette.
-- Fix scope: let the status fit or wrap within its card without shrinking the entire path or moving the result controls into another panel.
-- Acceptance: the complete caption remains readable within the card at narrow mobile widths; check the equivalent local/remote loop states in all four languages. Preserve the desktop layout and result-recording behavior.
-- Relevant files: [troubleshoot-visuals.mjs](troubleshoot-visuals.mjs), [styles.css](styles.css), and the translation catalogs if wording needs adjustment.
-
-No other unresolved defect was established by this documentation review; that is not a claim that the entire course has no defects. At the 2026-10-19 review, GitHub had no open issues or pull requests. This file is the current outstanding-work list; no separate tickets were created for this refresh.
+This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
 
 ## Boundaries to preserve
 

@@ -1813,14 +1813,29 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-workspace-state { margin:4px 0; min-height:20px; color:#526f83; font-size:12px; }
 .ts-workspace .ts-map { margin:0 -4px; padding:0; }
 .ts-path-scene { margin:0 auto; direction:ltr; }
-.ts-recorded-loop .learn-signal { stroke-dasharray:none; stroke-width:4; }
-.ts-stacked-direct-loop { display:block; width:100%; height:auto; }
 .ts-path-scene > svg { display:block; width:100%; max-width:none; color:#245b91; }
-.ts-recorded-base { fill:none; stroke:#ccd7de; stroke-width:4; stroke-dasharray:4 8; stroke-linecap:round; }
-.ts-recorded-base.suspect { stroke:#bc8531; stroke-dasharray:7 6; }
-.ts-recorded-ir .learn-signal { stroke-dasharray:none; stroke-width:4; }
-.ts-recorded-vfl .learn-signal { stroke-width:3; stroke-dasharray:5 7; }
-.ts-recorded-channel { fill:#335a73; font-size:13px; font-weight:700; text-anchor:middle; }
+.ts-hardware-flow { pointer-events:none; }
+.ts-map .ts-weak-flow .light-flow { --light-color:#b78323; }
+.ts-hardware-flow .learn-signal { stroke-width:1.8; stroke-dasharray:none; }
+.ts-hardware-vfl .learn-signal { stroke-width:1.8; stroke-dasharray:5 7; }
+.ts-hardware-flow .flow-arrow { transform:scale(.65); }
+.ts-cas-connection .loop-jacket { stroke-width:9; }
+.ts-cas-connection .loop-cord { stroke-width:6.8; }
+.ts-external-cord .loop-jacket { stroke-width:4.8; }
+.ts-external-cord .loop-cord { stroke-width:3.4; }
+.ts-open-cord { fill:white; stroke:#8a7134; stroke-width:1.5; }
+.ts-hardware-caption { font:12px/1.35 'Segoe UI',sans-serif; text-align:center; color:#3e627b; }
+.ts-hardware-caption .ts-node-caption { margin-top:3px; color:#516e82; }
+.ts-observed-pass .ts-hardware-caption .ts-node-caption { color:#276c50; font-weight:700; }
+.ts-hardware-caption .ts-connection-label { font-weight:650; }
+.ts-hardware-caption .ts-connection-label.open { color:#7c622d; }
+.ts-cord-summaries { display:grid; grid-template-columns:repeat(var(--cord-sections,3),1fr); margin:0 135px 8px; gap:10px; }
+.ts-cord-status { color:#4f6c80; text-align:center; font:11px/1.35 'Segoe UI',sans-serif; }
+.ts-cord-status > div { display:flex; justify-content:center; gap:5px; margin-top:4px; }
+.ts-cord-badge { padding:3px 6px; border-radius:5px; background:#edf1f4; color:#345469; font-weight:650; }
+.ts-cord-badge.loop { background:#dbeee4; }
+.ts-cord-badge.vfl { background:#fbe3e7; }
+.ts-cord-badge.suspect { background:#ffe2b8; }
 .ts-recorded-key { margin:8px 0 4px; color:#526f83; }
 .ts-recorded-key p { margin:0; font-size:12px; }
 .ts-recorded-key .ts-legend { margin:5px 0 0; }
@@ -1830,8 +1845,14 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-stacked-node { width:270px; max-width:100%; scroll-margin-top:12px; }
 .ts-stacked-node > svg { display:block; width:100%; height:auto; color:#245b91; }
 .ts-stacked-node .ts-inline-loop { width:calc(100% - 14px); margin:0 auto; }
-.ts-stacked-span { display:block; width:270px; max-width:100%; height:auto; color:#245b91; }
-.ts-stacked-span .ts-span-status { font-size:10px; }
+.ts-mobile-loop-row { position:relative; padding-bottom:8px; }
+.ts-panel-cords { position:absolute; right:0; top:0; width:18px; height:100%; pointer-events:none; }
+.ts-panel-cords .flow-arrow { display:none; }
+.ts-mobile-cord-junction { position:relative; width:270px; max-width:100%; }
+.ts-cord-bridge { display:block; width:100%; height:auto; }
+.ts-mobile-cord-junction .ts-cord-status { position:absolute; top:0; left:26px; right:26px; }
+.ts-mobile-cord-junction .ts-cord-status > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+
 .ts-stack-fault { margin:8px 0 4px; color:#9e3a46; font-size:12px; text-align:center; }
 .ts-loop-slot { padding-bottom:4px; }
 .ts-inline-loop { box-sizing:border-box; width:256px; padding:10px; border:1px solid #5089ad; border-top:3px solid #337fa6; border-radius:0 0 10px 10px; background:#f4f9fc; color:#244c67; }
