@@ -21,7 +21,7 @@ function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=nul
   const loop=mode==='loop', plugged=mode==='plugged';
   const legs=[81,127].map((y,i)=>{
     const tip=plugged?168:63, boot=tip-64*.67, bend=plugged?22+i*12:4+i*12, bottom=184+i*18;
-    const cable=`M${boot} ${y} H${bend+12} Q${bend} ${y} ${bend} ${y+12} V${bottom-12} Q${bend} ${bottom} ${bend+12} ${bottom} H${remote?8:292}`;
+    const cable=remote?`M${boot} ${y} H8`:`M${boot} ${y} H${bend+12} Q${bend} ${y} ${bend} ${y+12} V${bottom-12} Q${bend} ${bottom} ${bend+12} ${bottom} H292`;
     const litStrand=receiving&&trace==='swapped'?(strand==='tx'?'rx':'tx'):strand;
     const lit=(mode==='vfl'||receiving&&trace!=='wrong')&&trace&&trace!=='dark'&&(i===0?litStrand==='tx':litStrand==='rx');
     return `<path class="loop-jacket" d="${cable}"/><path class="loop-cord" d="${cable}"/>
@@ -34,7 +34,7 @@ function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=nul
     <rect class="hardware-metal" x="54" y="43" width="130" height="120" rx="5"/>
     ${[88,151].map((x,i) => `<rect class="optic-recess" x="${x-23}" y="59" width="46" height="90" rx="3"/>
       ${[81,127].map(y => `<rect class="optic-opening" x="${x-15}" y="${y-13}" width="30" height="27" rx="2"/><circle class="optic-ferrule" cx="${x}" cy="${y}" r="7"/><circle class="optic-core" cx="${x}" cy="${y}" r="3"/>`).join('')}
-      <text class="hardware-label hardware-center hardware-small" x="${x}" y="181">${i ? '5' : '1'}</text>`).join('')}
+      <text class="hardware-label hardware-center hardware-small" x="${x}" y="175">${i ? '5' : '1'}</text>`).join('')}
     ${loop?lcLoopback(88,81,{gap:46/.8,scale:.8,seated:true,result:loopState}):''}
     </g>${legs}${coverage?.optic==='pass'&&plugged?lightSource(168,remote?127:81):''}
     ${mode==='vfl'?`<g data-mounted-tool="vfl" data-point="${point}">${vflPen(63,vflY,{scale:.65,reverse:true,on:true})}${lightSource(63,vflY,'red')}<rect class="ts-tool-handle" x="28" y="${vflY-49}" width="108" height="98" rx="8"><title>VFL attached to the unplugged LC leg. Drag to move or remove.</title></rect></g>`:''}
@@ -50,7 +50,13 @@ const mmcOut='M-48 24 C-96 24 -96 64 -61 64';
 function testMmcLoopback() {
   return `<g class="mmc-loopback">${cord(`${mmcOut} C-28 64 -25 24 -48 24 H-20`)}${mmcHead(0,0,false)}</g>`;
 }
-function cassetteConnection(s,point,mode) {
+function connectionLabels(s,point,side,mode) {
+  const face=displayedCasFace(s,point,side),fanout=point===1||point===s.count&&s.count>1,female=fanout&&face==='rear';
+  const loop=mode==='loop'&&side===(s.loopSide==='remote'?'rear':'front');
+  return {name:fanout?(female?'Rear · female MMC':'Front · male MMC'):(face==='rear'?'Rear MMC':'Front MMC'),
+    role:loop?'MMC loopback':fanout&&female?'Fanout head':patchAt(s,point)[side]?(fanout||side==='front'?'Onward cable':'Incoming MMC'):'Unplugged'};
+}
+function cassetteConnection(s,point,mode,{labels=true}={}) {
   const patch=patchAt(s,point),remote=point===s.count&&s.count>1,fanout=point===1||remote;
   const loopSide=s.loopSide==='remote'?'rear':'front';
   const caption=(x,y,text)=>`<text class="hardware-label hardware-center" text-anchor="middle" x="${x}" y="${y}" style="font-size:14px">${text}</text>`;
@@ -58,8 +64,8 @@ function cassetteConnection(s,point,mode) {
     const face=displayedCasFace(s,point,side),female=fanout&&face==='rear';
     const loop=mode==='loop'&&side===loopSide,seated=loop||patch[side];
     const x=i?(seated?233.95:263.95):(seated?126.05:96.05),scale=i?'-.65 .65':'.65 .65';
-    const name=fanout?(female?'Rear · female MMC':'Front · male MMC'):(face==='rear'?'Rear MMC':'Front MMC');
-    return `${caption(i?278:82,207,name)}${loop?`${cord(`M${i?360:0} 233.6 H${i?320:40}`)}<circle class="ts-open-cord" cx="${i?320:40}" cy="233.6" r="3"/>`:cord(`M${i?360:0} 233.6 H${x+(i?13:-13)}`)}<g transform="translate(${x} 218) scale(${scale})">${loop?testMmcLoopback():mmcHead(0,0,false)}${fanout&&!female?'<path d="M83 21 h7 M83 31 h7" stroke="#556862" stroke-width="2"/>':female?'<circle cx="82" cy="21" r="1.8" fill="#263a32"/><circle cx="82" cy="31" r="1.8" fill="#263a32"/>':''}</g>${caption(i?278:82,278,loop?'MMC loopback':fanout&&female?'Fanout head':seated?(fanout||i?'Onward cable':'Incoming MMC'):'Unplugged')}`;
+    const label=connectionLabels(s,point,side,mode);
+    return `${labels?caption(i?278:82,207,label.name):''}${loop?`${cord(`M${i?360:0} 233.6 H${i?320:40}`)}<circle class="ts-open-cord" cx="${i?320:40}" cy="233.6" r="3"/>`:cord(`M${i?360:0} 233.6 H${x+(i?13:-13)}`)}<g transform="translate(${x} 218) scale(${scale})">${loop?testMmcLoopback():mmcHead(0,0,false)}${fanout&&!female?'<path d="M83 21 h7 M83 31 h7" stroke="#556862" stroke-width="2"/>':female?'<circle cx="82" cy="21" r="1.8" fill="#263a32"/><circle cx="82" cy="31" r="1.8" fill="#263a32"/>':''}</g>${labels?caption(i?278:82,278,label.role):''}`;
   }).join('');
   const endpoint=vflEndpoint(s),lit=endpoint?.point===point&&endpoint.emitting;
   const faceX=endpoint?.kind==='head'?(endpoint.face==='rear'?150:210):180;
@@ -67,7 +73,7 @@ function cassetteConnection(s,point,mode) {
     <rect x="158" y="218" width="44" height="34" rx="4" fill="#e3f0e7" stroke="#3d785d" stroke-width="2"/>
     ${connectors}
     ${lit?lightSource(faceX,234,'red'):''}
-    ${caption(180,305,`Port ${patch.port} · MMC mating point`)}
+    ${labels?caption(180,305,`Port ${patch.port} · MMC mating point`):''}
   </g>`;
 }
 function passiveFace(s,point,mode,detailed=false) {
@@ -126,6 +132,7 @@ function transformPath(path,{x=0,y=0,sx=1,sy=sx}={}) {
 function opticCord(mode,remote,lane) {
   const plugged=mode==='plugged',y=lane==='tx'?81:127,i=lane==='tx'?0:1;
   const tip=plugged?168:63,boot=tip-64*.67,bend=plugged?22+i*12:4+i*12,bottom=184+i*18;
+  if(remote)return {out:`M${tip} ${y} H8`,back:`M8 ${y} H${tip}`};
   const path=`M${boot} ${y} H${bend+12} Q${bend} ${y} ${bend} ${y+12} V${bottom-12} Q${bend} ${bottom} ${bend+12} ${bottom} H${remote?8:292}`;
   const reverse=`M${remote?8:292} ${bottom} H${bend+12} Q${bend} ${bottom} ${bend} ${bottom-12} V${y+12} Q${bend} ${y} ${bend+12} ${y} H${tip}`;
   return {out:`M${tip} ${y} H${boot} ${path.slice(path.indexOf(' H')+1)}`,back:reverse};
@@ -142,10 +149,16 @@ function supportedLoops(s,coverage) {
   });
 }
 const opticScale=214/300,casScale=242/360;
-const opticTop=97,casTop=81,cardHeight=332,nodeHeight=372;
+const opticTop=72,casTop=56,cardHeight=336,nodeHeight=352;
+// Portrait keeps the enlarged MMC connection vertical in its own cable channel.
+// Port numbering, labels and controls stay upright alongside the physical path.
+const mobileRail=282,mobileCasY=224,mobileOpticTop=44;
+const mobileHeight=(s,point)=>isOptic(s,point)?286:354;
+const portraitConnection=`translate(${mobileRail} ${mobileCasY}) rotate(90) scale(${casScale}) translate(-180 -233.6)`;
+const portraitFlow=`translate(${mobileRail} ${mobileCasY}) rotate(90) translate(-135 ${-(casTop+233.6*casScale)})`;
 const casY=lane=>casTop+(233.6+(lane==='tx'?-1.95:1.95))*casScale;
 const endpoint=(s,point,cx,lane)=>isOptic(s,point)?
-  {x:cx-107+(point===0?292:8)*opticScale,y:opticTop+(lane==='tx'?184:202)*opticScale}:
+  {x:cx-107+(point===0?292:8)*opticScale,y:opticTop+(point===0?(lane==='tx'?184:202):(lane==='tx'?81:127))*opticScale}:
   {x:cx+(point===0?121:-121),y:casY(lane)};
 function laneFlow(path,lane,direction,kind='ir') {
   return `<g class="ts-hardware-flow ts-hardware-${kind}" data-strand="${lane}" data-direction="${direction}">${lightFlow(path,kind==='vfl'?'red':lane==='tx'?'ir':'return-ir')}</g>`;
@@ -172,14 +185,14 @@ function section(s,coverage,point,strand) {
   const weak=s.tool==='loop'&&loopResult(s)==='weak'&&point>Math.min(loopSource(s),s.selected)&&point<=Math.max(loopSource(s),s.selected);
   return weak?{...lane,ir:true,weak:true}:practiceLane(s,point,strand,lane);
 }
-function nodeFlow(s,coverage,point,cx,mode,test) {
+function nodeFlow(s,coverage,point,cx,mode,test,stacked=false) {
   const optic=isOptic(s,point),remote=point===s.count+1;
   let drawing='';
   if(optic) {
     if(mode==='loop')return '';// The direct LC loop animates its own exact cord.
     for(const strand of ['tx','rx']) {
-      const lane=section(s,coverage,remote?point:1,strand),paths=opticCord(mode,remote,strand);
-      const map=d=>transformPath(d,{x:cx-107,y:opticTop,sx:opticScale});
+      const lane=section(s,coverage,remote?point:1,strand),paths=opticCord(mode,remote&&!stacked,strand);
+      const map=d=>transformPath(d,{x:cx-107,y:stacked?mobileOpticTop:opticTop,sx:opticScale});
       drawing+=flowOnCord(map(remote?paths.back:paths.out),map(remote?paths.out:paths.back),lane,strand);
     }
     return drawing;
@@ -217,22 +230,28 @@ function nodeCaption(s,point,mode,endpoint) {
   if(endpoint?.point===point&&endpoint.kind!=='lc')return endpoint.kind==='head'?'MMC head unplugged · CAS bypassed':endpoint.closed?'Both sides patched · path continues':`${displayedCasFace(s,point,endpoint.face)==='front'?'Front':'Rear'} port open`;
   return mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?'VFL on LC leg · optic empty':mode==='unplugged'?isOptic(s,point)?'LC legs unplugged · optic empty':'MMC unplugged · path open':isOptic(s,point)?'LC legs plugged into optic':'MMC head plugged into CAS';
 }
-function hardwareNode(s,coverage,point,cx,tests) {
-  const mode=connectionAt(s,point),test=tests.find(test=>test.point===point);
+function hardwareNode(s,coverage,point,cx,tests,stacked=false) {
+  const mode=connectionAt(s,point),test=tests.find(test=>test.point===point&&test.side===s.loopSide);
   const source=traceFrom(s),trace=s.traces[traceKey(s)],endpoint=vflEndpoint(s);
   const accessible=point<=s.reach,optic=isOptic(s,point),remote=point===s.count+1;
   const value=loopResult(s,point),cxClasses=`${s.selected===point?' ts-selected':''}${s.tool==='vfl'&&source===point?' ts-vfl-source':''}${!accessible?' ts-inaccessible':''}${value?' ts-observed-'+value:''}${coverage.points[point]?.issue?' ts-coverage-suspect':coverage.points[point]?.loop==='pass'?' ts-coverage-passed':''}`;
   const result=s.tool==='vfl'&&point===source?'VFL source':s.tool==='vfl'&&point===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):!accessible?'Outside your reach':mode==='loop'&&!value?'Enter your loop result':recordedNodeCaption(s,coverage,point);
-  let art=optic?`<svg x="${cx-107}" y="${opticTop}" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,s.tool==='vfl'&&s.selected===point,null,remote,point,value)}</svg>`:
+  const top=stacked?mobileOpticTop:opticTop;
+  let art=optic?`<svg x="${cx-107}" y="${top}" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,s.tool==='vfl'&&s.selected===point,null,remote&&!stacked,point,value)}</svg>`:
     `<svg x="${cx-121}" y="${casTop}" width="242" height="${320*casScale}" viewBox="0 0 360 320">${passiveFace(s,point,mode,true)}</svg>`;
+  if(stacked&&!optic)art=`<svg x="9" y="49" width="242" height="${185*casScale}" viewBox="0 0 360 185">${cassetteFront({name:`CAS ${point}`,port:patchAt(s,point).port}).replace('front view','port layout')}</svg>
+    <g transform="${portraitConnection}">${cassetteConnection(s,point,mode,{labels:false})}</g>
+    ${['rear','front'].map((side,i)=>{const label=connectionLabels(s,point,side,mode);return `<foreignObject x="16" y="${i?236:177}" width="218" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="ts-mobile-connection-label"><b>${label.name}</b><span>${label.role}</span></div></foreignObject>`;}).join('')}`;
   if(optic&&mode==='loop'&&test)art=art.replace('class="lc-loopback"',`class="lc-loopback ts-hardware-loop" data-loop-side="${test.side}" data-loop-point="${point}"`);
-  const handle=mode==='loop'?`<rect class="ts-tool-handle" data-mounted-tool="${optic?'lc':'mmc'}" x="${optic?cx-50:cx-26}" y="${optic?opticTop+49:casTop+218*casScale-16}" width="${optic?72:100}" height="72" rx="9"><title>Drag this loop to move it, or return it to the tray</title></rect>`:'';
+  const handle=mode==='loop'?`<rect class="ts-tool-handle" data-mounted-tool="${optic?'lc':'mmc'}" x="${optic?cx-50:stacked?248:cx+(s.loopSide==='remote'?-100:-10)}" y="${optic?top+49:stacked?(s.loopSide==='remote'?124:224):casTop+218*casScale-16}" width="${optic?72:stacked?48:110}" height="${stacked&&!optic?108:72}" rx="9"><title>Drag this loop to move it, or return it to the tray</title></rect>`:'';
   const drawing=`<g class="ts-node${cxClasses}" ${accessible?`role="button" tabindex="0" data-point="${point}" aria-pressed="${s.selected===point}" aria-label="${s.tool==='vfl'&&point!==source?'Check light at':'Select'} ${pointName(point,s)}${optic?'':`, port ${s.ports[point-1]}`}"`:''}>
-    <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="${cardHeight}" rx="12"/>
-    <text class="ts-node-title" x="${cx}" y="59">${remote?'Remote optic':point===0?'Local optic':`CAS ${point} · Port ${patchAt(s,point).port}`}</text>${art}${handle}
-    <foreignObject x="${cx-124}" y="294" width="248" height="68"><div xmlns="http://www.w3.org/1999/xhtml" class="ts-hardware-caption"><div class="ts-connection-label ${mode==='plugged'?'':'open'}">${nodeCaption(s,point,mode,endpoint)}</div><div class="ts-node-caption">${result}</div></div></foreignObject>
+    <rect class="ts-node-card" x="${stacked?4:cx-128}" y="8" width="${stacked?254:256}" height="${stacked?mobileHeight(s,point)-12:cardHeight}" rx="12"/>
+    <text class="ts-node-title" x="${stacked?131:cx}" y="32">${remote?'Remote optic':point===0?'Local optic':`CAS ${point} · Port ${patchAt(s,point).port}`}</text>${art}${handle}
+    <foreignObject x="${stacked?12:cx-124}" y="${stacked?(optic?208:286):273}" width="${stacked?236:248}" height="${stacked?64:68}"><div xmlns="http://www.w3.org/1999/xhtml" class="ts-hardware-caption"><div class="ts-connection-label ${mode==='plugged'?'':'open'}">${nodeCaption(s,point,mode,endpoint)}</div><div class="ts-node-caption">${result}</div></div></foreignObject>
   </g>`;
-  return {drawing,flow:nodeFlow(s,coverage,point,cx,mode,test),mode};
+  let flow=nodeFlow(s,coverage,point,cx,mode,test,stacked);
+  if(stacked&&!optic)flow=`<g transform="${portraitFlow}">${flow}</g>`;
+  return {drawing,flow,mode};
 }
 function desktopBridge(s,point,centers,strand) {
   const left=isOptic(s,point-1)?endpoint(s,point-1,centers[point-1],strand):{x:centers[point-1]+121,y:casY(strand)};
@@ -246,17 +265,22 @@ function spanLabel(s,coverage,point) {
   return `<div class="ts-cord-status" data-path-span="${point}"><span>${spanName(s,point)}</span><div>${['tx','rx'].map(strand=>`<span class="ts-cord-badge ${span.lanes[strand].status}">${coverageLabel(span.lanes[strand],strand)}</span>`).join('')}</div></div>`;
 }
 function mobileTail(s,point,strand,outgoing) {
-  const p=outgoing?(isOptic(s,point)?endpoint(s,point,135,strand):{x:256,y:casY(strand)}):endpoint(s,point,135,strand);
-  const tx=strand==='tx',side=outgoing?(tx?266:258):(tx?4:12),bend=Math.min(8,Math.abs(side-p.x)/2);
-  if(outgoing)return {path:`M${p.x} ${p.y} H${side-bend} Q${side} ${p.y} ${side} ${p.y+bend} V${nodeHeight}`,
-    back:`M${side} ${nodeHeight} V${p.y+bend} Q${side} ${p.y} ${side-bend} ${p.y} H${p.x}`};
-  return {path:`M${side} 0 V${p.y-bend} Q${side} ${p.y} ${side+bend} ${p.y} H${p.x}`,
-    back:`M${p.x} ${p.y} H${side+bend} Q${side} ${p.y} ${side} ${p.y-bend} V0`};
+  const x=mobileRail+(strand==='tx'?1.95:-1.95)*casScale,height=mobileHeight(s,point);
+  if(!isOptic(s,point)) {
+    const from=outgoing?mobileCasY+121:0,to=outgoing?height:mobileCasY-121;
+    return {path:`M${x} ${from} V${to}`,back:`M${x} ${to} V${from}`};
+  }
+  const p={x:28+292*opticScale,y:mobileOpticTop+(strand==='tx'?184:202)*opticScale},bend=12;
+  return outgoing?{path:`M${p.x} ${p.y} H${x-bend} Q${x} ${p.y} ${x} ${p.y+bend} V${height}`,
+    back:`M${x} ${height} V${p.y+bend} Q${x} ${p.y} ${x-bend} ${p.y} H${p.x}`}:
+    {path:`M${x} 0 V${p.y-bend} Q${x} ${p.y} ${x-bend} ${p.y} H${p.x}`,
+    back:`M${p.x} ${p.y} H${x-bend} Q${x} ${p.y} ${x} ${p.y-bend} V0`};
 }
-function mobileBridge(strand) {
-  const tx=strand==='tx',right=tx?266:258,left=tx?4:12,y=tx?86:78;
-  return {path:`M${right} 0 V${y-8} Q${right} ${y} ${right-8} ${y} H${left+8} Q${left} ${y} ${left} ${y+8} V104`,
-    back:`M${left} 104 V${y+8} Q${left} ${y} ${left+8} ${y} H${right-8} Q${right} ${y} ${right} ${y-8} V0`};
+function mobileExtension(s,coverage,point,css,height) {
+  return `<svg class="${css}" viewBox="0 0 300 ${height}" preserveAspectRatio="none" aria-hidden="true"><g class="ts-cas-bridge">${cord(`M${mobileRail} 0 V${height}`)}</g>${['tx','rx'].map(strand=>{
+    const x=mobileRail+(strand==='tx'?1.95:-1.95)*casScale;
+    return flowOnCord(`M${x} 0 V${height}`,`M${x} ${height} V0`,section(s,coverage,point+1,strand),strand);
+  }).join('')}</svg>`;
 }
 export function workbenchDiagram(s,loopControls='',{stacked=false}={}) {
   const coverage=recordedContinuity(s),tests=supportedLoops(s,coverage);
@@ -264,17 +288,29 @@ export function workbenchDiagram(s,loopControls='',{stacked=false}={}) {
   const centers=Array.from({length:s.count+2},(_,i)=>135+i*290),width=centers.at(-1)+135;
   const fault=point=>s.simulated&&s.fault.kind!=='none'&&s.fault.at===point?`<text class="ts-fault-label" x="135" y="17">Simulated fault ${isOptic(s,point)?'at optic':'in this section'} ↓</text>`:'';
   if(stacked)return `<div class="ts-stacked-path">${centers.map((_,point)=>{
-    const node=hardwareNode(s,coverage,point,135,tests);
+    const node=hardwareNode(s,coverage,point,135,tests,true);
     let cords='',flows=node.flow;
     for(const strand of ['tx','rx'])for(const outgoing of [false,true]) {
       if(outgoing?point===s.count+1:point===0)continue;
       const paths=mobileTail(s,point,strand,outgoing),lane=section(s,coverage,outgoing?point+1:point,strand);
-      cords+=`<g class="ts-external-cord">${cord(paths.path)}</g>`;flows+=flowOnCord(paths.path,paths.back,lane,strand);
+      if(isOptic(s,point)) {
+        const join=mobileOpticTop+(outgoing?202:184)*opticScale+(outgoing?12:-12);
+        const jacketPath=outgoing?paths.path.replace(/V[\d.]+$/,`V${join}`):paths.path.replace(/^(M[\d.]+) 0/,`$1 ${join}`);
+        cords+=`<g class="ts-external-cord">${cord(jacketPath)}</g>`;
+      }
+      else if(strand==='tx')cords+=`<g class="ts-cas-bridge">${cord(`M${mobileRail} ${outgoing?mobileCasY+121:0} V${outgoing?mobileHeight(s,point):mobileCasY-121}`)}</g>`;
+      flows+=flowOnCord(paths.path,paths.back,lane,strand);
+    }
+    // One jacket after the LC pair gathers into the fanout. Keep the two signal
+    // lanes within it, at exactly the same coordinates as the MMC connector.
+    if(isOptic(s,point)) {
+      const start=point===0?mobileOpticTop+202*opticScale+12:0,end=point===0?mobileHeight(s,point):mobileOpticTop+184*opticScale-12;
+      cords+=`<g class="ts-cas-bridge">${cord(`M${mobileRail} ${start} V${end}`)}</g>`;
     }
     const panel=s.selected===point?loopControls:'';
-    const extensions=panel&&point<=s.count?`<svg class="ts-panel-cords" viewBox="0 0 18 100" preserveAspectRatio="none" aria-hidden="true">${['tx','rx'].map(strand=>{const x=strand==='tx'?14:6,lane=section(s,coverage,point+1,strand);return `<g class="ts-external-cord">${cord(`M${x} 0 V100`)}</g>`+flowOnCord(`M${x} 0 V100`,`M${x} 100 V0`,lane,strand);}).join('')}</svg>`:'';
-    const bridge=point<=s.count?`<div class="ts-mobile-cord-junction"><svg class="ts-cord-bridge" viewBox="0 0 270 104" aria-hidden="true">${['tx','rx'].map(strand=>{const paths=mobileBridge(strand),lane=section(s,coverage,point+1,strand);return `<g class="ts-external-cord">${cord(paths.path)}</g>`+flowOnCord(paths.path,paths.back,lane,strand);}).join('')}</svg>${spanLabel(s,coverage,point+1)}</div>`:'';
-    return `<div class="ts-stacked-node" data-path-node="${point}"><svg viewBox="0 0 270 ${nodeHeight}" role="group">${node.drawing}${cords}${flows}${fault(point)}</svg>${panel?`<div class="ts-mobile-loop-row">${panel}${extensions}</div>`:''}</div>${bridge}`;
+    const extensions=panel&&point<=s.count?mobileExtension(s,coverage,point,'ts-panel-cords',100):'';
+    const bridge=point<=s.count?`<div class="ts-mobile-cord-junction">${mobileExtension(s,coverage,point,'ts-cord-bridge',72)}${spanLabel(s,coverage,point+1)}</div>`:'';
+    return `<div class="ts-stacked-node" data-path-node="${point}"><svg viewBox="0 0 300 ${mobileHeight(s,point)}" role="group">${node.drawing}${cords}${flows}${fault(point)}</svg>${panel?`<div class="ts-mobile-loop-row">${panel}${extensions}</div>`:''}</div>${bridge}`;
   }).join('')}</div>`;
   const nodes=centers.map((cx,point)=>hardwareNode(s,coverage,point,cx,tests));
   const bridges=coverage.spans.map(span=>{
@@ -283,5 +319,5 @@ export function workbenchDiagram(s,loopControls='',{stacked=false}={}) {
     return jacket+['tx','rx'].map(strand=>{const paths=desktopBridge(s,span.point,centers,strand);return (bundled?'':`<g class="ts-external-cord">${cord(paths.path)}</g>`)+flowOnCord(paths.path,paths.back,section(s,coverage,span.point,strand),strand);}).join('');
   }).join('');
   // Status badges sit beside their cable ends; there is no second light diagram.
-  return `<div class="ts-path-scene" style="width:${width}px;--cord-sections:${s.count+1}"><svg viewBox="0 0 ${width} ${nodeHeight}" style="height:${nodeHeight}px" role="group">${nodes.map(node=>node.drawing).join('')}${bridges}${nodes.map(node=>node.flow).join('')}${centers.map((cx,point)=>`<g transform="translate(${cx-135} 0)">${fault(point)}</g>`).join('')}</svg><div class="ts-cord-summaries">${coverage.spans.map(span=>spanLabel(s,coverage,span.point)).join('')}</div>${loopControls?`<div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px">${loopControls}</div>`:''}</div>`;
+  return `<div class="ts-path-scene" style="width:${width}px;min-width:${centers.length*225}px;--cord-sections:${s.count+1};--cord-margin:${135/width*100}%"><svg viewBox="0 0 ${width} ${nodeHeight}" role="group">${nodes.map(node=>node.drawing).join('')}${bridges}${nodes.map(node=>node.flow).join('')}${centers.map((cx,point)=>`<g transform="translate(${cx-135} 0)">${fault(point)}</g>`).join('')}</svg>${loopControls?`<div class="ts-loop-slot" style="margin-left:${(centers[s.selected]-128)/width*100}%;width:${256/width*100}%">${loopControls}</div>`:''}<div class="ts-cord-summaries">${coverage.spans.map(span=>spanLabel(s,coverage,span.point)).join('')}</div></div>`;
 }

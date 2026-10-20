@@ -1,6 +1,6 @@
 # Project status
 
-Updated: **2026-10-19**. This is a maintained snapshot, not an automatic health monitor.
+Updated: **2026-10-20**. This is a maintained snapshot, not an automatic health monitor.
 
 [Live course](https://ironfaith.github.io/fiber-troubleshooting/) · [Standing instructions](AGENTS.md) · [Current behavior](README.md) · [Counter operations](counter/README.md) · [Deployment history](https://github.com/IronFaith/fiber-troubleshooting/actions)
 
@@ -8,11 +8,12 @@ Updated: **2026-10-19**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Normalize must remove the loopback illustration and reconnect service fibers after a passing test.
-- **Accepted scope — 2026-10-19:** Show the current physical setup at all times. Normalize removes LC/MMC loopbacks from either end; retain recorded passes, history and supported checked-path highlighting. This supersedes the earlier decision to redraw historical loopbacks after Normalize.
-- **Completed and live:** [`90b5abc`](https://github.com/IronFaith/fiber-troubleshooting/commit/90b5abc61ff1f753090eab979781461d89a44d79) removes the historical-loop override from the hardware renderer. Local/remote LC/MMC regression coverage and desktop/mobile browser checks passed. All 119 tests pass; the exact deployment succeeded and all four changed application files matched their served contents.
-- **Resolved defect:** UI-01 now uses wrapping captions within the hardware card; all four languages and both loop directions passed rendered checks.
-- **Remaining work / next action:** The Normalize correction is complete. No implementation or blocker remains for this request.
+- **Current objective:** Clean up the troubleshooting diagram with dedicated desktop and mobile layouts, based on the user's two screenshots.
+- **Accepted scope — 2026-10-20:** Keep the existing workflow and evidence. Desktop uses compact horizontal cards; mobile uses a straight cable channel beside stacked cards, with upright cassette maps and vertically arranged enlarged MMC connections. Keep cables out of result controls and retain Normalize behavior.
+- **Implemented locally:** Responsive geometry, attached result panels, calmer card styling, direct remote LC cable entry on desktop and removal of idle tool-handle outlines. A reproduced dual-source defect is fixed: when both ends passed at one CAS, the animation must follow the currently installed loop's source.
+- **Browser verification:** 320-pixel French/Arabic/Spanish and 390-pixel English mobile views have no page overflow or clipped hardware captions; 1024/1440-pixel desktop and one/four-CAS paths fit or scroll within the map. Normalize removed all loopbacks and retained recorded passes. VFL result recording retained its scroll position, and no console errors were reported.
+- **Automated verification:** `npm run check` passed all 120 tests. One focused regression was added for the reproduced dual-source animation defect; existing Normalize coverage remains passing. `git diff --check` passed.
+- **Remaining work / next action:** Publish the application commit and verify its exact Pages deployment and affected served files. The prior live application release remains listed below until that verification completes.
 - **Blockers / missing input:** None.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.

@@ -23,3 +23,24 @@ test('Normalize removes local and remote LC/MMC loopbacks while preserving their
     }
   }
 });
+
+test('the installed MMC loop animates only its current source when both directions passed at the same CAS',()=>{
+  let s=createCase();
+  s=changeCase(s,{type:'place',kind:'mmc',point:1});
+  for(const side of ['local','remote']) {
+    s=changeCase(s,{type:'loop-side',value:side});
+    s=changeCase(s,{type:'ready',value:true});
+    s=changeCase(s,{type:'record',result:'pass'});
+  }
+  assert.equal(s.loops[1],'pass');
+  assert.equal(s.remoteLoops[1],'pass');
+  for(const side of ['local','remote']) {
+    s=changeCase(s,{type:'loop-side',value:side});
+    for(const stacked of [false,true]) {
+      const view=workbenchDiagram(s,'',{stacked});
+      const animatedLoops=[...view.matchAll(/class="ts-hardware-loop" data-loop-side="([^"]+)" data-loop-point="(\d+)"/g)]
+        .map(([,source,point])=>({source,point:Number(point)}));
+      assert.deepEqual(animatedLoops,[{source:side,point:1}]);
+    }
+  }
+});
