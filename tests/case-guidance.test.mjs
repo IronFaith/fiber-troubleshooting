@@ -72,3 +72,22 @@ test('after a change, retest returns to the failed source and strand while keepi
   const conflict=loop(loop(loop(createCase(),0,'pass','local'),1,'dark','local'),2,'pass','local');
   assert.deepEqual(retestFindingActions(conflict),[],'disagreements prompt a repeat check rather than a silent repair reset');
 });
+
+test('combined loops and VFL expose the failing strand and the supporting results together',()=>{
+  for(const [from,near,far,side] of [[0,1,2,'local'],[3,2,1,'remote']]) for(const bad of ['tx','rx']) {
+    const good=bad==='tx'?'rx':'tx';
+    let s=loop(loop(loop(createCase(),from,'pass',side),near,'pass',side),far,'dark',side);
+    s=trace(trace(s,from,near,'tx','seen'),from,near,'rx','seen');
+    s=trace(trace(s,from,far,bad,'dark'),from,far,good,'seen');
+    const guide=caseGuidance(s);
+    assert.equal(guide.area,'CAS 1 ↔ CAS 2');
+    assert.equal(guide.strand,bad==='tx'?'A':'B');
+    assert.equal(assessment(s).isolation.kind,'fiber-contacts');
+    assert.deepEqual(guide.evidence.filter(r=>r.kind==='loop').map(r=>[r.point,r.result]),[[from,'pass'],[near,'pass'],[far,'dark']]);
+    assert.deepEqual(guide.evidence.filter(r=>r.kind==='vfl').map(r=>[r.point,r.lanes.tx,r.lanes.rx]),[[near,'seen','seen'],[far,bad==='tx'?'dark':'seen',bad==='rx'?'dark':'seen']]);
+    assert.ok(!assessment(s).causes.some(c=>['optic','damage'].includes(c.id)),'a dark channel does not establish optic or ferrule damage');
+    assert.equal(caseGuidance(mapped(s)).heading,'Inspect this section');
+    const newRound=changeCase(s,{type:'retest'});
+    assert.deepEqual(caseGuidance(newRound).evidence,[],'the summary must not reuse previous-round results');
+  }
+});

@@ -8,25 +8,25 @@ Updated: **2026-10-20**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Improve the lesson structure so beginners learn each action’s purpose, interpretation and limits before assessment.
-- **Accepted scope — 2026-10-20:** The user approved the five-stage progression proposed in the course review. Reuse all 23 lessons and existing artwork, move the combined case last, add consistent objectives and unscored checks, and connect practice/exams. Preserve bookmarks, scores, badges and cases.
-- **Completed and published:** Five stages with one visible lesson, selector, Previous/Next, optional contents and exact-lesson resume. All 23 lessons include a short objective and revealable explanation. Stage links target existing practice and exams; saved attempts remain available. New learner content is translated into Spanish, French and Arabic.
-- **Verification:** Final `npm run check` passed all 129 tests. Browser checks covered all 23 lessons, cross-stage navigation, explanations, fanout selection/seating, flipped LC mapping, LLDP, polarity, loop comparison, the final case and stopping playback when leaving a lesson. Mobile explanations fit in English, Spanish, French and Arabic without page overflow. The exam handoff retained an existing 5/5 score and resumed its unfinished second question; the old Chapter 3 link opened FIM.
-- **Latest verified application release:** [`0ec2d71`](https://github.com/IronFaith/fiber-troubleshooting/commit/0ec2d71706fac5993524ad1b758582f9a6e0a5ef). Its exact Pages deployment succeeded and all 24 changed runtime files matched the commit. The live browser shows the five stages and lesson checks without console errors.
-- **Remaining work / next action:** This approved milestone is complete. No additional lesson redesign or exam expansion is queued; use learner feedback to choose any later improvement.
-- **Blockers / missing input:** No implementation blocker. Field-tool inventory remains unconfirmed; Case findings already states requirements and offers unavailable-tool/access guidance.
+- **Current objective:** Make troubleshooting findings scannable and correctly follow the user's combined loop/VFL field sequence.
+- **Accepted scope — 2026-10-20:** Keep the existing workspace; replace the paragraph-heavy findings with a suspect span/strand, compact test table and one next action. Fix premature loop repetition during VFL isolation. Ferrule degradation remains a hypothesis until supported by inspection or comparison.
+- **Completed locally:** Findings show current same-source loop and A/B VFL results, with unknown channels explicit. Steps/tools/outcomes and possible causes are expandable. Partial VFL passes continue through the failed loop boundary while its optical failure remains suspect. The reported sequence isolates the dark strand and contacts between the first and onward passives, from either end and for either strand. English, Spanish, French and Arabic ship together.
+- **Verification:** Final `npm run check` passed all 131 tests, including two focused regressions. Browser checks reproduced optic pass → CAS 1 pass → CAS 2 failure, both VFL channels passing at CAS 1 and one dark at CAS 2; identity confirmation advances to inspection. Desktop and mobile findings, four-language mobile overflow, expandable instructions, Normalize and reload were checked without browser errors. Existing tests also caught and verified retention of the suspect optical-loop status during partial VFL checks.
+- **Latest verified application release:** [`0ec2d71`](https://github.com/IronFaith/fiber-troubleshooting/commit/0ec2d71706fac5993524ad1b758582f9a6e0a5ef). The new findings milestone is locally verified; publication verification is pending.
+- **Remaining work / next action:** Publish this milestone through main and verify its exact Pages deployment and affected runtime files.
+- **Blockers / missing input:** None. No extra tools or confirmed ferrule damage are assumed.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`0ec2d71`](https://github.com/IronFaith/fiber-troubleshooting/commit/0ec2d71706fac5993524ad1b758582f9a6e0a5ef): **Five guided stages with lesson objectives, understanding checks and exam handoffs**.
+**Compact troubleshooting findings and continuous VFL isolation** are verified locally and awaiting publication.
 
-- All 23 existing topics now progress through equipment, connection identity, readings, tests, then isolation and verification. Each lesson has a short objective and an unscored question with a revealable explanation. The combined case is last.
-- One lesson is visible at a time, with a selector, Previous/Next, optional contents and exact-lesson resume. Original artwork, interactions, references and topic anchors remain. Legacy chapter bookmarks open their original subjects.
-- Stage practice links target existing simulations and relevant exams. Knowledge-exam links highlight the requested exam without starting it or replacing a saved attempt. Existing scores, badges, cases and counters remain compatible. English, Spanish, French and Arabic ship together.
-- Final `npm run check` passed all **129 tests**. Browser checks covered all lessons and moved interactions, cross-stage navigation, legacy FIM links, saved lesson resume, existing exam score/draft preservation, and mobile explanations in all four languages. The live course also loaded without console errors.
-- [The exact Pages deployment succeeded](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39449854445). SHA-256 comparisons confirmed all **24 changed runtime files** served by Pages match the application commit. Runtime URL versions include changed modules and their importers.
+- The findings lead with the bounded span and suspect strand, then a compact loop/VFL table and one next action. Detailed steps, tools, outcome meanings and causes remain available on demand.
+- A failed onward loop no longer prematurely sends a partially completed VFL investigation back to looping. Its suspect status stays visible; both VFL channels passing still cannot clear that optical failure.
+- The user's combined sequence identifies the dark strand and its contacts in the added span. It does not assert that the ferrule is degraded. Earlier rounds and opposite-source results are not reused as this source's current evidence.
+- Two focused tests cover continued tracing and the combined evidence summary in both directions and on either channel. Final validation: 131 tests, desktop/mobile browser checks, translated mobile views, Normalize and reload. Existing saved-case keys remain unchanged.
+- Cache versions include changed modules and their importers. Exact deployment and served-file verification are pending.
 
 ## What is in place
 
@@ -35,7 +35,7 @@ The latest application release is [`0ec2d71`](https://github.com/IronFaith/fiber
 | Learn | Five stages covering equipment, connection identity, readings, tests, and isolation. All 23 lessons have objectives and unscored explanation checks; one lesson is visible at a time, with optional contents, reference, resume and practice/exam links. |
 | Simulations and Exams | Interactive LC/MMC patching, selectable five-question Beginner and Intermediate exams, saved attempts, local best scores and Fiber Apprentice badges. Questions are supported by lesson material. |
 | Troubleshooting | One test workspace with local/remote tools, editable CAS points, physical identity checks, inline results and compact findings. The path stacks on mobile. |
-| Evidence | Loop and VFL coverage remain separate. Findings show the bounded area, source/strand, observations, possible causes, ordered steps, required tools, outcome meanings and unavailable-tool/access guidance. Unknown sections and contradictory results stay visible. |
+| Evidence | Loop and VFL coverage remain separate. Findings show the suspect span/strand, a compact current-source results table and one next action, with steps/tools/outcomes and causes expandable. Missing channels and unresolved optical failures stay explicit. |
 | Case continuity | Normalize changes the illustrated setup; it does not declare a repair. History retains earlier checks. Made a change · retest in findings starts fresh evidence at the failed setup. New case begins a separate investigation. |
 | Languages | English, Spanish, French and Modern Standard Arabic. Physical port positions and identifiers keep their meaning when the language changes. |
 | Progress and activity | Scores and badges are local to a browser, without accounts. The separate Cloudflare counter supplies shared visitor, completed-exam and estimated active-learning-time totals. |
@@ -63,9 +63,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The Case findings change is complete and verified live. The lesson-structure review is complete; its proposed reorganization is awaiting the user's chosen scope. No course implementation is approved or in progress.
-
-This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
+The compact findings and VFL guidance milestone is implemented and locally verified. Publication verification remains. No other redesign or curriculum work is queued.
 
 ## Boundaries to preserve
 

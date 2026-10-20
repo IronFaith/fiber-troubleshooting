@@ -1,10 +1,10 @@
-import {translateLines} from './locale.mjs?v=26';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=22';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=33';
+import {translateLines} from './locale.mjs?v=27';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=23';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=34';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=8';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=4';
-import {simpleVfl} from './vfl-simple.mjs?v=29';
-import {caseGuidance,retestFindingActions} from './case-guidance.mjs?v=1';
+import {simpleVfl} from './vfl-simple.mjs?v=30';
+import {caseGuidance,retestFindingActions} from './case-guidance.mjs?v=2';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -12,7 +12,7 @@ const key='fiber-workbench-v1';
 let view='actual', cases={actual:createCase(),simulation:createCase(true)};
 let lightLayer='ir';
 let selectedTool=null,setupOpen=false,newCaseStarted=false;
-let serviceCheckOpen=false,historyOpen=false,guidanceDetailsOpen=false,guidanceUnavailableOpen=false;
+let serviceCheckOpen=false,historyOpen=false,guidanceDetailsOpen=false,guidanceUnavailableOpen=false,guidancePlanOpen=false;
 let deferPortRender=false,portRenderPending=false;
 const undo={actual:[],simulation:[]};
 let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -251,10 +251,16 @@ function controls(s) {
   return '';
 }
 
+function evidenceTable(s,rows) {
+  const mark=(result,label,strand='')=>`<span class="ts-test-result ${['pass','seen'].includes(result)?'passed':result?'failed':'untested'}"><span aria-hidden="true">${['pass','seen'].includes(result)?'✓':result==='dark'?'×':result?'!':'?'}</span>${strand?`<b>${strand}</b>`:''}<span>${escape(label)}</span></span>`;
+  return `<table class="ts-test-results"><caption>Recorded tests</caption><thead><tr><th scope="col">Test point</th><th scope="col">Result</th></tr></thead><tbody>${rows.map(row=>`<tr>
+    <th scope="row"><span>${pointName(row.point,s)}</span><small>${row.kind==='loop'?isOptic(s,row.point)?'LC loopback':'MMC loopback':'VFL'}${row.head?' · <span>Loose MMC only</span>':''}</small></th>
+    <td>${row.kind==='loop'?mark(row.result,loopLabels[row.result]):`<div class="ts-test-pair">${['tx','rx'].map(strand=>mark(row.lanes[strand],!row.lanes[strand]?'Not checked':row.lanes[strand]==='seen'?'Light seen':row.lanes[strand]==='dark'?'No light':traceLabels[row.lanes[strand]],strand==='tx'?'A':'B')).join('')}</div>`}</td>
+  </tr>`).join('')}</tbody></table>`;
+}
 function advice(s) {
   const a=assessment(s);
   const guide=caseGuidance(s,a);
-  const compared=Object.keys(s.comparisons?.[a.observation?.key]??{}).length>0;
   const pending=s.tool!=='link'&&(!s.ready || (s.tool==='loop'?!loopResult(s):!s.traces[traceKey(s)]));
   const awaitingResult=s.tool!=='link'&&(s.tool==='loop'?!loopResult(s):!s.traces[traceKey(s)]);
   const hasEvidence=loopEntries(s).length+Object.keys(s.traces).length>0;
@@ -262,16 +268,24 @@ function advice(s) {
   if(waiting) return '';
   const nextLabel=a.check?.label??(a.suggestion?.tool==='loop'?`Next: ${isOptic(s,a.suggestion.point)?'LC':'MMC'} loop at ${pointName(a.suggestion.point,s)}`:a.suggestion?.tool==='vfl'?`VFL from ${a.suggestion.side==='remote'?'Remote LC legs':'Local LC legs'} → ${fiberPointName(a.suggestion.point,s)}`:'Normalize');
   return `<section class="ts-guidance ${a.tone}" aria-labelledby="finding-title"><h3 id="finding-title" tabindex="-1">Case findings</h3>
-    <div class="ts-finding-focus"><span>Where to check</span><strong>${guide.area.split(' ↔ ').map(part=>`<span>${escape(part)}</span>`).join(' ↔ ')}</strong>${guide.source?`<small>Test source: ${guide.source}${guide.strand?` · Strand ${guide.strand}`:''}</small>`:''}</div>
-    <p class="ts-finding-summary">${a.title}</p>
-    ${hasEvidence?`<p class="ts-guidance-evidence"><b>What we know</b><br>${a.evidencePath&&!compared?`<span>${a.evidencePath[0]}</span> <span aria-hidden="true">→</span> <span>${a.evidencePath[1]}</span>`:a.comparisonFinding??a.why}</p>`:''}
-    ${a.causes.length?`<p class="ts-guidance-causes"><b>Possible causes to check</b>: ${a.causes.map(c=>`<span>${c.label}</span>`).join(' · ')}</p>`:''}
-    ${awaitingResult?'<p class="ts-guidance-next">Current setup: waiting for a new result. Earlier findings stay visible.</p>':`<div class="ts-finding-plan"><h4>${guide.heading}</h4>${guide.tools.length?`<p class="ts-finding-tools"><b>Needed</b>: ${guide.tools.map(tool=>`<span>${escape(tool)}</span>`).join(' · ')}</p>`:''}<ol>${guide.steps.map(step=>`<li>${escape(step)}</li>`).join('')}</ol></div>`}
-    <div class="ts-guidance-actions">${awaitingResult?button('test-result','Record result','class="ts-next-button"'):`${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}${diagnosticControls(a,s)}${!s.simulated&&retestFindingActions(s).length?button('retest-finding','Made a change · retest','class="ts-next-button"'):''}`}</div>
-    ${!awaitingResult&&guide.outcomes.length?`<dl class="ts-finding-outcomes">${guide.outcomes.map(([condition,meaning])=>`<div><dt>${condition}</dt><dd>${meaning}</dd></div>`).join('')}</dl>`:''}
-    ${!awaitingResult&&!a.complete&&guide.tools.length?`<details class="ts-guidance-unavailable" ${guidanceUnavailableOpen?'open':''}><summary>Tools or access unavailable?</summary><p>${guide.unavailable}</p>${button('copy','Copy findings')}</details>`:''}
+    <div class="ts-finding-focus"><span>Where to check</span><strong>${guide.area.split(' ↔ ').map(part=>`<span>${escape(part)}</span>`).join(' ↔ ')}</strong>
+      <p class="ts-finding-summary">${a.issue==='dark'&&a.isolation&&!a.causes.some(c=>['vfl-setup','damage','assembly','common'].includes(c.id))?`<b>Strand ${guide.strand}</b> · <span>${a.isolation.label}</span>`:a.title}</p>
+      ${guide.source?`<small>Test source: ${guide.source}${guide.strand?` · Strand ${guide.strand}`:''}</small>`:''}
+      ${a.issue==='dark'&&!a.causes.some(c=>c.id==='damage')?'<small>Exact component not yet confirmed.</small>':''}
+    </div>
+    <div class="ts-findings-grid">
+      ${guide.evidence.length?evidenceTable(s,guide.evidence):''}
+      <div class="ts-finding-next"><span class="ts-next-label">Next action</span>
+        <h4>${awaitingResult?'Record result':guide.heading}</h4>
+        ${awaitingResult?'<p class="ts-guidance-next">Current setup: waiting for a new result. Earlier findings stay visible.</p>':`<details class="ts-finding-plan" ${guidancePlanOpen?'open':''}><summary>Steps, tools and result meanings</summary>${guide.tools.length?`<p class="ts-finding-tools"><b>Needed</b>: ${guide.tools.map(tool=>`<span>${escape(tool)}</span>`).join(' · ')}</p>`:''}<ol>${guide.steps.map(step=>`<li>${escape(step)}</li>`).join('')}</ol>
+          ${guide.outcomes.length?`<dl class="ts-finding-outcomes">${guide.outcomes.map(([condition,meaning])=>`<div><dt>${condition}</dt><dd>${meaning}</dd></div>`).join('')}</dl>`:''}</details>`}
+        <div class="ts-guidance-actions">${awaitingResult?button('test-result','Record result','class="ts-next-button"'):`${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}${diagnosticControls(a,s)}${!s.simulated&&retestFindingActions(s).length?button('retest-finding','Made a change · retest','class="ts-next-button"'):''}`}</div>
+        ${!awaitingResult&&!a.complete&&guide.tools.length?`<details class="ts-guidance-unavailable" ${guidanceUnavailableOpen?'open':''}><summary>Tools or access unavailable?</summary><p>${guide.unavailable}</p>${button('copy','Copy findings')}</details>`:''}
+      </div>
+    </div>
     ${hasEvidence?`<details class="ts-guidance-details" ${guidanceDetailsOpen?'open':''}><summary>Why this check?</summary>
-      ${a.route?`<p><b>${escape(a.route)}</b></p>`:''}${a.evidencePath||a.comparisonFinding?`<p>${a.why}</p>`:''}${a.evidencePath&&a.comparisonFinding?`<p>${a.comparisonFinding}</p>`:''}
+      ${a.causes.length?`<b>Possible causes to check</b><ul>${a.causes.map(c=>`<li>${c.label}</li>`).join('')}</ul>`:''}
+      ${a.route?`<p><b>${escape(a.route)}</b></p>`:''}<p>${a.why}</p>${a.comparisonFinding?`<p>${a.comparisonFinding}</p>`:''}
       ${a.caution?`<p>${a.caution}</p>`:''}${a.scope?`<p>${a.scope}</p>`:''}${a.isolation?`<p><b>${a.isolation.strand==='tx'?'A':'B'}</b> · <span>${a.isolation.label}</span></p>`:''}
       ${pending?'<p>Current setup: waiting for a new result. Earlier findings stay visible.</p>':''}
       ${a.otherIssues?`<p>${a.otherIssues} other recorded ${a.otherIssues===1?'issue':'issues'} remain in this case.</p>`:''}
@@ -380,6 +394,7 @@ host.addEventListener('toggle',event=>{
   if(event.target.matches('.ts-service-check')) serviceCheckOpen=event.target.open;
   if(event.target.matches('.ts-guidance-details')) guidanceDetailsOpen=event.target.open;
   if(event.target.matches('.ts-guidance-unavailable')) guidanceUnavailableOpen=event.target.open;
+  if(event.target.matches('.ts-finding-plan')) guidancePlanOpen=event.target.open;
 },true);
 function choosePoint(point) {
   if(selectedTool) {placeTool(selectedTool,point,true);return;}
@@ -507,7 +522,7 @@ host.addEventListener('click',async event=>{
     undo[view].push(s);
     if(undo[view].length>30) undo[view].shift();
     cases[view]=createCase(s.simulated);
-    newCaseStarted=true;setupOpen=true;serviceCheckOpen=false;historyOpen=false;guidanceDetailsOpen=false;guidanceUnavailableOpen=false;
+    newCaseStarted=true;setupOpen=true;serviceCheckOpen=false;historyOpen=false;guidanceDetailsOpen=false;guidanceUnavailableOpen=false;guidancePlanOpen=false;
     save();render();
     host.querySelector('.ts-new-case')?.scrollIntoView({block:'start',behavior:'instant'});
     host.querySelector('#new-case-title')?.focus({preventScroll:true});

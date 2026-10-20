@@ -1,5 +1,9 @@
 // Neutral Latin American Spanish. Keep numbered placeholders and technical identifiers intact.
 export const spanishMessages = [
+  ["Strand {0}","Fibra {0}"],
+  ["Test point","Punto de prueba"],
+  ["Steps, tools and result meanings","Pasos, herramientas e interpretación"],
+  ["Exact component not yet confirmed.","El componente exacto aún no está confirmado."],
   ["Tell service light from a tracing tool.","Distingue la luz de servicio de una herramienta de trazado."],
   ["Which source carries the device’s data?","¿Qué fuente transporta los datos del dispositivo?"],
   ["The optic carries data as infrared light. The VFL supplies separate red light to trace an isolated fiber.","El óptico transporta datos mediante luz infrarroja. El VFL aporta una luz roja independiente para trazar una fibra aislada."],

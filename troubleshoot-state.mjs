@@ -669,13 +669,21 @@ function traceAssessment(s) {
   const failure=loopEntries(s).find(e=>e.result!=='pass'),failedLoop=failure?[failure.point,failure.result]:null;
   if(failedLoop) {
     best.caution=`${pointName(failure.side==='remote'?s.count+1:0,s)} · Loop at ${pointName(Number(failedLoop[0]),s)}: ${loopLabels[failedLoop[1]]}. VFL continuity does not clear this optical test.`;
+    const source=failure.side==='remote'?s.count+1:0;
+    // Finish the VFL pair through the failed boundary before repeating its loop.
+    // A farther VFL check cannot explain this loop, nor can another source.
+    const tracingBoundary=best.check?.from===source&&best.check.to!==source&&
+      Math.sign(best.check.to-source)===Math.sign(failure.point-source)&&
+      Math.abs(best.check.to-source)<=Math.abs(failure.point-source);
     if(best.priority<50) {
       const isolated=combinedLoopAssessment(s);
       best.issue='loop'; best.from=isolated.from; best.to=isolated.to; best.source=isolated.source;
       best.title='Visible light does not clear the failed loop'; best.tone='suspect';
-      best.next='Verify the loop setup and inspect the connections. Recheck the loop against the optic limits; measure loss if the return remains weak.';
-      best.check=null; best.branches=[['Loop passes','Restore the mapped path and verify the live link.'],['Loop still fails','Continue isolating the optic / setup or added fiber section.']];
-      best.suggestion={tool:'loop',point:Number(failedLoop[0]),side:failure.side};
+      if(!tracingBoundary) {
+        best.next='Verify the loop setup and inspect the connections. Recheck the loop against the optic limits; measure loss if the return remains weak.';
+        best.check=null; best.branches=[['Loop passes','Restore the mapped path and verify the live link.'],['Loop still fails','Continue isolating the optic / setup or added fiber section.']];
+        best.suggestion={tool:'loop',point:Number(failedLoop[0]),side:failure.side};
+      }
     }
   }
   if(!failedLoop&&s.tx==='dark') best.caution='Starting local TX reports no light. The VFL has its own source and does not verify the optic.';

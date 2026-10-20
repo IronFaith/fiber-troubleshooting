@@ -1,5 +1,9 @@
 // Modern Standard Arabic. Keep English keys aligned with all translation catalogs.
 export const arabicMessages = [
+  ["Strand {0}","الليف {0}"],
+  ["Test point","نقطة الاختبار"],
+  ["Steps, tools and result meanings","الخطوات والأدوات وتفسير النتائج"],
+  ["Exact component not yet confirmed.","لم يُحدَّد المكوّن بعينه بعد."],
   ["Tell service light from a tracing tool.","ميّز ضوء الخدمة عن أداة التتبع."],
   ["Which source carries the device’s data?","أي مصدر يحمل بيانات الجهاز؟"],
   ["The optic carries data as infrared light. The VFL supplies separate red light to trace an isolated fiber.","تحمل الوحدة الضوئية البيانات بضوء الأشعة تحت الحمراء. ويوفر VFL ضوءًا أحمر منفصلًا لتتبع ليف معزول."],

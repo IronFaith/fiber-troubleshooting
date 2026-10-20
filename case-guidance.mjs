@@ -1,4 +1,19 @@
-import {assessment,isOptic,pointName,fiberPointName,loopEntries,nextCheckActions} from './troubleshoot-state.mjs?v=22';
+import {assessment,isOptic,pointName,fiberPointName,loopEntries,nextCheckActions,parseTraceKey} from './troubleshoot-state.mjs?v=23';
+
+function recordedTests(s,source) {
+  const rows=loopEntries(s).filter(e=>(e.side==='remote'?s.count+1:0)===source)
+    .sort((a,b)=>Math.abs(a.point-source)-Math.abs(b.point-source))
+    .map(e=>({kind:'loop',point:e.point,result:e.result}));
+  const traces=[];
+  for(const [key,result] of Object.entries(s.traces)) {
+    const r=parseTraceKey(key);
+    if(!r||r.from!==source) continue;
+    let row=traces.find(e=>e.point===r.to&&e.head===Boolean(r.head));
+    if(!row) {row={kind:'vfl',point:r.to,head:Boolean(r.head),lanes:{}};traces.push(row);}
+    row.lanes[r.strand]=result;
+  }
+  return [...rows,...traces.sort((a,b)=>Math.abs(a.point-source)-Math.abs(b.point-source)||Number(b.head)-Number(a.head))];
+}
 
 // Explain the existing evidence decision without turning instructions into results.
 export function caseGuidance(s,a=assessment(s)) {
@@ -11,6 +26,7 @@ export function caseGuidance(s,a=assessment(s)) {
     area:comparison.source==='fail'?'VFL and LC reference connection':area??'Not isolated yet',
     source:a.source===undefined&&!a.check&&!observation&&!['loop','vfl'].includes(a.suggestion?.tool)?null:pointName(source,s),
     strand:strand?strand==='tx'?'A':'B':null,
+    evidence:recordedTests(s,source),
     heading:'Do this next',steps:[a.next],tools:[],outcomes:a.branches??[],
     unavailable:'Keep this area unverified. Copy the findings and request the listed tools or access before continuing.'
   };

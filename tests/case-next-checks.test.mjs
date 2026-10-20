@@ -57,3 +57,20 @@ test('a farther loop pass cannot silently erase a nearer failure from the same o
     assert.equal(assessment(s).tone,'pass');
   }
 });
+
+test('a failed onward loop lets VFL finish checking the pair up to that boundary',()=>{
+  for(const [from,near,far,side] of [[0,1,2,'local'],[3,2,1,'remote']]) {
+    let s=loop(loop(loop(createCase(),from,'pass',side),near,'pass',side),far,'dark',side);
+    s=trace(s,from,near,'tx','seen');
+    assert.equal(assessment(s).tone,'suspect','partial visible continuity must retain the unresolved optical failure');
+    assert.deepEqual([assessment(s).check?.from,assessment(s).check?.to,assessment(s).check?.strand],[from,near,'rx']);
+    s=trace(s,from,near,'rx','seen');
+    assert.equal(assessment(s).check?.to,far);
+    s=trace(s,from,far,'tx','seen');
+    assert.equal(assessment(s).check?.strand,'rx');
+    assert.equal(assessment(s).check?.to,far);
+    s=trace(s,from,far,'rx','seen');
+    assert.equal(assessment(s).issue,'loop','visible continuity still cannot clear a failed optical test');
+    assert.deepEqual(assessment(s).suggestion,{tool:'loop',point:far,side});
+  }
+});

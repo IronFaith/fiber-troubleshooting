@@ -1,5 +1,9 @@
 // French learner-facing messages. Keep English keys aligned with spanish.mjs.
 export const frenchMessages = [
+  ["Strand {0}","Fibre {0}"],
+  ["Test point","Point de test"],
+  ["Steps, tools and result meanings","Étapes, outils et interprétation"],
+  ["Exact component not yet confirmed.","Le composant exact reste à confirmer."],
   ["Tell service light from a tracing tool.","Distinguer la lumière de service d’un outil de traçage."],
   ["Which source carries the device’s data?","Quelle source transporte les données de l’appareil ?"],
   ["The optic carries data as infrared light. The VFL supplies separate red light to trace an isolated fiber.","Le module optique transporte les données sous forme de lumière infrarouge. Le VFL fournit une lumière rouge distincte pour tracer une fibre isolée."],
