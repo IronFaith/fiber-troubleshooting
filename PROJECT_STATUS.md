@@ -10,21 +10,20 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Latest user objective:** Correct the confusing loop overlay shown in the user's screenshot and keep GitHub notes current whenever project instructions or decisions change, so another chat can resume from the repository.
 - **Accepted instruction update — 2026-10-19:** Automatically update AGENTS.md and this status whenever an instruction, preference, accepted scope or lasting decision changes, even if no application code changes. Refresh affected README descriptions when behavior changes. Verify, commit and push the notes as part of the authorized milestone without waiting for another reminder.
-- **Work in progress:** The overlay is removed and the connected return is drawn inside the dedicated evidence rails. The normalized local-optic/CAS-1 passing case from the screenshot has been reproduced and inspected on desktop and mobile. Final checks passed all 118 tests; [browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39353077050) passed 52 scenarios, including checks that recorded loops stay clear of cassette artwork. Exact deployment verification is pending publication of this milestone.
-- **Remaining work:** UI-01 remains the recorded mobile caption defect, with reproduction and acceptance criteria under Outstanding work. The current milestone addresses the reported loop-visual regression and saves the instruction/handoff policy.
+- **Completed work:** The confusing overlay is removed, the clean connected return is deployed in `a98967d`, and the automatic instruction/status handoff rule is saved in AGENTS.md, README.md and this file. Verification and exact deployment evidence are below.
+- **Remaining work and next action:** UI-01 remains the recorded mobile caption defect, with reproduction and acceptance criteria under Outstanding work. It is available for the next UI milestone. The loop-visual correction and handoff-policy requests are complete; no application implementation is in progress or blocker recorded.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action. Keep observed defects, unverified questions and optional proposals distinct.
 
 ## Current release
 
-The latest application release is [`ebf8c8e`](https://github.com/IronFaith/fiber-troubleshooting/commit/ebf8c8ed3a4e66ea669e294680c45eaadf2239b8): **Restore connected passing-loop animation in the test path**.
+The latest application release is [`a98967d`](https://github.com/IronFaith/fiber-troubleshooting/commit/a98967d8f9594e517ae175ede937887ca1964319): **Keep loop animation clear of cassette visuals and maintain chat handoffs**.
 
-**Reported visual regression:** The user supplied a screenshot showing that this release's added overlay crosses the CAS grid and creates confusing branches above the evidence rails. The checks below established connectivity and deployment, but did not prevent this layout defect. A corrective release is in progress.
-
-- Restored the connected optic → mapped CAS ports → loopback → optic return animation lost when cumulative evidence replaced the manual diagram with separate span indicators.
-- Local and remote routes follow their recorded source and return point; Normalize and tool changes preserve supported evidence. Conflicting or unrecorded tests do not draw a confirmed loop. All four learner languages retain their existing labels and saved state.
-- Verification: final `npm run check` passed all 118 tests. [Browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39350514842) passed 26 desktop/mobile, evidence, language and motion scenarios; both animation halves meet without a gap and stay within their rendered bounds. Screenshots were inspected.
-- [GitHub Pages deployment succeeded for the exact application commit](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39350779499). All 10 changed application files matched their served contents and the browser-verified application files. The temporary browser workflow was removed before publication.
+- Removed the added overlay crossing the CAS grid. The connected TX-to-RX loop return stays on the evidence rails below desktop hardware cards; mobile returns join the lanes within their recorded section. Cassette grids, connector art and labels stay clear.
+- Local and remote tests retain their direction, return point and evidence after Normalize or tool changes. VFL remains a separate red route; retests, conflicts and mapped-port changes still determine which loop evidence is supported. Existing four-language labels and saved state are preserved.
+- Verification: final `npm run check` passed all 118 tests. [Browser verification](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39353077050) passed 52 scenarios at 1728, 1400 and 390 pixels, plus all four languages and motion controls. Checks establish that recorded loops meet without a gap, stay on their evidence rails and do not intersect cassette artwork. Screenshots of the user's normalized local-optic/CAS-1 passing state, mobile layout and combined loop/VFL results were inspected.
+- [GitHub Pages deployment succeeded for the exact application commit](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39353360474). All 10 changed application files matched their served contents and the browser-verified version. The temporary browser workflow was removed before publication.
+- Standing instructions now require automatic documentation updates for accepted instruction/decision changes and a maintained handoff so another chat can resume from the repository.
 
 ## What is in place
 
@@ -42,6 +41,7 @@ The latest application release is [`ebf8c8e`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`a98967d`](https://github.com/IronFaith/fiber-troubleshooting/commit/a98967d8f9594e517ae175ede937887ca1964319) | Corrected the screenshot-reported overlay regression: connected loop returns stay in the evidence diagram and leave cassette artwork clear. Saved automatic instruction/status updates and the resumption handoff policy. |
 | [`ebf8c8e`](https://github.com/IronFaith/fiber-troubleshooting/commit/ebf8c8ed3a4e66ea669e294680c45eaadf2239b8) | Connected passing-loop animation through mapped hardware, with the return to the tested optic restored on desktop and mobile. Earlier span evidence remains visible. |
 | [`989b711`](https://github.com/IronFaith/fiber-troubleshooting/commit/989b711a7bc8d3cd1057e8373690289fc6b5a2a5) | Explicit female-to-male MMC mating detail at the CAS. |
 | [`989caa8`](https://github.com/IronFaith/fiber-troubleshooting/commit/989caa8) | Findings show evidence, possible causes and a specific next check. Earlier same-strand VFL passes narrow the added section; remote loop failures suggest an appropriate next tool; conflicting loops remain available for rechecking. |
