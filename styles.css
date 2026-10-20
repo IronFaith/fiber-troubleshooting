@@ -1395,6 +1395,8 @@ html[dir="rtl"] :is(.connected-route,.connected-strands,.connected-port-check) :
 .vfl-simple-canvas { width:100%; height:auto; display:block; }
 .vfl-simple-canvas .vfl-label { font:600 15px 'Segoe UI',sans-serif; fill:#33566d; }
 .vfl-simple-canvas .vfl-label.small { font-size:12px; font-weight:400; }
+.vfl-head-caption { color:#33566d; font:12px/1.35 'Segoe UI',sans-serif; text-align:center; overflow-wrap:anywhere; }
+html[dir="rtl"] .vfl-head-caption { direction:rtl; }
 .vfl-label.centered { text-anchor:middle; }
 .vfl-simple-canvas .vfl-label.on-dark { fill:#edf8f1; }
 .vfl-simple-canvas .vfl-label.tool { fill:white; font-size:12px; }
@@ -1821,6 +1823,8 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-hardware-flow .flow-arrow { transform:scale(.65); }
 .ts-cas-connection .loop-jacket { stroke-width:9; }
 .ts-cas-connection .loop-cord { stroke-width:6.8; }
+.ts-cas-bridge .loop-jacket { stroke-width:6.05; }
+.ts-cas-bridge .loop-cord { stroke-width:4.57; }
 .ts-external-cord .loop-jacket { stroke-width:4.8; }
 .ts-external-cord .loop-cord { stroke-width:3.4; }
 .ts-open-cord { fill:white; stroke:#8a7134; stroke-width:1.5; }

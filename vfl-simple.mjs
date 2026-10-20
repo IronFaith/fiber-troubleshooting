@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
 import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=21';
-import {vflEndpoint,displayedCasFace} from './troubleshoot-visuals.mjs?v=29';
+import {vflEndpoint,displayedCasFace} from './troubleshoot-visuals.mjs?v=30';
 import {lcConnector,vflPen} from './test-tool-visuals.mjs?v=1';
 
 const letter=strand=>strand==='tx'?'A':'B';
@@ -39,14 +39,14 @@ function diagram(s,mobile) {
   const patch=atCAS?patchAt(s,point):null;
   const source=mobile?[[85,175],[265,175]]:[[185,155],[185,230]];
   const headY=mobile?450:310,headX=533;
-  const head=mobile?[[154,headY+80],[190,headY+80]]:[[headX+87,151],[headX+87,189]];
-  const port=mobile?[[145,615],[199,615]]:[[770,151],[770,199]];
+  const head=mobile?[[162,headY+80],[198,headY+80]]:[[headX+87,151],[headX+87,199]];
+  const port=mobile?[[153,615],[207,615]]:[[770,151],[770,199]];
   const stop=port;
   const selected=s.strand==='tx'?0:1,output=light.outputStrand==='tx'?0:1;
   const sourceName=sourceLC?from===0?'Local LC legs unplugged':'Remote LC legs unplugged':`Test fiber at CAS ${from}`;
   const activePath=(i,to)=>{
     if(mobile) {
-      const edge=i?350:10,join=atCAS?headY:510;
+      const edge=i?350:10,join=atCAS?headY-24:510;
       return `M${source[i][0]} ${source[i][1]} C${source[i][0]} 205 ${edge} 195 ${edge} 225 V${join-35} Q${edge} ${join} ${atCAS?head[i][0]:to[0]} ${join}${atCAS?` V${head[i][1]} V564 H${to[0]} V${to[1]}`:` V${to[1]}`}`;
     }
     return !atCAS?`M${source[i][0]} ${source[i][1]} C390 ${source[i][1]} 560 ${to[1]} ${to[0]} ${to[1]}`:
@@ -62,23 +62,23 @@ function diagram(s,mobile) {
     const [x,y]=source[i],strand=i?'rx':'tx';
     drawing+=cable(activePath(i,stop[i]));
     drawing+=`<g role="button" tabindex="0" data-vfl-strand="${strand}" aria-pressed="${i===selected}" aria-label="Move VFL to ${sourceLC?'LC':'strand'} ${i?'B':'A'}" class="vfl-leg"><rect class="vfl-leg-hit" x="${mobile?x-40:x-140}" y="${mobile?y-140:y-25}" width="${mobile?80:160}" height="${mobile?165:50}" rx="9"/>
-      <g transform="translate(${x} ${y}) ${mobile?'rotate(90)':''}">${lcConnector(-52,0,{scale:.82,reverse:true})}${i===selected?vflPen(-52,0,{scale:.8,on:true})+lightFlow('M-52 0 H0','red')+lightSource(-52,0,'red'):''}</g>
+      <g transform="translate(${x} ${y}) ${mobile?'rotate(90)':''}">${lcConnector(-52.48,0,{scale:.82,reverse:true})}${i===selected?vflPen(-52.48,0,{scale:.8,on:true})+lightFlow('M-52.48 0 H0','red')+lightSource(-52.48,0,'red'):''}</g>
       ${label(mobile?x-33:x+28,mobile?y+21:y-16,`${sourceLC?'LC':'Strand'} ${i?'B':'A'}`,mobile?'centered':'')}
       ${label(mobile?x+25:x+70,mobile?y+21:y-16,resultMark(s.traces[traceKey({...s,selected:point,strand})]),'vfl-leg-result centered')}</g>`;
   }
   drawing+=cards;
   if(atCAS) {
     const adjacent=Math.abs(point-from)===1;
-    drawing+=mobile?label(180,423,adjacent?'Fanout head · female MMC':'Incoming MMC','small centered'):
-      label(575,98,adjacent?'Fanout head · female MMC':'Incoming MMC','small centered');
-    drawing+=mobile?`<rect class="cassette-adapter" x="126" y="526" width="94" height="26" rx="4"/>`:`<rect class="cassette-adapter" x="619" y="129" width="32" height="82" rx="4"/>`;
+    drawing+=mobile?label(180,403,adjacent?'Fanout head · female MMC':'Incoming MMC','small centered'):
+      `<foreignObject x="473" y="238" width="168" height="70"><div xmlns="http://www.w3.org/1999/xhtml" class="vfl-head-caption">${adjacent?'Fanout head · female MMC':'Incoming MMC'}</div></foreignObject>`;
+    drawing+=mobile?`<rect class="cassette-adapter" x="133" y="526" width="94" height="26" rx="4"/>`:`<rect class="cassette-adapter" x="619" y="129" width="32" height="82" rx="4"/>`;
     drawing+=`<g>
-      ${mobile?`<rect class="hardware-boot" x="150" y="${headY-14}" width="44" height="19" rx="4"/><rect class="hardware-plug" x="120" y="${headY}" width="105" height="75" rx="8"/><rect class="hardware-metal" x="137" y="${headY+65}" width="72" height="28" rx="4"/>${label(172,headY+43,'MMC','centered')}`:
-      `<rect class="hardware-boot" x="${headX-16}" y="144" width="22" height="53" rx="4"/><rect class="hardware-plug" x="${headX}" y="117" width="82" height="105" rx="8"/><rect class="hardware-metal" x="${headX+73}" y="130" width="29" height="80" rx="4"/>${label(headX+37,175,'MMC','centered')}`}
+      ${mobile?`<rect class="hardware-boot" x="158" y="${headY-14}" width="44" height="19" rx="4"/><rect class="hardware-plug" x="127.5" y="${headY}" width="105" height="75" rx="8"/><rect class="hardware-metal" x="144" y="${headY+65}" width="72" height="28" rx="4"/>${label(180,headY+43,'MMC','centered')}`:
+      `<rect class="hardware-boot" x="${headX-16}" y="137" width="22" height="70" rx="4"/><rect class="hardware-plug" x="${headX}" y="122.5" width="82" height="105" rx="8"/><rect class="hardware-metal" x="${headX+73}" y="135" width="29" height="80" rx="4"/>${label(headX+37,179,'MMC','centered')}`}
       ${head.map(([x,y],i)=>`<circle class="vfl-channel" cx="${x}" cy="${y}" r="7"/>${label(mobile?x:x-19,mobile?y-13:y+5,i?'B':'A','small centered')}`).join('')}
     </g>`;
   }
-  drawing+=mobile?'<rect class="vfl-port-face" x="119" y="592" width="105" height="49" rx="5"/>':'<rect class="vfl-port-face" x="745" y="132" width="50" height="89" rx="5"/>';
+  drawing+=mobile?'<rect class="vfl-port-face" x="127.5" y="592" width="105" height="49" rx="5"/>':'<rect class="vfl-port-face" x="745" y="132" width="50" height="89" rx="5"/>';
   for(let i=0;i<2;i++) drawing+=`<circle class="vfl-channel" cx="${port[i][0]}" cy="${port[i][1]}" r="10"/>${label(mobile?port[i][0]:812,mobile?port[i][1]+44:port[i][1]+5,i?'B':'A',`${atCAS?'on-dark ':''}${mobile?'centered':''}`)}`;
   const path=activePath(selected,stop[output]);
   if(light.emitting) {

@@ -20,12 +20,12 @@ export function vflEndpoint(s,{preview=false}={}) {
 function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=null,remote=false,point=0,loopState) {
   const loop=mode==='loop', plugged=mode==='plugged';
   const legs=[81,127].map((y,i)=>{
-    const tip=plugged?168:52, boot=tip-40, bend=plugged?22+i*12:4+i*12, bottom=184+i*18;
+    const tip=plugged?168:63, boot=tip-64*.67, bend=plugged?22+i*12:4+i*12, bottom=184+i*18;
     const cable=`M${boot} ${y} H${bend+12} Q${bend} ${y} ${bend} ${y+12} V${bottom-12} Q${bend} ${bottom} ${bend+12} ${bottom} H${remote?8:292}`;
     const litStrand=receiving&&trace==='swapped'?(strand==='tx'?'rx':'tx'):strand;
     const lit=(mode==='vfl'||receiving&&trace!=='wrong')&&trace&&trace!=='dark'&&(i===0?litStrand==='tx':litStrand==='rx');
     return `<path class="loop-jacket" d="${cable}"/><path class="loop-cord" d="${cable}"/>
-      <g class="ts-lc-leg" data-connection="${plugged?'seated':'unplugged'}">${lcConnector(plugged?tip:tip+11,y,{scale:.67,seated:plugged})}</g>
+      <g class="ts-lc-leg" data-connection="${plugged?'seated':'unplugged'}">${lcConnector(tip,y,{scale:.67,seated:plugged})}</g>
       ${lit&&receiving?`<circle class="ts-red-dot" cx="63" cy="${y}" r="5"/>`:''}`;
   }).join('');
   const vflY=strand==='tx'?81:127;
@@ -59,7 +59,7 @@ function cassetteConnection(s,point,mode) {
     const loop=mode==='loop'&&side===loopSide,seated=loop||patch[side];
     const x=i?(seated?233.95:263.95):(seated?126.05:96.05),scale=i?'-.65 .65':'.65 .65';
     const name=fanout?(female?'Rear · female MMC':'Front · male MMC'):(face==='rear'?'Rear MMC':'Front MMC');
-    return `${caption(i?278:82,207,name)}${loop?`${cord(`M${i?360:0} 233.6 H${i?320:40}`)}<circle class="ts-open-cord" cx="${i?320:40}" cy="233.6" r="3"/>`:cord(`M${i?360:0} 233.6 H${x+(i?13:-13)}`)}<g transform="translate(${x} 218) scale(${scale})">${loop?testMmcLoopback():mmcHead(0,0,false)}${fanout&&!female?'<path d="M83 21 h7 M83 31 h7" stroke="#556862" stroke-width="2"/>':female?'<circle cx="82" cy="21" r="1.8" fill="#263a32"/><circle cx="82" cy="31" r="1.8" fill="#263a32"/>':''}</g>${caption(i?278:82,278,loop?'MMC loopback':fanout&&female?'Fanout head':seated?'Onward cable':'Unplugged')}`;
+    return `${caption(i?278:82,207,name)}${loop?`${cord(`M${i?360:0} 233.6 H${i?320:40}`)}<circle class="ts-open-cord" cx="${i?320:40}" cy="233.6" r="3"/>`:cord(`M${i?360:0} 233.6 H${x+(i?13:-13)}`)}<g transform="translate(${x} 218) scale(${scale})">${loop?testMmcLoopback():mmcHead(0,0,false)}${fanout&&!female?'<path d="M83 21 h7 M83 31 h7" stroke="#556862" stroke-width="2"/>':female?'<circle cx="82" cy="21" r="1.8" fill="#263a32"/><circle cx="82" cy="31" r="1.8" fill="#263a32"/>':''}</g>${caption(i?278:82,278,loop?'MMC loopback':fanout&&female?'Fanout head':seated?(fanout||i?'Onward cable':'Incoming MMC'):'Unplugged')}`;
   }).join('');
   const endpoint=vflEndpoint(s),lit=endpoint?.point===point&&endpoint.emitting;
   const faceX=endpoint?.kind==='head'?(endpoint.face==='rear'?150:210):180;
@@ -125,7 +125,7 @@ function transformPath(path,{x=0,y=0,sx=1,sy=sx}={}) {
 }
 function opticCord(mode,remote,lane) {
   const plugged=mode==='plugged',y=lane==='tx'?81:127,i=lane==='tx'?0:1;
-  const tip=plugged?168:63,boot=(plugged?168:52)-40,bend=plugged?22+i*12:4+i*12,bottom=184+i*18;
+  const tip=plugged?168:63,boot=tip-64*.67,bend=plugged?22+i*12:4+i*12,bottom=184+i*18;
   const path=`M${boot} ${y} H${bend+12} Q${bend} ${y} ${bend} ${y+12} V${bottom-12} Q${bend} ${bottom} ${bend+12} ${bottom} H${remote?8:292}`;
   const reverse=`M${remote?8:292} ${bottom} H${bend+12} Q${bend} ${bottom} ${bend} ${bottom-12} V${y+12} Q${bend} ${y} ${bend+12} ${y} H${tip}`;
   return {out:`M${tip} ${y} H${boot} ${path.slice(path.indexOf(' H')+1)}`,back:reverse};
@@ -279,7 +279,11 @@ export function workbenchDiagram(s,loopControls='',{stacked=false}={}) {
     return `<div class="ts-stacked-node" data-path-node="${point}"><svg viewBox="0 0 270 ${nodeHeight}" role="group">${node.drawing}${cords}${flows}${fault(point)}</svg>${panel?`<div class="ts-mobile-loop-row">${panel}${extensions}</div>`:''}</div>${bridge}`;
   }).join('')}</div>`;
   const nodes=centers.map((cx,point)=>hardwareNode(s,coverage,point,cx,tests));
-  const bridges=coverage.spans.map(span=>['tx','rx'].map(strand=>{const paths=desktopBridge(s,span.point,centers,strand);return `<g class="ts-external-cord">${cord(paths.path)}</g>`+flowOnCord(paths.path,paths.back,section(s,coverage,span.point,strand),strand);}).join('')).join('');
+  const bridges=coverage.spans.map(span=>{
+    const bundled=!isOptic(s,span.point-1)&&!isOptic(s,span.point);
+    const jacket=bundled?`<g class="ts-cas-bridge">${cord(`M${centers[span.point-1]+121} ${casTop+233.6*casScale} H${centers[span.point]-121}`)}</g>`:'';
+    return jacket+['tx','rx'].map(strand=>{const paths=desktopBridge(s,span.point,centers,strand);return (bundled?'':`<g class="ts-external-cord">${cord(paths.path)}</g>`)+flowOnCord(paths.path,paths.back,section(s,coverage,span.point,strand),strand);}).join('');
+  }).join('');
   // Status badges sit beside their cable ends; there is no second light diagram.
   return `<div class="ts-path-scene" style="width:${width}px;--cord-sections:${s.count+1}"><svg viewBox="0 0 ${width} ${nodeHeight}" style="height:${nodeHeight}px" role="group">${nodes.map(node=>node.drawing).join('')}${bridges}${nodes.map(node=>node.flow).join('')}${centers.map((cx,point)=>`<g transform="translate(${cx-135} 0)">${fault(point)}</g>`).join('')}</svg><div class="ts-cord-summaries">${coverage.spans.map(span=>spanLabel(s,coverage,span.point)).join('')}</div>${loopControls?`<div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px">${loopControls}</div>`:''}</div>`;
 }
