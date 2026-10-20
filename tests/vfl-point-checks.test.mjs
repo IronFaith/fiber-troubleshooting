@@ -39,7 +39,8 @@ test('point-check findings isolate the failed strand without requesting a loose-
   const finding=assessment(s);
   assert.deepEqual([finding.from,finding.to],[1,2]);
   assert.equal(finding.isolation.strand,'rx');
-  assert.equal(finding.diagnostic.step,'source');
+  assert.equal(finding.needsIdentity,true);
+  assert.equal(finding.sourceEvidence.to,1);
   assert.equal(finding.check?.head??false,false);
   assert.equal(vflProgress(s).points[1].lanes.rx.segment,'suspect');
   s=observe(s,'rx','weak');

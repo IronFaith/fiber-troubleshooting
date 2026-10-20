@@ -26,9 +26,10 @@ test('a dark strand narrows causes using reference, identity and inspection evid
   assert.deepEqual([a.from,a.to],[1,2]);
   assert.ok(a.causes.some(c=>c.id==='fiber'));
   assert.ok(!a.causes.some(c=>c.id==='optic'),'VFL does not test the disconnected optic');
-  s=changeCase(s,{type:'comparison',key:'0>2:rx',step:'source',value:'fail'});
-  assert.deepEqual(assessment(s).causes.map(c=>c.id),['vfl-setup']);
-  s=mapped(changeCase(s,{type:'comparison',key:'0>2:rx',step:'source',value:'pass'}));
+  let referenceCase=trace(createCase(),0,1,'rx','dark');
+  referenceCase=changeCase(referenceCase,{type:'comparison',key:'1:rx',step:'source',value:'fail'});
+  assert.deepEqual(assessment(referenceCase).causes.map(c=>c.id),['vfl-setup']);
+  s=mapped(s);
   s=changeCase(s,{type:'comparison',key:'0>2:rx',step:'inspection',value:'damage'});
   assert.deepEqual(assessment(s).causes.map(c=>c.id),['damage']);
   for(const c of [...a.causes,...assessment(s).causes]) for(const lang of ['es','fr','ar']) assert.notEqual(translate(c.label,lang),c.label);

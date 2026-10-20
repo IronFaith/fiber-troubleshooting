@@ -53,7 +53,7 @@ test('changed topology and contradictory retests discard stale results; inaccess
   s = record(s,0,'dark');
   assert.deepEqual(s.loops,{0:'dark'});
   s = record(s,1,'pass');
-  assert.deepEqual(s.loops,{1:'pass'});
+  assert.deepEqual(s.loops,{0:'dark',1:'pass'},'a farther pass does not erase an unresolved direct-loop failure');
   s = changeCase(s,{type:'port',value:32});
   assert.deepEqual(s.loops,{});
   assert.equal(s.ports[0],32);

@@ -1,7 +1,7 @@
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=5';
+import {cassetteFront,mmcHead,mmcLoopback} from './loop-visuals.mjs?v=5';
 import {lcConnector,lcLoopback,vflPen} from './test-tool-visuals.mjs?v=1';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage,recordedContinuity,isOptic,loopSource,loopResult} from './troubleshoot-state.mjs?v=20';
+import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage,recordedContinuity,isOptic,loopSource,loopResult} from './troubleshoot-state.mjs?v=21';
 
 // At the observation cassette, open the onward connection, not the MMC
 // carrying light from the source. The selected port is the viewing face.
@@ -43,22 +43,47 @@ function opticFace(mode='plugged',strand='tx',trace,receiving=false,coverage=nul
     </g>`;
 }
 
-function passiveFace(s,point,mode) {
+// The outer cassettes show the user's fanout arrangement. The remote rack is
+// mirrored: its rear faces its own device. Stored patch sides stay path-relative.
+export const displayedCasFace=(s,point,side)=>point===s.count&&s.count>1?(side==='rear'?'front':'rear'):side;
+function cassetteConnection(s,point,mode) {
+  const patch=patchAt(s,point),remote=point===s.count&&s.count>1,fanout=point===1||remote;
+  const loopSide=s.loopSide==='remote'?'rear':'front';
+  const caption=(x,y,text)=>`<text class="hardware-label hardware-center" text-anchor="middle" x="${x}" y="${y}" style="font-size:14px">${text}</text>`;
+  const connectors=['rear','front'].map((side,i)=>{
+    const face=displayedCasFace(s,point,side),female=fanout&&face==='rear';
+    const loop=mode==='loop'&&side===loopSide,seated=loop||patch[side];
+    const x=i?(seated?295:318):(seated?65:42),scale=i?'-.65 .65':'.65 .65';
+    const name=fanout?(female?'Rear · female MMC':'Front · male MMC'):(face==='rear'?'Rear MMC':'Front MMC');
+    return `${caption(i?278:82,207,name)}<g transform="translate(${x} 218) scale(${scale})">${loop?mmcLoopback(0,0,{compact:true}):mmcHead(0,0,false)}${fanout&&!female?'<path d="M83 21 h7 M83 31 h7" stroke="#556862" stroke-width="2"/>':female?'<circle cx="82" cy="21" r="1.8" fill="#263a32"/><circle cx="82" cy="31" r="1.8" fill="#263a32"/>':''}</g>${caption(i?278:82,278,loop?'MMC loopback':fanout&&female?'Fanout head':seated?'Onward cable':'Unplugged')}`;
+  }).join('');
+  const endpoint=vflEndpoint(s),lit=endpoint?.point===point&&endpoint.emitting;
+  const faceX=endpoint?.face==='rear'?121:239;
+  return `<g class="hardware-art ts-cas-connection" role="img" aria-label="${fanout?`CAS ${point} connection: rear female fanout head, front male MMC extension. Simplified site example.`:`CAS ${point} connection: two MMC mating connectors. Follow the actual cable record.`}">
+    <rect x="124" y="218" width="112" height="34" rx="4" fill="#e3f0e7" stroke="#3d785d" stroke-width="2"/>
+    <path class="loop-jacket" d="M0 234 H44 M316 234 H360"/><path class="loop-cord" d="M0 234 H44 M316 234 H360"/>
+    <path d="M124 229 H236 M124 241 H236" fill="none" stroke="#b8c9bd" stroke-width="2" stroke-dasharray="4 4"/>
+    ${caption(180,240,'CAS')}${connectors}
+    ${lit?lightSource(faceX,234,'red'):''}
+    ${caption(180,305,`Port ${patch.port} · connection detail`)}
+  </g>`;
+}
+function passiveFace(s,point,mode,detailed=false) {
+  const finish=drawing=>detailed?drawing.replace('front view','port layout').replace('rear view','port layout')+cassetteConnection(s,point,mode):drawing;
   const endpoint=vflEndpoint(s);
   if(s.tool==='vfl' && point!==traceFrom(s) && point>=Math.min(traceFrom(s),s.selected) && point<=Math.max(traceFrom(s),s.selected)) {
     const patch=patchAt(s,point),forward=traceFrom(s)<s.selected;
     const active=endpoint?.point===point, incomingSeated=patch[forward?'rear':'front'];
     const {x,y,emitting,face}=active?endpoint:{emitting:false,face:forward?'front':'rear'};
     const cassette=cassetteFront({name:`CAS ${point}`,port:patch.port,patched:patch[forward?'front':'rear']}).replace('front view',`${face} view`);
-    return cassette+`<g class="hardware-art ts-vfl-port-view" aria-label="Incoming MMC ${incomingSeated?'seated':'unplugged'}; ${face} port ${patch.port}">
+    return finish(cassette+(detailed?'':`<g class="hardware-art ts-vfl-port-view" aria-label="Incoming MMC ${incomingSeated?'seated':'unplugged'}; ${face} port ${patch.port}">
       <path class="loop-jacket" d="M2 194 H${incomingSeated?25:12}"/><path class="loop-cord" d="M2 194 H${incomingSeated?25:12}"/>
       <g transform="translate(${incomingSeated?34.5:21.5} 182) scale(.5)">${mmcHead(0,0,false)}</g><rect class="cassette-adapter" x="76" y="181" width="12" height="26" rx="2"/>
       <text class="hardware-label hardware-small" x="12" y="178">${incomingSeated?'Incoming MMC':'Loose MMC head'}</text>
-      ${emitting?`<circle class="ts-port-glow" cx="${x}" cy="${y}" r="17"/>${lightSource(x,y,'red')}<path class="ts-port-emission" d="M${x} ${y} l-12 24 h24 Z"/>`:''}
-    </g>`;
+    </g>`)+`${emitting?`<circle class="ts-port-glow" cx="${x}" cy="${y}" r="17"/>${lightSource(x,y,'red')}<path class="ts-port-emission" d="M${x} ${y} l-12 24 h24 Z"/>`:''}`);
   }
-  return cassetteFront({name:`CAS ${point}`,port:s.ports[point-1],inserted:mode==='loop',patched:mode==='plugged'})+
-    (mode==='plugged'?'':`<g class="hardware-art ts-parked-head"><path class="loop-jacket" d="M1 194 H13"/><path class="loop-cord" d="M1 194 H13"/><g transform="translate(23 182) scale(.5)">${mmcHead(0,0,false)}</g><text class="hardware-label hardware-small" x="81" y="194">Head unplugged</text></g>`);
+  return finish(cassetteFront({name:`CAS ${point}`,port:s.ports[point-1],inserted:mode==='loop',patched:mode==='plugged'})+
+    (mode==='plugged'||detailed?'':`<g class="hardware-art ts-parked-head"><path class="loop-jacket" d="M1 194 H13"/><path class="loop-cord" d="M1 194 H13"/><g transform="translate(23 182) scale(.5)">${mmcHead(0,0,false)}</g><text class="hardware-label hardware-small" x="81" y="194">Head unplugged</text></g>`));
 }
 
 function recordedNodeCaption(s,coverage,point) {
@@ -142,7 +167,7 @@ function recordedSpan(s,span,vertical,centers) {
   const label=span.lanes;
   if(vertical) return `<svg class="ts-stacked-span" viewBox="0 0 270 160" role="img" aria-label="Recorded section: ${pointName(span.point-1,s)} → ${pointName(span.point,s)}; ${coverageLabel(label.tx,'tx')}; ${coverageLabel(label.rx,'rx')}">
     <text class="ts-span-name" x="135" y="18">${name}</text>
-    ${['tx','rx'].map((strand,i)=>{const x=i?202:68,lane=label[strand];return `<text class="ts-recorded-channel" x="${x}" y="39">${i?'B':'A'}</text>${recordedLane(lane,strand,[x,48],[x,125],true)}<text class="ts-span-status" x="${x}" y="150">${coverageLabel(lane,strand)}</text>`;}).join('')}
+    ${['tx','rx'].map((strand,i)=>{const x=i?202:68,lane=label[strand];return `<text class="ts-recorded-channel" x="${x}" y="39">${i?'B':'A'}</text>${recordedLane(lane,strand,[x,48],[x,125],true)}<text class="ts-span-status" x="${x}" y="150">${coverageLabel(lane,strand).slice(4)}</text>`;}).join('')}
   </svg>`;
   const cx=(centers[span.point-1]+centers[span.point])/2;
   return `<g role="img" aria-label="Recorded section: ${pointName(span.point-1,s)} → ${pointName(span.point,s)}; ${coverageLabel(label.tx,'tx')}; ${coverageLabel(label.rx,'rx')}">
@@ -154,8 +179,8 @@ function recordedSpan(s,span,vertical,centers) {
 function recordedDiagram(s,nodeDrawings,centers,loopControls,stacked) {
   const coverage=recordedContinuity(s),width=centers.at(-1)+135;
   const faultAt=(point,optic)=>s.simulated&&s.fault.kind!=='none'&&s.fault.at===point&&(s.fault.kind.startsWith('optic_')||point===0)===optic?`<p class="ts-stack-fault">Simulated fault ${optic?'at optic':'in this section'} ↓</p>`:'';
-  if(stacked) return `<div class="ts-stacked-path">${nodeDrawings.map((node,i)=>`<div class="ts-stacked-node" data-path-node="${i}">${faultAt(i,true)}<svg viewBox="${i*290} 28 270 228" role="group">${node}</svg>${s.selected===i?loopControls:''}</div>${coverage.spans[i]?faultAt(i+1,false)+recordedSpan(s,coverage.spans[i],true):''}`).join('')}</div>`;
-  return `<div class="ts-path-scene" style="width:${width}px"><svg viewBox="0 0 ${width} 256" style="height:256px" role="group">${nodeDrawings.join('')}</svg>${loopControls?`<div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px">${loopControls}</div>`:''}
+  if(stacked) return `<div class="ts-stacked-path">${nodeDrawings.map((node,i)=>`<div class="ts-stacked-node" data-path-node="${i}">${faultAt(i,true)}<svg viewBox="${i*290} 28 270 ${isOptic(s,i)?228:308}" role="group">${node}</svg>${s.selected===i?loopControls:''}</div>${coverage.spans[i]?faultAt(i+1,false)+recordedSpan(s,coverage.spans[i],true):''}`).join('')}</div>`;
+  return `<div class="ts-path-scene" style="width:${width}px"><svg viewBox="0 0 ${width} 336" style="height:336px" role="group">${nodeDrawings.join('')}</svg>${loopControls?`<div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px;${isOptic(s,s.selected)?'margin-top:-80px':''}">${loopControls}</div>`:''}
     <svg class="ts-recorded-routes" viewBox="0 0 ${width} 196" style="height:196px" role="group"><text class="ts-recorded-channel" x="40" y="34">A</text><text class="ts-recorded-channel" x="40" y="80">B</text>${coverage.spans.map(span=>recordedSpan(s,span,false,centers)).join('')}</svg></div>`;
 }
 
@@ -166,23 +191,25 @@ export function workbenchDiagram(s,loopControls='',{stacked=false,recordedOnly=f
   const loop = loopResult(s);
   const from=traceFrom(s),trace = s.traces[traceKey(s)];
   const endpoint=vflEndpoint(s);
+  const detailed=!s.simulated||stacked||recordedOnly;
   const x = centers[endpoint?.point??s.selected], start = centers[0], end = centers.at(-1);
   let drawing = '';
   const nodeDrawings=[];
   for (let i=0;i<centers.length;i++) {
     const nodeStart=drawing.length;
     const cx = centers[i], remote = i === s.count+1, accessible = i <= s.reach;
+    const extra=detailed&&!isOptic(s,i)?80:0;
     const mode=connectionAt(s,i), isLoop=mode==='loop';
     const handleX=isOptic(s,i)?cx-50:cx-121+(31.5+((s.ports[i-1]-1)%16)*19.8)*242/360-32;
     const handleY=isOptic(s,i)?117:81+(s.ports[i-1]<=16?59:137)*140/208-7;
     drawing += `<g class="ts-node${s.selected===i ? ' ts-selected' : ''}${tracing&&from===i?' ts-vfl-source':''}${!accessible ? ' ts-inaccessible' : ''}${loopResult(s,i)?' ts-observed-'+loopResult(s,i):''}${coverage.points[i]?.issue?' ts-coverage-suspect':coverage.points[i]?.loop==='pass'?' ts-coverage-passed':''}" ${accessible ? `role="button" tabindex="0" data-point="${i}" aria-pressed="${s.selected===i}" aria-label="${tracing&&i!==from?'Check light at':'Select'} ${i===0&&tracing?'optic-side LC leg':pointName(i,s)}${!isOptic(s,i) ? `, port ${s.ports[i-1]}` : ''}"` : ''}>
-      <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="218" rx="12"/>
+      <rect class="ts-node-card" x="${cx-128}" y="34" width="256" height="${218+extra}" rx="12"/>
       <text class="ts-node-title" x="${cx}" y="59">${remote ? 'Remote optic' : i===0 ? 'Local optic' : `CAS ${i} · Port ${patchAt(s,i).port}`}</text>
       ${i===0 || remote ? `<svg x="${cx-107}" y="68" width="214" height="149.8" viewBox="0 0 300 210">${opticFace(mode,s.strand,trace,tracing&&s.selected===i,normalized&&isOptic(s,i)?remote?{optic:coverage.remoteOptic,txThrough:s.count+1-coverage.remoteTxThrough}:coverage:null,remote,i,loopResult(s,i))}</svg>` :
-        `<svg x="${cx-121}" y="81" width="242" height="140" viewBox="0 0 360 208">${passiveFace(s,i,mode)}</svg>`}
+        `<svg x="${cx-121}" y="81" width="242" height="${detailed?215:140}" viewBox="0 0 360 ${detailed?320:208}">${passiveFace(s,i,mode,detailed)}</svg>`}
       ${isLoop?`<rect class="ts-tool-handle" data-mounted-tool="${isOptic(s,i)?'lc':'mmc'}" x="${handleX}" y="${handleY}" width="72" height="72" rx="9"><title>Drag this loop to move it, or return it to the tray</title></rect>`:''}
-      <text class="ts-connection-label ${mode==='plugged'?'':'open'}" x="${cx}" y="230">${endpoint?.point===i&&endpoint.kind!=='lc'?endpoint.kind==='head'?'MMC head unplugged · CAS bypassed':endpoint.closed?'Both sides patched · path continues':`${endpoint.face==='front'?'Front':'Rear'} port open · incoming MMC seated`:mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?isOptic(s,i)?'VFL on LC leg · optic empty':'VFL on unplugged fiber':mode==='unplugged'?isOptic(s,i)?'LC legs unplugged · optic empty':'MMC unplugged · path open':i===0||remote?'LC legs plugged into optic':'MMC head plugged into CAS'}</text>
-      <text class="ts-node-caption" x="${cx}" y="247">${tracing&&i===from?'VFL source':tracing&&i===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):!accessible ? 'Outside your reach' : isLoop&&!loopResult(s,i)?'Enter your loop result':recordedNodeCaption(s,coverage,i)}</text>
+      <text class="ts-connection-label ${mode==='plugged'?'':'open'}" x="${cx}" y="${230+extra}">${endpoint?.point===i&&endpoint.kind!=='lc'?endpoint.kind==='head'?'MMC head unplugged · CAS bypassed':endpoint.closed?'Both sides patched · path continues':`${displayedCasFace(s,i,endpoint.face)==='front'?'Front':'Rear'} port open`:mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?isOptic(s,i)?'VFL on LC leg · optic empty':'VFL on unplugged fiber':mode==='unplugged'?isOptic(s,i)?'LC legs unplugged · optic empty':'MMC unplugged · path open':i===0||remote?'LC legs plugged into optic':'MMC head plugged into CAS'}</text>
+      <text class="ts-node-caption" x="${cx}" y="${247+extra}">${tracing&&i===from?'VFL source':tracing&&i===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):!accessible ? 'Outside your reach' : isLoop&&!loopResult(s,i)?'Enter your loop result':recordedNodeCaption(s,coverage,i)}</text>
     </g>`;
     nodeDrawings.push(drawing.slice(nodeStart));
   }

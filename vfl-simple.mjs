@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=20';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=24';
+import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=21';
+import {vflEndpoint,displayedCasFace} from './troubleshoot-visuals.mjs?v=25';
 import {lcConnector,vflPen} from './test-tool-visuals.mjs?v=1';
 
 const letter=strand=>strand==='tx'?'A':'B';
@@ -68,6 +68,9 @@ function diagram(s,mobile) {
   }
   drawing+=cards;
   if(atCAS) {
+    const adjacent=Math.abs(point-from)===1;
+    drawing+=mobile?label(180,423,adjacent?'Fanout head · female MMC':'Incoming MMC','small centered'):
+      label(575,98,adjacent?'Fanout head · female MMC':'Incoming MMC','small centered');
     drawing+=mobile?`<rect class="cassette-adapter" x="126" y="526" width="94" height="26" rx="4"/>`:`<rect class="cassette-adapter" x="619" y="129" width="32" height="82" rx="4"/>`;
     drawing+=`<g>
       ${mobile?`<rect class="hardware-boot" x="150" y="${headY-14}" width="44" height="19" rx="4"/><rect class="hardware-plug" x="120" y="${headY}" width="105" height="75" rx="8"/><rect class="hardware-metal" x="137" y="${headY+65}" width="72" height="28" rx="4"/>${label(172,headY+43,'MMC','centered')}`:
@@ -88,6 +91,10 @@ function diagram(s,mobile) {
     drawing+=`<path class="vfl-dark-path" d="${path}"/><path class="vfl-dark-mark" d="M${x-6} ${y-6} l12 12 m0 -12 l-12 12"/>`;
   }
   const outputCaption=light.result==='dark'?'No light reported here':light.result==='weak'?'Weak light reported here':light.result==='wrong'?'Light reported at a different port':`${light.mode==='expected'?'Expected':'Shown'} at ${atCAS?'CAS':'LC'} · ${letter(light.outputStrand)}`;
+  if(atCAS) {
+    const face=displayedCasFace(s,point,light.face)==='front'?'Front · extension unplugged':'Rear · extension unplugged';
+    drawing+=mobile?label(180,699,face,'small centered'):label(752,283,face,'small centered');
+  }
   drawing+=mobile?label(180,723,outputCaption,'centered'):label(650,304,outputCaption);
   return `<svg class="vfl-simple-canvas hardware-art ${mobile?'vfl-mobile':'vfl-desktop'}" viewBox="0 0 ${mobile?'360 750':'900 330'}" role="group" aria-label="VFL light from ${sourceName} to ${atCAS?`CAS ${point}`:fiberPointName(point,s)}">${drawing}</svg>`;
 }

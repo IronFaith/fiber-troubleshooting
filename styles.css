@@ -1874,6 +1874,13 @@ html[dir="rtl"] .ts-inline-loop { direction:rtl; text-align:right; }
 .ts-guidance.pass h3 { color:#286b4e; }
 .ts-guidance.suspect h3 { color:#875714; }
 .ts-guidance > p { margin:6px 0 10px; max-width:88ch; color:#456174; font-size:13px; line-height:1.6; }
+.ts-guidance .ts-guidance-evidence { color:#345e79; font-size:12px; }
+.ts-guidance-evidence:has(> span) { direction:ltr; unicode-bidi:isolate; }
+.ts-guidance-evidence > span { display:inline-block; }
+html[dir="rtl"] .ts-guidance-evidence > span:not([aria-hidden]) { direction:rtl; }
+.ts-guidance .ts-guidance-causes { color:#80551d; font-size:12px; }
+.ts-guidance-next { display:grid; gap:3px; }
+.ts-guidance-next > b { color:#244c67; }
 .ts-guidance-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
 .ts-guidance .ts-next-button { width:auto; max-width:100%; cursor:pointer; }
 .ts-guidance .ts-comparison-options { margin:0; }

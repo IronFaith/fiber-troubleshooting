@@ -1,9 +1,9 @@
-import {translateLines} from './locale.mjs?v=19';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=20';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=24';
+import {translateLines} from './locale.mjs?v=20';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=21';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=25';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=8';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=4';
-import {simpleVfl} from './vfl-simple.mjs?v=20';
+import {simpleVfl} from './vfl-simple.mjs?v=21';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -250,15 +250,18 @@ function controls(s) {
 function advice(s) {
   const a=assessment(s);
   const pending=s.tool!=='link'&&(!s.ready || (s.tool==='loop'?!loopResult(s):!s.traces[traceKey(s)]));
+  const awaitingResult=s.tool!=='link'&&(s.tool==='loop'?!loopResult(s):!s.traces[traceKey(s)]);
   const hasEvidence=loopEntries(s).length+Object.keys(s.traces).length>0;
   const waiting=pending&&!hasEvidence&&!traceStop(s)?.blocked&&!traceStop(s)?.closed;
   if(waiting) return '';
   const nextLabel=a.check?.label??(a.suggestion?.tool==='loop'?`Next: ${isOptic(s,a.suggestion.point)?'LC':'MMC'} loop at ${pointName(a.suggestion.point,s)}`:a.suggestion?.tool==='vfl'?`VFL from ${a.suggestion.side==='remote'?'Remote LC legs':'Local LC legs'} → ${fiberPointName(a.suggestion.point,s)}`:'Normalize');
-  return `<section class="ts-guidance ${a.tone}" aria-labelledby="finding-title"><h3 id="finding-title" tabindex="-1">${a.title}</h3><p>${a.next}</p>
-    <div class="ts-guidance-actions">${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}${diagnosticControls(a,s)}</div>
+  return `<section class="ts-guidance ${a.tone}" aria-labelledby="finding-title"><h3 id="finding-title" tabindex="-1">${a.title}</h3>
+    ${hasEvidence?`<p class="ts-guidance-evidence">${a.evidencePath?`<span>${a.evidencePath[0]}</span> <span aria-hidden="true">→</span> <span>${a.evidencePath[1]}</span>`:a.comparisonFinding??a.why}</p>`:''}
+    ${a.causes.length?`<p class="ts-guidance-causes"><b>Possible causes to check</b>: ${a.causes.map(c=>`<span>${c.label}</span>`).join(' · ')}</p>`:''}
+    <p class="ts-guidance-next"><b>Next check</b><span>${awaitingResult?'Current setup: waiting for a new result. Earlier findings stay visible.':a.next}</span></p>
+    <div class="ts-guidance-actions">${awaitingResult?button('test-result','Record result','class="ts-next-button"'):`${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}${diagnosticControls(a,s)}`}</div>
     ${hasEvidence?`<details class="ts-guidance-details" ${guidanceDetailsOpen?'open':''}><summary>Why this check?</summary>
-      ${a.route?`<p><b>${escape(a.route)}</b></p>`:''}<p>${a.why}</p>${a.comparisonFinding?`<p>${a.comparisonFinding}</p>`:''}
-      ${a.causes.length?`<p><b>Possible causes to check</b></p><ul>${a.causes.map(c=>`<li>${c.label}</li>`).join('')}</ul>`:''}
+      ${a.route?`<p><b>${escape(a.route)}</b></p>`:''}${a.evidencePath||a.comparisonFinding?`<p>${a.why}</p>`:''}${a.evidencePath&&a.comparisonFinding?`<p>${a.comparisonFinding}</p>`:''}
       ${a.caution?`<p>${a.caution}</p>`:''}${a.scope?`<p>${a.scope}</p>`:''}${a.isolation?`<p><b>${a.isolation.strand==='tx'?'A':'B'}</b> · <span>${a.isolation.label}</span></p>`:''}
       ${a.branches?`<dl>${a.branches.map(([condition,meaning])=>`<dt>${condition}</dt><dd>${meaning}</dd>`).join('')}</dl>`:''}
       ${pending?'<p>Current setup: waiting for a new result. Earlier findings stay visible.</p>':''}
