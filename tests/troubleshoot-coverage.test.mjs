@@ -1,10 +1,48 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCase,changeCase,pathCoverage} from '../troubleshoot-state.mjs';
+import {createCase,changeCase,pathCoverage,recordedContinuity} from '../troubleshoot-state.mjs';
 const apply=(s,...actions)=>actions.reduce(changeCase,s);
 const loop=(s,point,result)=>apply(s,{type:'select',point},{type:'tool',tool:'loop'},{type:'ready',value:true},{type:'record',result});
 const trace=(s,from,to,strand,result)=>apply(s,{type:'trace',from,to},{type:'strand',value:strand},{type:'ready',value:true},{type:'record',result});
 const normal=s=>changeCase(s,{type:'normalize'});
+
+test('recorded IR and VFL remain separate on the same channel while tools change',()=>{
+  let s=loop(loop(createCase(),0,'pass'),1,'pass');
+  s=changeCase(s,{type:'vfl-point-checks'});
+  s=trace(s,0,1,'tx','seen');
+  const evidence=recordedContinuity(s);
+  assert.equal(evidence.spans[0].lanes.tx.ir,true);
+  assert.deepEqual(evidence.spans[0].lanes.tx.vflDirections,[1]);
+  assert.equal(evidence.spans[0].lanes.rx.ir,true);
+  assert.deepEqual(evidence.spans[0].lanes.rx.vflDirections,[]);
+  for(const state of [normal(s),changeCase(s,{type:'place',kind:'mmc',point:2}),changeCase(s,{type:'remove'})]) {
+    assert.deepEqual(recordedContinuity(state).spans,evidence.spans);
+  }
+});
+
+test('a failed onward channel preserves earlier continuity without animating suspect or untested sections',()=>{
+  let s=changeCase(createCase(),{type:'vfl-point-checks'});
+  s=trace(trace(loop(s,1,'pass'),0,1,'tx','seen'),0,2,'tx','dark');
+  const spans=recordedContinuity(s).spans;
+  assert.equal(spans[0].lanes.tx.ir,true);
+  assert.deepEqual(spans[0].lanes.tx.vflDirections,[1]);
+  assert.equal(spans[1].lanes.tx.issue,true);
+  assert.equal(spans[1].lanes.tx.ir,false);
+  assert.deepEqual(spans[1].lanes.tx.vflDirections,[]);
+  assert.equal(spans[1].lanes.rx.status,'unknown');
+  for(const state of [changeCase(s,{type:'retest'}),changeCase(s,{type:'port',point:1,value:25})]) {
+    assert.ok(recordedContinuity(state).spans.every(span=>Object.values(span.lanes).every(lane=>!lane.ir&&!lane.vflDirections.length)));
+  }
+});
+
+test('remote loop coverage and reverse VFL keep their tested span and direction',()=>{
+  let s=apply(createCase(),{type:'place',kind:'mmc',point:2},{type:'loop-side',value:'remote'},{type:'ready',value:true},{type:'record',result:'pass'},{type:'vfl-point-checks'});
+  s=trace(s,3,2,'rx','seen');
+  const spans=recordedContinuity(s).spans;
+  assert.equal(spans[2].lanes.rx.ir,true);
+  assert.deepEqual(spans[2].lanes.rx.vflDirections,[-1]);
+  assert.ok(spans.slice(0,2).every(span=>Object.values(span.lanes).every(lane=>!lane.ir&&!lane.vflDirections.length)));
+});
 
 test('normalized coverage grows from the tested optic through passed loops, leaving onward fiber unverified',()=>{
   let s=normal(loop(createCase(),0,'pass'));

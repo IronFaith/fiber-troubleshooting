@@ -1,6 +1,6 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=19';
-import {vflEndpoint} from './troubleshoot-visuals.mjs?v=23';
+import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=20';
+import {vflEndpoint} from './troubleshoot-visuals.mjs?v=24';
 import {lcConnector,vflPen} from './test-tool-visuals.mjs?v=1';
 
 const letter=strand=>strand==='tx'?'A':'B';
@@ -102,7 +102,7 @@ function viewingControls(s,light,points) {
   </div>`;
 }
 
-export function simpleVfl(s,paused,{embedded=false}={}) {
+export function simpleVfl(s,paused,{embedded=false,recordedPath=''}={}) {
   const light=vflEndpoint(s,{preview:true}),point=light.point,from=traceFrom(s);
   const atCAS=!isOptic(s,point);
   const patch=atCAS?patchAt(s,point):null;
@@ -118,7 +118,7 @@ export function simpleVfl(s,paused,{embedded=false}={}) {
       <p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${observationLabels[light.result]}`:''}</p>
       <div class="vfl-scene">${diagram(s,false)}${diagram(s,true)}${inlineObservation(s,light,destination)}</div>
     </div>
-    ${embedded?`<details class="ts-finding-details"><summary>Recorded VFL path</summary>${progressDiagram(s,point)}</details>`:progressDiagram(s,point)}
+    ${recordedPath||(embedded?`<details class="ts-finding-details"><summary>Recorded VFL path</summary>${progressDiagram(s,point)}</details>`:progressDiagram(s,point))}
     ${embedded?'':`<p class="vfl-hint"><a href="./learn.html#polarity-checks">Learn polarity: see TX / RX and trace both strands →</a></p><p class="vfl-fine">A / B illustrate one pair, not MMC pin numbers. Follow your actual channel map. Attach VFL only to disconnected LC legs; view light indirectly at the MMC or CAS.</p>`}
   </section>`;
 }

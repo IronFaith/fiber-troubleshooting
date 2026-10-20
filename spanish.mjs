@@ -1,6 +1,10 @@
 // Neutral Latin American Spanish. Keep numbered placeholders and technical identifiers intact.
 export const spanishMessages = [
   ["Case details", "Detalles del caso"],
+  ["Recorded continuity", "Continuidad registrada"],
+  ["Recorded section: {0} → {1}; {2}; {3}", "Tramo registrado: {0} → {1}; {2}; {3}"],
+  ["Red dashed: VFL passed", "Rojo discontinuo: VFL aprobado"],
+  ["Fiber diagram; scroll down to follow the path", "Diagrama de fibra; desplázate hacia abajo para seguir el recorrido"],
   ["Play light", "Animar luz"],
   ["Pause light", "Pausar luz"],
   ["Not connected", "Sin conectar"],

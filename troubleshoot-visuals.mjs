@@ -1,7 +1,7 @@
 import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=5';
 import {lcConnector,lcLoopback,vflPen} from './test-tool-visuals.mjs?v=1';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage,isOptic,loopSource,loopResult} from './troubleshoot-state.mjs?v=19';
+import {pointName,loopLabels,traceLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,parseTraceKey,patchAt,traceStop,pathCoverage,recordedContinuity,isOptic,loopSource,loopResult} from './troubleshoot-state.mjs?v=20';
 
 // At the observation cassette, open the onward connection, not the MMC
 // carrying light from the source. The selected port is the viewing face.
@@ -125,7 +125,41 @@ function coverageOverlay(s,coverage,centers) {
   return drawing;
 }
 
-export function workbenchDiagram(s,loopControls='') {
+function recordedLane(lane,strand,start,end,vertical=false) {
+  const path=(direction,offset=0)=>vertical?`M${start[0]+offset} ${direction>0?start[1]:end[1]} V${direction>0?end[1]:start[1]}`:
+    `M${direction>0?start[0]:end[0]} ${start[1]+offset} H${direction>0?end[0]:start[0]}`;
+  let drawing=`<path class="ts-recorded-base ${lane.issue?'suspect':''}" d="${path(1)}"/>`;
+  if(lane.ir) drawing+=`<g class="ts-recorded-ir">${lightFlow(path(strand==='tx'?1:-1),strand==='tx'?'ir':'return-ir')}</g>`;
+  for(const direction of lane.vflDirections) drawing+=`<g class="ts-recorded-vfl">${lightFlow(path(direction,lane.ir?9:0),'red')}</g>`;
+  if(lane.issue) {
+    const x=(start[0]+end[0])/2,y=(start[1]+end[1])/2;
+    drawing+=`<circle class="ts-coverage-issue" cx="${x}" cy="${y}" r="10"/><text class="ts-coverage-mark" x="${x}" y="${y+4}">!</text>`;
+  }
+  return drawing;
+}
+function recordedSpan(s,span,vertical,centers) {
+  const name=span.point===1?'LC leg → MMC head':span.point===s.count+1?`CAS ${span.point-1} → Remote LC legs`:`CAS ${span.point-1} → CAS ${span.point}`;
+  const label=span.lanes;
+  if(vertical) return `<svg class="ts-stacked-span" viewBox="0 0 270 160" role="img" aria-label="Recorded section: ${pointName(span.point-1,s)} → ${pointName(span.point,s)}; ${coverageLabel(label.tx,'tx')}; ${coverageLabel(label.rx,'rx')}">
+    <text class="ts-span-name" x="135" y="18">${name}</text>
+    ${['tx','rx'].map((strand,i)=>{const x=i?202:68,lane=label[strand];return `<text class="ts-recorded-channel" x="${x}" y="39">${i?'B':'A'}</text>${recordedLane(lane,strand,[x,48],[x,125],true)}<text class="ts-span-status" x="${x}" y="150">${coverageLabel(lane,strand)}</text>`;}).join('')}
+  </svg>`;
+  const cx=(centers[span.point-1]+centers[span.point])/2;
+  return `<g role="img" aria-label="Recorded section: ${pointName(span.point-1,s)} → ${pointName(span.point,s)}; ${coverageLabel(label.tx,'tx')}; ${coverageLabel(label.rx,'rx')}">
+    ${['tx','rx'].map((strand,i)=>recordedLane(label[strand],strand,[centers[span.point-1],30+i*46],[centers[span.point],30+i*46])).join('')}
+    <rect class="ts-fiber-summary" x="${cx-127}" y="102" width="254" height="87" rx="8"/><text class="ts-span-name" x="${cx}" y="121">${name}</text>
+    ${['tx','rx'].map((strand,i)=>`<rect class="ts-coverage-badge ${label[strand].status}" x="${cx-111}" y="${130+i*27}" width="222" height="24" rx="6"/><text class="ts-span-status" x="${cx}" y="${146+i*27}">${coverageLabel(label[strand],strand)}</text>`).join('')}
+  </g>`;
+}
+function recordedDiagram(s,nodeDrawings,centers,loopControls,stacked) {
+  const coverage=recordedContinuity(s),width=centers.at(-1)+135;
+  const faultAt=(point,optic)=>s.simulated&&s.fault.kind!=='none'&&s.fault.at===point&&(s.fault.kind.startsWith('optic_')||point===0)===optic?`<p class="ts-stack-fault">Simulated fault ${optic?'at optic':'in this section'} ↓</p>`:'';
+  if(stacked) return `<div class="ts-stacked-path">${nodeDrawings.map((node,i)=>`<div class="ts-stacked-node" data-path-node="${i}">${faultAt(i,true)}<svg viewBox="${i*290} 28 270 228" role="group">${node}</svg>${s.selected===i?loopControls:''}</div>${coverage.spans[i]?faultAt(i+1,false)+recordedSpan(s,coverage.spans[i],true):''}`).join('')}</div>`;
+  return `<div class="ts-path-scene" style="width:${width}px"><svg viewBox="0 0 ${width} 256" style="height:256px" role="group">${nodeDrawings.join('')}</svg>${loopControls?`<div class="ts-loop-slot" style="padding-left:${centers[s.selected]-128}px">${loopControls}</div>`:''}
+    <svg class="ts-recorded-routes" viewBox="0 0 ${width} 196" style="height:196px" role="group"><text class="ts-recorded-channel" x="40" y="34">A</text><text class="ts-recorded-channel" x="40" y="80">B</text>${coverage.spans.map(span=>recordedSpan(s,span,false,centers)).join('')}</svg></div>`;
+}
+
+export function workbenchDiagram(s,loopControls='',{stacked=false,recordedOnly=false}={}) {
   const coverage=pathCoverage(s), centers = Array.from({length:s.count+2},(_,i) => 135+i*290);
   const width = centers.at(-1)+135;
   const looping = s.tool === 'loop', tracing = s.tool === 'vfl', normalized=!s.simulated&&s.tool==='link';
@@ -134,7 +168,9 @@ export function workbenchDiagram(s,loopControls='') {
   const endpoint=vflEndpoint(s);
   const x = centers[endpoint?.point??s.selected], start = centers[0], end = centers.at(-1);
   let drawing = '';
+  const nodeDrawings=[];
   for (let i=0;i<centers.length;i++) {
+    const nodeStart=drawing.length;
     const cx = centers[i], remote = i === s.count+1, accessible = i <= s.reach;
     const mode=connectionAt(s,i), isLoop=mode==='loop';
     const handleX=isOptic(s,i)?cx-50:cx-121+(31.5+((s.ports[i-1]-1)%16)*19.8)*242/360-32;
@@ -148,7 +184,9 @@ export function workbenchDiagram(s,loopControls='') {
       <text class="ts-connection-label ${mode==='plugged'?'':'open'}" x="${cx}" y="230">${endpoint?.point===i&&endpoint.kind!=='lc'?endpoint.kind==='head'?'MMC head unplugged · CAS bypassed':endpoint.closed?'Both sides patched · path continues':`${endpoint.face==='front'?'Front':'Rear'} port open · incoming MMC seated`:mode==='loop'?'Loop inserted · service fiber unplugged':mode==='vfl'?isOptic(s,i)?'VFL on LC leg · optic empty':'VFL on unplugged fiber':mode==='unplugged'?isOptic(s,i)?'LC legs unplugged · optic empty':'MMC unplugged · path open':i===0||remote?'LC legs plugged into optic':'MMC head plugged into CAS'}</text>
       <text class="ts-node-caption" x="${cx}" y="247">${tracing&&i===from?'VFL source':tracing&&i===s.selected?({seen:'Light seen here',wrong:'Light at another port',swapped:'Light on other strand',dark:'No light seen here'}[trace]??'Expect light here'):!accessible ? 'Outside your reach' : isLoop&&!loopResult(s,i)?'Enter your loop result':recordedNodeCaption(s,coverage,i)}</text>
     </g>`;
+    nodeDrawings.push(drawing.slice(nodeStart));
   }
+  if(!s.simulated||stacked||recordedOnly) return recordedDiagram(s,nodeDrawings,centers,loopControls,stacked);
   let nodes=drawing;
   drawing='';
   drawing += `<text class="ts-lane-label" x="10" y="278">TX →</text><text class="ts-lane-label" x="10" y="338">RX ←</text>

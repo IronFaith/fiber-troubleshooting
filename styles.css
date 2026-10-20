@@ -1814,6 +1814,23 @@ html[dir="rtl"] .ts-advice .ts-evidence-path > span { direction:rtl; }
 .ts-workspace .ts-map { margin:0 -4px; padding:0; }
 .ts-path-scene { margin:0 auto; direction:ltr; }
 .ts-path-scene > svg { display:block; width:100%; max-width:none; color:#245b91; }
+.ts-recorded-base { fill:none; stroke:#ccd7de; stroke-width:4; stroke-dasharray:4 8; stroke-linecap:round; }
+.ts-recorded-base.suspect { stroke:#bc8531; stroke-dasharray:7 6; }
+.ts-recorded-ir .learn-signal { stroke-dasharray:none; stroke-width:4; }
+.ts-recorded-vfl .learn-signal { stroke-width:3; stroke-dasharray:5 7; }
+.ts-recorded-channel { fill:#335a73; font-size:13px; font-weight:700; text-anchor:middle; }
+.ts-recorded-key { margin:8px 0 4px; color:#526f83; }
+.ts-recorded-key p { margin:0; font-size:12px; }
+.ts-recorded-key .ts-legend { margin:5px 0 0; }
+.ts-continuity-title { margin:20px 0 6px; font-size:17px; color:#244c67; }
+.ts-workspace .ts-map.is-stacked { overflow:visible; margin:12px 0 0; }
+.ts-stacked-path { display:flex; flex-direction:column; align-items:center; direction:ltr; }
+.ts-stacked-node { width:270px; max-width:100%; scroll-margin-top:12px; }
+.ts-stacked-node > svg { display:block; width:100%; height:auto; color:#245b91; }
+.ts-stacked-node .ts-inline-loop { width:calc(100% - 14px); margin:0 auto; }
+.ts-stacked-span { display:block; width:270px; max-width:100%; height:auto; color:#245b91; }
+.ts-stacked-span .ts-span-status { font-size:10px; }
+.ts-stack-fault { margin:8px 0 4px; color:#9e3a46; font-size:12px; text-align:center; }
 .ts-loop-slot { padding-bottom:4px; }
 .ts-inline-loop { box-sizing:border-box; width:256px; padding:10px; border:1px solid #5089ad; border-top:3px solid #337fa6; border-radius:0 0 10px 10px; background:#f4f9fc; color:#244c67; }
 .ts-inline-loop h2 { margin:0 0 8px; font-size:17px; line-height:1.3; }

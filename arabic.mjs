@@ -1,6 +1,10 @@
 // Modern Standard Arabic. Keep English keys aligned with all translation catalogs.
 export const arabicMessages = [
   ["Case details", "تفاصيل الحالة"],
+  ["Recorded continuity", "الاستمرارية المسجلة"],
+  ["Recorded section: {0} → {1}; {2}; {3}", "المقطع المسجل: {0} → {1}؛ {2}؛ {3}"],
+  ["Red dashed: VFL passed", "أحمر متقطع: نجاح فحص VFL"],
+  ["Fiber diagram; scroll down to follow the path", "مخطط الألياف؛ مرر إلى أسفل لتتبع المسار"],
   ["New case started","بدأت حالة جديدة"],
   ["Choose your path, then place a tool to begin.","اختر مسارك، ثم ضع أداة للبدء."],
   ["Play light", "تشغيل حركة الضوء"],

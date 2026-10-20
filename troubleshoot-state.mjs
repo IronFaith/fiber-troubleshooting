@@ -793,6 +793,18 @@ export function pathCoverage(s) {
   return {optic,remoteOptic,lastLoopPass,firstRemotePass,points,spans,txThrough,remoteTxThrough};
 }
 
+// Cumulative evidence is independent of the currently installed tool. Keep IR
+// and VFL separate so a loop pass cannot hide a passing VFL strand. A conflict
+// remains suspect rather than animating a confirmed route through that section.
+export function recordedContinuity(s) {
+  const coverage=pathCoverage(s);
+  const traces=Object.entries(s.traces).map(([key,result])=>({...parseTraceKey(key),result}));
+  return {...coverage,spans:coverage.spans.map(span=>({...span,lanes:Object.fromEntries(Object.entries(span.lanes).map(([strand,lane])=>[strand,{
+    ...lane,ir:lane.loop&&!lane.issue,
+    vflDirections:lane.issue?[]:[...new Set(traces.filter(r=>r.result==='seen'&&r.strand===strand&&span.point>Math.min(r.from,r.to)&&span.point<=Math.max(r.from,r.to)).map(r=>Math.sign(r.to-r.from)))],
+  }]))}))};
+}
+
 // Recorded VFL continuity for one LC source only. Physical emission still uses
 // traceStop; unplugging a connector cannot turn history into live light.
 export function vflProgress(s) {

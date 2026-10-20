@@ -1,6 +1,10 @@
 // French learner-facing messages. Keep English keys aligned with spanish.mjs.
 export const frenchMessages = [
   ["Case details", "Détails du cas"],
+  ["Recorded continuity", "Continuité enregistrée"],
+  ["Recorded section: {0} → {1}; {2}; {3}", "Section enregistrée : {0} → {1} ; {2} ; {3}"],
+  ["Red dashed: VFL passed", "Pointillés rouges : VFL réussi"],
+  ["Fiber diagram; scroll down to follow the path", "Schéma de fibre ; faites défiler vers le bas pour suivre le chemin"],
   ["New case started","Nouveau cas commencé"],
   ["Choose your path, then place a tool to begin.","Choisissez votre parcours, puis placez un outil pour commencer."],
   [
