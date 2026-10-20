@@ -13,7 +13,7 @@ export const identityLabels = {
   route:'CAS route + ports', channels:'Strand mapping'
 };
 export const comparisonLabels = {
-  source:{pass:'Reference has light',fail:'Reference also dark'},
+  source:{pass:'Reference has light',fail:'Reference also dark',unavailable:'No reference lead available'},
   inspection:{clear:'Ends clean; original still dark',damage:'Damage seen',unavailable:'Cannot inspect'},
   substitute:{light:'Replacement has light',dark:'Replacement also dark',unavailable:'No compatible spare'}
 };
@@ -300,7 +300,7 @@ function sideLoopAssessment(s,side) {
   const passes=pairs.filter(([,r])=>r==='pass').map(([p])=>p);
   const lastPass=passes.length?passes.at(-1):-1;
   const fail=pairs.find(([p,r])=>r!=='pass'&&(lastPass<0||dir*(p-lastPass)>0));
-  const result=(title,why,next,extra={})=>({title,why,next,tone:'neutral',from:null,to:null,lastPass,issue:'loop',...extra});
+  const result=(title,why,next,extra={})=>({title,why,next,tone:'neutral',from:null,to:null,lastPass,source,issue:'loop',...extra});
   const conflict=pairs.find(([p,r])=>p!==source&&r!=='pass'&&passes.some(pass=>dir*(pass-p)>0));
   if(conflict&&(!loopResults(s,side)[source]||loopResults(s,side)[source]==='pass')) return result('Loop results need rechecking',
     `A loop failed at ${pointName(conflict[0],s)}, but a farther loop passed from the same optic.`,
@@ -515,6 +515,9 @@ export function comparisonGuide(s,key) {
   const sourceEvidence=c.source==='fail'?undefined:vflBoundary(entries,r).earlier;
   const diagnostic=(step,next,extra={})=>({next,diagnostic:{key,step,options:Object.entries(comparisonLabels[step])},...(sourceEvidence?{sourceEvidence}:{}),...extra});
   const terminal=(next,extra={})=>({next,diagnostic:{key,step:null,options:[]},...(sourceEvidence?{sourceEvidence}:{}),...extra});
+  if(c.source==='unavailable'&&!sourceEvidence) return diagnostic('source',
+    'Get a compatible known-good LC reference lead, or hand off the recorded route and strand. Until the source is checked, the VFL setup and installed fiber both remain possible causes.',
+    {comparisonFinding:'The reference check could not be done. No passing source check has been recorded.'});
   if(c.source==='fail'||c.source!=='pass'&&!sourceEvidence) return diagnostic('source',
     `Check the VFL on a known-good LC reference using the same LC connection used for ${letter}. Does the reference pass light?`,
     c.source==='fail'?{comparisonFinding:'The reference is also dark. Check the VFL, LC connection and reference lead before blaming the installed fiber.'}:{});
@@ -554,7 +557,7 @@ function traceAssessment(s) {
     const status=r=>!r?'Not checked':r.result==='seen'?'Light at '+strandLetter(r.strand):r.result==='swapped'?'Light at '+strandLetter(r.strand==='tx'?'rx':'tx'):traceLabels[r.result];
     const pair=[{strand:'A',result:a?.result,label:status(a)},{strand:'B',result:b?.result,label:status(b)}];
     const make=(priority,title,why,next,extra={})=>findings.push({priority,title,why,next,tone:priority>=50?'suspect':'trace',issue:'continuity',
-      from:Math.min(g.from,g.to),to:Math.max(g.from,g.to),route:routeDescription(s,g),pair,...extra,
+      from:Math.min(g.from,g.to),to:Math.max(g.from,g.to),source:g.from,route:routeDescription(s,g),pair,...extra,
       active:rows.some(r=>r.key===activeKey)});
     const output=r=>['seen','weak'].includes(r?.result)?r.strand:r?.result==='swapped'?(r.strand==='tx'?'rx':'tx'):null;
     if(a&&b&&output(a)&&output(a)===output(b)) {
@@ -625,7 +628,7 @@ function traceAssessment(s) {
         checkHead?'Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.':head?.result==='seen'?
           'Inspect both mating ends; clean and reinspect as needed. Verify seating and the mapped CAS port, then retest through the CAS.':
           'Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.',
-        {issue:'weak',from:Math.min(earlier?.to??weak.from,weak.to),to:Math.max(earlier?.to??weak.from,weak.to),
+        {issue:'weak',observation:weak,from:Math.min(earlier?.to??weak.from,weak.to),to:Math.max(earlier?.to??weak.from,weak.to),
           check:traceCheck({...weak,head:checkHead||weak.head},checkHead?`Check loose MMC · strand ${letter}`:`Recheck ${fiberPointName(weak.to,s)} · ${letter}`)});
       continue;
     }
@@ -668,7 +671,7 @@ function traceAssessment(s) {
     best.caution=`${pointName(failure.side==='remote'?s.count+1:0,s)} · Loop at ${pointName(Number(failedLoop[0]),s)}: ${loopLabels[failedLoop[1]]}. VFL continuity does not clear this optical test.`;
     if(best.priority<50) {
       const isolated=combinedLoopAssessment(s);
-      best.issue='loop'; best.from=isolated.from; best.to=isolated.to;
+      best.issue='loop'; best.from=isolated.from; best.to=isolated.to; best.source=isolated.source;
       best.title='Visible light does not clear the failed loop'; best.tone='suspect';
       best.next='Verify the loop setup and inspect the connections. Recheck the loop against the optic limits; measure loss if the return remains weak.';
       best.check=null; best.branches=[['Loop passes','Restore the mapped path and verify the live link.'],['Loop still fails','Continue isolating the optic / setup or added fiber section.']];
@@ -711,7 +714,7 @@ export function assessment(s) {
     if(a.issue==='dark') {
       const c=s.comparisons?.[a.observation?.key]??{};
       ids=c.source==='fail'?['vfl-setup']:c.inspection==='damage'?['damage']:c.substitute==='light'?['assembly']:c.substitute==='dark'?['common']:
-        [...(!identityConfirmed(s)?['mapping']:[]),'contacts',...(a.isolation?.kind==='mmc-cas-contact'?[]:['fiber'])];
+        [...(!a.sourceEvidence&&c.source!=='pass'?['vfl-setup']:[]),...(!identityConfirmed(s)?['mapping']:[]),'contacts',...(a.isolation?.kind==='mmc-cas-contact'?[]:['fiber'])];
     } else if(a.issue==='weak') ids=['contacts','fiber'];
     else if(a.issue==='mapping') ids=['mapping'];
     else if(a.issue==='polarity') ids=['pairing','mapping'];
@@ -720,8 +723,7 @@ export function assessment(s) {
   return {...a,causes:ids.map(id=>({id,label:causeLabels[id]}))};
 }
 
-export function nextCheckActions(s) {
-  const check=assessment(s).check;
+export function nextCheckActions(s,check=assessment(s).check) {
   if(!check) return [];
   if(!validTrace(s,check.from,check.to)) return [];
   const actions=[{type:'trace',from:check.from,to:check.to},{type:'strand',value:check.strand}];

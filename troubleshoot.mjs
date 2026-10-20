@@ -1,9 +1,10 @@
-import {translateLines} from './locale.mjs?v=24';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=21';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=32';
+import {translateLines} from './locale.mjs?v=25';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=22';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=33';
 import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=8';
 import {mountPatchDrag} from './troubleshoot-patching.mjs?v=4';
-import {simpleVfl} from './vfl-simple.mjs?v=28';
+import {simpleVfl} from './vfl-simple.mjs?v=29';
+import {caseGuidance,retestFindingActions} from './case-guidance.mjs?v=1';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -11,7 +12,7 @@ const key='fiber-workbench-v1';
 let view='actual', cases={actual:createCase(),simulation:createCase(true)};
 let lightLayer='ir';
 let selectedTool=null,setupOpen=false,newCaseStarted=false;
-let serviceCheckOpen=false,historyOpen=false,guidanceDetailsOpen=false;
+let serviceCheckOpen=false,historyOpen=false,guidanceDetailsOpen=false,guidanceUnavailableOpen=false;
 let deferPortRender=false,portRenderPending=false;
 const undo={actual:[],simulation:[]};
 let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -252,21 +253,26 @@ function controls(s) {
 
 function advice(s) {
   const a=assessment(s);
+  const guide=caseGuidance(s,a);
+  const compared=Object.keys(s.comparisons?.[a.observation?.key]??{}).length>0;
   const pending=s.tool!=='link'&&(!s.ready || (s.tool==='loop'?!loopResult(s):!s.traces[traceKey(s)]));
   const awaitingResult=s.tool!=='link'&&(s.tool==='loop'?!loopResult(s):!s.traces[traceKey(s)]);
   const hasEvidence=loopEntries(s).length+Object.keys(s.traces).length>0;
   const waiting=pending&&!hasEvidence&&!traceStop(s)?.blocked&&!traceStop(s)?.closed;
   if(waiting) return '';
   const nextLabel=a.check?.label??(a.suggestion?.tool==='loop'?`Next: ${isOptic(s,a.suggestion.point)?'LC':'MMC'} loop at ${pointName(a.suggestion.point,s)}`:a.suggestion?.tool==='vfl'?`VFL from ${a.suggestion.side==='remote'?'Remote LC legs':'Local LC legs'} → ${fiberPointName(a.suggestion.point,s)}`:'Normalize');
-  return `<section class="ts-guidance ${a.tone}" aria-labelledby="finding-title"><h3 id="finding-title" tabindex="-1">${a.title}</h3>
-    ${hasEvidence?`<p class="ts-guidance-evidence">${a.evidencePath?`<span>${a.evidencePath[0]}</span> <span aria-hidden="true">→</span> <span>${a.evidencePath[1]}</span>`:a.comparisonFinding??a.why}</p>`:''}
+  return `<section class="ts-guidance ${a.tone}" aria-labelledby="finding-title"><h3 id="finding-title" tabindex="-1">Case findings</h3>
+    <div class="ts-finding-focus"><span>Where to check</span><strong>${guide.area.split(' ↔ ').map(part=>`<span>${escape(part)}</span>`).join(' ↔ ')}</strong>${guide.source?`<small>Test source: ${guide.source}${guide.strand?` · Strand ${guide.strand}`:''}</small>`:''}</div>
+    <p class="ts-finding-summary">${a.title}</p>
+    ${hasEvidence?`<p class="ts-guidance-evidence"><b>What we know</b><br>${a.evidencePath&&!compared?`<span>${a.evidencePath[0]}</span> <span aria-hidden="true">→</span> <span>${a.evidencePath[1]}</span>`:a.comparisonFinding??a.why}</p>`:''}
     ${a.causes.length?`<p class="ts-guidance-causes"><b>Possible causes to check</b>: ${a.causes.map(c=>`<span>${c.label}</span>`).join(' · ')}</p>`:''}
-    <p class="ts-guidance-next"><b>Next check</b><span>${awaitingResult?'Current setup: waiting for a new result. Earlier findings stay visible.':a.next}</span></p>
-    <div class="ts-guidance-actions">${awaitingResult?button('test-result','Record result','class="ts-next-button"'):`${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}${diagnosticControls(a,s)}`}</div>
+    ${awaitingResult?'<p class="ts-guidance-next">Current setup: waiting for a new result. Earlier findings stay visible.</p>':`<div class="ts-finding-plan"><h4>${guide.heading}</h4>${guide.tools.length?`<p class="ts-finding-tools"><b>Needed</b>: ${guide.tools.map(tool=>`<span>${escape(tool)}</span>`).join(' · ')}</p>`:''}<ol>${guide.steps.map(step=>`<li>${escape(step)}</li>`).join('')}</ol></div>`}
+    <div class="ts-guidance-actions">${awaitingResult?button('test-result','Record result','class="ts-next-button"'):`${a.check||a.suggestion?button('next',nextLabel,'class="ts-next-button"'):''}${diagnosticControls(a,s)}${!s.simulated&&retestFindingActions(s).length?button('retest-finding','Made a change · retest','class="ts-next-button"'):''}`}</div>
+    ${!awaitingResult&&guide.outcomes.length?`<dl class="ts-finding-outcomes">${guide.outcomes.map(([condition,meaning])=>`<div><dt>${condition}</dt><dd>${meaning}</dd></div>`).join('')}</dl>`:''}
+    ${!awaitingResult&&!a.complete&&guide.tools.length?`<details class="ts-guidance-unavailable" ${guidanceUnavailableOpen?'open':''}><summary>Tools or access unavailable?</summary><p>${guide.unavailable}</p>${button('copy','Copy findings')}</details>`:''}
     ${hasEvidence?`<details class="ts-guidance-details" ${guidanceDetailsOpen?'open':''}><summary>Why this check?</summary>
       ${a.route?`<p><b>${escape(a.route)}</b></p>`:''}${a.evidencePath||a.comparisonFinding?`<p>${a.why}</p>`:''}${a.evidencePath&&a.comparisonFinding?`<p>${a.comparisonFinding}</p>`:''}
       ${a.caution?`<p>${a.caution}</p>`:''}${a.scope?`<p>${a.scope}</p>`:''}${a.isolation?`<p><b>${a.isolation.strand==='tx'?'A':'B'}</b> · <span>${a.isolation.label}</span></p>`:''}
-      ${a.branches?`<dl>${a.branches.map(([condition,meaning])=>`<dt>${condition}</dt><dd>${meaning}</dd>`).join('')}</dl>`:''}
       ${pending?'<p>Current setup: waiting for a new result. Earlier findings stay visible.</p>':''}
       ${a.otherIssues?`<p>${a.otherIssues} other recorded ${a.otherIssues===1?'issue':'issues'} remain in this case.</p>`:''}
       ${!a.complete?'<p>Only the recorded source, pair and section are checked. Untested parts and the live link remain unverified.</p>':''}
@@ -373,6 +379,7 @@ host.addEventListener('toggle',event=>{
   if(!host.contains(event.target)) return;
   if(event.target.matches('.ts-service-check')) serviceCheckOpen=event.target.open;
   if(event.target.matches('.ts-guidance-details')) guidanceDetailsOpen=event.target.open;
+  if(event.target.matches('.ts-guidance-unavailable')) guidanceUnavailableOpen=event.target.open;
 },true);
 function choosePoint(point) {
   if(selectedTool) {placeTool(selectedTool,point,true);return;}
@@ -456,6 +463,15 @@ host.addEventListener('click',async event=>{
     return;
   }
   if(action==='comparison') {update([{type:'comparison',key:target.dataset.checkKey,step:target.dataset.checkStep,value:target.dataset.checkValue}],'Comparison recorded for this route and strand.');showFindings();return;}
+  if(action==='retest-finding') {
+    const actions=retestFindingActions(s);
+    if(actions.length) {
+      update(actions,'Retest started. Earlier checks kept; enter fresh results after your change.');
+      host.querySelector('.vfl-observe, .ts-inline-loop')?.scrollIntoView({block:'start',behavior:'instant'});
+      host.querySelector('#test-title')?.focus({preventScroll:true});
+    }
+    return;
+  }
   if(action==='setup') {setDisclosure(action,!setupOpen);return;}
   if(action==='history') {historyOpen=!historyOpen;target.setAttribute('aria-expanded',String(historyOpen));host.querySelector('#ts-case-history').hidden=!historyOpen;return;}
   if(action==='normalize') {normalizeSetup();return;}
@@ -470,6 +486,7 @@ host.addEventListener('click',async event=>{
   if(action==='show-path') {centerMap();host.querySelector('.ts-workspace')?.scrollIntoView({block:'start',behavior:'instant'});host.querySelector('.ts-map')?.focus({preventScroll:true});return;}
   if(action==='copy') {
     const a=assessment(s);
+    const guide=caseGuidance(s,a);
     const text=translateLines([s.simulated?'SIMULATED FIBER CASE':'FIBER OBSERVATIONS — entered manually',`Reach: ${pointName(s.reach,s)}; ${s.count} passives on path`,
       `Mapped ports: ${s.ports.slice(0,s.count).map((p,i)=>`CAS ${i+1} / ${p}`).join(', ')}`,
       ...(!s.simulated?[`Starting local TX: ${statusLabels[s.tx]}; RX: ${s.rx==='good'?'Within optic limits':statusLabels[s.rx]}`]:[`Fault: ${faults[s.fault.kind]}; section ${s.fault.at}`]),
@@ -479,7 +496,7 @@ host.addEventListener('click',async event=>{
       ...Object.entries(s.patches??{}).map(([point,p])=>`Diagram CAS ${point}: port ${p.port}; rear ${patchAt(s,Number(point)).rear?'connected':'unplugged'}, front ${patchAt(s,Number(point)).front?'connected':'unplugged'}`),
       ...(!s.simulated&&s.service!=='unknown'?[`Restored link: ${s.service==='good'?'Required readings and link normal':'Still has a problem'}`]:[]),
       ...caseHistory(s).filter(e=>!e.current).map(e=>`EARLIER round ${e.round}: ${historyLabel(e)} — ${historyResult(e)}`),
-      a.title,a.why,...(a.scope?[a.scope]:[]),...(a.comparisonFinding?[a.comparisonFinding]:[]),...(a.causes.length?['Possible causes to check',...a.causes.map(c=>c.label)]:[]),`Next: ${a.next}`,'Only the recorded source, pair and section are checked. Untested parts and the live link remain unverified.'].join('\n'));
+      a.title,a.why,`Where to check: ${guide.area.split(' ↔ ').map(part=>translateLines(part)).join(' ↔ ')}`,...(guide.source?[`Test source: ${guide.source}${guide.strand?` · Strand ${guide.strand}`:''}`]:[]),...(a.scope?[a.scope]:[]),...(a.comparisonFinding?[a.comparisonFinding]:[]),...(a.causes.length?['Possible causes to check',...a.causes.map(c=>c.label)]:[]),guide.heading,...guide.steps,...(guide.tools.length?['Needed',...guide.tools]:[]),'Only the recorded source, pair and section are checked. Untested parts and the live link remain unverified.'].join('\n'));
     try {await navigator.clipboard.writeText(text);target.textContent='Copied';}
     catch {const area=document.createElement('textarea');area.value=text;area.readOnly=true;area.setAttribute('aria-label','Findings to copy');host.querySelector('#ts-copy-fallback').replaceChildren(area);area.select();}
     return;
@@ -490,7 +507,7 @@ host.addEventListener('click',async event=>{
     undo[view].push(s);
     if(undo[view].length>30) undo[view].shift();
     cases[view]=createCase(s.simulated);
-    newCaseStarted=true;setupOpen=true;serviceCheckOpen=false;historyOpen=false;guidanceDetailsOpen=false;
+    newCaseStarted=true;setupOpen=true;serviceCheckOpen=false;historyOpen=false;guidanceDetailsOpen=false;guidanceUnavailableOpen=false;
     save();render();
     host.querySelector('.ts-new-case')?.scrollIntoView({block:'start',behavior:'instant'});
     host.querySelector('#new-case-title')?.focus({preventScroll:true});

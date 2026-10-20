@@ -8,15 +8,15 @@ Updated: **2026-10-20**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Add a dedicated Loopbacks exam and MMC loopback badge, and fix overlapping loop IR / VFL markings reported in mobile and desktop screenshots.
-- **Accepted scope — 2026-10-20:** Five questions aligned with the existing looping lessons; a separate 4/5 badge using existing MMC artwork; preserve Apprentice I–IV and all existing scores. Add an IR/VFL display selector on the existing hardware path, keeping recorded results and conflicts. Include English, Spanish, French and Arabic.
-- **Completed and live:** [`83bbcae`](https://github.com/IronFaith/fiber-troubleshooting/commit/83bbcaef27f130442bc5040d420b05fcea36f5ec) adds Loopbacks under Beginner and My progress, bringing the badge count to eight. Two taught scenarios have independent exam IDs; three new questions cover location, failed-setup validation and restored service. The badge requires a complete attempt; retries remain practice. The location question reveals the connected test diagram only after an answer.
-- **Overlap fix:** Light view shows either blue/teal IR coverage or red dashed VFL coverage. All section findings remain; Normalize removes the tool and preserves evidence plus the view. Tool placement chooses the matching view. Cases and the view survive reload.
-- **Browser verification:** Completed the loop exam at 5/5, saw the MMC badge in My progress and confirmed the existing Apprentice I rank stayed unchanged. Recreated local-optic/CAS-1 passes with conflicting A evidence and passing B VFL to CAS 2. IR view showed three IR overlays and zero VFL overlays; VFL view showed six VFL overlays and zero IR overlays. Recorded labels stayed identical; Normalize left zero loopback drawings. Reviewed desktop and 390-pixel mobile layouts, the earned badge, translated light controls and Arabic exam without page overflow. Reload retained the selected VFL view; no console errors.
-- **Automated verification:** Narrow quiz/session/locale/coverage checks passed after correcting the new resume test to put a pending selection on a multiple-answer question. Final `npm run check` passed all 123 tests. Three focused tests cover loop grading/translations, separate scores/badge threshold and attempt resume. No new framework.
-- **Compatibility:** Existing storage keys and draft IDs remain. Loop progress uses `fiber-loop-progress-v1`; optional `lightLayer` is added to the existing tab case record. Old cases default to a view matching their tool. Existing Apprentice and Intermediate behavior remains.
-- **Remaining work / next action:** This milestone is complete. The exact Pages deployment succeeded and all 21 changed runtime files matched their committed bytes. No additional work is queued.
-- **Blockers / missing input:** None.
+- **Current objective:** Make troubleshooting isolation clearer and usable: identify where to check, explain the evidence, and give short next steps with required tools and alternatives when tools or access are missing.
+- **Accepted scope — 2026-10-20:** Improve Case findings within the existing workspace, using the current evidence engine. Preserve source/strand/round boundaries, conflicting results, hardware, exams, badges and the separate IR/VFL display. Include English, Spanish, French and Arabic.
+- **Implemented:** Findings now lead with the bounded area, source and strand. They show supporting observations, possible causes, ordered steps, required tools and outcome meanings. An unavailable reference remains unresolved; unavailable inspection/spares lead to an appropriate comparison or test handoff. Copy findings includes the area and action plan.
+- **Retest:** Made a change · retest is available directly in findings for failed VFL or loop tests. It starts a fresh round at the failed source, strand and boundary; earlier checks remain in History. Conflicting observations require a recheck rather than this repair reset.
+- **Browser verification:** Tested remote-source B light at CAS 2 followed by darkness at CAS 1: findings identify CAS 1 ↔ CAS 2 and both observations. Exercised unavailable inspection/spare paths and confirmed retest returned to remote B at CAS 1 with eight earlier checks retained and no current passes. Tested a missing local reference, reload, and resuming inspection after a real reference result. Reviewed desktop and 390-pixel mobile views in all four languages, including translated source/endpoints/tools and Arabic; no page overflow.
+- **Automated verification:** Final `npm run check` passed all 126 tests. Three new focused tests cover unavailable reference handling, same-strand/source section guidance and fresh retest/history behavior. Existing locale, evidence, exam and diagram checks pass.
+- **Compatibility:** No storage-key changes or score/badge migrations. The new reference-unavailable outcome is stored in existing scoped comparison records. Current evidence remains separate from prior rounds; physical layouts and Light view behavior are unchanged.
+- **Remaining work / next action:** Publish this application change and verify its exact Pages deployment and served files.
+- **Blockers / missing input:** No blocker. A fixed field-tool inventory was not confirmed; each action states its requirements and provides an unavailable-tool/access path.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
@@ -36,8 +36,8 @@ The latest application release is [`83bbcae`](https://github.com/IronFaith/fiber
 | Learn | Three connected chapters covering optics/light/testing, device communication and locations/LLDP, and FIM/patching. Optional contents and a visual quick reference support navigation. |
 | Simulations and Exams | Interactive LC/MMC patching, selectable five-question Beginner and Intermediate exams, saved attempts, local best scores and Fiber Apprentice badges. Questions are supported by lesson material. |
 | Troubleshooting | One test workspace with local/remote tools, editable CAS points, physical identity checks, inline results and compact findings. The path stacks on mobile. |
-| Evidence | Loop and VFL coverage remain separate. Findings identify what the evidence supports, possible causes and the next accessible test. Unknown sections and contradictory results stay visible. |
-| Case continuity | Normalize changes the illustrated setup; it does not declare a repair. History retains earlier checks. Made a change · retest begins a fresh round in the same case. New case begins a separate investigation. |
+| Evidence | Loop and VFL coverage remain separate. Findings show the bounded area, source/strand, observations, possible causes, ordered steps, required tools, outcome meanings and unavailable-tool/access guidance. Unknown sections and contradictory results stay visible. |
+| Case continuity | Normalize changes the illustrated setup; it does not declare a repair. History retains earlier checks. Made a change · retest in findings starts fresh evidence at the failed setup. New case begins a separate investigation. |
 | Languages | English, Spanish, French and Modern Standard Arabic. Physical port positions and identifiers keep their meaning when the language changes. |
 | Progress and activity | Scores and badges are local to a browser, without accounts. The separate Cloudflare counter supplies shared visitor, completed-exam and estimated active-learning-time totals. |
 
@@ -45,6 +45,7 @@ The latest application release is [`83bbcae`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`83bbcae`](https://github.com/IronFaith/fiber-troubleshooting/commit/83bbcaef27f130442bc5040d420b05fcea36f5ec) | Five-question Loopbacks exam, separate MMC badge at 4/5 and IR/VFL Light view selector. Apprentice scores preserved; 123 tests passed, exact Pages deployment succeeded and all 21 changed runtime files matched. |
 | [`cc163b4`](https://github.com/IronFaith/fiber-troubleshooting/commit/cc163b4f9bf76477d95854fa53236556849dd171) | Purpose-first looping lesson, explicit test boundaries and follow-up, two-reason Beginner assessment and clearer added-span reasoning in all four languages. |
 | [`4051394`](https://github.com/IronFaith/fiber-troubleshooting/commit/4051394438a9c46fbc79bb747252da0ff616492f) | Dedicated portrait cable channel and compact desktop path, attached result panels, aligned remote LC entry and correct installed-loop animation when both directions passed. |
 | [`90b5abc`](https://github.com/IronFaith/fiber-troubleshooting/commit/90b5abc61ff1f753090eab979781461d89a44d79) | Normalize removes LC/MMC loopback drawings, reconnects service fibers and retains recorded passes and checked-path highlighting. |
@@ -61,7 +62,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The dedicated loop exam, MMC badge and light-view fix are complete and verified live. No reproduced defect or publication task remains open for this milestone.
+The Case findings change is implemented and locally verified. Its exact deployment and served-file verification are pending. No additional feature work is queued.
 
 This is the current agreed work list; it does not assert that every page is defect-free. New course features or integrations need separate agreed scope.
 

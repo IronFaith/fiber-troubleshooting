@@ -17,6 +17,7 @@ files['/quiz.html'] = ['quiz.html', 'text/html'];
 files['/quiz.mjs'] = ['quiz.mjs', 'text/javascript'];
 files['/quiz-data.mjs'] = ['quiz-data.mjs', 'text/javascript'];
 files['/loop-exam.mjs'] = ['loop-exam.mjs', 'text/javascript'];
+files['/case-guidance.mjs'] = ['case-guidance.mjs', 'text/javascript'];
 files['/loop-visuals.mjs'] = ['loop-visuals.mjs', 'text/javascript'];
 files['/rack-visuals.mjs'] = ['rack-visuals.mjs', 'text/javascript'];
 files['/light-visuals.mjs'] = ['light-visuals.mjs', 'text/javascript'];
