@@ -34,7 +34,7 @@ test('training actions preserve follower identity and restarting creates a clean
 });
 
 test('fanout instructions and removal feedback translate without changing identifiers',()=>{
-  const messages=['Fanout replacement','Simulation activities','Confirm and save the FIMspect mapping','Unpatch the old leader, then every follower','Unpatch old follower leg 7','Leg 7 cleared. Old followers remaining: 5.','12 remaining','Patch replacement leader','Restart this simulation','Unpatched','New leader patched','Old leader · S747885346FWL'];
+  const messages=['Fanout replacement','Simulation activities','Find the MMC','Save and match the map','Unpatch the old bundle','Patch the new bundle','Check every link','Clear the MMC AND every leg before adding the new MMC.','Practice unpatching','See the mapping example','Unpatch old follower leg 7','Leg 7 cleared. Old followers remaining: 5.','12 remaining','Patch replacement leader','Restart this simulation','Unpatched','New leader patched','Old leader · S747885346FWL'];
   for(const language of ['es','fr','ar']){
     for(const message of messages) assert.notEqual(translate(message,language),message,`${language}: ${message}`);
     assert.ok(translate('Old leader · S747885346FWL',language).includes('S747885346FWL'));

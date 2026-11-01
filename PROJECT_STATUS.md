@@ -8,12 +8,12 @@ Updated: **2026-11-01**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Keep the fanout replacement guide inside the existing Simulations page.
-- **Accepted scope — 2026-11-01:** Integrate the reviewed seven-step visual guide, reuse the course's MMC/LC artwork and mapping examples, add the leader/follower removal practice and a direct activity link. Preserve existing practice, exams and progress; ship all four languages together.
-- **Completed and published:** The guide and restartable unscored practice are at `simulations.html#fanout-replacement`. Replacement stays blocked until the old leader and all twelve followers are cleared. Three/six-passive illustrations retain the same twelve-leg bundle. Physical and system actions are distinguished.
-- **Verification:** Focused behavior/locale checks passed; final `npm run check` passed all 134 tests. Browser checks covered the direct anchor, desktop and 390/320px layouts, English/Spanish/French/Arabic, preserved state on language switching, the final follower gate, keyboard activation, restart, six-passive selection and unchanged port 12. No overflow, duplicate IDs or browser errors were reported. One missing dynamic translation found during inspection was added before final checks.
+- **Current objective:** Simplify the fanout replacement steps inside Simulations.
+- **Accepted scope — 2026-11-01:** Reduce the guide to five short, always-visible actions. Retain the artwork and required workflow; make the detailed mapping example and practice optional to expand. Preserve existing practice, exams and progress; ship all four languages together.
+- **Implemented locally:** Five steps cover find, match, unpatch, replace and check. The old MMC plus all its legs must still be cleared before adding the replacement. Complete mapping, exact passive/serial/port matching, site physical procedures and all-link verification remain explicit.
+- **Verification:** Focused behavior/locale checks passed (15 tests); final `npm run check` passed all 134 tests. Browser checks covered the five translated headings, desktop and 390/320px layouts, keyboard expansion, final-follower gating, restart, six-passive selection and unchanged port 12. No horizontal overflow or browser errors were found. Publication is pending.
 - **Latest verified application release:** [`df4081c`](https://github.com/IronFaith/fiber-troubleshooting/commit/df4081cc9fc21c0f9de6467574c942ccc4f3ca9d). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/41346062857) succeeded; SHA-256 checks confirmed all 18 changed runtime files served by Pages match the application commit.
-- **Remaining work / next action:** This milestone is complete. Use further learner or field feedback to choose later changes.
+- **Remaining work / next action:** Commit/push and verify the exact Pages deployment and served runtime files.
 - **Blockers / missing input:** No blocker. No actual MyPatch screenshot or live integration is available; navigation follows the user's described workflow and is labeled schematic.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
@@ -65,7 +65,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The fanout simulation is complete and verified live. The open-lesson update and earlier compact findings/VFL guidance remain verified live. No other redesign or curriculum work is queued.
+The five-step simplification is implemented and locally verified; publication is in progress. The previous fanout simulation, open-lesson update and earlier compact findings/VFL guidance remain verified live. No other redesign or curriculum work is queued.
 
 ## Boundaries to preserve
 

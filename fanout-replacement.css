@@ -11,7 +11,7 @@
 #fanout-guide .fg-fault{border-top-color:#a34c22;border-top-style:dashed}
 #fanout-guide .fg-steps{list-style:none;margin:1.8rem 0 0;padding:0}
 #fanout-guide .fg-steps>li{padding:1.3rem 0;border-top:1px solid #c8d5de}
-#fanout-guide .fg-step-heading{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1rem}
+#fanout-guide .fg-step-heading{display:flex;align-items:baseline;gap:.75rem;margin-bottom:.6rem}
 #fanout-guide .fg-number{font-variant-numeric:tabular-nums;color:#536c7c;flex:none}
 #fanout-guide .fg-flow{display:flex;align-items:center;justify-content:space-between;gap:.65rem;flex-wrap:wrap;margin:1rem 0}
 #fanout-guide .fg-flow>div{display:flex;flex-direction:column;gap:.3rem}
@@ -77,3 +77,14 @@
 #fanout-guide .fg-flow {direction:ltr}
 #fanout-guide .fg-flow>div {unicode-bidi:plaintext}
 @media(max-width:520px){#fanout-guide .fg-card{padding:12px} #fanout-guide .fg-btn{padding:8px} #fanout-guide .fg-route{flex-direction:column;gap:0} #fanout-guide .fg-route-node{flex-direction:row;align-items:center;text-align:left;gap:.65rem;padding:.7rem 0 .7rem 1.25rem} #fanout-guide .fg-route-node:before{top:0;bottom:0;left:3px;right:auto;border-top:0;border-left:1px solid #c8d5de} #fanout-guide .fg-route-node:after{left:0;top:calc(50% - 3px)} #fanout-guide .fg-route-node[data-target]:after{left:-2px;top:calc(50% - 5px)}}
+
+#fanout-guide .fg-steps>li.fg-step-identity{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,1fr);gap:2rem;align-items:center}
+#fanout-guide .fg-step-identity>div{min-width:0}
+#fanout-guide .fg-step-identity .fg-flow{align-items:flex-start;flex-direction:column}
+#fanout-guide .fg-step-identity .fg-flow>span{transform:rotate(90deg)}
+#fanout-guide .fg-details{margin-top:1rem;border:1px solid #c8d5de;border-radius:6px;padding:0 14px}
+#fanout-guide .fg-details>summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:600}
+#fanout-guide .fg-details[open]{padding-bottom:14px}
+#fanout-guide .fg-rule{padding:12px 14px;border-inline-start:4px solid #aa851d;background:#faf5e8}
+#fanout-guide .fg-verify>div{border-inline-start:3px solid #508563;padding-inline-start:10px}
+@media(max-width:700px){#fanout-guide .fg-steps>li.fg-step-identity{grid-template-columns:minmax(0,1fr);gap:.5rem} #fanout-guide .fg-action-pair{grid-template-columns:1fr;gap:.6rem}}

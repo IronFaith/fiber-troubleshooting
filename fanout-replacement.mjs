@@ -6,26 +6,36 @@ import {newFanoutReplacement,changeFanoutReplacement,canPatchFanout} from './fan
 export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson-section" aria-labelledby="fanout-title"><div id="fanout-guide">
   <div class="fg-viz-row"><span class="fg-viz-badge">Guided simulation</span><span class="fg-text-small">Worked example · 12 LC legs</span></div>
   <h3 id="fanout-title">Fanout replacement</h3>
-  <p>One MMC leader. All of its followers. One complete replacement.</p>
-  <div class="fg-diagram">
+  <p>Replace one MMC and all its legs.</p>
+  <ol class="fg-steps">
+    <li class="fg-step-identity">
+      <div>
+        <div class="fg-step-heading"><span class="fg-number">01</span><h4>Find the MMC</h4></div>
+        <p>Find the broken leg. Follow its label to the MMC and match the full serial.</p>
+        <div class="fg-flow" aria-label="Trace the damaged leg to its assembly">
+          <div><span class="fg-text-small">Damaged follower</span><strong>Leg 7</strong></div><span aria-hidden="true">→</span>
+          <div><span class="fg-text-small">MMC leader serial</span><strong>S747885346FWL</strong></div>
+        </div>
+        <p class="fg-text-small">MMC = leader. Legs = followers.</p>
+      </div>
+      <div>  <div class="fg-diagram">
     <svg id="fg-fanout" class="fg-hardware" role="img" aria-label="One MMC head connects to twelve LC legs. Leg 7 is the damaged example; the replacement includes the entire assembly."></svg>
   </div>
   <div class="fg-viz-row"><span class="fg-key"><span class="fg-line"></span> Same assembly</span><span class="fg-key"><span class="fg-line fg-fault"></span> Leg 7 · damaged example</span></div>
   <p class="fg-text-small fg-text-muted">One line represents one leg, not a strand or ferrule pin map. LC is the connector type in this example; confirm the actual assembly specification.</p>
-
-  <ol class="fg-steps">
-    <li>
-      <div class="fg-step-heading"><span class="fg-number">01</span><h4>Identify the damaged leg and its MMC</h4></div>
-      <div class="fg-flow" aria-label="Trace the damaged leg to its assembly">
-        <div><span class="fg-text-small">Device / optic port</span><strong>SSW · 5/1</strong></div><span aria-hidden="true">→</span>
-        <div><span class="fg-text-small">Damaged follower</span><strong>Leg 7</strong></div><span aria-hidden="true">→</span>
-        <div><span class="fg-text-small">MMC leader serial</span><strong>S747885346FWL</strong></div>
-      </div>
-      <p>Read the physical labels. Trace that leg to its head; match the full serial.</p>
+</div>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">02</span><h4>Confirm and save the FIMspect mapping</h4></div>
-      <table class="fg-table fg-table-sm">
+      <div class="fg-step-heading"><span class="fg-number">02</span><h4>Save and match the map</h4></div>
+      <div class="fg-action-pair">
+        <div><h5>FIMspect</h5><p>Save the room, rack, passive, MMC port and every leg’s device / port.</p></div>
+        <div><h5>MyPatch</h5><p>Open the device route, then the mapped P. Match the MMC serial and port to your saved map.</p></div>
+      </div>
+      <div class="fg-location"><span class="fg-viz-badge">Worked example</span><strong dir="ltr">SSW → STSW / P · CAS 1 / 12 / S747885346FWL</strong></div>
+      <div class="fg-viz-row"><span><strong>A</strong> · active / device-side legs</span><span><strong>P</strong> · passive / MMC location</span></div>
+      <p class="fg-text-small">If the labels or map do not match, stop and resolve the mismatch.</p>
+      <details class="fg-details"><summary>See the mapping example</summary>
+              <table class="fg-table fg-table-sm">
         <caption class="fg-sr-only">Illustrative mapping to capture before unpatching</caption>
         <thead><tr><th scope="col">Match</th><th scope="col">Worked example</th></tr></thead>
         <tbody>
@@ -35,33 +45,26 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
           <tr><th scope="row">Whole assembly</th><td>Save each of the 12 follower IDs and its assigned device / port</td></tr>
         </tbody>
       </table>
-      <p>Keep the complete mapping before clearing records. Include room, rack, passive and port identifiers.</p>
-      <p class="fg-text-small fg-text-muted">Teaching values combined from the existing course and your example; these are not live FIMspect records.</p>
-    </li>
-    <li>
-      <div class="fg-step-heading"><span class="fg-number">03</span><h4>Find the matching route in MyPatch</h4></div>
-      <div class="fg-viz-controls"><label class="fg-form-label">Illustrated room layout<select class="fg-form-select" id="fg-passive-count"><option value="3">3 passive locations</option><option value="6">6 passive locations</option></select></label></div>
+
+              <div class="fg-viz-controls"><label class="fg-form-label">Illustrated room layout<select class="fg-form-select" id="fg-passive-count"><option value="3">3 passive locations</option><option value="6">6 passive locations</option></select></label></div>
       <div class="fg-route-title">SSW → STSW</div>
       <div id="fg-route" class="fg-route" role="img" aria-label="SSW active endpoint, three passive locations, then STSW active endpoint"></div>
-      <div class="fg-viz-row"><span><strong>A</strong> · active / device-side legs</span><span><strong>P</strong> · passive / MMC location</span></div>
-      <p>Match the device relationship and room / building. Follow the mapped passive to the correct MMC.</p>
-      <p class="fg-text-small fg-text-muted">Schematic navigation based on the site workflow. The number of passives is not the number of fanout legs.</p>
-    </li>
-    <li>
-      <div class="fg-step-heading"><span class="fg-number">04</span><h4>Match the exact leader inside the passive</h4></div>
-      <div class="fg-location"><span class="fg-viz-badge">P · mapped passive</span><strong>CAS 1 → port 12 → S747885346FWL</strong></div>
-      <div class="fg-cassette" role="img" aria-label="CAS 1, 32 ports. Ports 1 to 16 are on top; 17 to 32 below. Port 12 is the example destination.">
+
+              <div class="fg-cassette" role="img" aria-label="CAS 1, 32 ports. Ports 1 to 16 are on top; 17 to 32 below. Port 12 is the example destination.">
         <div class="fg-cassette-label"><span>CAS 1 · front port reference</span><span>32 ports</span></div>
         <div class="fg-port-row" id="fg-ports-top"></div><div class="fg-port-row" id="fg-ports-bottom"></div>
       </div>
-      <div class="fg-flow fg-scope"><div><span class="fg-text-small">P · leader record</span><strong>1 matching MMC</strong></div><span aria-hidden="true">↔</span><div><span class="fg-text-small">Associated A · followers</span><strong>12 matching legs</strong></div></div>
-      <p>Cross-check the serial, passive and port against the physical labels and FIMspect. Identify every follower belonging to that leader.</p>
-      <p class="fg-text-small fg-text-muted">A mismatch means stop and reconcile the mapping. Only this assembly is in scope—not every MMC along the route.</p>
+
+        <p class="fg-text-small fg-text-muted">Schematic navigation based on the site workflow. The number of passives is not the number of fanout legs.</p>
+        <p class="fg-text-small fg-text-muted">Teaching values combined from the existing course and your example; these are not live FIMspect records.</p>
+      </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">05</span><h4>Unpatch the old leader, then every follower</h4></div>
-      <p>In MyPatch, clear the selected MMC leader. Then clear each of its associated leg records, using the saved mapping.</p>
-      <div class="fg-card" id="fg-demo">
+      <div class="fg-step-heading"><span class="fg-number">03</span><h4>Unpatch the old bundle</h4></div>
+      <p>In MyPatch, unpatch the MMC first. Then unpatch every leg belonging to it.</p>
+      <div class="fg-rule"><strong>Clear the MMC AND every leg before adding the new MMC.</strong></div>
+      <details class="fg-details"><summary>Practice unpatching</summary>
+              <div class="fg-card" id="fg-demo">
         <div class="fg-viz-row"><strong>Try the record-removal sequence</strong><span class="fg-viz-badge">Illustration only</span></div>
         <div class="fg-leader-action"><div><span class="fg-text-small">Old leader · S747885346FWL</span><div id="fg-leader-state">Patched</div></div><button class="fg-btn" type="button" id="fg-remove-leader">Unpatch leader</button></div>
         <div class="fg-followers-label"><span>Old followers · legs 1–12</span><span id="fg-follower-count" class="fg-tabular-nums">12 remaining</span></div>
@@ -70,29 +73,25 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
         <div class="fg-viz-row"><button class="fg-btn fg-btn-primary" type="button" id="fg-patch-new" disabled>Patch replacement leader</button><span id="fg-gate-label">Blocked · old records remain</span></div>
         <p id="fg-status" aria-live="polite">First unpatch the old leader. All 12 followers must also be cleared.</p>
       </div>
-      <div class="fg-rule"><strong>Old leader cleared + zero old followers = replacement leader can be patched</strong></div>
-      <p class="fg-text-small fg-text-muted">“Unpatch” here means a system-record action. This practice does not operate MyPatch or disconnect physical fibers. Button wording is illustrative.</p>
+
+        <p class="fg-text-small fg-text-muted">“Unpatch” here means a system-record action. This practice does not operate MyPatch or disconnect physical fibers. Button wording is illustrative.</p>
+        <button class="fg-btn" type="button" id="fg-restart">Restart this simulation</button>
+      </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">06</span><h4>Install and register the replacement fanout</h4></div>
-      <div class="fg-replace" role="img" aria-label="Replace the old complete assembly with a compatible new assembly, preserving every mapped destination.">
-        <div><span class="fg-text-small">OLD assembly</span><strong>Old MMC + all 12 legs</strong><span>Records cleared</span></div><span class="fg-replace-arrow" aria-hidden="true">→</span>
-        <div><span class="fg-text-small">NEW assembly</span><strong>New MMC + all 12 legs</strong><span>Actual new serials</span></div>
+      <div class="fg-step-heading"><span class="fg-number">04</span><h4>Patch the new bundle</h4></div>
+      <div class="fg-action-pair">
+        <div><h5>At the rack</h5><p>Fit a compatible fanout at the saved destinations, following the site’s isolation, inspection and cleaning procedure.</p></div>
+        <div><h5>In MyPatch</h5><p>Patch the new MMC first, then every new leg to its saved device / port. Use the new labels.</p></div>
       </div>
-      <div class="fg-action-pair"><div><h5>At the rack</h5><p>Under the approved work / isolation procedure: confirm a compatible assembly, inspect and clean as required, then seat the MMC and every leg at its mapped destination.</p></div><div><h5>In MyPatch</h5><p>Once all old records are cleared, patch the new leader at the correct passive, then patch its followers to their recorded device / port assignments.</p></div></div>
-      <p class="fg-text-small fg-text-muted">Coordinate physical and system changes using the site procedure. A whole-fanout replacement affects every associated leg, including the undamaged ones.</p>
+      <div class="fg-flow"><div><strong>New MMC</strong></div><span aria-hidden="true">→</span><div><strong>Every new leg</strong></div><span aria-hidden="true">→</span><div><strong>Same saved destinations</strong></div></div>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">07</span><h4>Verify the whole bundle before closing</h4></div>
-      <div class="fg-verify">
-        <div><strong>Identity</strong><span>New head and follower labels match the records.</span></div>
-        <div><strong>Mapping</strong><span>Every leg is at its assigned device and port.</span></div>
-        <div><strong>Service</strong><span>Check every affected link with the required site tests and readings.</span></div>
-      </div>
-      <p>Confirm the old assembly records are cleared and the replacement records are complete. Resolve any failed link before closing the work.</p>
+      <div class="fg-step-heading"><span class="fg-number">05</span><h4>Check every link</h4></div>
+      <p>Match the new labels and ports. Run the required site tests on every affected link before closing.</p>
+      <div class="fg-verify"><div><strong>Labels match</strong></div><div><strong>Ports match</strong></div><div><strong>All links verified</strong></div></div>
     </li>
   </ol>
-  <button class="fg-btn" type="button" id="fg-restart">Restart this simulation</button>
 </div></section>`;
 
 export function mountFanoutReplacement(host) {
