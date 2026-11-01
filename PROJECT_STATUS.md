@@ -8,12 +8,12 @@ Updated: **2026-11-01**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state and read AGENTS.md and this file before continuing.
 
-- **Current objective:** Give Fanout replacement its own simulation page, separate from the other simulation activities.
-- **Completed and published:** `fanout-replacement.html` contains the existing five-step guide, A/P boxes and mapping checklist. Simulations links directly to it, and a return link leads back. Old `simulations.html#fanout-replacement` bookmarks redirect while retaining query parameters. Existing LC/MMC practice, exam links and storage are unchanged.
-- **Verification:** Focused behavior/locale checks passed (15 tests), followed by `npm run check` with all 134 tests passing. Browser checks confirmed separate activity content, links both ways, the legacy bookmark with Arabic query parameter, translated titles/return links in all four languages, five steps, checklist progress and restart, and six-passive selection. Desktop and 320px Arabic layouts were inspected; no page overflow or browser errors were found. The live old-link redirect and separate page content were also verified.
+- **Current objective:** Make the active and passive list visuals clearly show what learners should find in MyPatch.
+- **Implemented locally:** The separate fanout page now labels an illustrative MyPatch management-system view. Device A and mapped P1 boxes link to active-leg and passive-MMC list previews. Highlighted rows connect damaged leg 7 to its MMC serial and passive port 12; the panels reinforce one MMC and twelve related legs. Fictional records and all four languages are retained. Existing page separation, five steps and order-independent checklist remain unchanged.
+- **Verification:** Focused behavior/locale checks passed (15 tests), then `npm run check` passed all 134 tests. Browser checks confirmed both list links, keyboard focus on their targets, three/six-passive selection and translated list labels. Desktop and mobile Spanish/Arabic layouts were inspected; French and Arabic showed no page overflow, including Arabic at 320px. The physical route stayed left-to-right in Arabic, and no browser errors were recorded. Publication is pending.
 - **Latest verified application release:** [39fb99c](https://github.com/IronFaith/fiber-troubleshooting/commit/39fb99c7e493981533adee7992f442e1cd7f7ae2). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/41354840306) succeeded. SHA-256 comparisons confirmed all 18 changed runtime files served by Pages match the commit.
-- **Remaining work / next action:** The page-separation milestone is complete and live. No further navigation change is queued.
-- **Blockers:** None for the page separation. The separate serial-format question remains unresolved below.
+- **Remaining work / next action:** Publish the MyPatch list visuals, then verify the exact deployment and served files.
+- **Blockers:** None for the list visuals. The separate serial-format question remains unresolved below.
 
 ## Serial research retained
 
