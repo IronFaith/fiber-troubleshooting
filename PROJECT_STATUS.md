@@ -10,30 +10,29 @@ Fetch the latest repository state, read AGENTS.md and this file, then consult th
 
 - **Current objective:** Keep the fanout replacement guide inside the existing Simulations page.
 - **Accepted scope — 2026-11-01:** Integrate the reviewed seven-step visual guide, reuse the course's MMC/LC artwork and mapping examples, add the leader/follower removal practice and a direct activity link. Preserve existing practice, exams and progress; ship all four languages together.
-- **Completed locally:** The guide and restartable unscored practice are at `simulations.html#fanout-replacement`. Replacement stays blocked until the old leader and all twelve followers are cleared. Three/six-passive illustrations retain the same twelve-leg bundle. Physical and system actions are distinguished.
+- **Completed and published:** The guide and restartable unscored practice are at `simulations.html#fanout-replacement`. Replacement stays blocked until the old leader and all twelve followers are cleared. Three/six-passive illustrations retain the same twelve-leg bundle. Physical and system actions are distinguished.
 - **Verification:** Focused behavior/locale checks passed; final `npm run check` passed all 134 tests. Browser checks covered the direct anchor, desktop and 390/320px layouts, English/Spanish/French/Arabic, preserved state on language switching, the final follower gate, keyboard activation, restart, six-passive selection and unchanged port 12. No overflow, duplicate IDs or browser errors were reported. One missing dynamic translation found during inspection was added before final checks.
-- **Latest verified application release:** [`acca914`](https://github.com/IronFaith/fiber-troubleshooting/commit/acca914ca7fa64902fcc3431955da4b6ce3f84b5). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39505715242) succeeded; SHA-256 checks confirmed all 19 changed runtime files served by Pages match the application commit.
-- **Remaining work / next action:** Commit and publish the verified fanout milestone, then verify its exact Pages deployment and served runtime files.
+- **Latest verified application release:** [`df4081c`](https://github.com/IronFaith/fiber-troubleshooting/commit/df4081cc9fc21c0f9de6467574c942ccc4f3ca9d). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/41346062857) succeeded; SHA-256 checks confirmed all 18 changed runtime files served by Pages match the application commit.
+- **Remaining work / next action:** This milestone is complete. Use further learner or field feedback to choose later changes.
 - **Blockers / missing input:** No blocker. No actual MyPatch screenshot or live integration is available; navigation follows the user's described workflow and is labeled schematic.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
 ## Current release
 
-The latest application release is [`acca914`](https://github.com/IronFaith/fiber-troubleshooting/commit/acca914ca7fa64902fcc3431955da4b6ce3f84b5): **Open lessons and visible topic index**.
+The latest application release is [`df4081c`](https://github.com/IronFaith/fiber-troubleshooting/commit/df4081cc9fc21c0f9de6467574c942ccc4f3ca9d): **Fanout replacement in Simulations**.
 
-- All five stages and 23 lesson bodies stay open. The visible topic index exposes every lesson directly; stage headings no longer collapse content and the one-lesson selector is removed.
-- Full existing explanations, diagrams, objectives and understanding checks remain. Self-check answers and source lists are still optional. Quick reference and stage practice/exam handoffs remain available.
-- Scrolling or following topic links saves the reader's place. Existing topic IDs, legacy chapter bookmarks, scores and attempts stay compatible. Guided journeys stop when the reader leaves their topic, while inactive-stage animation is paused.
-- Final validation: 131 tests, desktop/mobile browser checks, all four languages, scroll/reload/resume, legacy FIM links and the Loopbacks exam handoff. All 23 lessons and topic links were visible without duplicate IDs or mobile overflow.
-- Cache versions include changed modules and their importers. The [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39505715242) succeeded, and all 19 affected runtime files matched the commit byte for byte.
+- The seven-step visual guide is together with the existing LC/MMC practice, with direct activity links and reused connector artwork.
+- The local record-removal practice requires the old leader and every follower to be cleared before enabling the replacement leader. Restart and language switching preserve the intended exercise behavior; exam scores and attempts are untouched.
+- English, Spanish, French and Arabic ship together. Mobile/desktop, physical port ordering, keyboard use, removal gating and restart were checked; all 134 tests passed.
+- The [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/41346062857) succeeded. All 18 affected runtime files matched the application commit byte for byte. All 23 existing lessons remain open and their links/progress remain available.
 
 ## What is in place
 
 | Area | Current behavior |
 | --- | --- |
 | Learn | Five stages covering equipment, connection identity, readings, tests, and isolation. All 23 lessons and the topic index stay open for browsing and browser Find. Objectives, unscored explanation checks, reference, scroll/topic resume and practice/exam links remain available. |
-| Simulations and Exams | Interactive LC/MMC patching plus the new fanout replacement guide and unscored record-removal practice (local, awaiting publication). Existing five-question exams, saved attempts, scores and badges are preserved. |
+| Simulations and Exams | Interactive LC/MMC patching plus the fanout replacement guide and unscored record-removal practice. Existing five-question exams, saved attempts, scores and badges are preserved. |
 | Troubleshooting | One test workspace with local/remote tools, editable CAS points, physical identity checks, inline results and compact findings. The path stacks on mobile. |
 | Evidence | Loop and VFL coverage remain separate. Findings show the suspect span/strand, a compact current-source results table and one next action, with steps/tools/outcomes and causes expandable. Missing channels and unresolved optical failures stay explicit. |
 | Case continuity | Normalize changes the illustrated setup; it does not declare a repair. History retains earlier checks. Made a change · retest in findings starts fresh evidence at the failed setup. New case begins a separate investigation. |
@@ -44,6 +43,7 @@ The latest application release is [`acca914`](https://github.com/IronFaith/fiber
 
 | Commit | Delivered change |
 | --- | --- |
+| [`df4081c`](https://github.com/IronFaith/fiber-troubleshooting/commit/df4081cc9fc21c0f9de6467574c942ccc4f3ca9d) | Added the seven-step fanout replacement guide and leader/follower removal practice to Simulations in all four languages. 134 tests passed; exact Pages deployment and all 18 changed runtime files verified. |
 | [`acca914`](https://github.com/IronFaith/fiber-troubleshooting/commit/acca914ca7fa64902fcc3431955da4b6ce3f84b5) | All 23 lessons and the topic index stay open; scrolling saves the current lesson. Full material, old anchors and practice/exam links preserved. 131 tests passed; exact Pages deployment and all 19 changed runtime files verified. |
 | [`dfa9587`](https://github.com/IronFaith/fiber-troubleshooting/commit/dfa9587fb6f653f1bd75fb19a07eec006fbd56bd) | Compact loop/VFL evidence table, suspect strand/span and expandable instructions; VFL continues to the failed boundary while optical failure remains suspect. 131 tests passed; exact Pages deployment and all 20 changed runtime files verified. |
 | [`0ec2d71`](https://github.com/IronFaith/fiber-troubleshooting/commit/0ec2d71706fac5993524ad1b758582f9a6e0a5ef) | Five guided stages, 23 objectives and understanding checks, lesson navigation/resume and direct exam handoffs. 129 tests passed; exact Pages deployment and all 24 changed runtime files verified. |
@@ -65,7 +65,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The fanout simulation is verified locally and awaiting publication. The open-lesson update and earlier compact findings/VFL guidance remain verified live. No other redesign or curriculum work is queued.
+The fanout simulation is complete and verified live. The open-lesson update and earlier compact findings/VFL guidance remain verified live. No other redesign or curriculum work is queued.
 
 ## Boundaries to preserve
 
