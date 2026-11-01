@@ -5,12 +5,12 @@ import {newFanoutReplacement,changeFanoutReplacement,canCompleteFanout} from './
 // Fictional teaching records; no employer software workflow is represented.
 export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson-section" aria-labelledby="fanout-title"><div id="fanout-guide">
   <div class="fg-viz-row"><span class="fg-viz-badge">Guided simulation</span><span class="fg-text-small">Worked example · 12 LC legs</span></div>
-  <h3 id="fanout-title">Fanout replacement</h3>
+  <h2 id="fanout-title">Fanout replacement</h2>
   <p>Fictional example: replace a fanout while preserving every connection assignment.</p>
   <ol class="fg-steps">
     <li class="fg-step-identity">
       <div>
-        <div class="fg-step-heading"><span class="fg-number">01</span><h4>Find the MMC</h4></div>
+        <div class="fg-step-heading"><span class="fg-number">01</span><h3>Find the MMC</h3></div>
         <p>Find the broken leg. Follow its label to the MMC and match the full serial.</p>
         <div class="fg-flow" aria-label="Trace the damaged leg to its assembly">
           <div><span class="fg-text-small">Damaged leg</span><strong>Leg 7</strong></div><span aria-hidden="true">→</span>
@@ -26,10 +26,10 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
 </div>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">02</span><h4>Save and match the map</h4></div>
+      <div class="fg-step-heading"><span class="fg-number">02</span><h3>Save and match the map</h3></div>
       <div class="fg-action-pair">
-        <div><h5>Connection record</h5><p>Record the location, head serial, passive port and every leg’s endpoint.</p></div>
-        <div><h5>Physical labels</h5><p>Compare the record with the installed labels. Resolve any mismatch before work.</p></div>
+        <div><h4>Connection record</h4><p>Record the location, head serial, passive port and every leg’s endpoint.</p></div>
+        <div><h4>Physical labels</h4><p>Compare the record with the installed labels. Resolve any mismatch before work.</p></div>
       </div>
       <div class="fg-build">
         <div class="fg-viz-row"><strong>Fully patched example</strong><span class="fg-text-small">A = active legs. P = passive MMCs.</span></div>
@@ -64,12 +64,12 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
       </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">03</span><h4>Replace under the approved procedure</h4></div>
+      <div class="fg-step-heading"><span class="fg-number">03</span><h3>Replace under the approved procedure</h3></div>
       <p>Confirm authorization, affected services and a compatible replacement. Follow the approved isolation, inspection, cleaning and installation procedure.</p>
       <div class="fg-rule"><strong>Keep every leg matched to its recorded destination.</strong></div>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">04</span><h4>Update and verify the record</h4></div>
+      <div class="fg-step-heading"><span class="fg-number">04</span><h3>Update and verify the record</h3></div>
       <p>Record the installed head and leg identifiers, destinations and required change history using the authorized process.</p>
       <details class="fg-details"><summary>Practice checking the map</summary>
         <div class="fg-card" id="fg-demo">
@@ -86,7 +86,7 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
       </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">05</span><h4>Check every link</h4></div>
+      <div class="fg-step-heading"><span class="fg-number">05</span><h3>Check every link</h3></div>
       <p>Match the new labels and ports. Run the required site tests on every affected link before closing.</p>
       <div class="fg-verify"><div><strong>Labels match</strong></div><div><strong>Ports match</strong></div><div><strong>All links verified</strong></div></div>
     </li>

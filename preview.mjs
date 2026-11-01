@@ -7,6 +7,7 @@ files['/learn.html'] = ['learn.html', 'text/html'];
 files['/devices.html'] = ['devices.html', 'text/html'];
 files['/patching.html'] = ['patching.html', 'text/html'];
 files['/simulations.html'] = ['simulations.html', 'text/html'];
+files['/fanout-replacement.html'] = ['fanout-replacement.html', 'text/html'];
 files['/fanout-replacement.mjs'] = ['fanout-replacement.mjs', 'text/javascript'];
 files['/fanout-replacement-state.mjs'] = ['fanout-replacement-state.mjs', 'text/javascript'];
 files['/fanout-replacement.css'] = ['fanout-replacement.css', 'text/css'];

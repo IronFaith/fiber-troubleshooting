@@ -80,7 +80,7 @@
 #fanout-guide .fg-steps {counter-reset:none}
 #fanout-guide .fg-steps>li {display:block}
 #fanout-guide .fg-steps>li::before {content:none}
-#fanout-guide .fg-step-heading h4 {font-size:18px}
+#fanout-guide .fg-step-heading h3 {font-size:18px;margin:0}
 #fanout-guide .fg-flow {direction:ltr}
 #fanout-guide .fg-flow>div {unicode-bidi:plaintext}
 @media(max-width:520px){#fanout-guide .fg-card{padding:12px} #fanout-guide .fg-btn{padding:8px}}

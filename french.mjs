@@ -10188,4 +10188,6 @@ export const frenchMessages = [
   ["192 legs","192 branches"],
   ["12 legs per MMC","12 branches par MMC"],
   ["16 MMCs","16 MMC"],
+  ["Fanout replacement | Fiber Optics Fundamentals","Remplacement du fanout | Fondamentaux de la fibre optique"],
+  ["← Back to simulations","← Retour aux simulations"],
 ];

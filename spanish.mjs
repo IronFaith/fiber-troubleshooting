@@ -3051,4 +3051,6 @@ export const spanishMessages = [
   ["192 legs","192 ramales"],
   ["12 legs per MMC","12 ramales por MMC"],
   ["16 MMCs","16 MMC"],
+  ["Fanout replacement | Fiber Optics Fundamentals","Reemplazo de fanout | Fundamentos de fibra óptica"],
+  ["← Back to simulations","← Volver a simulaciones"],
 ];

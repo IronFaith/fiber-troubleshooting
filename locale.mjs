@@ -1,6 +1,6 @@
-import {spanishMessages} from './spanish.mjs?v=2026110103b';
-import {frenchMessages} from './french.mjs?v=2026110103b';
-import {arabicMessages} from './arabic.mjs?v=2026110103b';
+import {spanishMessages} from './spanish.mjs?v=2026110104';
+import {frenchMessages} from './french.mjs?v=2026110104';
+import {arabicMessages} from './arabic.mjs?v=2026110104';
 export const languages=Object.freeze({en:'English',es:'Español',fr:'Français',ar:'العربية'});
 export const isLanguage=value=>Object.hasOwn(languages,value);
 export const languageDirection=language=>language==='ar'?'rtl':'ltr';

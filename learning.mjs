@@ -5,10 +5,10 @@ import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPa
 import { rackIllustration } from './rack-visuals.mjs?v=2026110103';
 import { mountCommunicationRoute } from './communication-route.mjs?v=2026110103';
 import { mountCourse, learningEntry } from './course.mjs?v=20261101';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=2026110103b';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=2026110104';
 import { opticIllustration } from './patching-visuals.mjs?v=20261101';
 import { mountPatchPractice } from './patch-practice.mjs?v=2026110103';
-import { mountFanoutReplacement } from './fanout-replacement.mjs?v=2026110103b';
+import { mountFanoutReplacement } from './fanout-replacement.mjs?v=2026110104';
 import { mountLightJourney } from './loop-lesson.mjs?v=2026110103';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=2026110103';
@@ -443,18 +443,24 @@ function renderSimulations() {
     <div class="chapter-heading"><p class="chapter-count">Hands-on practice</p><button type="button" class="lesson-motion"></button></div>
     <h2 id="lesson-title">Simulations</h2>
     <p class="lesson-intro">Move the cable. Match the port. Build confidence on mock hardware.</p>
-    <nav class="lesson-jumps" aria-label="Simulation activities"><a href="#patch-practice">LC & MMC patching</a><a href="#fanout-replacement">Fanout replacement</a></nav>
+    <nav class="lesson-jumps" aria-label="Simulation activities"><a href="#patch-practice" aria-current="page">LC & MMC patching</a><a href="./fanout-replacement.html">Fanout replacement</a></nav>
     <section id="patch-practice" class="lesson-section" aria-labelledby="practice-title">
       <h3 id="practice-title">LC & MMC patching</h3>
       <p class="section-intro">Read a mock connection record ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question exam.</p>
       <div id="patch-lab" class="patch-lab"></div>
       <p class="picture-note">Each ticket provides a fictional position map. Matching a port does not prove light or link health. Follow the approved procedure and verify the actual connection.</p>
     </section>
-    <div id="fanout-simulation"></div>
     <a class="next-chapter" href="./patching.html">Review connection record, LC & MMC patching →</a>
     <a class="next-chapter" href="./quiz.html">Exams →</a>`;
   setupLesson(lesson);
   mountPatchPractice(document.getElementById('patch-lab'));
+}
+
+function renderFanoutSimulation() {
+  simulationsLink.setAttribute('aria-current', 'page');
+  lesson.innerHTML = `
+    <nav class="lesson-jumps" aria-label="Simulation activities"><a href="./simulations.html#patch-practice">LC & MMC patching</a><a href="./fanout-replacement.html" aria-current="page">Fanout replacement</a></nav>
+    <div id="fanout-simulation"></div>`;
   mountFanoutReplacement(document.getElementById('fanout-simulation'));
 }
 
@@ -551,7 +557,16 @@ if (lesson) {
   if (lesson.dataset.chapter === 'patching' && location.hash === '#patch-practice') location.replace('./simulations.html#patch-practice');
   else if (['devices', 'patching'].includes(lesson.dataset.chapter)) {
     location.replace('./learn.html' + (location.hash || (lesson.dataset.chapter === 'devices' ? '#chapter-2' : '#chapter-3')));
-  } else if (lesson.dataset.chapter === 'simulations') renderSimulations();
+  } else if (lesson.dataset.chapter === 'simulations') {
+    const redirectFanoutBookmark = () => {
+      if(location.hash !== '#fanout-replacement') return false;
+      location.replace('./fanout-replacement.html' + location.search);
+      return true;
+    };
+    window.addEventListener('hashchange', redirectFanoutBookmark);
+    if(!redirectFanoutBookmark()) renderSimulations();
+  }
+  else if (lesson.dataset.chapter === 'fanout-replacement') renderFanoutSimulation();
   else {
     courseLink.setAttribute('aria-current', 'page');
     mountCourse(lesson, renderStage, linkLessonTerms);

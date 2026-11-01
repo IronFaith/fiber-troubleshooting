@@ -3051,4 +3051,6 @@ export const arabicMessages = [
   ["192 legs","192 فرعًا"],
   ["12 legs per MMC","12 فرعًا لكل MMC"],
   ["16 MMCs","16 موصل MMC"],
+  ["Fanout replacement | Fiber Optics Fundamentals","استبدال مجموعة التفرّع | أساسيات الألياف الضوئية"],
+  ["← Back to simulations","← العودة إلى المحاكاة"],
 ];
