@@ -5,10 +5,10 @@ import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPa
 import { rackIllustration } from './rack-visuals.mjs?v=20261101';
 import { mountCommunicationRoute } from './communication-route.mjs?v=20261101';
 import { mountCourse, learningEntry } from './course.mjs?v=20261101';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=20261101';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=20261101b';
 import { opticIllustration } from './patching-visuals.mjs?v=20261101';
 import { mountPatchPractice } from './patch-practice.mjs?v=20261101';
-import { mountFanoutReplacement } from './fanout-replacement.mjs?v=20261101';
+import { mountFanoutReplacement } from './fanout-replacement.mjs?v=20261101b';
 import { mountLightJourney } from './loop-lesson.mjs?v=20261101';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=20261101';

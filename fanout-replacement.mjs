@@ -31,8 +31,16 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
         <div><h5>Connection record</h5><p>Record the location, head serial, passive port and every leg’s endpoint.</p></div>
         <div><h5>Physical labels</h5><p>Compare the record with the installed labels. Resolve any mismatch before work.</p></div>
       </div>
-      <div class="fg-location"><span class="fg-viz-badge">Worked example</span><strong dir="ltr">Device A → Device B · CAS 1 / 12 · DEMO-FANOUT-001</strong></div>
-      <div class="fg-viz-row"><span>Device endpoints</span><span>Passive locations</span></div>
+      <div class="fg-build">
+        <div class="fg-viz-row"><strong>Fully patched example</strong><span class="fg-text-small">A = active legs. P = passive MMCs.</span></div>
+        <div class="fg-build-equation" role="img" aria-label="192 legs ÷ 12 legs per MMC = 16 MMCs"><span dir="auto">192 legs</span><span aria-hidden="true">÷</span><span dir="auto">12 legs per MMC</span><span aria-hidden="true">=</span><span dir="auto">16 MMCs</span></div>
+        <div class="fg-viz-controls"><label class="fg-form-label">Illustrated room layout<select class="fg-form-select" id="fg-passive-count"><option value="3">3 passive locations</option><option value="6">6 passive locations</option></select></label></div>
+        <p class="fg-text-small fg-text-muted">Follow the boxes from Device A to Device B. Scroll sideways to see the full route.</p>
+        <div class="fg-route-scroll" tabindex="0" role="region" aria-label="Active and passive block diagram"><div id="fg-route" class="fg-route" role="list"></div></div>
+        <p class="fg-text-small">Counts show patched / required. Each P shows 16/16 MMCs in this example.</p>
+      </div>
+      <div class="fg-location"><span class="fg-viz-badge">Mapped passive</span><strong dir="ltr">P1 · CAS 1 / 12 · DEMO-FANOUT-001</strong></div>
+      <p class="fg-text-small">Replace one of the 16 MMCs and its 12 legs.</p>
       <p class="fg-text-small">If the labels or map do not match, stop and resolve the mismatch.</p>
       <details class="fg-details"><summary>See the mapping example</summary>
               <table class="fg-table fg-table-sm">
@@ -45,10 +53,6 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
           <tr><th scope="row">Whole assembly</th><td>Record each of the 12 leg IDs and its assigned device / port</td></tr>
         </tbody>
       </table>
-
-              <div class="fg-viz-controls"><label class="fg-form-label">Illustrated room layout<select class="fg-form-select" id="fg-passive-count"><option value="3">3 passive locations</option><option value="6">6 passive locations</option></select></label></div>
-      <div class="fg-route-title">Device A → Device B</div>
-      <div id="fg-route" class="fg-route" role="img" aria-label="Device A active endpoint, three passive locations, then Device B active endpoint"></div>
 
               <div class="fg-cassette" role="img" aria-label="CAS 1, 32 ports. Ports 1 to 16 are on top; 17 to 32 below. Port 12 is the example destination.">
         <div class="fg-cassette-label"><span>CAS 1 · front port reference</span><span>32 ports</span></div>
@@ -109,8 +113,8 @@ export function mountFanoutReplacement(host) {
  }
  function drawRoute(){
    const count=Number(q('#fg-passive-count').value),route=q('#fg-route');
-   route.innerHTML=`<div class="fg-route-node"><strong>Device A</strong><span>Endpoint</span></div>${Array.from({length:count},(_,i)=>`<div class="fg-route-node" ${i===0?'data-target="true"':''}><strong>P${i+1}</strong><span>${i===0?'CAS 1':'Passive'}</span>${i===0?'<span class="fg-text-small">Target</span>':''}</div>`).join('')}<div class="fg-route-node"><strong>Device B</strong><span>Endpoint</span></div>`;
-   route.setAttribute('aria-label',`Device A active endpoint, ${count} passive locations, then Device B active endpoint. The target assembly in this example is at CAS 1, the first passive. The fanout still has 12 legs.`);
+   const active=device=>`<div class="fg-route-node fg-route-active" role="listitem"><strong class="fg-route-letter">A</strong><span>${device}</span><bdi class="fg-route-count" dir="ltr">192/192</bdi><span class="fg-text-small">Legs patched</span></div>`;
+   route.innerHTML=active('Device A')+Array.from({length:count},(_,i)=>`<div class="fg-route-node" role="listitem" ${i===0?'data-target="true"':''}><strong class="fg-route-letter">P${i+1}</strong><span>${i===0?'CAS 1':'Passive'}</span><bdi class="fg-route-count" dir="ltr">16/16</bdi><span class="fg-text-small">MMCs patched</span>${i===0?'<span class="fg-route-target">Mapped passive</span>':''}</div>`).join('')+active('Device B');
  }
  for(const [selector,start] of [['#fg-ports-top',1],['#fg-ports-bottom',17]])q(selector).innerHTML=Array.from({length:16},(_,i)=>`<span class="fg-port"${i+start===12?' data-selected="true"':''}>${i+start}</span>`).join('');
 

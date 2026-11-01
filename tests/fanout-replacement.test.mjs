@@ -37,7 +37,7 @@ test('checks preserve leg identity, reject invalid legs and restart independentl
 });
 
 test('fanout instructions and checklist feedback translate without changing identifiers',()=>{
-  const messages=['Fanout replacement','Simulation activities','Find the MMC','Save and match the map','Replace under the approved procedure','Update and verify the record','Check every link','Practice checking the map','See the mapping example','Check mapping for leg 7','Leg 7 checked. Legs remaining: 5.','12 remaining','Finish checklist','Restart this simulation','Head checked','Checklist complete','Head · DEMO-FANOUT-001'];
+  const messages=['Fanout replacement','Simulation activities','Fully patched example','Active and passive block diagram','192 legs ÷ 12 legs per MMC = 16 MMCs','Counts show patched / required. Each P shows 16/16 MMCs in this example.','Legs patched','MMCs patched','Passive','192 legs','12 legs per MMC','16 MMCs','Find the MMC','Save and match the map','Replace under the approved procedure','Update and verify the record','Check every link','Practice checking the map','See the mapping example','Check mapping for leg 7','Leg 7 checked. Legs remaining: 5.','12 remaining','Finish checklist','Restart this simulation','Head checked','Checklist complete','Head · DEMO-FANOUT-001'];
   for(const language of ['es','fr','ar']){
     for(const message of messages) assert.notEqual(translate(message,language),message,language+': '+message);
     assert.ok(translate('Head · DEMO-FANOUT-001',language).includes('DEMO-FANOUT-001'));
