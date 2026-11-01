@@ -10,10 +10,10 @@ Fetch the latest repository state and read AGENTS.md and this file before contin
 
 - **Current objective:** Use realistic fictional dotted serials instead of a demo-prefixed serial.
 - **Accepted scope:** Replace the head serial consistently with `SN.4827.0619` in lessons, simulations, diagrams, accessible labels, exam examples and all four languages. Keep the surrounding fictional-example labeling. No exercise behavior or saved-progress changes.
-- **Implemented:** The dotted serial is consistent throughout the course. Standing instructions now retain this naming preference. The connected A/P boxes, five-step guide and mapping checklist remain unchanged.
+- **Completed and published:** The dotted serial is consistent throughout the course. Standing instructions now retain this naming preference. The connected A/P boxes, five-step guide and mapping checklist remain unchanged.
 - **Verification:** Focused behavior/locale checks passed (15 tests), followed by `npm run check` with all 134 tests passing. Learn and Simulations displayed the new serial at 320px in all four languages, without page overflow or browser errors. English and Arabic hardware-label screenshots were inspected.
-- **Latest previously verified application release:** [86b6ad1](https://github.com/IronFaith/fiber-troubleshooting/commit/86b6ad1e100424bc3e41075b86623a5ad8e0dc09), the connected active/passive build. Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/41348468632) succeeded and all 17 changed runtime files matched. The dotted-serial publication is pending verification.
-- **Remaining work / next action:** Publish and verify the exact dotted-serial deployment and affected served files.
+- **Latest verified application release:** [9b76627](https://github.com/IronFaith/fiber-troubleshooting/commit/9b76627bab0f8ca7869f349cd1bcdf4d8ca83dce). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/41348825560) succeeded. SHA-256 comparisons confirmed all 35 changed runtime files served by Pages match the commit.
+- **Remaining work / next action:** This milestone is complete and live. Use the realistic dotted-serial convention for future fictional examples.
 - **Blockers:** None known.
 
 The preceding generic-content release [f80d36e](https://github.com/IronFaith/fiber-troubleshooting/commit/f80d36e14b8b94af23a73b7618d80b770ad979f4) was verified through [its exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/41348243392) and all 46 changed runtime files. Its generic records, fictional examples and order-independent checklist remain the baseline.
