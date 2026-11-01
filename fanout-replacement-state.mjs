@@ -1,16 +1,17 @@
-// Local training state only. No live MyPatch operations or exam storage.
+// Local checklist only; no equipment or record-management operations.
 export function newFanoutReplacement() {
-  return {leaderCleared:false,followers:Array(12).fill(true),newLeaderPatched:false};
+  return {headVerified:false,legsVerified:Array(12).fill(false),completed:false};
 }
 
-export function canPatchFanout(state) {
-  return state.leaderCleared && state.followers.every(patched=>!patched) && !state.newLeaderPatched;
+export function canCompleteFanout(state) {
+  return state.headVerified && state.legsVerified.every(Boolean) && !state.completed;
 }
 
 export function changeFanoutReplacement(state,action) {
-  if(action.type==='clearLeader' && !state.newLeaderPatched) return {...state,leaderCleared:true};
-  if(action.type==='clearFollower' && state.leaderCleared && !state.newLeaderPatched && Number.isInteger(action.leg) && action.leg>=1 && action.leg<=state.followers.length)
-    return {...state,followers:state.followers.map((patched,index)=>index===action.leg-1?false:patched)};
-  if(action.type==='patchNew' && canPatchFanout(state)) return {...state,newLeaderPatched:true};
+  if(state.completed) return state;
+  if(action.type==='verifyHead') return {...state,headVerified:true};
+  if(action.type==='verifyLeg' && Number.isInteger(action.leg) && action.leg>=1 && action.leg<=state.legsVerified.length)
+    return {...state,legsVerified:state.legsVerified.map((verified,index)=>index===action.leg-1?true:verified)};
+  if(action.type==='complete' && canCompleteFanout(state)) return {...state,completed:true};
   return state;
 }

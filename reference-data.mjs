@@ -1,4 +1,4 @@
-import {translate,getLanguage} from './locale.mjs?v=30';
+import {translate,getLanguage} from './locale.mjs?v=20261101';
 const foa = ['FOA · fiber testing', 'https://www.thefoa.org/tech/ref/basic/test.html'];
 const units = ['FOA · dB and dBm', 'https://www.thefoa.org/tech/ref/testing/test/dB.html'];
 const jargon = ['FOA · illustrated terms', 'https://www.thefoa.org/tech/ref/basic/jargon.html'];
@@ -13,14 +13,14 @@ export const referenceTerms = [
     definition:'A thin glass path that carries light between connections.', purpose:'Trace the mapped strand through each connection; the cable itself does not generate light.'},
   {id:'lc', label:'LC', also:'Optic-side connector', group:'Hardware', aliases:['LC connector','duplex LC'], art:'lc', anchor:'lc-position',
     definition:'The small connector used at the optic in this course. Two LC connections form the illustrated TX/RX pair.', purpose:'Match the assigned optic position and orientation. A duplex pair contains two fiber strands.'},
-  {id:'mmc', label:'MMC', also:'Multi-fiber connector', group:'Hardware', aliases:['MMC head','leader','head'], art:'mmc', anchor:'mmc-fanout',
+  {id:'mmc', label:'MMC', also:'Multi-fiber connector', group:'Hardware', aliases:['MMC head','head','head'], art:'mmc', anchor:'mmc-fanout',
     definition:'A compact connector that brings several fiber paths together at one mating interface.', purpose:'In our fanout examples, this is the head connected at the CAS. Its fibers stay separate; it does not split one signal.', source:mmc},
-  {id:'cas', label:'CAS / cassette', also:'Site label · passive connection point', group:'Hardware', aliases:['CAS','cassette','passive','passives'], art:'cas', anchor:'ends',
+  {id:'cas', label:'CAS / cassette', also:'Example label · passive connection point', group:'Hardware', aliases:['CAS','cassette','passive','passives'], art:'cas', anchor:'ends',
     definition:'The passive connection point shown in our fiber routes. It connects mapped fiber paths without making light.', purpose:'Our front view has ports 1–16 above 17–32. Match the actual CAS, port and route in the connection record.'},
-  {id:'fanout', label:'Fanout', also:'One head, multiple followers', group:'Hardware', aliases:['assembly','breakout'], art:'fanout', anchor:'mmc-fanout',
-    definition:'An assembly that brings separate follower paths into one multi-fiber head.', purpose:'The example has 12 followers sharing a head serial. Count legs and individual strands separately; one duplex leg has two strands.'},
-  {id:'follower', label:'Follower / leg', also:'One branch of the fanout', group:'Hardware', aliases:['follower','followers','leg','legs'], art:'fanout', anchor:'fim-path',
-    definition:'A labeled branch of the fanout that connects to its assigned optic position.', purpose:'Match the leg ID as well as the head serial. Followers from the same head are not interchangeable.'},
+  {id:'fanout', label:'Fanout', also:'One head, multiple legs', group:'Hardware', aliases:['assembly','breakout'], art:'fanout', anchor:'mmc-fanout',
+    definition:'An assembly that brings separate leg paths into one multi-fiber head.', purpose:'The example has 12 legs sharing a head serial. Count legs and individual strands separately; one duplex leg has two strands.'},
+  {id:'follower', label:'Fanout leg', also:'One branch of the fanout', group:'Hardware', aliases:['leg','legs','leg','legs'], art:'fanout', anchor:'fim-path',
+    definition:'A labeled branch of the fanout that connects to its assigned optic position.', purpose:'Match the leg ID as well as the head serial. Legs from the same head are not interchangeable.'},
   {id:'ferrule', label:'Ferrule', also:'Fiber holder at the connector face', group:'Hardware', aliases:['ferrite','connector face','end face'], art:'ferrule', anchor:'fault-evidence',
     definition:'The precision part that holds and aligns fibers where connectors meet.', purpose:'Dirt or damage here can affect a channel. The component is called a ferrule; its shape depends on the connector.', source:mmc},
   {id:'tx', label:'TX', also:'Transmit', group:'Light & readings', aliases:['transmit','transmitter','sending'], art:'tx', anchor:'optics',
@@ -31,8 +31,8 @@ export const referenceTerms = [
     definition:'Light outside the visible range, used by the optics in our examples.', purpose:'Blue arrows in the course represent invisible IR. They are not a literal glow you can see on the cable.', source:foa},
   {id:'dbm', label:'dBm', also:'Optical power relative to 1 milliwatt', group:'Light & readings', aliases:['power','reading','0 dBm'], art:'power', anchor:'readings',
     definition:'A unit for optical power. Zero dBm equals 1 milliwatt; negative dBm still represents some power.', purpose:'Zero is not a universal “perfect” reading. Use the installed optic’s allowed range.', source:units},
-  {id:'no-light', label:'−40 / no light', also:'Site report example', group:'Light & readings', aliases:['-40','−40','no light','dark'], art:'dark', anchor:'fault-evidence',
-    definition:'In the report examples used here, −40 is the no-light indication.', purpose:'It is a symptom, not the cause. Check the source, connections, mapped path and test setup before blaming a part.'},
+  {id:'no-light', label:'No signal', also:'Simulated report', group:'Light & readings', aliases:['no signal','below reporting range','no light','dark'], art:'dark', anchor:'fault-evidence',
+    definition:'A diagnostic status indicating no detected signal. A value below the reporting range also requires interpretation using the device specifications.', purpose:'It is a symptom, not the cause. Check the source, connections, mapped path and test setup before blaming a part.'},
   {id:'attenuation', label:'Attenuation', also:'Loss of optical power', group:'Light & readings', aliases:['loss','dB','weak light','bend loss'], art:'loss', anchor:'readings',
     definition:'A reduction in light power as it travels through fiber and connections. Loss is expressed in dB.', purpose:'Too much loss can leave RX below its required minimum even when some light gets through.', source:units},
   {id:'polarity', label:'Polarity', also:'Correct TX-to-RX pairing', group:'Connections & tests', aliases:['swapped pair','pairing','swap'], art:'polarity', anchor:'polarity-checks',
@@ -50,13 +50,13 @@ export const referenceTerms = [
   {id:'local-remote', label:'Local / remote', also:'Your end and the other end', group:'Site & records', aliases:['local','remote','endpoint','device'], art:'ends', anchor:'viewpoint',
     definition:'Local is the device you are working from. Remote is the device at the other end of the link.', purpose:'These names depend on your viewpoint. Each device has its own TX and RX.'},
   {id:'lldp', label:'LLDP', also:'Link Layer Discovery Protocol', group:'Site & records', aliases:['neighbor','neighbour','neighbor discovery','local LLDP','remote LLDP'], art:'lldp', anchor:'lldp-neighbors',
-    definition:'A shared way for devices to announce their name and port over the existing link. Local is the device whose report you’re reading; remote is the other end.', purpose:'LLDP lists the remote device as a neighbor. Passive cassettes between them do not become neighbors. Compare the reported name and port with FIM. LLDP adds no backup connection and does not prove optical health.', source:['Cisco · LLDP neighbors','https://developer.cisco.com/docs/sonic/lldp/']},
-  {id:'fim', label:'FIM', also:'Site connection record', group:'Site & records', aliases:['connection record','ticket','mapping'], art:'ticket', anchor:'fim-path',
-    definition:'The record used in this course to look up devices, ports, followers, heads and passive connections.', purpose:'Use it to confirm the expected path. The record tells you where a connection belongs; it is not a live light measurement.'},
-  {id:'cable-guy', label:'Cable Guy', also:'Site optic-health report', group:'Site & records', aliases:['health report','optic health'], art:'power', anchor:'readings',
-    definition:'The system used in your site examples to view optic-health readings.', purpose:'Read TX/RX per lane and the applicable limits. This learning site does not pull live reports from Cable Guy.'},
-  {id:'rack-position', label:'Rack position', also:'Building → room → row → rack → elevation', group:'Site & records', aliases:['rack','elevation','QNO5.5C.16f.17.30','location'], art:'rack', anchor:'position',
-    definition:'The site address used to locate the device within a building and rack.', purpose:'QNO5.5C.16f.17.30 means building QNO5, room 5C, row 16 front, rack 17, elevation 30 in our example.'}
+    definition:'A shared way for devices to announce their name and port over the existing link. Local is the device whose report you’re reading; remote is the other end.', purpose:'LLDP lists the remote device as a neighbor. Passive cassettes between them do not become neighbors. Compare the reported name and port with the connection record. LLDP adds no backup connection and does not prove optical health.', source:['Cisco · LLDP neighbors','https://developer.cisco.com/docs/sonic/lldp/']},
+  {id:'fim', label:'Connection record', also:'Connection assignment', group:'Site & records', aliases:['connection record','ticket','mapping'], art:'ticket', anchor:'fim-path',
+    definition:'The record used in this course to look up devices, ports, legs, heads and passive connections.', purpose:'Use it to confirm the expected path. The record tells you where a connection belongs; it is not a live light measurement.'},
+  {id:'cable-guy', label:'Device diagnostics', also:'Optical readings and status', group:'Site & records', aliases:['health report','optic health'], art:'power', anchor:'readings',
+    definition:'Tools that report device and transceiver status, including optical readings.', purpose:'Read TX/RX per lane and the applicable limits. All reports in this course are simulated.'},
+  {id:'rack-position', label:'Rack position', also:'Building → room → row → rack → elevation', group:'Site & records', aliases:['rack','elevation','DEMO / ROOM-A / ROW-02 / RACK-17 / U30','location'], art:'rack', anchor:'position',
+    definition:'The site address used to locate the device within a building and rack.', purpose:'DEMO / ROOM-A / ROW-02 / RACK-17 / U30 means building DEMO, room ROOM-A, row 2, rack 17, elevation 30 in our example.'}
 ];
 
 export const referenceGroups = [...new Set(referenceTerms.map(term => term.group))];

@@ -36,7 +36,7 @@ test('an open intermediate connector stops a forward or reverse trace and preven
   }
 });
 
-test('patching a different numbered port preserves the FIM target and invalidates only affected evidence',()=>{
+test('patching a different numbered port preserves the connection record target and invalidates only affected evidence',()=>{
   let s=createCase();
   for(const point of [0,1,2]) s=apply(s,{type:'select',point},{type:'tool',tool:'loop'},{type:'ready',value:true},{type:'record',result:'pass'});
   s=observe(changeCase(s,{type:'trace',from:0,to:2}));

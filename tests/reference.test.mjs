@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {referenceTerms,searchReference} from '../reference-data.mjs';
 import {chapters,coursePosition} from '../course.mjs';
 
-test('reference search finds everyday names, acronym expansions and the site no-light value',()=>{
-  for(const [query,id] of [['  TRANSCEIVER  ','optic'],['visual fault locator','vfl'],['ferrite','ferrule'],['-40','no-light'],['−40','no-light'],['swapped pair','polarity'],['head','mmc'],['LLDP','lldp'],['Link Layer Discovery Protocol','lldp'],['neighbor','lldp']]) {
+test('reference search finds everyday names, acronym expansions and no-signal terminology',()=>{
+  for(const [query,id] of [['  TRANSCEIVER  ','optic'],['visual fault locator','vfl'],['ferrite','ferrule'],['below reporting range','no-light'],['no signal','no-light'],['swapped pair','polarity'],['head','mmc'],['LLDP','lldp'],['Link Layer Discovery Protocol','lldp'],['neighbor','lldp']]) {
     assert.ok(searchReference(query).some(term=>term.id===id),query);
   }
 });

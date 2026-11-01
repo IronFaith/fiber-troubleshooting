@@ -1,7 +1,7 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=23';
-import {vflEndpoint,displayedCasFace} from './troubleshoot-visuals.mjs?v=34';
-import {lcConnector,vflPen} from './test-tool-visuals.mjs?v=1';
+import {patchAt,traceFrom,traceKey,isOptic,fiberPointName,vflProgress} from './troubleshoot-state.mjs?v=20261101';
+import {vflEndpoint,displayedCasFace} from './troubleshoot-visuals.mjs?v=20261101';
+import {lcConnector,vflPen} from './test-tool-visuals.mjs?v=20261101';
 
 const letter=strand=>strand==='tx'?'A':'B';
 const label=(x,y,value,extra='')=>`<text x="${x}" y="${y}" class="vfl-label ${extra}">${value}</text>`;
@@ -105,7 +105,7 @@ function viewingControls(s,light,points) {
   if(traceFrom(s)>s.selected) route.reverse();
   return `<div class="vfl-viewing-controls">
     <div class="vfl-destinations" role="group" aria-label="Look for light at">${route.map(([p,name])=>`<button type="button" data-action="vfl-view-${p}" aria-pressed="${s.selected===p}"><b>${name}</b>${!isOptic(s,p)?`<small>Port ${patchAt(s,p).port}</small>`:''}</button>`).join('')}</div>
-    ${atCAS?`<div class="vfl-port-controls"><label for="vfl-port-number">CAS ${point} · Viewing port</label><div class="vfl-port-stepper"><button type="button" data-action="vfl-port-minus" aria-label="Previous port" ${patch.port===1?'disabled':''}>−</button><input id="vfl-port-number" data-field="vfl-patch-port" type="number" inputmode="numeric" min="1" max="32" step="1" value="${patch.port}" required><button type="button" data-action="vfl-port-plus" aria-label="Next port" ${patch.port===32?'disabled':''}>+</button></div><div class="vfl-fim-port">${patch.port===s.ports[point-1]?`<span>FIM · Port ${s.ports[point-1]}</span>`:`<button type="button" data-action="vfl-port-fim">Use FIM port ${s.ports[point-1]}</button>`}</div></div>`:''}
+    ${atCAS?`<div class="vfl-port-controls"><label for="vfl-port-number">CAS ${point} · Viewing port</label><div class="vfl-port-stepper"><button type="button" data-action="vfl-port-minus" aria-label="Previous port" ${patch.port===1?'disabled':''}>−</button><input id="vfl-port-number" data-field="vfl-patch-port" type="number" inputmode="numeric" min="1" max="32" step="1" value="${patch.port}" required><button type="button" data-action="vfl-port-plus" aria-label="Next port" ${patch.port===32?'disabled':''}>+</button></div><div class="vfl-fim-port">${patch.port===s.ports[point-1]?`<span>Connection record · Port ${s.ports[point-1]}</span>`:`<button type="button" data-action="vfl-port-fim">Use the connection record port ${s.ports[point-1]}</button>`}</div></div>`:''}
   </div>`;
 }
 
@@ -119,7 +119,7 @@ export function simpleVfl(s,paused,{embedded=false,recordedPath=''}={}) {
   const status=light.mode==='expected'?'Expected path · no result recorded':light.mode==='simulation'?'Simulated fault · illustration':'Your recorded observation';
   return `<section class="vfl-simple" aria-label="VFL strand check">
     ${embedded?'':`<div class="vfl-simple-top"><div><h2>Follow the red light</h2><p>Tap an LC leg, then mark the light at the viewing point.</p></div><button type="button" data-action="motion" class="motion-toggle">${paused?'Play arrows':'Pause arrows'}</button></div>`}
-    <div class="vfl-simple-route">${select('vfl-from','VFL attached to',points.filter(([p])=>isOptic(s,p)&&p!==s.selected),from)}${embedded&&atCAS?`<div class="vfl-fim-port">${patch.port===s.ports[point-1]?`<span>FIM · Port ${s.ports[point-1]}</span>`:`<button type="button" data-action="vfl-port-fim">Use FIM port ${s.ports[point-1]}</button>`}</div>`:''}</div>
+    <div class="vfl-simple-route">${select('vfl-from','VFL attached to',points.filter(([p])=>isOptic(s,p)&&p!==s.selected),from)}${embedded&&atCAS?`<div class="vfl-fim-port">${patch.port===s.ports[point-1]?`<span>Connection record · Port ${s.ports[point-1]}</span>`:`<button type="button" data-action="vfl-port-fim">Use the connection record port ${s.ports[point-1]}</button>`}</div>`:''}</div>
     <div class="vfl-view ${paused?'light-paused':''}">
       ${embedded?'':viewingControls(s,light,points)}
       <p class="vfl-view-status ${light.mode}" role="status">${status}${light.mode==='observation'?` · ${observationLabels[light.result]}`:''}</p>

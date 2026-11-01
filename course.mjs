@@ -1,4 +1,4 @@
-import {chapters,lessonSupport,takeaways,legacyCourseAnchors,lessonNavigation} from './course-data.mjs?v=1';
+import {chapters,lessonSupport,takeaways,legacyCourseAnchors,lessonNavigation} from './course-data.mjs?v=20261101';
 export {chapters,lessonNavigation};
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function resolvePosition(value) {

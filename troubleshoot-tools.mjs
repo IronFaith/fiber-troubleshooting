@@ -1,5 +1,5 @@
-import {mmcLoopback} from './loop-visuals.mjs?v=5';
-import {lcLoopback,vflPen} from './test-tool-visuals.mjs?v=1';
+import {mmcLoopback} from './loop-visuals.mjs?v=20261101';
+import {lcLoopback,vflPen} from './test-tool-visuals.mjs?v=20261101';
 export const toolNames={lc:'LC loopback',mmc:'MMC loopback',vfl:'VFL'};
 export function toolArt(kind) {
   if(kind==='mmc') return `<svg viewBox="0 0 230 92" aria-hidden="true">${mmcLoopback(142,42,{label:true})}</svg>`;

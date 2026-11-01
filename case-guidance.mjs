@@ -1,4 +1,4 @@
-import {assessment,isOptic,pointName,fiberPointName,loopEntries,nextCheckActions,parseTraceKey} from './troubleshoot-state.mjs?v=23';
+import {assessment,isOptic,pointName,fiberPointName,loopEntries,nextCheckActions,parseTraceKey} from './troubleshoot-state.mjs?v=20261101';
 
 function recordedTests(s,source) {
   const rows=loopEntries(s).filter(e=>(e.side==='remote'?s.count+1:0)===source)
@@ -33,10 +33,10 @@ export function caseGuidance(s,a=assessment(s)) {
   const plan=(heading,steps,tools,outcomes=guide.outcomes)=>Object.assign(guide,{heading,steps,tools,outcomes});
   if(a.complete) return {...guide,area:'Restored service verified',heading:'Finish the case',steps:[a.next]};
   if(a.needsIdentity) return plan('Confirm the path first',[
-    'Match the device and optic socket to FIM.',
-    'Match the LC follower, MMC head serial, CAS ports and strand at the tested ends.',
+    'Match the device and optic socket to the connection record.',
+    'Match the LC leg, MMC head serial, CAS ports and strand at the tested ends.',
     'Check only the identity boxes you have confirmed.'
-  ],['FIM record and readable hardware labels'],[
+  ],['connection record and readable hardware labels'],[
     ['Mapping matches','Continue with the next isolation check.'],
     ['Mapping differs','Correct the confirmed misport, then retest.']
   ]);
@@ -81,7 +81,7 @@ export function caseGuidance(s,a=assessment(s)) {
     a.next,
     'Record the repeat result before replacing a part.'
   ],[a.check?'VFL and access to the recorded viewing point':'Approved loopback and optic readings']);
-  if(a.issue==='polarity') return plan(a.title,[a.next],['FIM record and readable hardware labels']);
+  if(a.issue==='polarity') return plan(a.title,[a.next],['connection record and readable hardware labels']);
   if(a.issue==='loop'&&a.tone==='suspect'&&a.from===a.to&&isOptic(s,a.from)) return plan('Check the optic test setup',[
     'Verify the loop pair, seating and required attenuation against the approved setup.',
     'Inspect, clean if needed and reinspect the connections.',

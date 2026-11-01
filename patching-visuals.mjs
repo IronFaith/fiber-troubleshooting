@@ -2,7 +2,7 @@ const text = (x,y,value,extra='') => `<text x="${x}" y="${y}" ${extra}>${value}<
 
 export function opticIllustration({selected=null, flipped=false, optic=25, labels=true, id='practice'}={}) {
   const right = (selected === 1) !== flipped;
-  const suffix = selected ? 5 : 1;
+  const suffix = selected ? 2 : 1;
   const position = selected+1;
   const side = right ? 'right' : 'left';
   const center = selected ? 232 : 128;
@@ -31,7 +31,7 @@ export function opticIllustration({selected=null, flipped=false, optic=25, label
   drawing += '</g></g>';
   [128,232].forEach((x,index) => {
     const visibleX = flipped ? 360-x : x;
-    drawing += (labels ? text(visibleX,flipped ? 59 : 140,`${optic}/${index ? 5 : 1}`,'class="patch-port-label" text-anchor="middle"') : '')+
+    drawing += (labels ? text(visibleX,flipped ? 59 : 140,`${optic}/${index ? 2 : 1}`,'class="patch-port-label" text-anchor="middle"') : '')+
       text(visibleX,flipped ? 258 : 338,`Position ${index+1}`,'class="small" text-anchor="middle"');
   });
   if(selected !== null) drawing += `<path class="patch-insert" d="M${screenCenter} ${flipped ? 65 : 146} V${flipped ? 78 : 156} m-5 -5 5 5 5 -5"/>`;

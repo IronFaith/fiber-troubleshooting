@@ -13,7 +13,7 @@ test('course objectives, self-checks, stages and navigation translate in every l
     'Stage 3 of 5','Start stage 2','Lesson 4 of 7','Lesson in this stage','What you’ll learn',
     'Check your understanding','Show explanation','Put this stage into practice','Related exam',
     'Lesson navigation','Previous lesson','Next lesson','Choose an Intermediate exam','From your lesson',
-    'Follow the full route through rack, distribution and room-passage passives →','Review FIM, LC & MMC patching →',
+    'Follow the full route through rack, distribution and room-passage passives →','Review connection record, LC & MMC patching →',
     'Choose a level. Every exam has five questions and draws from the lessons.','Explore the lessons',
     'Use the same lesson knowledge in situations with several clues. Separate what is known from what still needs checking.'
   ];
@@ -32,7 +32,7 @@ test('new-case actions and recorded VFL path labels translate in all learner lan
     'Red: confirmed light','Amber: investigate','Dashed: not checked',
     'Fiber / contacts suspect','MMC / CAS contact suspect','Recheck observations',
     "Weak light","Weak light reported here","Strand B: weak light reported","Dim VFL light is a visual observation, not a loss measurement.","Keep the VFL on this LC strand. Compare the loose incoming MMC head with the through-CAS result; inspect the mating connection if the glow changes there.","Check the VFL and LC seating with a known-good reference lead. Inspect the mapped fiber ends and bends, then use an optical loss test to measure loss.",
-    "Open here","CAS 2 · Patched port","Previous port","Next port","Use FIM port 2","Choose a port from 1 to 32.","Patched port updated. Recheck this section.",
+    "Open here","CAS 2 · Patched port","Previous port","Next port","Use the connection record port 2","Choose a port from 1 to 32.","Patched port updated. Recheck this section.",
     'Tap an LC leg, then mark the light at the viewing point.',"CAS 2 · Viewing port","Viewing port updated. Recheck this section.","Inspect the strand and its connections; compare with an earlier CAS.",'Does light reach the expected channel?','Light on another channel or port','Other channel (A)','Other channel (B)',
     'The incoming fiber passes visible light to the loose MMC head. The dark through-CAS result makes this channel’s mating contact suspect: contamination, damage, alignment or seating.',
     'A passes visible light; B does not. The MMC ferrule holds separate fibers. Investigate B’s fiber and its end-face contacts; A passing does not clear them.',
@@ -56,10 +56,10 @@ test('Spanish translates findings and composed diagram labels while preserving t
   assert.equal(translate('CAS 2 · Port 12','es'),'CAS 2 · Puerto 12');
   assert.equal(translate('1 current check · Round 3','es'),'1 comprobación actual · Ronda 3');
   assert.equal(translate('“I’m B”','es'),'«Soy B»');
-  for(const id of ['QNO5.5C.16f.17.30','S747885346FWL','25/5','RX −40 dBm','TX +0.25 dBm']) assert.equal(translate(id,'es'),id);
+  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','DEMO-FANOUT-001','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'es'),id);
   assert.equal(translate('Question 1 of 5','es'),'Pregunta 1 de 5');
   assert.equal(translate('Expected at CAS · A','es'),'Esperado en CAS · A');
-  assert.equal(translate('✓ Seated in the correct port. 25/1 means optic 25, position 1. With the tab above, that is the left side.','es'),'✓ Asentado en el puerto correcto. 25/1 indica óptico 25, posición 1. Con la pestaña arriba, queda a la izquierda.');
+  assert.equal(translate('✓ Seated in the correct port. The fictional map assigns 25/1 to optic 25, position 1. With the tab above, that is the left side.','es'),'✓ Asentado en el puerto correcto. El mapa ficticio asigna 25/1 al óptico 25, posición 1. Con la pestaña arriba, queda a la izquierda.');
   const finding='Strand B is dark; the other has light';
   assert.equal(translate(finding,'es'),'La fibra B está sin luz; la otra tiene luz');
   assert.equal(translate(finding,'en'),finding);
@@ -99,9 +99,9 @@ test('French translates composed feedback and findings without mixing language c
   assert.equal(translate('Select all supported answers. Then check your answers.','es'),'Selecciona todas las respuestas respaldadas por la evidencia. Luego revisa tus respuestas.');
   assert.equal(translate('1 current check · Round 3','fr'),'1 contrôle actuel · série 3');
   assert.equal(translate('CAS 2 · Port 12','fr'),'CAS 2 · port 12');
-  assert.equal(translate('✓ Seated in the correct port. 25/1 means optic 25, position 1. With the tab above, that is the left side.','fr'),'✓ Enclenché dans le bon port. 25/1 signifie optique 25, position 1. Avec la languette en haut, c’est le côté gauche.');
+  assert.equal(translate('✓ Seated in the correct port. The fictional map assigns 25/1 to optic 25, position 1. With the tab above, that is the left side.','fr'),'✓ Enclenché dans le bon port. Le plan fictif affecte 25/1 au module 25, position 1. Avec la languette en haut, cela correspond au côté gauche.');
   assert.equal(translateLines('FIBER OBSERVATIONS — entered manually\nLoop · Local optic','fr'),'OBSERVATIONS FIBRE — saisies manuellement\nBoucle · Optique locale');
-  for(const id of ['QNO5.5C.16f.17.30','S747885346FWL','25/5','RX −40 dBm','TX +0.25 dBm']) assert.equal(translate(id,'fr'),id);
+  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','DEMO-FANOUT-001','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'fr'),id);
   assert.equal(translate(finding,'unsupported'),finding);
 });
 
@@ -145,7 +145,7 @@ test('Arabic translates questions, findings and feedback while keeping technical
   assert.equal(translate('Select all supported answers. Then check your answers.','ar'),'اختر جميع الإجابات التي تدعمها الأدلة. ثم تحقق من إجاباتك.');
   assert.equal(translate('Question 1 of 5','fr'),'Question 1 sur 5');
   assert.equal(translateLines('FIBER OBSERVATIONS — entered manually\nLoop · Local optic','ar'),'ملاحظات الألياف — أُدخلت يدويًا\nحلقة · الوحدة الضوئية المحلية');
-  for(const id of ['QNO5.5C.16f.17.30','S747885346FWL','25/5','RX −40 dBm','TX +0.25 dBm']) assert.equal(translate(id,'ar'),id);
+  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','DEMO-FANOUT-001','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'ar'),id);
 });
 
 test('Arabic preference, direction and glossary search coexist with saved progress and other languages',()=>{
@@ -166,10 +166,10 @@ test('Arabic preference, direction and glossary search coexist with saved progre
 });
 
 test('Arabic display isolates signed readings, equipment IDs and path directions without changing their text',()=>{
-  for(const token of ['5C','16f']) assert.equal(formatBidi(token,'ar'),`\u2066${token}\u2069`);
-  const text='القراءة −40 dBm؛ المنفذ 25/5؛ الموقع QNO5.5C.16f.17.30؛ A TX → B RX؛ /1 أو /5';
+  for(const token of ['ROOM-A','ROW-02']) assert.equal(formatBidi(token,'ar'),`\u2066${token}\u2069`);
+  const text='القراءة −4.20 dBm؛ المنفذ 25/2؛ الموقع DEMO / ROOM-A / ROW-02 / RACK-17 / U30؛ A TX → B RX؛ /1 أو /2';
   const displayed=formatBidi(text,'ar');
-  for(const token of ['−40 dBm','25/5','QNO5.5C.16f.17.30','A TX → B RX','/1','/5']) assert.ok(displayed.includes(`\u2066${token}\u2069`),token);
+  for(const token of ['−4.20 dBm','25/2','DEMO / ROOM-A / ROW-02 / RACK-17 / U30','A TX → B RX','/1','/2']) assert.ok(displayed.includes(`\u2066${token}\u2069`),token);
   assert.equal(displayed.replace(/[\u2066\u2069]/g,''),text);
   assert.equal(formatBidi(displayed,'ar'),displayed);
   assert.equal(formatBidi('TX +0.25 dBm','ar'),'\u2066TX +0.25 dBm\u2069');

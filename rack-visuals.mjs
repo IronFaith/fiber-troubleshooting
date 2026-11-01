@@ -1,4 +1,4 @@
-import { mmcHead } from './loop-visuals.mjs?v=5';
+import { mmcHead } from './loop-visuals.mjs?v=20261101';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 
 // A teaching rack inspired by the reference photo, not a surveyed rack layout.
@@ -176,7 +176,7 @@ function linkRack(offset,name,local,casName='CAS 1') {
     <rect class="link-role-badge" x="10" y="4" width="152" height="28" rx="5"/>
     ${label(86,23,local ? 'LOCAL · YOU ARE HERE' : 'REMOTE','rack-center link-role')}
     ${label(86,53,`Device ${name}`,'rack-center link-device-name')}
-    ${label(86,73,name==='A' ? 'Rack 17 · elevation 30' : 'Other rack · find in FIM','rack-center link-location')}
+    ${label(86,73,name==='A' ? 'Rack 17 · elevation 30' : 'Other rack · find in the connection record','rack-center link-location')}
     <rect class="rack-shadow" x="14" y="186" width="152" height="264" rx="4"/>
     <rect class="rack-frame" x="10" y="182" width="152" height="264" rx="4"/>
     <rect class="rack-interior" x="18" y="212" width="136" height="221"/>

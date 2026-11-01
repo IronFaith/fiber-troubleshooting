@@ -45,7 +45,7 @@ test('real observations require a prepared test and isolate only the evidence-su
   assert.match(assessment(s).why,/does not prove acceptable IR loss/);
   s = record(s,2,'wrong','vfl');
   assert.equal(assessment(s).tone,'suspect');
-  assert.match(assessment(s).next,/FIM/);
+  assert.match(assessment(s).next,/connection record/);
 });
 
 test('changed topology and contradictory retests discard stale results; inaccessible tests cannot be selected', () => {

@@ -1,7 +1,6 @@
 // French learner-facing messages. Keep English keys aligned with spanish.mjs.
 export const frenchMessages = [
-  ["Unpatched","Non affecté"],
-  ["All lessons are open. Jump to a topic below or scroll through the five stages.","Toutes les leçons sont ouvertes. Accédez à un sujet ci-dessous ou parcourez les cinq étapes."],
+    ["All lessons are open. Jump to a topic below or scroll through the five stages.","Toutes les leçons sont ouvertes. Accédez à un sujet ci-dessous ou parcourez les cinq étapes."],
   ["Strand {0}","Fibre {0}"],
   ["Test point","Point de test"],
   ["Steps, tools and result meanings","Étapes, outils et interprétation"],
@@ -21,27 +20,27 @@ export const frenchMessages = [
   ["Keep TX and RX roles clear when changing ends.","Garder les rôles de TX et RX clairs en changeant d’extrémité."],
   ["At Device B, whose TX supplies B’s RX?","Sur l’appareil B, quel TX alimente le RX de B ?"],
   ["Device A’s TX supplies B’s RX through the mapped path. Changing viewpoint does not change that physical direction.","Le TX de l’appareil A alimente le RX de B par le chemin attribué. Changer de point de vue ne change pas cette direction physique."],
-  ["Recognize separate followers within one MMC assembly.","Reconnaître les branches distinctes d’un même ensemble MMC."],
-  ["Does one working follower prove all followers work?","Une branche qui fonctionne prouve-t-elle que toutes fonctionnent ?"],
-  ["No. Each follower has its own mapped fibers. Check the assigned follower, head and destination.","Non. Chaque branche possède ses propres fibres attribuées. Vérifiez la branche, la tête et la destination prévues."],
+  ["Recognize separate legs within one MMC assembly.","Reconnaître les branches distinctes d’un même ensemble MMC."],
+  ["Does one working leg prove all legs work?","Une branche qui fonctionne prouve-t-elle que toutes fonctionnent ?"],
+  ["No. Each leg has its own mapped fibers. Check the assigned leg, head and destination.","Non. Chaque branche possède ses propres fibres attribuées. Vérifiez la branche, la tête et la destination prévues."],
   ["Use each part of the location to find the intended device.","Utiliser chaque élément de l’emplacement pour trouver l’appareil prévu."],
   ["Does a rack location identify the correct fiber connection by itself?","L’emplacement dans le rack suffit-il à identifier la bonne connexion fibre ?"],
-  ["No. The location gets you to the device; FIM and the physical labels identify its assigned connections.","Non. L’emplacement mène à l’appareil ; FIM et les étiquettes physiques identifient les connexions qui lui sont attribuées."],
+  ["No. The location gets you to the device; the connection record and the physical labels identify its assigned connections.","Non. L’emplacement mène à l’appareil ; registre des connexions et les étiquettes physiques identifient les connexions qui lui sont attribuées."],
   ["Distinguish the physical location from the connection assignment.","Distinguer l’emplacement physique de l’attribution de connexion."],
   ["After finding the device, what must you match?","Après avoir trouvé l’appareil, quels éléments faut-il faire correspondre ?"],
-  ["Match the device, optic socket, LC follower, MMC head and CAS port to the connection record.","Faites correspondre l’appareil, le logement optique, la branche LC, la tête MMC et le port CAS avec la fiche de connexion."],
+  ["Match the device, optic socket, LC leg, MMC head and CAS port to the connection record.","Faites correspondre l’appareil, le logement optique, la branche LC, la tête MMC et le port CAS avec la fiche de connexion."],
   ["Follow one assignment from its LC leg to the mapped CAS port.","Suivre une attribution de sa branche LC jusqu’au port CAS indiqué."],
-  ["What should you do when the observed port differs from FIM?","Que faire lorsque le port observé ne correspond pas à FIM ?"],
+  ["What should you do when the observed port differs from the connection record?","Que faire lorsque le port observé ne correspond pas à registre des connexions ?"],
   ["Compare the physical labels, patching and record before correcting anything. A mismatch is not proof of a failed optic.","Comparez les étiquettes physiques, le brassage et la fiche avant toute correction. Un écart ne prouve pas une panne du module optique."],
   ["Use the installed orientation and labels to choose the LC position.","Utiliser l’orientation installée et les étiquettes pour choisir la position LC."],
-  ["If the optic is flipped, does the identifier 5/1 become 5/5?","Si le module optique est retourné, l’identifiant 5/1 devient-il 5/5 ?"],
+  ["If the optic is flipped, does the identifier 5/1 become 5/2?","Si le module optique est retourné, l’identifiant 5/1 devient-il 5/2 ?"],
   ["No. The displayed side changes, but the identifier and assigned connection stay the same.","Non. Le côté affiché change, mais l’identifiant et la connexion attribuée restent les mêmes."],
   ["Trace the assigned LC leg to its MMC head and passive.","Tracer la branche LC attribuée jusqu’à sa tête MMC et son passif."],
   ["Is a nearby cable enough to identify the right route?","Un câble proche suffit-il à identifier le bon chemin ?"],
   ["No. Follow the assigned leg and confirm its head and mapped port. Physical proximity does not establish identity.","Non. Suivez la branche attribuée et confirmez sa tête et son port prévu. La proximité physique ne suffit pas à établir l’identité."],
   ["Combine location, orientation and mapping before patching.","Combiner emplacement, orientation et attribution avant le brassage."],
   ["What should agree before seating the connector?","Quels éléments doivent correspondre avant d’insérer le connecteur ?"],
-  ["The device location, optic position, follower, head and destination port should match the assignment.","L’emplacement de l’appareil, la position optique, la branche, la tête et le port de destination doivent correspondre à l’attribution."],
+  ["The device location, optic position, leg, head and destination port should match the assignment.","L’emplacement de l’appareil, la position optique, la branche, la tête et le port de destination doivent correspondre à l’attribution."],
   ["Use the reported neighbor to check endpoint identity.","Utiliser le voisin signalé pour vérifier l’identité de l’extrémité."],
   ["Does the correct LLDP neighbor prove healthy optical power?","Le bon voisin LLDP prouve-t-il que la puissance optique est correcte ?"],
   ["No. It supports endpoint identity. Check required optical readings and link operation separately.","Non. Il étaye l’identité de l’extrémité. Vérifiez séparément les relevés optiques requis et le fonctionnement de la liaison."],
@@ -58,7 +57,7 @@ export const frenchMessages = [
   ["After cleaning a connector, what comes next?","Après avoir nettoyé un connecteur, quelle est la suite ?"],
   ["Inspect again, seat correctly, then retest and record the result. Cleaning alone does not prove recovery.","Inspectez à nouveau, insérez correctement, puis retestez et consignez le résultat. Le nettoyage seul ne prouve pas le rétablissement."],
   ["Trace the expected strand and destination on an isolated path.","Tracer la fibre et la destination attendues sur un chemin isolé."],
-  ["Where does this site’s VFL attach?","Où se raccorde le VFL de ce site ?"],
+  ["Where does this simulation’s VFL attach?","Où se branche le VFL dans cette simulation ?"],
   ["To a disconnected LC leg with the matching adapter. CAS/MMC connections are viewing points for this kit.","Sur une branche LC déconnectée, avec l’adaptateur adapté. Les connexions CAS/MMC servent de points d’observation pour ce kit."],
   ["Understand why visible continuity is only part of the evidence.","Comprendre pourquoi la continuité visible ne constitue qu’une partie des preuves."],
   ["Both strands pass VFL, but restored RX is below its limit. Is the case finished?","Les deux fibres passent le VFL, mais le RX rétabli est sous sa limite. Le cas est-il terminé ?"],
@@ -78,7 +77,7 @@ export const frenchMessages = [
   ["Know the equipment","Connaître le matériel"],
   ["Recognize the parts and follow the light.","Reconnaître les éléments et suivre la lumière."],
   ["Identify the correct connection","Identifier la bonne connexion"],
-  ["Find the device, match FIM and confirm the destination.","Trouver l’appareil, vérifier FIM et confirmer la destination."],
+  ["Find the device, match the connection record and confirm the destination.","Trouver l’appareil, vérifier registre des connexions et confirmer la destination."],
   ["Understand the readings","Comprendre les relevés"],
   ["Read limits, separate symptoms and keep causes open.","Lire les limites, distinguer les symptômes et garder les causes ouvertes."],
   ["Choose and use a test","Choisir et utiliser un test"],
@@ -106,7 +105,7 @@ export const frenchMessages = [
   ["References","Références"],
   ["From your lesson","Depuis votre leçon"],
   ["Follow the full route through rack, distribution and room-passage passives","Suivre le chemin complet à travers les passifs du rack, de distribution et de passage entre salles"],
-  ["Review FIM, LC & MMC patching","Revoir FIM et le brassage LC et MMC"],
+  ["Review connection record, LC & MMC patching","Revoir registre des connexions et le brassage LC et MMC"],
   ["Choose a level. Every exam has five questions and draws from the lessons.","Choisissez un niveau. Chaque examen comporte cinq questions tirées des leçons."],
   ["Explore the lessons","Explorer les leçons"],
   ["Use the same lesson knowledge in situations with several clues. Separate what is known from what still needs checking.","Appliquez les mêmes connaissances dans des situations avec plusieurs indices. Distinguez ce qui est connu de ce qui reste à vérifier."],
@@ -117,10 +116,10 @@ export const frenchMessages = [
   ["Restored service verified","Service rétabli et vérifié"],
   ["Finish the case","Terminer le dossier"],
   ["Confirm the path first","Confirmer d’abord le trajet"],
-  ["Match the device and optic socket to FIM.","Vérifiez que l’équipement et l’emplacement optique correspondent à FIM."],
-  ["Match the LC follower, MMC head serial, CAS ports and strand at the tested ends.","Vérifiez le brin LC, le numéro de série de la tête MMC, les ports CAS et la fibre aux extrémités testées."],
+  ["Match the device and optic socket to the connection record.","Vérifiez que l’équipement et l’emplacement optique correspondent à registre des connexions."],
+  ["Match the LC leg, MMC head serial, CAS ports and strand at the tested ends.","Vérifiez le brin LC, le numéro de série de la tête MMC, les ports CAS et la fibre aux extrémités testées."],
   ["Check only the identity boxes you have confirmed.","Cochez uniquement les identifiants que vous avez confirmés."],
-  ["FIM record and readable hardware labels","Fiche FIM et étiquettes matérielles lisibles"],
+  ["connection record and readable hardware labels","Fiche registre des connexions et étiquettes matérielles lisibles"],
   ["Continue with the next isolation check.","Poursuivez avec le contrôle d’isolement suivant."],
   ["Check the test source","Vérifier la source de test"],
   ["Keep the same VFL and LC attachment. Connect a compatible known-good reference lead.","Gardez le même VFL et raccordement LC. Connectez un cordon de référence compatible dont le bon fonctionnement est connu."],
@@ -402,20 +401,20 @@ export const frenchMessages = [
     "Autre"
   ],
   [
-    "Example optic health readings in dBm",
-    "Exemples de mesures optiques en dBm"
+    "Example optical readings and status",
+    "Exemples de mesures optiques et d’état"
   ],
   [
-    "✓ Good example",
-    "✓ Bon exemple"
+    "Numeric example",
+    "Exemple numérique"
   ],
   [
     "× No light",
     "× Aucune lumière"
   ],
   [
-    "dBm examples · use site / optic limits",
-    "Exemples en dBm · utilisez les limites du site / module"
+    "Numeric values are dBm; compare with the installed optic limits.",
+    "Les valeurs numériques sont en dBm ; comparez-les aux limites du module installé."
   ],
   [
     "Result",
@@ -486,8 +485,8 @@ export const frenchMessages = [
     "Comparez les boucles, les limites du traçage et les changements avant de choisir le prochain contrôle."
   ],
   [
-    "Connect device data, direction, rack location, FIM and individual fiber paths.",
-    "Reliez données, direction, emplacement en baie, FIM et chemins de fibre individuels."
+    "Connect device data, direction, rack location, connection record and individual fiber paths.",
+    "Reliez données, direction, emplacement en baie, registre des connexions et chemins de fibre individuels."
   ],
   [
     "Bound the suspect section",
@@ -606,8 +605,8 @@ export const frenchMessages = [
     "Considérer l’équipement distant comme défectueux puisque la boucle au passif a réussi."
   ],
   [
-    "Verify that each TX lands on the intended RX, using the FIM strand map.",
-    "Vérifier que chaque TX aboutit au RX prévu à l’aide du plan de fibres FIM."
+    "Verify that each TX lands on the intended RX, using the connection record strand map.",
+    "Vérifier que chaque TX aboutit au RX prévu à l’aide du plan de fibres registre des connexions."
   ],
   [
     "The loop established a return path for the tested pair. It did not prove the restored TX-to-RX assignments. Verify the unchecked mapping before concluding which component failed.",
@@ -830,8 +829,8 @@ export const frenchMessages = [
     "Chez B, RX local est alimenté par TX de A."
   ],
   [
-    "Combine location and FIM mapping",
-    "Combiner emplacement et affectation FIM"
+    "Combine location and connection record mapping",
+    "Combiner emplacement et affectation registre des connexions"
   ],
   [
     "Use the mock ticket and the optic orientation shown. Which complete patch matches the record?",
@@ -854,27 +853,27 @@ export const frenchMessages = [
     "Hauteur 30 ; optique 7, position LC gauche ; branche 8 attribuée ; sa tête vers CAS 2 / 28."
   ],
   [
-    "In the position code, 17 is the rack and 30 is the elevation. With the purple tab below, this site’s 7/5 is on the left. The ticket assigns leg 8 and CAS 2 / 28; a matching head serial does not make its legs interchangeable.",
-    "Dans le code de position, 17 désigne la baie et 30 la hauteur. Avec la languette violette en bas, le 7/5 de ce site est à gauche. L’ordre attribue la branche 8 et CAS 2 / 28 ; le même numéro de tête ne rend pas les branches interchangeables."
+    "RACK-17 identifies the rack; U30 identifies its unit. The fictional map assigns 7/2 to position 2, which moves left when flipped. The ticket assigns leg 8 and CAS 2 / 28; a shared serial does not make legs interchangeable.",
+    "RACK-17 désigne la baie ; U30 désigne son unité. Le plan fictif affecte 7/2 à la position 2, qui passe à gauche après retournement. La fiche affecte la branche 8 et CAS 2 / 28 ; un numéro de série commun ne rend pas les branches interchangeables."
   ],
   [
-    "7/5 is on the right when upright; the pictured optic is flipped.",
-    "7/5 est à droite en position normale ; l’optique illustrée est retournée."
+    "7/2 is on the right when upright; the pictured optic is flipped.",
+    "7/2 est à droite en position normale ; l’optique illustrée est retournée."
   ],
   [
     "17 is the rack number, not the elevation.",
     "17 est le numéro de baie, pas la hauteur."
   ],
   [
-    "Each follower has its own mapping. Matching the head alone is insufficient.",
+    "Each leg has its own mapping. Matching the head alone is insufficient.",
     "Chaque branche a sa propre affectation. Vérifier seulement la tête ne suffit pas."
   ],
   [
-    "This matches location, flipped optic position, follower and passive destination.",
+    "This matches location, flipped optic position, leg and passive destination.",
     "Ce choix respecte l’emplacement, l’optique retournée, la branche et le passif de destination."
   ],
   [
-    "Location + orientation + exact follower + mapped head destination.",
+    "Location + orientation + exact leg + mapped head destination.",
     "Emplacement + orientation + branche exacte + destination attribuée à la tête."
   ],
   [
@@ -886,8 +885,8 @@ export const frenchMessages = [
     "Distinguer les chemins du fanout"
   ],
   [
-    "Leg 3 is dark. Leg 8 on the same MMC head works. FIM assigns the affected optic to leg 3. Which two statements are supported?",
-    "La branche 3 est sans lumière. La branche 8 de la même tête MMC fonctionne. FIM attribue l’optique concernée à la branche 3. Quelles sont les deux affirmations justifiées ?"
+    "Leg 3 is dark. Leg 8 on the same MMC head works. The connection record assigns the affected optic to leg 3. Which two statements are supported?",
+    "La branche 3 est sans lumière. La branche 8 de la même tête MMC fonctionne. registre des connexions attribue l’optique concernée à la branche 3. Quelles sont les deux affirmations justifiées ?"
   ],
   [
     "Leg 8 working does not prove leg 3’s separate path is healthy.",
@@ -902,11 +901,11 @@ export const frenchMessages = [
     "Tracez la branche 3 et son canal attribué à travers la tête et le passif."
   ],
   [
-    "The shared head splits leg 8’s working light into every other follower.",
+    "The shared head splits leg 8’s working light into every other leg.",
     "La tête commune répartit la lumière fonctionnelle de la branche 8 dans toutes les autres branches."
   ],
   [
-    "The serial identifies the assembly, not an interchangeable destination for every follower. Track the assigned leg through its own channel; do not treat a working neighbor as proof of that path.",
+    "The serial identifies the assembly, not an interchangeable destination for every leg. Track the assigned leg through its own channel; do not treat a working neighbor as proof of that path.",
     "Le numéro de série identifie l’ensemble, pas une destination interchangeable pour chaque branche. Suivez la branche attribuée dans son canal ; une voisine fonctionnelle ne valide pas ce chemin."
   ],
   [
@@ -922,7 +921,7 @@ export const frenchMessages = [
     "Cette approche suit le circuit concerné sans supposer que toutes les branches partagent le même chemin."
   ],
   [
-    "The fanout groups fiber paths; it does not split one optic’s light into all followers.",
+    "The fanout groups fiber paths; it does not split one optic’s light into all legs.",
     "Le fanout regroupe des chemins de fibre ; il ne divise pas la lumière d’une optique entre toutes les branches."
   ],
   [
@@ -934,8 +933,8 @@ export const frenchMessages = [
     "Séparer les preuves sur la source et le chemin"
   ],
   [
-    "The report shows −40 for local TX and RX. Someone blames both readings on reversed polarity. What should you check before accepting that diagnosis?",
-    "Le rapport indique −40 pour TX et RX locaux. Quelqu’un attribue les deux mesures à une polarité inversée. Que vérifier avant d’accepter ce diagnostic ?"
+    "The report shows No signal for local TX and RX. Someone blames both readings on reversed polarity. What should you check before accepting that diagnosis?",
+    "Le rapport indique aucun signal pour TX et RX locaux. Quelqu’un attribue les deux mesures à une polarité inversée. Que vérifier avant d’accepter ce diagnostic ?"
   ],
   [
     "Swap the fibers first; a polarity mismatch always stops the local laser.",
@@ -954,8 +953,8 @@ export const frenchMessages = [
     "Noter une rupture de fibre externe comme cause des deux mesures."
   ],
   [
-    "TX describes the local source; RX describes incoming light. A pairing problem can leave RX dark while TX still emits. Verify the reported source condition, then isolate with the approved test instead of assigning a cause from −40 alone.",
-    "TX décrit la source locale ; RX décrit la lumière entrante. Un problème d’appariement peut laisser RX sans lumière alors que TX émet toujours. Vérifiez l’état de la source indiqué, puis isolez avec le test approuvé au lieu d’attribuer une cause au seul −40."
+    "TX describes the local source; RX describes incoming light. A pairing problem can leave RX dark while TX still emits. Verify the reported source condition, then isolate with the approved test instead of assigning a cause from No signal alone.",
+    "TX décrit la source locale ; RX décrit la lumière entrante. Un problème d’appariement peut laisser RX sans lumière alors que TX émet toujours. Vérifiez l’état de la source indiqué, puis isolez avec le test approuvé au lieu d’attribuer une cause au seul aucun signal."
   ],
   [
     "A routing mismatch does not by itself prove that the local transmitter stopped emitting.",
@@ -1022,7 +1021,7 @@ export const frenchMessages = [
     "La fibre entre salles relie {0} à {1}. Ce passif est l’entrée de l’autre côté de ce parcours d’exemple. Il transmet le même signal optique."
   ],
   [
-    "From {0}, the fiber reaches {1} at the device rack. In this site example, light enters through the front male MMC and leaves through the rear female MMC toward the LC fanout.",
+    "From {0}, the fiber reaches {1} at the device rack. In this fictional example, light enters through the front male MMC and leaves through the rear female MMC toward the LC fanout.",
     "Depuis {0}, la fibre atteint {1} dans la baie de l’équipement. Dans cet exemple du site, la lumière entre par le MMC mâle avant et sort par le MMC femelle arrière vers le fanout LC."
   ],
   [
@@ -1310,8 +1309,8 @@ export const frenchMessages = [
     "LLDP : suis-je connecté au bon équipement ?"
   ],
   [
-    "FIM & patching",
-    "FIM et raccordement"
+    "connection record & patching",
+    "registre des connexions et raccordement"
   ],
   [
     "Read the assignment → choose the position → match the connections",
@@ -1322,8 +1321,8 @@ export const frenchMessages = [
     "Repérer et raccorder"
   ],
   [
-    "Read the FIM connection assignment",
-    "Lire l’affectation de connexion FIM"
+    "Read the connection record connection assignment",
+    "Lire l’affectation de connexion registre des connexions"
   ],
   [
     "Choose the LC optic position",
@@ -1334,7 +1333,7 @@ export const frenchMessages = [
     "Suivre la fibre dans la baie"
   ],
   [
-    "Match the MMC head & followers",
+    "Match the MMC head & legs",
     "Associer la tête MMC et ses branches"
   ],
   [
@@ -1374,7 +1373,7 @@ export const frenchMessages = [
     "Suivez la branche LC attribuée depuis l’optique jusqu’à sa tête MMC et son port CAS."
   ],
   [
-    "Match location, optic orientation, follower, head and CAS port together, then verify health.",
+    "Match location, optic orientation, leg, head and CAS port together, then verify health.",
     "Vérifiez ensemble emplacement, orientation de l’optique, branche, tête et port CAS, puis contrôlez le fonctionnement."
   ],
   [
@@ -1506,8 +1505,8 @@ export const frenchMessages = [
     "Réussi · dans les limites"
   ],
   [
-    "−40 · no light reported",
-    "−40 · aucune lumière signalée"
+    "No signal reported",
+    "Aucun signal signalé"
   ],
   [
     "End-to-end pairing",
@@ -1622,15 +1621,15 @@ export const frenchMessages = [
     "Cassette de destination"
   ],
   [
-    "Mock ticket calls for Ethernet 7/5, leg 8, CAS 2 port 28. Optic is flipped with purple tab below.",
-    "L’ordre fictif demande Ethernet 7/5, branche 8, CAS 2 port 28. L’optique est retournée, languette violette en bas."
+    "Mock ticket calls for Ethernet 7/2, leg 8, CAS 2 port 28. Optic is flipped with purple tab below.",
+    "L’ordre fictif demande Ethernet 7/2, branche 8, CAS 2 port 28. L’optique est retournée, languette violette en bas."
   ],
   [
     "Position",
     "Position"
   ],
   [
-    "Follower",
+    "Leg",
     "Branche"
   ],
   [
@@ -1666,12 +1665,12 @@ export const frenchMessages = [
     "Les branches 3 et 8 suivent des chemins séparés dans le même ensemble MMC. La branche 3 est sans lumière ; la 8 fonctionne."
   ],
   [
-    "Head serial S747885346FWL · 12 followers",
-    "N° de tête S747885346FWL · 12 branches"
+    "Head serial DEMO-FANOUT-001 · 12 legs",
+    "N° de tête DEMO-FANOUT-001 · 12 branches"
   ],
   [
-    "FIM assigns the affected optic to leg 3. No mapping change is authorized.",
-    "FIM attribue l’optique concernée à la branche 3. Aucun changement d’affectation n’est autorisé."
+    "connection record assigns the affected optic to leg 3. No mapping change is authorized.",
+    "registre des connexions attribue l’optique concernée à la branche 3. Aucun changement d’affectation n’est autorisé."
   ],
   [
     "Local device · reported values",
@@ -1714,7 +1713,7 @@ export const frenchMessages = [
     "Déplacer la boucle sur l’optique"
   ],
   [
-    "Fit the LC loopback directly at the optic, bypassing the MMC leader and LC legs.",
+    "Fit the LC loopback directly at the optic, bypassing the MMC head and LC legs.",
     "Installez la boucle LC directement sur l’optique, en excluant la tête MMC et les branches LC."
   ],
   [
@@ -1750,7 +1749,7 @@ export const frenchMessages = [
     "Vérifier le chemin jusqu’à ce passif"
   ],
   [
-    "Check mapped ports, leader/legs, seating, dirt and bends. Retry the MMC loop.",
+    "Check mapped ports, head/legs, seating, dirt and bends. Retry the MMC loop.",
     "Vérifiez ports attribués, tête / branches, enclenchement, saleté et courbures. Refaites la boucle MMC."
   ],
   [
@@ -1810,7 +1809,7 @@ export const frenchMessages = [
     "Vérifier les ports et branches LC voisins"
   ],
   [
-    "Compare where the light appears with the intended route and leader group.",
+    "Compare where the light appears with the intended route and head group.",
     "Comparez l’endroit où apparaît la lumière au chemin prévu et au groupe de la tête."
   ],
   [
@@ -2106,8 +2105,8 @@ export const frenchMessages = [
     "La fibre transporte la lumière"
   ],
   [
-    "In your layout: LC followers join an MMC leader at the passive.",
-    "Dans votre installation : les branches LC rejoignent une tête MMC au passif."
+    "In this fictional layout: LC legs join an MMC head at the passive.",
+    "Dans ce plan fictif, les branches LC rejoignent une tête MMC au passif."
   ],
   [
     "See this fiber path inside a rack →",
@@ -2298,8 +2297,8 @@ export const frenchMessages = [
     "Équipement actif déconnecté"
   ],
   [
-    "TX starts at the optic → LC follower → MMC head → CAS → onward fiber. The separate RX path carries light from the remote optic. One pair shown; follow the full lane map in FIM.",
-    "TX commence à l’optique → branche LC → tête MMC → CAS → fibre sortante. Le chemin RX séparé transporte la lumière de l’optique distante. Un couple est montré ; suivez le plan complet des canaux dans FIM."
+    "TX starts at the optic → LC leg → MMC head → CAS → onward fiber. The separate RX path carries light from the remote optic. One pair shown; follow the full lane map in the connection record.",
+    "TX commence à l’optique → branche LC → tête MMC → CAS → fibre sortante. Le chemin RX séparé transporte la lumière de l’optique distante. Un couple est montré ; suivez le plan complet des canaux dans le registre des connexions."
   ],
   [
     "MMC loop at CAS 1 Port 12: tests the optic + fiber to this port. Beyond the loop is untested. One pair illustrated.",
@@ -2446,16 +2445,16 @@ export const frenchMessages = [
     "Salle"
   ],
   [
-    "Row / front",
-    "Rangée / avant"
+    "Row",
+    "Rangée"
   ],
   [
     "Elevation",
     "Hauteur"
   ],
   [
-    "Your naming format. Drawings are illustrative; use the site labels and layout to locate the actual device.",
-    "Votre format de nommage. Les dessins sont illustratifs ; utilisez les étiquettes et le plan du site pour localiser l’équipement réel."
+    "Fictional naming format. Use the installed labels and actual layout to locate real equipment.",
+    "Format de nommage fictif. Utilisez les étiquettes installées et le plan réel pour localiser les équipements."
   ],
   [
     "From your rack to the other room",
@@ -2466,8 +2465,8 @@ export const frenchMessages = [
     "Les équipements échangent des données par une chaîne de connexions de fibre. Suivez la lumière de l’optique à travers trois passifs de chaque côté de cet exemple. Local désigne l’équipement que vous vérifiez ; distant désigne l’autre."
   ],
   [
-    "Device A · your example",
-    "Équipement A · votre exemple"
+    "Device A · fictional example",
+    "Appareil A · exemple fictif"
   ],
   [
     "Device B · the other end",
@@ -2478,8 +2477,8 @@ export const frenchMessages = [
     "Trouvez sa propre position dans le registre de connexions."
   ],
   [
-    "A1–A3 and B1–B3, Port 12 and the room layouts are teaching examples. The rear female / front male MMC arrangement at the rack CAS follows your site example; connector gender depends on the assembly. Use FIM and the actual labels for the route, mating connectors and lane map.",
-    "A1–A3, B1–B3, le port 12 et les plans de salles sont des exemples pédagogiques. Le MMC femelle arrière / mâle avant du CAS de baie suit votre exemple de site ; le genre du connecteur dépend de l’ensemble. Utilisez FIM et les étiquettes réelles pour le parcours, les connecteurs et les canaux."
+    "All locations and assignments shown are fictional. Connector gender and lane mapping depend on the assembly; confirm the actual labels, specifications and connection record.",
+    "Tous les emplacements et affectations présentés sont fictifs. Le genre des connecteurs et le plan des voies dépendent de l’assemblage ; vérifiez les étiquettes, les spécifications et le registre de connexions réels."
   ],
   [
     "Match the device and its port",
@@ -2514,8 +2513,8 @@ export const frenchMessages = [
     "Vérifiez ce que vous pouvez atteindre : bouclez l’optique locale, puis étendez le test aux passifs accessibles. Une boucle locale réussie ne vérifie pas la suite du chemin."
   ],
   [
-    "Position format and rack connection: your site examples. References:",
-    "Format de position et connexion de baie : vos exemples de site. Références :"
+    "Fictional location format and rack example. References:",
+    "Format d’emplacement et baie fictifs. Références :"
   ],
   [
     "Cisco: TX/RX pairing",
@@ -2526,48 +2525,48 @@ export const frenchMessages = [
     "US Conec : genre MMC et polarité"
   ],
   [
-    "QNO5 = building. Start at this building.",
-    "QNO5 = bâtiment. Commencez par ce bâtiment."
+    "DEMO = building. Start at this building.",
+    "DEMO = bâtiment. Commencez par ce bâtiment."
   ],
   [
-    "5C = data hall / room. Find room 5C inside QNO5.",
-    "5C = salle informatique. Trouvez la salle 5C dans QNO5."
+    "ROOM-A = data hall / room. Find room ROOM-A inside DEMO.",
+    "ROOM-A = salle informatique. Trouvez la salle ROOM-A dans DEMO."
   ],
   [
-    "16f = row 16, front. The f identifies front in your naming format.",
-    "16f = rangée 16, avant. Le f désigne l’avant dans votre format de nommage."
+    "ROW-02 identifies row 2 in this fictional location.",
+    "ROW-02 désigne la rangée 2 dans cet emplacement fictif."
   ],
   [
-    "17 = rack. Find rack 17 in row 16, at the front.",
-    "17 = baie. Trouvez la baie 17 à l’avant de la rangée 16."
+    "RACK-17 identifies rack 17 in row 2.",
+    "RACK-17 désigne la baie 17 dans la rangée 2."
   ],
   [
-    "30 = elevation. Find the device at elevation 30 in rack 17.",
-    "30 = hauteur. Trouvez l’équipement à la hauteur 30 dans la baie 17."
+    "U30 identifies rack unit 30 in rack 17.",
+    "U30 désigne l’unité 30 de la baie 17."
   ],
   [
-    "Inside building QNO5",
-    "Dans le bâtiment QNO5"
+    "Inside building DEMO",
+    "Dans le bâtiment DEMO"
   ],
   [
     "Data hall / room",
     "Salle informatique"
   ],
   [
-    "Inside room 5C",
-    "Dans la salle 5C"
+    "Inside room ROOM-A",
+    "Dans la salle ROOM-A"
   ],
   [
-    "Row 16",
-    "Rangée 16"
+    "Row 2",
+    "Rangée 2"
   ],
   [
-    "f = front",
-    "f = avant"
+    "Front view",
+    "Vue de face"
   ],
   [
-    "Room 5C · row 16 · front",
-    "Salle 5C · rangée 16 · avant"
+    "Room ROOM-A · row 2",
+    "Salle ROOM-A · rangée 2"
   ],
   [
     "Rack 17 · front view",
@@ -2590,7 +2589,7 @@ export const frenchMessages = [
     "Chapitre 3"
   ],
   [
-    "Match the optic position, the follower and its MMC head.",
+    "Match the optic position, the leg and its MMC head.",
     "Associez la position de l’optique, la branche et sa tête MMC."
   ],
   [
@@ -2602,11 +2601,11 @@ export const frenchMessages = [
     "Vue de baie"
   ],
   [
-    "FIM path",
-    "Parcours FIM"
+    "Connection record path",
+    "Parcours registre des connexions"
   ],
   [
-    "MMC head & followers",
+    "MMC head & legs",
     "Tête MMC et branches"
   ],
   [
@@ -2618,16 +2617,16 @@ export const frenchMessages = [
     "Une optique. Deux positions LC."
   ],
   [
-    "Choose the Ethernet port shown in FIM.",
-    "Choisissez le port Ethernet indiqué dans FIM."
+    "Choose the Ethernet port shown in the connection record.",
+    "Choisissez le port Ethernet indiqué dans le registre des connexions."
   ],
   [
     "Tab above = upright. Flip the optic and the ports swap sides; their Ethernet numbers stay with them.",
     "Languette en haut = position normale. Retournez l’optique : les ports changent de côté, mais conservent leurs numéros Ethernet."
   ],
   [
-    "Your confirmed site example, facing the optic. Check the installed orientation and labels; other hardware may use a different mapping.",
-    "Exemple confirmé de votre site, face à l’optique. Vérifiez l’orientation et les étiquettes installées ; un autre matériel peut utiliser une affectation différente."
+    "Fictional optic example. Check the installed orientation and labels; other hardware may use a different mapping.",
+    "Exemple fictif de module optique. Vérifiez l’orientation et les étiquettes installées ; d’autres matériels peuvent utiliser un plan différent."
   ],
   [
     "Find the device. Follow its fiber.",
@@ -2638,28 +2637,28 @@ export const frenchMessages = [
     "Depuis l’optique, le long du guide latéral, jusqu’au CAS vert."
   ],
   [
-    "Example rack layout. Elevations, CAS 1 / 12 and front/rear routes are teaching examples; confirm the installed path in FIM.",
-    "Exemple de baie. Les hauteurs, CAS 1 / 12 et les parcours avant / arrière sont pédagogiques ; confirmez le parcours installé dans FIM."
+    "Example rack layout. Elevations, CAS 1 / 12 and front/rear routes are teaching examples; confirm the installed path in the connection record.",
+    "Exemple de baie. Les hauteurs, CAS 1 / 12 et les parcours avant / arrière sont pédagogiques ; confirmez le parcours installé dans le registre des connexions."
   ],
   [
     "Follow the LC leg to its passive",
     "Suivre la branche LC jusqu’à son passif"
   ],
   [
-    "Use FIM to match the device, Ethernet port, leg ID and passive port.",
-    "Utilisez FIM pour associer équipement, port Ethernet, ID de branche et port passif."
+    "Use the connection record to match the device, Ethernet port, leg ID and passive port.",
+    "Utilisez registre des connexions pour associer équipement, port Ethernet, ID de branche et port passif."
   ],
   [
-    "The Ethernet number chooses the optic position. FIM tells you which LC follower and MMC passive port belong to that connection.",
-    "Le numéro Ethernet détermine la position de l’optique. FIM indique quelle branche LC et quel port passif MMC appartiennent à cette connexion."
+    "Use the supplied map to identify the physical position. A port name alone does not define it. Match the assigned LC leg and passive port in the connection record.",
+    "Utilisez le plan fourni pour identifier la position physique. Le nom du port seul ne la définit pas. Vérifiez la branche LC et le port passif affectés dans le registre de connexions."
   ],
   [
     "Match.",
     "Identifier."
   ],
   [
-    "Confirm the device, port and fiber labels against FIM.",
-    "Comparez les étiquettes d’équipement, de port et de fibre à FIM."
+    "Confirm the device, port and fiber labels against the connection record.",
+    "Comparez les étiquettes d’équipement, de port et de fibre à registre des connexions."
   ],
   [
     "Inspect.",
@@ -2674,19 +2673,19 @@ export const frenchMessages = [
     "Enclencher et vérifier."
   ],
   [
-    "Seat the mapped connectors fully. Check optic health in Cable Guy.",
-    "Enclenchez complètement les connecteurs attribués. Consultez l’état optique dans Cable Guy."
+    "Seat the mapped connectors fully. Check optic health in device diagnostics.",
+    "Enclenchez complètement les connecteurs attribués. Consultez l’état optique dans diagnostic de l’appareil."
   ],
   [
     "Moving blue lines illustrate the intended IR path, not a measured result. Use the health check if light is missing.",
     "Les lignes bleues animées illustrent le chemin IR prévu, pas une mesure. Utilisez le diagnostic si la lumière manque."
   ],
   [
-    "One MMC head. 12 followers.",
+    "One MMC head. 12 legs.",
     "Une tête MMC. 12 branches."
   ],
   [
-    "The leader/head identifies this fanout. Its 12 legs belong to the same assembly.",
+    "The head identifies this fanout. Its 12 legs belong to the same assembly.",
     "La tête identifie ce fanout. Ses 12 branches appartiennent au même ensemble."
   ],
   [
@@ -2698,8 +2697,8 @@ export const frenchMessages = [
     "Choisissez une branche pour la suivre jusqu’à la tête."
   ],
   [
-    "One line per leg; individual strands are not shown. Leg numbers are illustration labels—use the actual labels and mapping in FIM.",
-    "Une ligne par branche ; les fibres individuelles ne sont pas représentées. Les numéros de branche sont illustratifs : utilisez les étiquettes réelles et l’affectation dans FIM."
+    "One line per leg; individual strands are not shown. Leg numbers are illustration labels—use the actual labels and mapping in the connection record.",
+    "Une ligne par branche ; les fibres individuelles ne sont pas représentées. Les numéros de branche sont illustratifs : utilisez les étiquettes réelles et l’affectation dans le registre des connexions."
   ],
   [
     "A fanout groups separate fiber paths. It does not split one optic’s light among all 12 legs.",
@@ -2710,16 +2709,16 @@ export const frenchMessages = [
     "Raccordez la tête au passif"
   ],
   [
-    "The serial identifies the fanout. FIM identifies its destination passive and port. Then match each follower to its assigned optic port.",
-    "Le numéro de série identifie le fanout. FIM indique le passif et le port de destination. Associez ensuite chaque branche au port optique prévu."
+    "The serial identifies the fanout. The connection record identifies its destination passive and port. Then match each leg to its assigned optic port.",
+    "Le numéro de série identifie le fanout. registre des connexions indique le passif et le port de destination. Associez ensuite chaque branche au port optique prévu."
   ],
   [
     "Practice LC & MMC patching in Simulations →",
     "Entraînez-vous au raccordement LC et MMC dans Simulations →"
   ],
   [
-    "Port mapping and fanout: your site examples.",
-    "Affectation des ports et fanout : exemples de votre site."
+    "Port mapping and fanout assignments are fictional teaching examples.",
+    "Le plan des ports et les affectations du fanout sont des exemples pédagogiques fictifs."
   ],
   [
     "US Conec: MMC alignment & polarity",
@@ -2738,7 +2737,7 @@ export const frenchMessages = [
     "Chemin LC sélectionné vers le passif"
   ],
   [
-    "Choose a fanout follower",
+    "Choose a fanout leg",
     "Choisissez une branche du fanout"
   ],
   [
@@ -2778,16 +2777,16 @@ export const frenchMessages = [
     "Raccordement LC et MMC"
   ],
   [
-    "Read a mock FIM ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question exam.",
-    "Lisez une fiche FIM simulée, choisissez un connecteur, puis faites-le glisser vers le port, ou touchez le connecteur puis le port. Entraînez-vous sur la fiche de votre choix ou passez l’examen de 5 questions."
+    "Read a mock connection record ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question exam.",
+    "Lisez une fiche registre des connexions simulée, choisissez un connecteur, puis faites-le glisser vers le port, ou touchez le connecteur puis le port. Entraînez-vous sur la fiche de votre choix ou passez l’examen de 5 questions."
   ],
   [
-    "Each ticket is a separate training example using your site's 1 / 5 mapping. Matching a port does not prove light or link health. On site: confirm FIM, inspect/clean, seat fully, and check optic health.",
-    "Chaque fiche est un exemple indépendant utilisant l’affectation 1 / 5 de votre site. Le bon port ne prouve pas que la lumière passe ni que la liaison fonctionne. Sur site : vérifiez FIM, inspectez/nettoyez, enclenchez complètement et contrôlez l’état optique."
+    "Each ticket provides a fictional position map. Matching a port does not prove light or link health. Follow the approved procedure and verify the actual connection.",
+    "Chaque fiche fournit un plan de positions fictif. Identifier un port ne prouve ni la présence de lumière ni le bon état du lien. Suivez la procédure approuvée et vérifiez la connexion réelle."
   ],
   [
-    "Review Chapter 3: FIM, LC & MMC patching →",
-    "Revoir le chapitre 3 : FIM, raccordement LC et MMC →"
+    "Review Chapter 3: connection record, LC & MMC patching →",
+    "Revoir le chapitre 3 : registre des connexions, raccordement LC et MMC →"
   ],
   [
     "Exams →",
@@ -2814,8 +2813,8 @@ export const frenchMessages = [
     "{0} · exemple"
   ],
   [
-    "Ethernet port in FIM",
-    "Port Ethernet dans FIM"
+    "Ethernet port in the connection record",
+    "Port Ethernet dans le registre des connexions"
   ],
   [
     "↻ Flip optic 180°",
@@ -2834,16 +2833,16 @@ export const frenchMessages = [
     "Position {1} · {2}"
   ],
   [
-    "Leader / head",
+    "Fanout head",
     "Tête / connecteur principal"
   ],
   [
-    "Followers",
+    "Legs",
     "Branches"
   ],
   [
-    "Leg {0} belongs to MMC head S747885346FWL. Match this follower’s actual label in FIM.",
-    "La branche {0} appartient à la tête MMC S747885346FWL. Vérifiez son étiquette réelle dans FIM."
+    "Leg {0} belongs to MMC head DEMO-FANOUT-001. Match this leg’s actual label in the connection record.",
+    "La branche {0} appartient à la tête MMC DEMO-FANOUT-001. Vérifiez son étiquette réelle dans le registre des connexions."
   ],
   [
     "1. Device {0} sends data through its optic",
@@ -2858,7 +2857,7 @@ export const frenchMessages = [
     "2. Suivez la branche dans la baie"
   ],
   [
-    "The LC follower runs up the cable manager to its MMC head. The head groups the fanout’s fibers; each keeps its own mapped path.",
+    "The LC leg runs up the cable manager to its MMC head. The head groups the fanout’s fibers; each keeps its own mapped path.",
     "La branche LC remonte le gestionnaire de câbles jusqu’à sa tête MMC. La tête regroupe les fibres du fanout ; chacune conserve son propre chemin prévu."
   ],
   [
@@ -2878,8 +2877,8 @@ export const frenchMessages = [
     "4. La lumière transporte les données entre les cassettes"
   ],
   [
-    "The onward fiber carries Device {0}’s data as light from CAS {1} to CAS {2}. Follow that mapped route in FIM.",
-    "La fibre suivante transporte les données de l’équipement {0} sous forme de lumière de CAS {1} à CAS {2}. Suivez ce chemin dans FIM."
+    "The onward fiber carries Device {0}’s data as light from CAS {1} to CAS {2}. Follow that mapped route in the connection record.",
+    "La fibre suivante transporte les données de l’équipement {0} sous forme de lumière de CAS {1} à CAS {2}. Suivez ce chemin dans le registre des connexions."
   ],
   [
     "5. Device {0} receives the data",
@@ -2910,7 +2909,7 @@ export const frenchMessages = [
     "Lumière dans la fibre"
   ],
   [
-    "LC followers",
+    "LC legs",
     "Branches LC"
   ],
   [
@@ -3022,8 +3021,8 @@ export const frenchMessages = [
     "32 ports"
   ],
   [
-    "Example: LC follower → MMC head → CAS 1 Port 12. Light continues through the passive; this is a patch, not a loopback. Use your actual FIM destination.",
-    "Exemple : branche LC → tête MMC → CAS 1 port 12. La lumière traverse le passif ; il s’agit d’un raccordement, pas d’une boucle de retour. Utilisez votre destination FIM réelle."
+    "Example: LC leg → MMC head → CAS 1 Port 12. Light continues through the passive; this is a patch, not a loopback. Use your actual connection record destination.",
+    "Exemple : branche LC → tête MMC → CAS 1 port 12. La lumière traverse le passif ; il s’agit d’un raccordement, pas d’une boucle de retour. Utilisez votre destination registre des connexions réelle."
   ],
   [
     "Example · CAS 1 Port 12",
@@ -3046,12 +3045,12 @@ export const frenchMessages = [
     "RX ← depuis le distant"
   ],
   [
-    "LC follower",
+    "LC leg",
     "Branche LC"
   ],
   [
-    "Match the head serial and FIM destination. CAS 1 Port 12 is only the destination used in this illustration.",
-    "Vérifiez le numéro de tête et la destination FIM. CAS 1 port 12 est uniquement la destination de cette illustration."
+    "Match the head serial and connection record destination. CAS 1 Port 12 is only the destination used in this illustration.",
+    "Vérifiez le numéro de tête et la destination registre des connexions. CAS 1 port 12 est uniquement la destination de cette illustration."
   ],
   [
     "Inspect, clean if needed, then inspect again. Align the head with the adapter rails; do not force it.",
@@ -3086,8 +3085,8 @@ export const frenchMessages = [
     "Identifiez la tête"
   ],
   [
-    "Head serial · S747885346FWL",
-    "Numéro de tête · S747885346FWL"
+    "Head serial · DEMO-FANOUT-001",
+    "Numéro de tête · DEMO-FANOUT-001"
   ],
   [
     "LC loopback inserted into one duplex pair on the local optic. Purple tab above the ports. TX light travels through the loop and returns to RX.",
@@ -3158,8 +3157,8 @@ export const frenchMessages = [
     "Ethernet 25/1 · à l’endroit"
   ],
   [
-    "Ethernet 25/5 · upright",
-    "Ethernet 25/5 · à l’endroit"
+    "Ethernet 25/2 · upright",
+    "Ethernet 25/2 · à l’endroit"
   ],
   [
     "Ethernet 7/1 · upside down",
@@ -3173,11 +3172,7 @@ export const frenchMessages = [
     "CAS 2 · Port 28",
     "CAS 2 · port 28"
   ],
-  [
-    "{0}/{1} means optic {2}, position {3}. With the tab {4}, that is the {5} side.",
-    "{0}/{1} signifie optique {2}, position {3}. Avec la languette {4}, c’est le côté {5}."
-  ],
-  [
+    [
     "Top row: 1–16.",
     "Rangée du haut : 1–16."
   ],
@@ -3186,8 +3181,8 @@ export const frenchMessages = [
     "Rangée du bas : 17–32."
   ],
   [
-    "This head goes to CAS {0}, Port {1}. {2} The head serial identifies the fanout; the FIM ticket gives its destination.",
-    "Cette tête va à CAS {0}, port {1}. {2} Son numéro identifie le fanout ; la fiche FIM indique sa destination."
+    "This head goes to CAS {0}, Port {1}. {2} The head serial identifies the fanout; the connection record ticket gives its destination.",
+    "Cette tête va à CAS {0}, port {1}. {2} Son numéro identifie le fanout ; la fiche registre des connexions indique sa destination."
   ],
   [
     "{0} selected. Drag it, or tap the port to place it.",
@@ -3246,7 +3241,7 @@ export const frenchMessages = [
     "✓ Enclenché dans le bon port."
   ],
   [
-    "LC followers connect to the optic.",
+    "LC legs connect to the optic.",
     "Les branches LC se raccordent à l’optique."
   ],
   [
@@ -3342,11 +3337,11 @@ export const frenchMessages = [
     "Raccordez CAS {0} · port {1}"
   ],
   [
-    "Follower: Leg {0} · of the 12-leg fanout",
+    "Fanout leg: Leg {0} · of the 12-leg fanout",
     "Branche : {0} · du fanout à 12 branches"
   ],
   [
-    "Connector: MMC leader / head",
+    "Connector: MMC head",
     "Connecteur : tête MMC"
   ],
   [
@@ -3378,8 +3373,8 @@ export const frenchMessages = [
     "Fiche d’entraînement suivante"
   ],
   [
-    "Mock FIM ticket · training example",
-    "Fiche FIM simulée · exemple pédagogique"
+    "Mock connection record ticket · training example",
+    "Fiche registre des connexions simulée · exemple pédagogique"
   ],
   [
     "Head {3}",
@@ -3498,8 +3493,8 @@ export const frenchMessages = [
     "TX émet. RX reçoit. La polarité décrit comment les fibres relient ces fonctions sur tout le chemin."
   ],
   [
-    "One duplex pair, enlarged. A / B are teaching labels, not MMC pin numbers or the optic’s /1 and /5 port positions. This example expects A → A and B → B at the passives; use your actual cable and FIM channel map.",
-    "Une paire duplex agrandie. A / B sont des repères pédagogiques, pas des numéros de broche MMC ni les positions /1 et /5 de l’optique. Cet exemple attend A → A et B → B aux passifs ; utilisez votre câble et le plan des canaux FIM réels."
+    "One duplex pair, enlarged. A / B are teaching labels, not MMC pin numbers or the optic’s physical port positions. This example expects A → A and B → B at the passives; use your actual cable and connection record channel map.",
+    "Une paire duplex agrandie. A / B sont des étiquettes pédagogiques, pas des numéros de broches MMC ni des positions physiques de ports. Cet exemple prévoit A → A et B → B aux passifs ; utilisez le plan réel des voies du câble et du registre de connexions."
   ],
   [
     "Light on the other channel?",
@@ -3634,8 +3629,8 @@ export const frenchMessages = [
     "Lisez les signes et envisagez leurs causes possibles."
   ],
   [
-    "Inspect connections, match FIM and check your changes.",
-    "Inspectez les connexions, vérifiez FIM et contrôlez vos changements."
+    "Inspect connections, match the connection record and check your changes.",
+    "Inspectez les connexions, vérifiez registre des connexions et contrôlez vos changements."
   ],
   [
     "Follow TX and RX, compare limits and check every lane.",
@@ -3650,8 +3645,8 @@ export const frenchMessages = [
     "Lire le signal"
   ],
   [
-    "The report shows −40 in red. What do we know so far?",
-    "Le rapport affiche −40 en rouge. Que savons-nous à ce stade ?"
+    "The report shows “No signal” in red. What do we know so far?",
+    "Le rapport affiche « Aucun signal » en rouge. Que savons-nous pour l’instant ?"
   ],
   [
     "No light is being reported; the cause is still unknown.",
@@ -3666,8 +3661,8 @@ export const frenchMessages = [
     "La fibre est cassée quelque part après le premier passif."
   ],
   [
-    "In this Cable Guy example, −40 means no light is reported. It does not identify the failed part. Start checking the possible causes.",
-    "Dans cet exemple Cable Guy, −40 signifie qu’aucune lumière n’est signalée. Cela n’identifie pas la pièce défectueuse. Commencez à vérifier les causes possibles."
+    "This simulated report indicates no detected signal. It does not identify the failed part. Check the source, reporting limits and possible causes.",
+    "Ce rapport simulé indique qu’aucun signal n’est détecté. Il n’identifie pas la pièce défectueuse. Vérifiez la source, les limites de mesure et les causes possibles."
   ],
   [
     "No light reported ≠ a diagnosis",
@@ -3814,8 +3809,8 @@ export const frenchMessages = [
     "Inspecter → nettoyer si nécessaire → inspecter à nouveau"
   ],
   [
-    "Clean and fully seated, but still −40. What is the useful next step?",
-    "Propre et bien enclenché, mais toujours −40. Quelle est la prochaine étape utile ?"
+    "Clean and fully seated, but still no detected signal. What is the useful next step?",
+    "Propre et bien inséré, mais toujours sans signal détecté. Quelle est la prochaine étape utile ?"
   ],
   [
     "Replace the optic immediately; the fiber is ruled out.",
@@ -3826,8 +3821,8 @@ export const frenchMessages = [
     "Réenclencher sans cesse le même connecteur jusqu’à ce que la mesure change."
   ],
   [
-    "Verify the FIM mapping, then use the approved local optic test.",
-    "Vérifier l’affectation FIM, puis utiliser le test local approuvé de l’optique."
+    "Verify the connection record mapping, then use the approved local optic test.",
+    "Vérifier l’affectation registre des connexions, puis utiliser le test local approuvé de l’optique."
   ],
   [
     "A clean, seated connector rules out neither a mispatch nor a source problem. Confirm the mapping and isolate the local optic using the correct approved loop setup.",
@@ -3866,12 +3861,12 @@ export const frenchMessages = [
     "Vérifier le parcours et le résultat"
   ],
   [
-    "Match the FIM destination",
-    "Trouver la destination FIM"
+    "Match the connection record destination",
+    "Trouver la destination registre des connexions"
   ],
   [
-    "FIM calls for CAS 2, Port 28. Select that port.",
-    "FIM indique CAS 2, port 28. Sélectionnez ce port."
+    "connection record calls for CAS 2, Port 28. Select that port.",
+    "registre des connexions indique CAS 2, port 28. Sélectionnez ce port."
   ],
   [
     "CAS 2 Port {0}",
@@ -4002,8 +3997,8 @@ export const frenchMessages = [
     "De la lumière est présente, mais RX est sous la plage autorisée."
   ],
   [
-    "It is acceptable because it is not −40.",
-    "C’est acceptable parce que ce n’est pas −40."
+    "It is acceptable because some light is detected.",
+    "C’est acceptable car de la lumière est détectée."
   ],
   [
     "It is too strong because 4.20 is greater than 3.00.",
@@ -4034,8 +4029,8 @@ export const frenchMessages = [
     "Voie RX 2 : +0.28 dBm"
   ],
   [
-    "RX lane 3: −40 dBm",
-    "Voie RX 3 : −40 dBm"
+    "RX lane 3: No signal",
+    "Voie RX 3 : Aucun signal"
   ],
   [
     "RX lane 4: +0.21 dBm",
@@ -4046,8 +4041,8 @@ export const frenchMessages = [
     "La voie 3 signale toujours une absence de lumière. Les autres voies ne prouvent pas qu’elle fonctionne. Suivez son chemin prévu et vérifiez aussi l’état de la liaison."
   ],
   [
-    "Lane 3: −40 needs investigation",
-    "Voie 3 : −40 nécessite une vérification"
+    "Lane 3: No signal needs investigation",
+    "Voie 3 : aucun signal nécessite une vérification"
   ],
   [
     "Interpret local loop results",
@@ -4130,20 +4125,20 @@ export const frenchMessages = [
     "Deux extrémités déconnectées + adaptateur adapté"
   ],
   [
-    "FIM expects Port 12. VFL light is detected at Port 13. What next?",
-    "FIM prévoit le port 12. La lumière VFL est détectée au port 13. Et ensuite ?"
+    "connection record expects Port 12. VFL light is detected at Port 13. What next?",
+    "registre des connexions prévoit le port 12. La lumière VFL est détectée au port 13. Et ensuite ?"
   ],
   [
     "Replace the optic because the light reached the wrong port.",
     "Remplacer l’optique parce que la lumière a atteint le mauvais port."
   ],
   [
-    "Compare fiber labels, actual patching and the FIM record.",
-    "Comparer les étiquettes, le raccordement réel et la fiche FIM."
+    "Compare fiber labels, actual patching and the connection record.",
+    "Comparer les étiquettes, le raccordement réel et la fiche registre des connexions."
   ],
   [
-    "Update FIM to Port 13 immediately without checking the route.",
-    "Modifier immédiatement FIM en port 13 sans vérifier le parcours."
+    "Update the connection record to Port 13 immediately without checking the route.",
+    "Modifier immédiatement registre des connexions en port 13 sans vérifier le parcours."
   ],
   [
     "The observation and expected route disagree. Check the labels and actual path before deciding whether the patch or record needs correction.",
@@ -4214,12 +4209,12 @@ export const frenchMessages = [
     "LLDP identifie l’autre extrémité de la liaison existante."
   ],
   [
-    "Compare the reported neighbor with FIM",
-    "Comparer le voisin signalé à FIM"
+    "Compare the reported neighbor with the connection record",
+    "Comparer le voisin signalé à registre des connexions"
   ],
   [
-    "The device name matches FIM, but the neighbor port does not. What should you do next?",
-    "Le nom d’équipement correspond à FIM, mais pas le port du voisin. Que faire ensuite ?"
+    "The device name matches the connection record, but the neighbor port does not. What should you do next?",
+    "Le nom d’équipement correspond à registre des connexions, mais pas le port du voisin. Que faire ensuite ?"
   ],
   [
     "Accept it because the device name matches.",
@@ -4258,8 +4253,8 @@ export const frenchMessages = [
     "La connexion prévue est vérifiée puisque la lumière est correcte."
   ],
   [
-    "The reported endpoint disagrees with FIM; investigate the mapping even though light is present.",
-    "L’extrémité signalée diffère de FIM ; vérifiez l’affectation même si la lumière est présente."
+    "The reported endpoint disagrees with the connection record; investigate the mapping even though light is present.",
+    "L’extrémité signalée diffère du registre des connexions ; vérifiez l’affectation même si la lumière est présente."
   ],
   [
     "The first CAS must be generating the wrong LLDP identity.",
@@ -4270,8 +4265,8 @@ export const frenchMessages = [
     "L’optique locale est prouvée défectueuse."
   ],
   [
-    "Light being present and reaching the intended device are different checks. Compare the reported device and port with FIM, labels and actual patching. Passive cassettes do not generate LLDP identities, and this mismatch alone does not diagnose a failed optic.",
-    "La présence de lumière et la bonne destination sont deux contrôles distincts. Comparez l’équipement et le port signalés à FIM, aux étiquettes et au raccordement réel. Les cassettes passives ne créent pas d’identité LLDP, et cet écart seul ne diagnostique pas une optique défectueuse."
+    "Light being present and reaching the intended device are different checks. Compare the reported device and port with the connection record, labels and actual patching. Passive cassettes do not generate LLDP identities, and this mismatch alone does not diagnose a failed optic.",
+    "La présence de lumière et la bonne destination sont deux contrôles distincts. Comparez l’équipement et le port signalés à registre des connexions, aux étiquettes et au raccordement réel. Les cassettes passives ne créent pas d’identité LLDP, et cet écart seul ne diagnostique pas une optique défectueuse."
   ],
   [
     "Healthy light does not prove the correct destination.",
@@ -4286,8 +4281,8 @@ export const frenchMessages = [
     "Interpréter l’absence de voisin"
   ],
   [
-    "Cable Guy shows no LLDP neighbor. You have not checked fresh light readings, link state or LLDP operation. What can you conclude?",
-    "Cable Guy n’affiche aucun voisin LLDP. Vous n’avez pas vérifié les mesures récentes, l’état de liaison ou LLDP. Que pouvez-vous conclure ?"
+    "device diagnostics shows no LLDP neighbor. You have not checked fresh light readings, link state or LLDP operation. What can you conclude?",
+    "diagnostic de l’appareil n’affiche aucun voisin LLDP. Vous n’avez pas vérifié les mesures récentes, l’état de liaison ou LLDP. Que pouvez-vous conclure ?"
   ],
   [
     "The fiber is definitely broken.",
@@ -4342,8 +4337,8 @@ export const frenchMessages = [
     "Connecteur B : un espace visible sépare son extrémité de l’adaptateur."
   ],
   [
-    "Cable Guy · training report",
-    "Cable Guy · rapport pédagogique"
+    "Device diagnostics · training report",
+    "diagnostic de l’appareil · rapport pédagogique"
   ],
   [
     "Local optic · training report",
@@ -4542,8 +4537,8 @@ export const frenchMessages = [
     "LLDP · Link Layer Discovery Protocol"
   ],
   [
-    "Fresh Cable Guy report · local Device A / 25/1",
-    "Rapport Cable Guy récent · équipement local A / 25/1"
+    "Fresh device diagnostics report · local Device A / 25/1",
+    "Rapport diagnostic de l’appareil récent · équipement local A / 25/1"
   ],
   [
     "Unconfirmed",
@@ -4578,8 +4573,8 @@ export const frenchMessages = [
     "Port {0}"
   ],
   [
-    "FIM expects",
-    "FIM prévoit"
+    "connection record expects",
+    "registre des connexions prévoit"
   ],
   [
     "Port 7/1",
@@ -4646,8 +4641,8 @@ export const frenchMessages = [
     "Câble fibre comprimé sous une attache. Sa gaine ne présente aucune déchirure visible."
   ],
   [
-    "Mock FIM destination",
-    "Destination FIM simulée"
+    "Mock connection record destination",
+    "Destination registre des connexions simulée"
   ],
   [
     "Top: 1–16 · Bottom: 17–32. Scroll to see every port.",
@@ -4698,8 +4693,8 @@ export const frenchMessages = [
     "Voie RX {0}"
   ],
   [
-    "Cable Guy · four receive lanes",
-    "Cable Guy · quatre voies de réception"
+    "Device diagnostics · four receive lanes",
+    "diagnostic de l’appareil · quatre voies de réception"
   ],
   [
     "Approved direct LC loopback at the local optic. The loop test passed.",
@@ -4822,8 +4817,8 @@ export const frenchMessages = [
     "Raccordement pratique"
   ],
   [
-    "Place LC and MMC connectors from a mock FIM ticket, including a flipped optic.",
-    "Placez les connecteurs LC et MMC selon une fiche FIM simulée, y compris sur une optique retournée."
+    "Place LC and MMC connectors from a mock connection record ticket, including a flipped optic.",
+    "Placez les connecteurs LC et MMC selon une fiche registre des connexions simulée, y compris sur une optique retournée."
   ],
   [
     "Open patching exam →",
@@ -5286,8 +5281,8 @@ export const frenchMessages = [
     "Baie 17 · hauteur 30"
   ],
   [
-    "Other rack · find in FIM",
-    "Autre baie · voir FIM"
+    "Other rack · find in the connection record",
+    "Autre baie · voir registre des connexions"
   ],
   [
     "LC leg",
@@ -5366,8 +5361,8 @@ export const frenchMessages = [
     ". Dépasser la limite haute est aussi hors plage. Zéro n’est pas une cible obligatoire ; TX et RX n’ont pas besoin d’être identiques."
   ],
   [
-    "A −40 report is this site’s no-light indication, not a diagnosis. Check each required lane against its own limits, then check link status. These example limits are not universal.",
-    "Un rapport −40 indique l’absence de lumière sur ce site, pas un diagnostic. Comparez chaque voie requise à ses limites, puis vérifiez la liaison. Ces limites d’exemple ne sont pas universelles."
+    "A no-signal status or reading below the reporting range is not a diagnosis. Check the reporting limits, each required lane and link status. These example limits are not universal.",
+    "Un état sans signal ou une mesure sous la plage de détection ne constitue pas un diagnostic. Vérifiez les limites de mesure, chaque voie requise et l’état du lien. Les limites de cet exemple ne sont pas universelles."
   ],
   [
     "Move the loop, grow the tested section",
@@ -5614,8 +5609,8 @@ export const frenchMessages = [
     "Étiquette bleue = message LLDP"
   ],
   [
-    "Now read the neighbor in Cable Guy",
-    "Lisez maintenant le voisin dans Cable Guy"
+    "Now read the neighbor in device diagnostics",
+    "Lisez maintenant le voisin dans diagnostic de l’appareil"
   ],
   [
     "LLDP calls the remote device a neighbor:",
@@ -5626,8 +5621,8 @@ export const frenchMessages = [
     "le prochain équipement actif sur cette liaison, même dans une autre salle. Les CAS ne font que transmettre par la fibre."
   ],
   [
-    "Compare the reported neighbor’s name + port with FIM. Does it match?",
-    "Comparez le nom + port du voisin signalé à FIM. Correspondent-ils ?"
+    "Compare the reported neighbor’s name + port with the connection record. Does it match?",
+    "Comparez le nom + port du voisin signalé à registre des connexions. Correspondent-ils ?"
   ],
   [
     "Try a different neighbor report",
@@ -5674,8 +5669,8 @@ export const frenchMessages = [
     "Nouvelle connexion ?"
   ],
   [
-    "Compare with FIM.",
-    "Comparez avec FIM."
+    "Compare with the connection record.",
+    "Comparez avec le registre des connexions."
   ],
   [
     "LLDP identifies the remote device. Your local report lists it as a neighbor.",
@@ -5702,16 +5697,16 @@ export const frenchMessages = [
     "≠ Attendu {0}. Reçu C."
   ],
   [
-    "Check the patching and FIM. A misport or an outdated record could explain this.",
-    "Vérifiez le raccordement et FIM. Un mauvais port ou une fiche périmée pourraient expliquer cela."
+    "Check the patching and connection record. A misport or an outdated record could explain this.",
+    "Vérifiez le raccordement et registre des connexions. Un mauvais port ou une fiche périmée pourraient expliquer cela."
   ],
   [
     "≠ Expected {0}. Heard {1}.",
     "≠ Attendu {0}. Reçu {1}."
   ],
   [
-    "Check the exact port and FIM before changing the patch.",
-    "Vérifiez le port exact et FIM avant de modifier le raccordement."
+    "Check the exact port and connection record before changing the patch.",
+    "Vérifiez le port exact et registre des connexions avant de modifier le raccordement."
   ],
   [
     "? No identity reported",
@@ -5818,16 +5813,16 @@ export const frenchMessages = [
     "Localiser :"
   ],
   [
-    "building QNO5, room 5C, row 16 front, rack 17, elevation 30. The rack number is not the elevation.",
-    "bâtiment QNO5, salle 5C, rangée 16 avant, baie 17, hauteur 30. Le numéro de baie n’est pas la hauteur."
+    "building DEMO, room ROOM-A, row 2, rack 17, elevation 30. The rack number is not the elevation.",
+    "bâtiment DEMO, salle ROOM-A, rangée 2 avant, baie 17, hauteur 30. Le numéro de baie n’est pas la hauteur."
   ],
   [
     "Orient:",
     "Orienter :"
   ],
   [
-    "tab above gives /1 left and /5 right. Tab below swaps their physical sides, not their Ethernet identities.",
-    "languette en haut : /1 à gauche et /5 à droite. Languette en bas : leurs côtés physiques s’inversent, pas leurs identités Ethernet."
+    "In this fictional map, 25/1 uses position 1 and 25/2 uses position 2 when upright. Flipping the optic reverses their displayed sides.",
+    "Dans ce plan fictif, 25/1 occupe la position 1 et 25/2 la position 2 à l’endroit. Retourner le module inverse les côtés affichés."
   ],
   [
     "Map:",
@@ -5966,8 +5961,8 @@ export const frenchMessages = [
     "CAS / cassette"
   ],
   [
-    "Site label · passive connection point",
-    "Nom du site · point de connexion passif"
+    "Example label · passive connection point",
+    "Étiquette d’exemple · point de connexion passif"
   ],
   [
     "The passive connection point shown in our fiber routes. It connects mapped fiber paths without making light.",
@@ -5978,19 +5973,19 @@ export const frenchMessages = [
     "Notre vue de face montre les ports 1–16 au-dessus de 17–32. Respectez le CAS, le port et le chemin réels dans la fiche de connexion."
   ],
   [
-    "One head, multiple followers",
+    "One head, multiple legs",
     "Une tête, plusieurs branches"
   ],
   [
-    "An assembly that brings separate follower paths into one multi-fiber head.",
+    "An assembly that brings separate leg paths into one multi-fiber head.",
     "Un ensemble qui réunit les chemins distincts des branches dans une tête multifibre."
   ],
   [
-    "The example has 12 followers sharing a head serial. Count legs and individual strands separately; one duplex leg has two strands.",
+    "The example has 12 legs sharing a head serial. Count legs and individual strands separately; one duplex leg has two strands.",
     "L’exemple a 12 branches partageant un numéro de tête. Comptez séparément les branches et les fibres individuelles ; une branche duplex contient deux fibres."
   ],
   [
-    "Follower / leg",
+    "Fanout leg",
     "Branche du fanout"
   ],
   [
@@ -6002,7 +5997,7 @@ export const frenchMessages = [
     "Une branche étiquetée du fanout qui rejoint sa position optique attribuée."
   ],
   [
-    "Match the leg ID as well as the head serial. Followers from the same head are not interchangeable.",
+    "Match the leg ID as well as the head serial. Legs from the same head are not interchangeable.",
     "Vérifiez l’identifiant de branche et le numéro de tête. Les branches d’une même tête ne sont pas interchangeables."
   ],
   [
@@ -6082,20 +6077,20 @@ export const frenchMessages = [
     "Zéro n’est pas une mesure « parfaite » universelle. Utilisez la plage autorisée de l’optique installée."
   ],
   [
-    "−40 / no light",
-    "−40 / aucune lumière"
+    "No signal",
+    "Aucun signal"
   ],
   [
-    "Site report example",
-    "Exemple de rapport du site"
+    "Simulated report",
+    "Rapport simulé"
   ],
   [
     "no light",
     "aucune lumière"
   ],
   [
-    "In the report examples used here, −40 is the no-light indication.",
-    "Dans les rapports d’exemple utilisés ici, −40 indique l’absence de lumière."
+    "A diagnostic status indicating no detected signal. A value below the reporting range also requires interpretation using the device specifications.",
+    "État de diagnostic indiquant l’absence de signal détecté. Une valeur sous la plage de mesure doit aussi être interprétée selon les spécifications de l’appareil."
   ],
   [
     "It is a symptom, not the cause. Check the source, connections, mapped path and test setup before blaming a part.",
@@ -6286,8 +6281,8 @@ export const frenchMessages = [
     "Un moyen commun pour les équipements d’annoncer leur nom et leur port sur la liaison existante. Local est l’équipement dont vous lisez le rapport ; distant est l’autre extrémité."
   ],
   [
-    "LLDP lists the remote device as a neighbor. Passive cassettes between them do not become neighbors. Compare the reported name and port with FIM. LLDP adds no backup connection and does not prove optical health.",
-    "LLDP indique l’équipement distant comme voisin. Les cassettes passives entre eux ne deviennent pas des voisins. Comparez le nom et le port signalés à FIM. LLDP n’ajoute pas de liaison de secours et ne prouve pas l’état optique."
+    "LLDP lists the remote device as a neighbor. Passive cassettes between them do not become neighbors. Compare the reported name and port with the connection record. LLDP adds no backup connection and does not prove optical health.",
+    "LLDP indique l’équipement distant comme voisin. Les cassettes passives entre eux ne deviennent pas des voisins. Comparez le nom et le port signalés à registre des connexions. LLDP n’ajoute pas de liaison de secours et ne prouve pas l’état optique."
   ],
   [
     "Cisco · LLDP neighbors",
@@ -6302,7 +6297,7 @@ export const frenchMessages = [
     "fiche de connexion"
   ],
   [
-    "The record used in this course to look up devices, ports, followers, heads and passive connections.",
+    "The record used in this course to look up devices, ports, legs, heads and passive connections.",
     "La fiche utilisée dans ce cours pour retrouver équipements, ports, branches, têtes et connexions passives."
   ],
   [
@@ -6322,12 +6317,12 @@ export const frenchMessages = [
     "état optique"
   ],
   [
-    "The system used in your site examples to view optic-health readings.",
-    "Le système utilisé dans vos exemples pour consulter les mesures optiques."
+    "Tools that report device and transceiver status, including optical readings.",
+    "Outils indiquant l’état de l’appareil et du transceiver, notamment les mesures optiques."
   ],
   [
-    "Read TX/RX per lane and the applicable limits. This learning site does not pull live reports from Cable Guy.",
-    "Lisez TX/RX par voie et les limites applicables. Ce site pédagogique ne récupère pas de rapports Cable Guy en direct."
+    "Read TX/RX per lane and the applicable limits. All reports in this course are simulated.",
+    "Lisez TX/RX par voie et les limites applicables. Tous les rapports de ce cours sont simulés."
   ],
   [
     "Building → room → row → rack → elevation",
@@ -6338,8 +6333,8 @@ export const frenchMessages = [
     "L’adresse du site qui permet de localiser l’équipement dans un bâtiment et une baie."
   ],
   [
-    "QNO5.5C.16f.17.30 means building QNO5, room 5C, row 16 front, rack 17, elevation 30 in our example.",
-    "QNO5.5C.16f.17.30 signifie bâtiment QNO5, salle 5C, rangée 16 avant, baie 17, hauteur 30 dans notre exemple."
+    "DEMO / ROOM-A / ROW-02 / RACK-17 / U30 means building DEMO, room ROOM-A, row 2, rack 17, elevation 30 in our example.",
+    "DEMO / ROOM-A / ROW-02 / RACK-17 / U30 signifie bâtiment DEMO, salle ROOM-A, rangée 2 avant, baie 17, hauteur 30 dans notre exemple."
   ],
   [
     "Simplified teaching view",
@@ -6370,7 +6365,7 @@ export const frenchMessages = [
     "Boucle LC directe · TX revient à RX"
   ],
   [
-    "Three followers shown · separate paths into one head",
+    "Three legs shown · separate paths into one head",
     "Trois branches représentées · chemins distincts vers une tête"
   ],
   [
@@ -6394,8 +6389,8 @@ export const frenchMessages = [
     "RX · rapport d’exemple"
   ],
   [
-    "No-light indication in our site report example",
-    "Indication d’absence de lumière dans notre rapport d’exemple"
+    "No-signal status in a simulated report",
+    "État sans signal dans un rapport simulé"
   ],
   [
     "Compare the reading with the installed optic’s limits.",
@@ -6422,8 +6417,8 @@ export const frenchMessages = [
     "Branche 3 → tête nommée → CAS 2 / 28"
   ],
   [
-    "Site example · confirm the actual labels and record",
-    "Exemple du site · confirmez les étiquettes et la fiche réelles"
+    "Fictional example · confirm actual labels and records",
+    "Exemple fictif · vérifiez les étiquettes et les registres réels"
   ],
   [
     "Port 13",
@@ -6606,7 +6601,7 @@ export const frenchMessages = [
     "Équipement + port optique"
   ],
   [
-    "LC follower + MMC head",
+    "LC leg + MMC head",
     "Branche LC + tête MMC"
   ],
   [
@@ -6718,8 +6713,8 @@ export const frenchMessages = [
     "Les tests locaux ne prouvent ni l’association de bout en bout ni la source et le récepteur distants."
   ],
   [
-    "Verify FIM ports and TX-to-RX pairing. Trace accessible strands if needed; leave the onward path and remote device unverified.",
-    "Vérifiez les ports FIM et l’association TX–RX. Tracez les fibres accessibles si nécessaire ; laissez le chemin suivant et l’équipement distant non vérifiés."
+    "Verify connection record ports and TX-to-RX pairing. Trace accessible strands if needed; leave the onward path and remote device unverified.",
+    "Vérifiez les ports registre des connexions et l’association TX–RX. Tracez les fibres accessibles si nécessaire ; laissez le chemin suivant et l’équipement distant non vérifiés."
   ],
   [
     "Light reaches the loose MMC head",
@@ -6734,16 +6729,16 @@ export const frenchMessages = [
     "Branchez la tête dans son port prévu, puis cherchez la lumière à la face opposée ouverte."
   ],
   [
-    "Check the port against FIM",
-    "Vérifier le port par rapport à FIM"
+    "Check the port against the connection record",
+    "Vérifier le port par rapport à registre des connexions"
   ],
   [
     "The diagram is patched to port {0}; the mapped destination is port {1}.",
     "Le schéma est raccordé au port {0} ; la destination prévue est le port {1}."
   ],
   [
-    "Confirm the real patch and FIM record. Correct the connection if needed, then trace again.",
-    "Confirmez le raccordement réel et la fiche FIM. Corrigez si nécessaire, puis tracez à nouveau."
+    "Confirm the real patch and connection record. Correct the connection if needed, then trace again.",
+    "Confirmez le raccordement réel et la fiche registre des connexions. Corrigez si nécessaire, puis tracez à nouveau."
   ],
   [
     "Light reached a different port",
@@ -6758,8 +6753,8 @@ export const frenchMessages = [
     "Un chemin existe, mais il ne correspond pas au port / à l’association TX–RX attendus."
   ],
   [
-    "Check the FIM destination, leader / follower mapping and polarity. Correct the route, then trace again.",
-    "Vérifiez la destination FIM, l’association tête / branche et la polarité. Corrigez le parcours, puis tracez à nouveau."
+    "Check the connection record destination, head / leg mapping and polarity. Correct the route, then trace again.",
+    "Vérifiez la destination registre des connexions, l’association tête / branche et la polarité. Corrigez le parcours, puis tracez à nouveau."
   ],
   [
     "Trace this section more closely",
@@ -6858,8 +6853,8 @@ export const frenchMessages = [
     "Vérifier pourquoi TX local n’émet pas"
   ],
   [
-    "A reported −40 indicates no light / the reporting floor. A fiber polarity mismatch alone does not explain absent local TX output.",
-    "−40 indique une absence de lumière / le plancher de mesure du rapport. Une erreur de polarité seule n’explique pas l’absence d’émission TX locale."
+    "A no-signal status needs verification against the device specifications and reporting range. A fiber polarity mismatch alone does not explain absent local TX output.",
+    "Un état sans signal doit être vérifié selon les spécifications et la plage de mesure de l’appareil. Une inversion de polarité ne suffit pas à expliquer l’absence de sortie TX locale."
   ],
   [
     "Verify the report and lane, port / laser state and optic seating. Then use a supported loop or known-good comparison.",
@@ -6894,7 +6889,7 @@ export const frenchMessages = [
     "La référence ne transmet pas non plus. Résolvez le problème de VFL, d’adaptateur, de cordon d’injection ou de couplage avant d’accuser la fibre installée."
   ],
   [
-    "Confirm the device / optic socket, follower-to-head serial, CAS ports and expected channel in “Match the physical path”. A working strand can still belong to the wrong fanout.",
+    "Confirm the device / optic socket, leg-to-head serial, CAS ports and expected channel in “Match the physical path”. A working strand can still belong to the wrong fanout.",
     "Confirmez l’équipement / logement optique, le numéro branche–tête, les ports CAS et le canal attendu dans « Vérifier le chemin physique ». Une fibre fonctionnelle peut appartenir au mauvais fanout."
   ],
   [
@@ -6994,8 +6989,8 @@ export const frenchMessages = [
     "Vérifiez les étiquettes, l’adaptateur et le montage."
   ],
   [
-    "The observed route does not match FIM",
-    "Le parcours observé ne correspond pas à FIM"
+    "The observed route does not match the connection record",
+    "Le parcours observé ne correspond pas à registre des connexions"
   ],
   [
     "Patched port {0}; expected port {1}.",
@@ -7006,8 +7001,8 @@ export const frenchMessages = [
     "La lumière a été signalée à un autre port."
   ],
   [
-    "Verify the device, LC follower, MMC serial and FIM destination. Correct the patch only after confirming the mapping, then start a retest.",
-    "Vérifiez l’équipement, la branche LC, le numéro MMC et la destination FIM. Corrigez seulement après confirmation de l’affectation, puis retestez."
+    "Verify the device, LC leg, MMC serial and connection record destination. Correct the patch only after confirming the mapping, then start a retest.",
+    "Vérifiez l’équipement, la branche LC, le numéro MMC et la destination registre des connexions. Corrigez seulement après confirmation de l’affectation, puis retestez."
   ],
   [
     "Mapping matches",
@@ -7182,8 +7177,8 @@ export const frenchMessages = [
     "La lumière est présente, mais sur l’autre canal illustré."
   ],
   [
-    "Compare both strands with the FIM / cable channel map. A / B are illustration labels; do not swap fibers solely because this picture differs.",
-    "Comparez les deux fibres au plan FIM / du câble. A / B sont des repères illustratifs ; ne les inversez pas seulement parce que ce dessin diffère."
+    "Compare both strands with the connection record / cable channel map. A / B are illustration labels; do not swap fibers solely because this picture differs.",
+    "Comparez les deux fibres au plan registre des connexions / du câble. A / B sont des repères illustratifs ; ne les inversez pas seulement parce que ce dessin diffère."
   ],
   [
     "Check the other strand",
@@ -8378,8 +8373,8 @@ export const frenchMessages = [
     "Port raccordé"
   ],
   [
-    "FIM destination: CAS {0} · Port {1}",
-    "Destination FIM : CAS {0} · port {1}"
+    "connection record destination: CAS {0} · Port {1}",
+    "Destination registre des connexions : CAS {0} · port {1}"
   ],
   [
     "Normally TX",
@@ -8582,8 +8577,8 @@ export const frenchMessages = [
     "Activez JavaScript pour voir le cours illustré."
   ],
   [
-    "FIM, LC & MMC patching | Fiber Optics Fundamentals",
-    "FIM, raccordement LC et MMC | Fondamentaux de la fibre optique"
+    "connection record, LC & MMC patching | Fiber Optics Fundamentals",
+    "registre des connexions, raccordement LC et MMC | Fondamentaux de la fibre optique"
   ],
   [
     "Exams | Fiber Optics Fundamentals",
@@ -9022,7 +9017,7 @@ export const frenchMessages = [
     "fibre"
   ],
   [
-    "leader",
+    "head",
     "tête"
   ],
   [
@@ -9042,11 +9037,11 @@ export const frenchMessages = [
     "épanouissement"
   ],
   [
-    "follower",
+    "leg",
     "branche"
   ],
   [
-    "followers",
+    "legs",
     "branches"
   ],
   [
@@ -9494,8 +9489,8 @@ export const frenchMessages = [
     "Réglages de votre chemin"
   ],
   [
-    "Enter your observations. Nothing is connected to Cable Guy or live equipment. A −40 report tells us no light was reported, not the cause.",
-    "Saisissez vos observations. Rien n’est connecté à Cable Guy ni au matériel réel. Un rapport −40 indique qu’aucune lumière n’a été signalée, pas la cause."
+    "Enter your observations. This tool has no live equipment connection. A no-signal report is an observation, not a diagnosis.",
+    "Saisissez vos observations. Cet outil n’est relié à aucun équipement réel. Un rapport sans signal est une observation, pas un diagnostic."
   ],
   [
     "Optic face / LC socket",
@@ -9550,16 +9545,16 @@ export const frenchMessages = [
     "{5} Les effets sont simplifiés ; les résultats réels dépendent du matériel, de l’affectation et de la longueur d’onde."
   ],
   [
-    "Ethernet ID + physical socket, e.g. 25/1 vs 25/5",
-    "Identifiant Ethernet + logement physique, ex. 25/1 ou 25/5"
+    "Ethernet ID + physical socket, e.g. 25/1 vs 25/2",
+    "Identifiant Ethernet + logement physique, ex. 25/1 ou 25/2"
   ],
   [
-    "Follower number + head serial match the record",
+    "Leg number + head serial match the record",
     "Numéro de branche + numéro de tête conformes à la fiche"
   ],
   [
-    "Accessible CAS faces and ports match FIM",
-    "Faces et ports CAS accessibles conformes à FIM"
+    "Accessible CAS faces and ports match the connection record",
+    "Faces et ports CAS accessibles conformes à registre des connexions"
   ],
   [
     "Expected fiber / channel at both test ends",
@@ -9841,7 +9836,7 @@ export const frenchMessages = [
   ["Remote loop at {0} · {1}", "Boucle distante à {0} · {1}"],
   ["Local → {0}", "Local → {0}"],
   ["Remote → {0}", "Distant → {0}"],
-  ["Device IDs + optic sockets at the tested ends, e.g. 25/1 vs 25/5", "Identifiants des appareils + prises optiques aux extrémités testées, par ex. 25/1 ou 25/5"],
+  ["Device IDs + optic sockets at the tested ends, e.g. 25/1 vs 25/2", "Identifiants des appareils + prises optiques aux extrémités testées, par ex. 25/1 ou 25/2"],
   ["A = local TX → remote RX · B = remote TX → local RX", "A = TX local → RX distant · B = TX distant → RX local"],
   ["Simulated readings at both ends.", "Mesures simulées aux deux extrémités."],
   ["Drag LC onto either optic to start. At a cassette, choose the optic under test. Earlier findings stay in this case.", "Déposez LC sur l’une des optiques pour commencer. Sur une cassette, choisissez l’optique testée. Les observations précédentes restent dans ce dossier."],
@@ -9867,7 +9862,7 @@ export const frenchMessages = [
   ["Remove the loops, Normalize, confirm the mapped TX-to-RX pairing, then verify readings and link status at both devices.", "Retirez les boucles, Normalisez, confirmez l’appariement TX-RX prévu, puis vérifiez les mesures et l’état du lien sur les deux appareils."],
   ["An opposite-end loop passed across this section. Recheck the tested pair, mating faces, loop setup and optic limits; these results do not yet identify a failed part.", "Une boucle depuis l’autre extrémité a réussi sur ce tronçon. Revérifiez la paire, les faces en contact, le montage et les limites optiques ; ces résultats n’identifient pas encore une pièce défaillante."],
   ["Loop tests do not prove the restored end-to-end pairing or live link.", "Les boucles ne valident pas l’appariement rétabli de bout en bout ni le lien en service."],
-  ["Verify FIM ports and TX-to-RX pairing. Compare both optic tests and trace accessible strands; keep untested sections unverified.", "Vérifiez les ports FIM et l’appariement TX-RX. Comparez les tests des deux optiques et tracez les fibres accessibles ; les tronçons non testés restent à vérifier."],
+  ["Verify connection record ports and TX-to-RX pairing. Compare both optic tests and trace accessible strands; keep untested sections unverified.", "Vérifiez les ports registre des connexions et l’appariement TX-RX. Comparez les tests des deux optiques et tracez les fibres accessibles ; les tronçons non testés restent à vérifier."],
   ["Place a supported LC loop at either accessible optic. Record its result, then extend from that same device through the passives.", "Placez une boucle LC compatible sur l’une des optiques accessibles. Notez le résultat, puis étendez le test depuis ce même appareil à travers les passifs."],
   ["Recorded remote loop coverage to CAS {0}. Live link unverified.", "Couverture de boucle distante consignée jusqu’à CAS {0}. Lien en service non vérifié."],
   ["Interactive fiber path. TX sends along one strand; RX receives along the other. Choose either optic or an accessible cassette.", "Chemin fibre interactif. TX émet sur une fibre ; RX reçoit sur l’autre. Choisissez une optique ou une cassette accessible."],
@@ -9912,8 +9907,8 @@ export const frenchMessages = [
   ["The local loop ends at CAS 1; the remote loop ends at CAS 2. Neither includes the middle section. Investigate that gap without assuming a particular part is faulty.","Le bouclage local s’arrête à CAS 1 ; le distant à CAS 2. Aucun n’inclut le tronçon central. Examinez ce tronçon sans supposer qu’un composant précis est défectueux."],
   ["Two passing ends leave the middle untested.","Deux extrémités validées laissent le milieu non testé."],
   ["Verify an observed destination","Vérifier la destination observée"],
-  ["The VFL trace reaches a different port from FIM. Which check addresses this new evidence?","Le tracé VFL atteint un port différent de celui du FIM. Quel contrôle répond à cette nouvelle observation ?"],
-  ["Compare actual ports, fanout labels and the route against FIM.","Comparez les ports réels, les étiquettes du fanout et le trajet avec le FIM."],
+  ["The VFL trace reaches a different port from the connection record. Which check addresses this new evidence?","Le tracé VFL atteint un port différent de celui du registre des connexions. Quel contrôle répond à cette nouvelle observation ?"],
+  ["Compare actual ports, fanout labels and the route against the connection record.","Comparez les ports réels, les étiquettes du fanout et le trajet avec le registre des connexions."],
   ["Repeat the direct optic loop to check the local light source.","Répétez le bouclage direct de l’optique pour vérifier la source locale."],
   ["Measure optical loss before checking the destination mismatch.","Mesurez la perte optique avant de vérifier l’écart de destination."],
   ["Expected Port 12 and observed Port 13 disagree. Verify the actual patching and the record before an authorized correction. A wrong destination does not identify a failed optic.","Le port attendu 12 et le port observé 13 diffèrent. Vérifiez le raccordement réel et le dossier avant une correction autorisée. Une mauvaise destination ne désigne pas une optique défectueuse."],
@@ -9968,7 +9963,7 @@ export const frenchMessages = [
   ["4 · Check service light","4 · Vérifier la lumière de service"],
   ["5 · Verify before closing","5 · Vérifier avant de clôturer"],
   ["Combine the coverage, not the conclusions. A local loop to CAS 1 and a remote loop to CAS 2 leave the section between the cassettes untested. A passing end does not verify that gap.","Combinez les couvertures, pas les conclusions. Un bouclage local jusqu’à CAS 1 et un distant jusqu’à CAS 2 laissent le tronçon entre les cassettes non testé. Une extrémité validée ne vérifie pas cet intervalle."],
-  ["Trace from a disconnected LC leg, with active optics isolated. If the observed port differs from FIM, compare the labels and physical route with the assignment. Verify which is wrong before making an authorized correction.","Tracez depuis une branche LC déconnectée, les optiques actives étant isolées. Si le port observé diffère du FIM, comparez les étiquettes et le trajet physique avec l’affectation. Déterminez ce qui est erroné avant une correction autorisée."],
+  ["Trace from a disconnected LC leg, with active optics isolated. If the observed port differs from the connection record, compare the labels and physical route with the assignment. Verify which is wrong before making an authorized correction.","Tracez depuis une branche LC déconnectée, les optiques actives étant isolées. Si le port observé diffère du registre des connexions, comparez les étiquettes et le trajet physique avec l’affectation. Déterminez ce qui est erroné avant une correction autorisée."],
   ["After correcting the mapping, test each assigned strand. A working strand does not clear its neighbor. Verify the VFL and LC connection with a known-good reference, then isolate the dark path and its interfaces. Do not name a ferrule or leg as faulty from this observation alone.","Après correction de la correspondance, testez chaque fibre affectée. Une fibre fonctionnelle ne valide pas sa voisine. Vérifiez le VFL et la connexion LC avec une référence connue comme bonne, puis isolez le chemin sombre et ses interfaces. Cette seule observation ne désigne ni une férule ni une branche défectueuse."],
   ["After correcting a connection, both strands can pass red light while service RX remains low. Normalize restores the assigned patching; it does not declare the link healthy. Inspect remaining connections and use an appropriate optical loss test.","Après correction d’une connexion, les deux fibres peuvent transmettre la lumière rouge alors que RX en service reste faible. Normaliser rétablit le raccordement prévu ; cela ne valide pas le lien. Inspectez les connexions restantes et effectuez un test de perte optique adapté."],
   ["An improved reading is progress. Check all required TX/RX lanes against the installed limits, verify link operation and the expected device and port, then record the final results. Each check answers a different question.","Une lecture améliorée est un progrès. Comparez toutes les voies TX/RX requises aux limites installées, vérifiez le lien et l’équipement et le port attendus, puis consignez les résultats finaux. Chaque contrôle répond à une question différente."],
@@ -10004,8 +9999,8 @@ export const frenchMessages = [
   ["CAS {0} · Patched port","CAS {0} · Port raccordé"],
   ["Previous port","Port précédent"],
   ["Next port","Port suivant"],
-  ["FIM · Port {0}","FIM · Port {0}"],
-  ["Use FIM port {0}","Utiliser le port FIM {0}"],
+  ["connection record · Port {0}","registre des connexions · Port {0}"],
+  ["Use the connection record port {0}","Utiliser le port registre des connexions {0}"],
   ["Choose a port from 1 to 32.","Choisissez un port de 1 à 32."],
   ["Patched port updated. Recheck this section.","Port raccordé mis à jour. Revérifiez cette section."],
   ["Tap an LC leg, then mark the light at the viewing point.", "Touchez une branche LC, puis indiquez la lumière au point d’observation."],
@@ -10050,7 +10045,7 @@ export const frenchMessages = [
   ["Guided simulation","Simulation guidée"],
   ["Fanout replacement","Remplacement du fanout"],
   ["Worked example · 12 LC legs","Exemple guidé · 12 branches LC"],
-  ["One MMC leader. All of its followers. One complete replacement.","Une tête MMC. Toutes ses branches. Un remplacement complet."],
+  ["One MMC head. All of its legs. One complete replacement.","Une tête MMC. Toutes ses branches. Un remplacement complet."],
   ["One MMC head connects to twelve LC legs. Leg 7 is the damaged example; the replacement includes the entire assembly.","Une tête MMC relie douze branches LC. La branche 7 est endommagée dans cet exemple ; le remplacement concerne tout l’ensemble."],
   ["Same assembly","Même ensemble"],
   ["Leg 7 · damaged example","Branche 7 · exemple endommagé"],
@@ -10058,113 +10053,125 @@ export const frenchMessages = [
   ["Identify the damaged leg and its MMC","Identifiez la branche endommagée et son MMC"],
   ["Trace the damaged leg to its assembly","Suivez la branche endommagée jusqu’à son ensemble"],
   ["Device / optic port","Équipement / port optique"],
-  ["Damaged follower","Branche endommagée"],
-  ["MMC leader serial","Numéro de série de la tête MMC"],
+  ["Damaged leg","Branche endommagée"],
+  ["MMC head serial","Numéro de série de la tête MMC"],
   ["Read the physical labels. Trace that leg to its head; match the full serial.","Lisez les étiquettes physiques. Suivez cette branche jusqu’à sa tête et vérifiez le numéro de série complet."],
-  ["Confirm and save the FIMspect mapping","Confirmez et conservez le mappage FIMspect"],
-  ["Illustrative mapping to capture before unpatching","Exemple de mappage à conserver avant de retirer les affectations"],
-  ["Device relationship","Relation entre équipements"],
-  ["Leader / destination","Tête / destination"],
-  ["S747885346FWL → CAS 1 · port 12","S747885346FWL → CAS 1 · port 12"],
-  ["Follower / endpoint","Branche / extrémité"],
+      ["Device relationship","Relation entre équipements"],
+  ["Head / destination","Tête / destination"],
+  ["DEMO-FANOUT-001 → CAS 1 · port 12","DEMO-FANOUT-001 → CAS 1 · port 12"],
+  ["Leg / endpoint","Branche / extrémité"],
   ["Whole assembly","Ensemble complet"],
-  ["Save each of the 12 follower IDs and its assigned device / port","Conservez les identifiants des 12 branches et l’équipement / port affecté à chacune"],
+  ["Save each of the 12 leg IDs and its assigned device / port","Conservez les identifiants des 12 branches et l’équipement / port affecté à chacune"],
   ["Keep the complete mapping before clearing records. Include room, rack, passive and port identifiers.","Conservez le mappage complet avant d’effacer les affectations, y compris les identifiants de salle, baie, élément passif et port."],
-  ["Teaching values combined from the existing course and your example; these are not live FIMspect records.","Valeurs pédagogiques issues du cours et de l’exemple ; ce ne sont pas des enregistrements FIMspect réels."],
-  ["Find the matching route in MyPatch","Trouvez le trajet correspondant dans MyPatch"],
-  ["Illustrated room layout","Configuration de salle illustrée"],
+      ["Illustrated room layout","Configuration de salle illustrée"],
   ["3 passive locations","3 emplacements passifs"],
   ["6 passive locations","6 emplacements passifs"],
   ["· active / device-side legs","· actif / branches côté équipement"],
   ["· passive / MMC location","· passif / emplacement MMC"],
   ["Match the device relationship and room / building. Follow the mapped passive to the correct MMC.","Vérifiez la relation entre équipements et la salle / le bâtiment. Suivez l’élément passif indiqué jusqu’au bon MMC."],
-  ["Schematic navigation based on the site workflow. The number of passives is not the number of fanout legs.","Navigation schématique fondée sur la procédure du site. Le nombre d’éléments passifs n’est pas le nombre de branches du fanout."],
-  ["Match the exact leader inside the passive","Identifiez la tête exacte dans l’élément passif"],
+    ["Match the exact head inside the passive","Identifiez la tête exacte dans l’élément passif"],
   ["P · mapped passive","P · élément passif indiqué"],
-  ["CAS 1 → port 12 → S747885346FWL","CAS 1 → port 12 → S747885346FWL"],
+  ["CAS 1 → port 12 → DEMO-FANOUT-001","CAS 1 → port 12 → DEMO-FANOUT-001"],
   ["CAS 1, 32 ports. Ports 1 to 16 are on top; 17 to 32 below. Port 12 is the example destination.","CAS 1, 32 ports. Les ports 1 à 16 sont en haut et 17 à 32 en bas. Le port 12 est la destination de l’exemple."],
   ["CAS 1 · front port reference","CAS 1 · repérage des ports en façade"],
-  ["P · leader record","P · enregistrement de la tête"],
+  ["P · head record","P · enregistrement de la tête"],
   ["1 matching MMC","1 MMC correspondant"],
-  ["Associated A · followers","A associés · branches"],
+  ["Associated A · legs","A associés · branches"],
   ["12 matching legs","12 branches correspondantes"],
-  ["Cross-check the serial, passive and port against the physical labels and FIMspect. Identify every follower belonging to that leader.","Recoupez le numéro de série, l’élément passif et le port avec les étiquettes physiques et FIMspect. Identifiez toutes les branches de cette tête."],
-  ["A mismatch means stop and reconcile the mapping. Only this assembly is in scope—not every MMC along the route.","En cas d’écart, arrêtez-vous et clarifiez le mappage. Seul cet ensemble est concerné, pas tous les MMC du trajet."],
-  ["Unpatch the old leader, then every follower","Retirez l’affectation de l’ancienne tête, puis de chaque branche"],
-  ["In MyPatch, clear the selected MMC leader. Then clear each of its associated leg records, using the saved mapping.","Dans MyPatch, retirez l’affectation de la tête MMC sélectionnée, puis celle de chaque branche associée en suivant le mappage conservé."],
-  ["Try the record-removal sequence","Essayez la séquence de retrait des affectations"],
-  ["Illustration only","Illustration uniquement"],
-  ["Old leader · S747885346FWL","Ancienne tête · S747885346FWL"],
-  ["Patched","Affecté"],
-  ["Unpatch leader","Retirer la tête"],
-  ["Old followers · legs 1–12","Anciennes branches · 1–12"],
-  ["{0} remaining","{0} restants"],
-  ["Patch replacement leader","Affecter la nouvelle tête"],
-  ["Blocked · old records remain","Bloqué · anciennes affectations restantes"],
-  ["First unpatch the old leader. All 12 followers must also be cleared.","Retirez d’abord l’affectation de l’ancienne tête. Les 12 branches doivent également être retirées."],
-  ["Old leader cleared + zero old followers = replacement leader can be patched","Ancienne tête retirée + aucune ancienne branche = nouvelle tête autorisée"],
-  ["“Unpatch” here means a system-record action. This practice does not operate MyPatch or disconnect physical fibers. Button wording is illustrative.","Ici, « retirer » désigne une action sur les enregistrements. Cet exercice n’agit pas sur MyPatch et ne débranche aucune fibre physique. Les libellés des boutons sont illustratifs."],
-  ["Install and register the replacement fanout","Installez et enregistrez le fanout de remplacement"],
+    ["A mismatch means stop and reconcile the mapping. Only this assembly is in scope—not every MMC along the route.","En cas d’écart, arrêtez-vous et clarifiez le mappage. Seul cet ensemble est concerné, pas tous les MMC du trajet."],
+        ["Illustration only","Illustration uniquement"],
+    ["Patched","Affecté"],
+      ["{0} remaining","{0} restants"],
+  ["Patch replacement head","Affecter la nouvelle tête"],
+          ["Install and register the replacement fanout","Installez et enregistrez le fanout de remplacement"],
   ["Replace the old complete assembly with a compatible new assembly, preserving every mapped destination.","Remplacez l’ensemble complet par un nouvel ensemble compatible en conservant chaque destination du mappage."],
   ["OLD assembly","ANCIEN ensemble"],
   ["NEW assembly","NOUVEL ensemble"],
   ["Old MMC + all 12 legs","Ancien MMC + les 12 branches"],
   ["New MMC + all 12 legs","Nouveau MMC + les 12 branches"],
-  ["Records cleared","Affectations retirées"],
-  ["Actual new serials","Nouveaux numéros de série réels"],
+    ["Actual new serials","Nouveaux numéros de série réels"],
   ["At the rack","Dans la baie"],
-  ["In MyPatch","Dans MyPatch"],
-  ["Under the approved work / isolation procedure: confirm a compatible assembly, inspect and clean as required, then seat the MMC and every leg at its mapped destination.","Selon la procédure de travail / d’isolement approuvée : vérifiez la compatibilité de l’ensemble, inspectez et nettoyez si nécessaire, puis raccordez le MMC et chaque branche à leur destination prévue."],
-  ["Once all old records are cleared, patch the new leader at the correct passive, then patch its followers to their recorded device / port assignments.","Une fois les anciennes affectations retirées, affectez la nouvelle tête au bon élément passif, puis ses branches aux équipements / ports consignés."],
-  ["Coordinate physical and system changes using the site procedure. A whole-fanout replacement affects every associated leg, including the undamaged ones.","Coordonnez les changements physiques et système selon la procédure du site. Le remplacement complet affecte toutes les branches, y compris celles qui sont intactes."],
+    ["Under the approved work / isolation procedure: confirm a compatible assembly, inspect and clean as required, then seat the MMC and every leg at its mapped destination.","Selon la procédure de travail / d’isolement approuvée : vérifiez la compatibilité de l’ensemble, inspectez et nettoyez si nécessaire, puis raccordez le MMC et chaque branche à leur destination prévue."],
+    ["Coordinate physical and system changes using the site procedure. A whole-fanout replacement affects every associated leg, including the undamaged ones.","Coordonnez les changements physiques et système selon la procédure du site. Le remplacement complet affecte toutes les branches, y compris celles qui sont intactes."],
   ["Verify the whole bundle before closing","Vérifiez tout l’ensemble avant de clôturer"],
   ["Identity","Identification"],
   ["Mapping","Mappage"],
   ["Service","Service"],
-  ["New head and follower labels match the records.","Les étiquettes de la nouvelle tête et de ses branches correspondent aux enregistrements."],
-  ["Every leg is at its assigned device and port.","Chaque branche est raccordée à l’équipement et au port prévus."],
+    ["Every leg is at its assigned device and port.","Chaque branche est raccordée à l’équipement et au port prévus."],
   ["Check every affected link with the required site tests and readings.","Vérifiez chaque liaison concernée avec les tests et mesures exigés sur le site."],
-  ["Confirm the old assembly records are cleared and the replacement records are complete. Resolve any failed link before closing the work.","Confirmez le retrait des anciennes affectations et la complétude des nouvelles. Résolvez toute liaison défaillante avant de clôturer l’intervention."],
-  ["Restart this simulation","Recommencer cette simulation"],
-  ["One head, twelve followers","Une tête, douze branches"],
-  ["The damaged example is leg 7. All twelve legs belong to MMC S747885346FWL; the full assembly is replaced.","La branche 7 est endommagée dans cet exemple. Les douze branches appartiennent au MMC S747885346FWL ; l’ensemble complet est remplacé."],
-  ["P · MMC leader","P · tête MMC"],
-  ["A · LC followers","A · branches LC"],
+    ["Restart this simulation","Recommencer cette simulation"],
+  ["One head, twelve legs","Une tête, douze branches"],
+  ["The damaged example is leg 7. All twelve legs belong to MMC DEMO-FANOUT-001; the full assembly is replaced.","La branche 7 est endommagée dans cet exemple. Les douze branches appartiennent au MMC DEMO-FANOUT-001 ; l’ensemble complet est remplacé."],
+  ["P · MMC head","P · tête MMC"],
+  ["A · LC legs","A · branches LC"],
   ["Entire assembly","Ensemble complet"],
   ["replaced together","remplacé en entier"],
   ["Target","Cible"],
-  ["SSW active endpoint, {0} passive locations, then STSW active endpoint. The target assembly in this example is at CAS 1, the first passive. The fanout still has 12 legs.","Extrémité active SSW, {0} emplacements passifs, puis extrémité active STSW. L’ensemble visé est au CAS 1, le premier élément passif. Le fanout comporte toujours 12 branches."],
-  ["Unpatch old follower leg {0}","Retirer l’affectation de l’ancienne branche {0}"],
-  ["Cleared","Retiré"],
-  ["Leader cleared","Tête retirée"],
-  ["New leader patched","Nouvelle tête affectée"],
-  ["Ready · all old records cleared","Prêt · toutes les anciennes affectations retirées"],
-  ["The old leader is cleared, but 12 followers remain. The replacement is still blocked. Select each leg to unpatch it.","L’ancienne tête est retirée, mais 12 branches restent affectées. Le remplacement est encore bloqué. Sélectionnez chaque branche pour retirer son affectation."],
-  ["Leg {0} cleared. Old followers remaining: {1}.","Branche {0} retirée. Anciennes branches restantes : {1}."],
-  ["Old leader cleared. All 12 old followers cleared. The replacement leader can now be patched.","Ancienne tête retirée. Les 12 anciennes branches sont retirées. La tête de remplacement peut maintenant être affectée."],
-  ["Example: the new leader is patched. Next, patch every NEW follower to its saved destination. The replacement is not complete until all legs and affected links are verified.","Exemple : la nouvelle tête est affectée. Affectez ensuite chaque NOUVELLE branche à sa destination conservée. Le remplacement n’est terminé qu’après vérification de toutes les branches et liaisons concernées."],
-  ["Replace one MMC and all its legs.","Remplacez un MMC et toutes ses branches."],
+  ["Device A active endpoint, {0} passive locations, then Device B active endpoint. The target assembly in this example is at CAS 1, the first passive. The fanout still has 12 legs.","Extrémité active Appareil A, {0} emplacements passifs, puis extrémité active Appareil B. L’ensemble visé est au CAS 1, le premier élément passif. Le fanout comporte toujours 12 branches."],
+    ["Cleared","Retiré"],
+                ["Replace one MMC and all its legs.","Remplacez un MMC et toutes ses branches."],
   ["Find the MMC","Trouvez le MMC"],
   ["Find the broken leg. Follow its label to the MMC and match the full serial.","Trouvez la branche endommagée. Suivez son étiquette jusqu’au MMC et vérifiez le numéro de série complet."],
-  ["MMC = leader. Legs = followers.","MMC = tête. Branches = suiveurs."],
-  ["Save and match the map","Enregistrez et vérifiez le plan"],
+    ["Save and match the map","Enregistrez et vérifiez le plan"],
   ["Save the room, rack, passive, MMC port and every leg’s device / port.","Enregistrez la salle, la baie, le passif, le port MMC et le dispositif / port de chaque branche."],
   ["Open the device route, then the mapped P. Match the MMC serial and port to your saved map.","Ouvrez le trajet entre dispositifs, puis le P indiqué sur le plan. Vérifiez le numéro de série et le port MMC avec le plan enregistré."],
   ["If the labels or map do not match, stop and resolve the mismatch.","Si les étiquettes ou le plan ne correspondent pas, arrêtez-vous et résolvez l’écart."],
   ["See the mapping example","Voir l’exemple de correspondances"],
-  ["Unpatch the old bundle","Retirez les affectations de l’ancien faisceau"],
-  ["In MyPatch, unpatch the MMC first. Then unpatch every leg belonging to it.","Dans MyPatch, retirez d’abord l’affectation du MMC. Puis retirez celle de chaque branche qui lui appartient."],
-  ["Clear the MMC AND every leg before adding the new MMC.","Retirez l’affectation du MMC ET de toutes ses branches avant d’ajouter le nouveau MMC."],
-  ["Practice unpatching","S’entraîner au retrait des affectations"],
-  ["Patch the new bundle","Affectez le nouveau faisceau"],
+          ["Patch the new bundle","Affectez le nouveau faisceau"],
   ["Fit a compatible fanout at the saved destinations, following the site’s isolation, inspection and cleaning procedure.","Installez un fanout compatible aux destinations enregistrées, en suivant la procédure d’isolement, d’inspection et de nettoyage du site."],
-  ["Patch the new MMC first, then every new leg to its saved device / port. Use the new labels.","Affectez d’abord le nouveau MMC, puis chaque nouvelle branche à son dispositif / port enregistré. Utilisez les nouvelles étiquettes."],
-  ["New MMC","Nouveau MMC"],
-  ["Every new leg","Chaque nouvelle branche"],
-  ["Same saved destinations","Mêmes destinations enregistrées"],
+    ["New MMC","Nouveau MMC"],
+    ["Same saved destinations","Mêmes destinations enregistrées"],
   ["Check every link","Vérifiez chaque liaison"],
   ["Match the new labels and ports. Run the required site tests on every affected link before closing.","Vérifiez les nouvelles étiquettes et les ports. Effectuez les tests requis par le site sur chaque liaison concernée avant de clôturer."],
   ["Labels match","Étiquettes conformes"],
   ["Ports match","Ports conformes"],
   ["All links verified","Toutes les liaisons vérifiées"],
+  ["Fictional example: replace a fanout while preserving every connection assignment.","Exemple fictif : remplacer un fanout en conservant chaque affectation de connexion."],
+  ["One head groups separate fiber paths; each leg keeps its own assignment.","Une tête regroupe des chemins de fibre distincts ; chaque branche conserve son affectation."],
+  ["Connection record","Registre de connexions"],
+  ["Device diagnostics","Diagnostic de l’appareil"],
+  ["Physical labels","Étiquettes physiques"],
+  ["Record the location, head serial, passive port and every leg’s endpoint.","Consignez l’emplacement, le numéro de série de la tête, le port passif et l’extrémité de chaque branche."],
+  ["Compare the record with the installed labels. Resolve any mismatch before work.","Comparez le registre aux étiquettes installées. Résolvez toute différence avant les travaux."],
+  ["Device endpoints","Extrémités des appareils"],
+  ["Passive locations","Emplacements passifs"],
+  ["Fictional connection map","Plan de connexions fictif"],
+  ["Record each of the 12 leg IDs and its assigned device / port","Consignez les 12 identifiants de branche et leurs appareils / ports affectés"],
+  ["This fictional route illustrates connectivity. Passive count and fanout leg count are independent.","Ce trajet fictif illustre la connectivité. Le nombre de passifs est indépendant du nombre de branches."],
+  ["All devices, assignments and serials in this example are fictional.","Tous les appareils, affectations et numéros de série de cet exemple sont fictifs."],
+  ["Replace under the approved procedure","Remplacer selon la procédure approuvée"],
+  ["Confirm authorization, affected services and a compatible replacement. Follow the approved isolation, inspection, cleaning and installation procedure.","Confirmez l’autorisation, les services concernés et un remplacement compatible. Suivez la procédure approuvée d’isolement, d’inspection, de nettoyage et d’installation."],
+  ["Keep every leg matched to its recorded destination.","Conservez chaque branche à sa destination consignée."],
+  ["Update and verify the record","Mettre à jour et vérifier le registre"],
+  ["Record the installed head and leg identifiers, destinations and required change history using the authorized process.","Consignez les identifiants de la tête et des branches installées, les destinations et l’historique requis selon le processus autorisé."],
+  ["Practice checking the map","S’entraîner à vérifier le plan"],
+  ["Account for the head and every leg","Vérifier la tête et chaque branche"],
+  ["Fictional checklist","Liste de vérification fictive"],
+  ["Check head mapping","Vérifier l’affectation de la tête"],
+  ["Legs 1–12","Branches 1–12"],
+  ["Finish checklist","Terminer la liste"],
+  ["Mapping checks remain","Des affectations restent à vérifier"],
+  ["Check the head and all 12 legs in any order.","Vérifiez la tête et les 12 branches dans n’importe quel ordre."],
+  ["These buttons mark a fictional checklist. They do not change records, disconnect fibers or verify a live link.","Ces boutons cochent une liste fictive. Ils ne modifient aucun registre, ne déconnectent aucune fibre et ne vérifient aucun lien réel."],
+  ["Check mapping for leg {0}","Vérifier l’affectation de la branche {0}"],
+  ["Checked","Vérifié"],
+  ["Head checked","Tête vérifiée"],
+  ["Checklist complete","Liste terminée"],
+  ["Ready to finish","Prêt à terminer"],
+  ["Head mapping checked. Account for every leg before finishing.","Affectation de la tête vérifiée. Vérifiez chaque branche avant de terminer."],
+  ["Leg {0} checked. Legs remaining: {1}.","Branche {0} vérifiée. Branches restantes : {1}."],
+  ["Checklist complete. Real work still requires the approved tests and verification of every affected link.","Liste terminée. Les travaux réels exigent toujours les tests approuvés et la vérification de chaque lien concerné."],
+  ["Endpoint","Extrémité"],
+  ["Fictional map: {0}/{1} → position {2} when upright.","Plan fictif : {0}/{1} → position {2} à l’endroit."],
+  ["The fictional map assigns {0}/{1} to optic {2}, position {3}. With the tab {4}, that is the {5} side.","Le plan fictif affecte {0}/{1} au module {2}, position {3}. Avec la languette {4}, cela correspond au côté {5}."],
+  ["Use the supplied position map. Check which way the purple tab faces.","Utilisez le plan de positions fourni. Vérifiez l’orientation de la languette violette."],
+  ["Fictional upright map","Plan fictif à l’endroit"],
+  ["7/2 → position 2","7/2 → position 2"],
+  ["Fictional upright map: 5/1 → position 1; 5/2 → position 2. Use the installed equipment map for real work.","Plan fictif à l’endroit : 5/1 → position 1 ; 5/2 → position 2. Pour les travaux réels, utilisez le plan de l’équipement installé."],
+  ["FOA: connection documentation","FOA : documentation des connexions"],
+  ["Connection assignment","Affectation de connexion"],
+  ["Optical readings and status","Mesures optiques et état"],
+  ["The connection record calls for CAS 2, Port 28. Select that port.","Le registre de connexions indique CAS 2, port 28. Sélectionnez ce port."],
+  ["The connection record expects Port 12. VFL light is detected at Port 13. What next?","Le registre de connexions indique le port 12. La lumière VFL est détectée au port 13. Quelle est la suite ?"],
+  ["The connection record expects","Le registre de connexions indique"],
 ];

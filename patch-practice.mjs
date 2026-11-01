@@ -1,8 +1,8 @@
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {cassetteFront, mmcHead} from './loop-visuals.mjs?v=5';
-import {opticIllustration} from './patching-visuals.mjs?v=1';
+import {cassetteFront, mmcHead} from './loop-visuals.mjs?v=20261101';
+import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 import {patchCableVisual} from './patch-cable-visuals.mjs?v=1';
-import {patchTasks,headSerial,placementCorrect,placementExplanation,recordPatchAnswer,patchResult,loadPatchBest,savePatchBest,loadPatchDraft,savePatchDraft,clearPatchDraft} from './patch-practice-data.mjs?v=2';
+import {patchTasks,headSerial,placementCorrect,placementExplanation,recordPatchAnswer,patchResult,loadPatchBest,savePatchBest,loadPatchDraft,savePatchDraft,clearPatchDraft} from './patch-practice-data.mjs?v=20261101';
 
 function connectorArt(kind) {
   if(kind==='mmc') return `<svg viewBox="0 0 130 85" aria-hidden="true"><path class="loop-cord" d="M2 48 H35"/><g class="lab-connector-head" transform="translate(32 24) scale(.85)">${mmcHead(0,0,false)}</g></svg>`;
@@ -152,7 +152,7 @@ export function mountPatchPractice(host) {
     placement={slot,correct}; persist();
     updateBoard();
     const wrongType=selected!==current.kind;
-    feedback(`${correct ? '✓ Seated in the correct port.' : wrongType ? `${selected.toUpperCase()} is the wrong connector here. ${current.kind==='lc' ? 'LC followers connect to the optic.' : 'The MMC head connects to the CAS.'}` : 'That is a different port.'} ${placementExplanation(current)}${mode==='practice' && !correct ? ' Try again.' : ''}`,correct ? 'success' : 'error');
+    feedback(`${correct ? '✓ Seated in the correct port.' : wrongType ? `${selected.toUpperCase()} is the wrong connector here. ${current.kind==='lc' ? 'LC legs connect to the optic.' : 'The MMC head connects to the CAS.'}` : 'That is a different port.'} ${placementExplanation(current)}${mode==='practice' && !correct ? ' Try again.' : ''}`,correct ? 'success' : 'error');
     if(correct || mode==='quiz') {
       host.querySelectorAll('[data-connector]').forEach(button=>button.disabled=true);
       const next=host.querySelector('.lab-next'); next.hidden=false;
@@ -203,17 +203,18 @@ export function mountPatchPractice(host) {
         <button type="button" class="quiz-secondary lab-practice-return">Back to practice</button>
       </div>` : `
       ${mode==='practice' ? `<label class="lab-exercise">Choose a practice ticket<select aria-label="Practice ticket">${patchTasks.map((item,i)=>`<option value="${i}"${i===index ? ' selected' : ''}>${item.title}</option>`).join('')}</select></label>` : `<p class="lab-progress">Question ${index+1} of 5 · first placement counts</p><progress value="${index}" max="5" aria-label="Patching questions completed"></progress>`}
-      <div class="lab-ticket"><span>Mock FIM ticket · training example</span>
+      <div class="lab-ticket"><span>Mock connection record ticket · training example</span>
         <h4 tabindex="-1">${current.kind==='lc' ? `Patch Ethernet ${current.optic}/${current.ethernet}` : `Patch CAS ${current.cas} · Port ${current.port}`}</h4>
-        <p>${current.kind==='lc' ? `Follower: Leg ${current.leg} · of the 12-leg fanout` : 'Connector: MMC leader / head'}</p>
+        ${current.kind==='lc' ? `<p>Fictional map: ${current.optic}/${current.ethernet} → position ${current.position} when upright.</p>` : ''}
+        <p>${current.kind==='lc' ? `Fanout leg: Leg ${current.leg} · of the 12-leg fanout` : 'Connector: MMC head'}</p>
         <p class="lab-serial">Head ${headSerial}</p>
       </div>
       <p class="lab-instruction">Pull the cable to a port. Or select its connector, then tap the port.</p>
       <div class="lab-workbench">
-      <div class="lab-tray" role="group" aria-label="Choose a connector">${['lc','mmc'].map(kind=>`<button type="button" data-connector="${kind}" aria-pressed="false" aria-label="Select ${kind==='lc' ? 'LC follower' : 'MMC head'}">${connectorArt(kind)}<strong>${kind==='lc' ? 'LC follower' : 'MMC head'}</strong></button>`).join('')}</div>
+      <div class="lab-tray" role="group" aria-label="Choose a connector">${['lc','mmc'].map(kind=>`<button type="button" data-connector="${kind}" aria-pressed="false" aria-label="Select ${kind==='lc' ? 'LC leg' : 'MMC head'}">${connectorArt(kind)}<strong>${kind==='lc' ? 'LC leg' : 'MMC head'}</strong></button>`).join('')}</div>
       <div class="lab-board"></div>
       </div>
-      <p class="lab-feedback" role="status" aria-live="polite" aria-atomic="true">${mode==='practice' ? current.kind==='lc' ? 'Match the Ethernet suffix to the optic position. Check which way the purple tab faces.' : 'Match the CAS and port in the ticket. The serial alone does not tell you the port.' : 'Choose your connector, then make one placement.'}</p>
+      <p class="lab-feedback" role="status" aria-live="polite" aria-atomic="true">${mode==='practice' ? current.kind==='lc' ? 'Use the supplied position map. Check which way the purple tab faces.' : 'Match the CAS and port in the ticket. The serial alone does not tell you the port.' : 'Choose your connector, then make one placement.'}</p>
       <button type="button" class="quiz-primary lab-next" hidden>${mode==='quiz' ? index===4 ? 'See my exam result' : 'Next question' : 'Next practice ticket'}</button>`}`;
     host.querySelector('.lab-resume')?.addEventListener('click',()=>begin('quiz'));
     host.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=> {

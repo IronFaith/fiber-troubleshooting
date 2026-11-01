@@ -1,10 +1,10 @@
-import {questionVariants} from './quiz-variants.mjs?v=1';
-import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=4';
+import {questionVariants} from './quiz-variants.mjs?v=20261101';
+import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=20261101';
 import {loopTopic,loopTitle,loopDescription,loopQuestions} from './loop-exam.mjs?v=1';
 export const topics = ['Spot the problem', 'Check the connection', 'Understand the light', 'Narrow down the problem'];
 export const roundDescriptions = [
   'Read the signs and consider what could cause them.',
-  'Inspect connections, match FIM and check your changes.',
+  'Inspect connections, match the connection record and check your changes.',
   'Follow TX and RX, compare limits and check every lane.',
   'Use local loops and VFL observations to choose the next check.'
 ];
@@ -21,9 +21,9 @@ export function examDestination(hash) {
 export const questions = [
   {
     id:'no-light', topic:0, visual:'simple-dark', skill:'Read the signal',
-    prompt:'The report shows −40 in red. What do we know so far?',
+    prompt:'The report shows “No signal” in red. What do we know so far?',
     choices:['No light is being reported; the cause is still unknown.', 'The optic has failed and needs replacing.', 'The fiber is broken somewhere beyond the first passive.'], correct:0,
-    explanation:'In this Cable Guy example, −40 means no light is reported. It does not identify the failed part. Start checking the possible causes.',
+    explanation:'This simulated report indicates no detected signal. It does not identify the failed part. Check the source, reporting limits and possible causes.',
     reveal:'No light reported ≠ a diagnosis', lesson:'learn.html#readings'
   },
   {
@@ -63,8 +63,8 @@ export const questions = [
   },
   {
     id:'seat-connection', topic:1, visual:'seated-dark', skill:'Check connections',
-    prompt:'Clean and fully seated, but still −40. What is the useful next step?',
-    choices:['Replace the optic immediately; the fiber is ruled out.', 'Keep reseating the same connector until the reading changes.', 'Verify the FIM mapping, then use the approved local optic test.'], correct:2,
+    prompt:'Clean and fully seated, but still no detected signal. What is the useful next step?',
+    choices:['Replace the optic immediately; the fiber is ruled out.', 'Keep reseating the same connector until the reading changes.', 'Verify the connection record mapping, then use the approved local optic test.'], correct:2,
     explanation:'A clean, seated connector rules out neither a mispatch nor a source problem. Confirm the mapping and isolate the local optic using the correct approved loop setup.',
     reveal:'One checked connection does not prove the whole path', lesson:'learn.html#loopbacks'
   },
@@ -76,8 +76,8 @@ export const questions = [
     reveal:'Check the route and the result', lesson:'learn.html#cleaning'
   },
   {
-    id:'match-port', topic:1, visual:'cassette', interaction:'visual', skill:'Match the FIM destination',
-    prompt:'FIM calls for CAS 2, Port 28. Select that port.',
+    id:'match-port', topic:1, visual:'cassette', interaction:'visual', skill:'Match the connection record destination',
+    prompt:'The connection record calls for CAS 2, Port 28. Select that port.',
     choices:Array.from({length:32},(_,i)=>`CAS 2 Port ${i+1}`), correct:27,
     explanation:'Port 28 is on the bottom row, which runs 17–32. Match the exact CAS, port and fiber labels; the nearest empty port may lead elsewhere.',
     reveal:'CAS 2 / 28: the mapped destination', lesson:'patching.html#fim-path'
@@ -113,16 +113,16 @@ export const questions = [
   {
     id:'low-reading', topic:2, visual:'weak', skill:'Compare readings with limits',
     prompt:'RX is −4.20. The example allows −3.00 to +3.00. What does that mean?',
-    choices:['Some light is present, but RX is below this allowed range.', 'It is acceptable because it is not −40.', 'It is too strong because 4.20 is greater than 3.00.'], correct:0,
+    choices:['Some light is present, but RX is below this allowed range.', 'It is acceptable because some light is detected.', 'It is too strong because 4.20 is greater than 3.00.'], correct:0,
     explanation:'−4.20 is more negative, so it is weaker than −3.00. Investigate why the received power is low; the reading alone does not locate the cause.',
     reveal:'Below the lower limit; cause still unknown', lesson:'learn.html#readings'
   },
   {
     id:'all-lanes', topic:2, visual:'lanes', interaction:'visual', skill:'Check every lane',
     prompt:'Which receive lane still needs a no-light check?',
-    choices:['RX lane 1: +0.25 dBm', 'RX lane 2: +0.28 dBm', 'RX lane 3: −40 dBm', 'RX lane 4: +0.21 dBm'], correct:2,
+    choices:['RX lane 1: +0.25 dBm', 'RX lane 2: +0.28 dBm', 'RX lane 3: No signal', 'RX lane 4: +0.21 dBm'], correct:2,
     explanation:'Lane 3 still reports no light. The other lanes cannot prove that this lane works. Follow its mapped path and check the link status too.',
-    reveal:'Lane 3: −40 needs investigation', lesson:'learn.html#readings'
+    reveal:'Lane 3: No signal needs investigation', lesson:'learn.html#readings'
   },
   {
     id:'loop-purpose', topic:3, visual:'direct-loop', skill:'Explain why and where to loop',
@@ -148,8 +148,8 @@ export const questions = [
   },
   {
     id:'wrong-port', topic:3, visual:'wrong-port', skill:'Use VFL observations',
-    prompt:'FIM expects Port 12. VFL light is detected at Port 13. What next?',
-    choices:['Replace the optic because the light reached the wrong port.', 'Compare fiber labels, actual patching and the FIM record.', 'Update FIM to Port 13 immediately without checking the route.'], correct:1,
+    prompt:'The connection record expects Port 12. VFL light is detected at Port 13. What next?',
+    choices:['Replace the optic because the light reached the wrong port.', 'Compare fiber labels, actual patching and the connection record.', 'Update the connection record to Port 13 immediately without checking the route.'], correct:1,
     explanation:'The observation and expected route disagree. Check the labels and actual path before deciding whether the patch or record needs correction.',
     reveal:'Observed 13 ≠ expected 12: verify the mapping', lesson:'patching.html#fim-path'
   },

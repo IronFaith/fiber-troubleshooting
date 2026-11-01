@@ -1,5 +1,5 @@
-import {cassetteFront} from './loop-visuals.mjs?v=5';
-import {opticIllustration} from './patching-visuals.mjs?v=1';
+import {cassetteFront} from './loop-visuals.mjs?v=20261101';
+import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 
 // One supplied case, in chronological order. Answers never invent test results.
 export const connectedCaseQuestions = [
@@ -12,8 +12,8 @@ export const connectedCaseQuestions = [
   },
   {
     id:'case-destination', skill:'Verify an observed destination',
-    prompt:'The VFL trace reaches a different port from FIM. Which check addresses this new evidence?',
-    choices:['Compare actual ports, fanout labels and the route against FIM.', 'Repeat the direct optic loop to check the local light source.', 'Measure optical loss before checking the destination mismatch.'], correct:0,
+    prompt:'The VFL trace reaches a different port from the connection record. Which check addresses this new evidence?',
+    choices:['Compare actual ports, fanout labels and the route against the connection record.', 'Repeat the direct optic loop to check the local light source.', 'Measure optical loss before checking the destination mismatch.'], correct:0,
     explanation:'Expected Port 12 and observed Port 13 disagree. Verify the actual patching and the record before an authorized correction. A wrong destination does not identify a failed optic.',
     reveal:'Resolve the mapping mismatch before trusting the route.'
   },
@@ -64,7 +64,7 @@ export function connectedCaseVisual(step,{lesson=false,answered=false}={}) {
   if(step===1) return endLoops(lesson||answered);
   if(step===2) return `<p class="q-report-label">Earlier checks: both end loops passed</p>
     <div class="connected-vfl"><b>VFL</b><span>Disconnected local LC leg</span><span class="connected-red-route" aria-hidden="true">↓</span><span>Through CAS 1 → toward CAS 2</span></div>
-    <div class="connected-port-check">${[['FIM expects',expected,false],['Light detected',observed,true]].map(([label,port,lit])=>`<div class="case-fact"><span>${label}</span><i class="connected-port-face${lit?' port-lit':''}" aria-hidden="true"></i><b>CAS 2 / ${port}</b></div>`).join('')}</div>
+    <div class="connected-port-check">${[['The connection record expects',expected,false],['Light detected',observed,true]].map(([label,port,lit])=>`<div class="case-fact"><span>${label}</span><i class="connected-port-face${lit?' port-lit':''}" aria-hidden="true"></i><b>CAS 2 / ${port}</b></div>`).join('')}</div>
     <p class="q-observation">Active optics are disconnected. VFL stays on the LC leg; CAS is the observation point. Detect light indirectly.</p>`;
   if(step===3) return `<p class="q-report-label">Authorized mapping correction completed; retest at the expected port</p>
     <div class="connected-strands"><div><b>LC · A</b><span class="strand-seen" aria-hidden="true">→</span><strong>Light detected</strong></div><div><b>LC · B</b><span class="strand-dark" aria-hidden="true">⇢</span><strong>No light detected</strong></div></div>
@@ -79,7 +79,7 @@ export function connectedCaseVisual(step,{lesson=false,answered=false}={}) {
 
 const lessonSteps=[
   ['1 · Compare loops','Combine the coverage, not the conclusions. A local loop to CAS 1 and a remote loop to CAS 2 leave the section between the cassettes untested. A passing end does not verify that gap.'],
-  ['2 · Check destination','Trace from a disconnected LC leg, with active optics isolated. If the observed port differs from FIM, compare the labels and physical route with the assignment. Verify which is wrong before making an authorized correction.'],
+  ['2 · Check destination','Trace from a disconnected LC leg, with active optics isolated. If the observed port differs from the connection record, compare the labels and physical route with the assignment. Verify which is wrong before making an authorized correction.'],
   ['3 · Check both strands','After correcting the mapping, test each assigned strand. A working strand does not clear its neighbor. Verify the VFL and LC connection with a known-good reference, then isolate the dark path and its interfaces. Do not name a ferrule or leg as faulty from this observation alone.'],
   ['4 · Check service light','After correcting a connection, both strands can pass red light while service RX remains low. Normalize restores the assigned patching; it does not declare the link healthy. Inspect remaining connections and use an appropriate optical loss test.'],
   ['5 · Verify before closing','An improved reading is progress. Check all required TX/RX lanes against the installed limits, verify link operation and the expected device and port, then record the final results. Each check answers a different question.']

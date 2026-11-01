@@ -1,18 +1,18 @@
 import {mountSiteCounter} from './site-counter.mjs?v=7';
-import {vflPen} from './test-tool-visuals.mjs?v=1';
-import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=2';
-import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=5';
-import { rackIllustration } from './rack-visuals.mjs?v=9';
-import { mountCommunicationRoute } from './communication-route.mjs?v=6';
-import { mountCourse, learningEntry } from './course.mjs?v=11';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=36';
-import { opticIllustration } from './patching-visuals.mjs?v=1';
-import { mountPatchPractice } from './patch-practice.mjs?v=14';
-import { mountFanoutReplacement } from './fanout-replacement.mjs?v=2';
-import { mountLightJourney } from './loop-lesson.mjs?v=9';
+import {vflPen} from './test-tool-visuals.mjs?v=20261101';
+import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=20261101';
+import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=20261101';
+import { rackIllustration } from './rack-visuals.mjs?v=20261101';
+import { mountCommunicationRoute } from './communication-route.mjs?v=20261101';
+import { mountCourse, learningEntry } from './course.mjs?v=20261101';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=20261101';
+import { opticIllustration } from './patching-visuals.mjs?v=20261101';
+import { mountPatchPractice } from './patch-practice.mjs?v=20261101';
+import { mountFanoutReplacement } from './fanout-replacement.mjs?v=20261101';
+import { mountLightJourney } from './loop-lesson.mjs?v=20261101';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=3';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=12';
+import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=20261101';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=20261101';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -94,7 +94,7 @@ function renderLesson(lesson,markupOnly=false) {
     </section>
     <section id="path" class="lesson-section" aria-labelledby="path-title">
       <h3 id="path-title">The fiber carries the light</h3>
-      <p class="section-intro">In your layout: LC followers join an MMC leader at the passive.</p>
+      <p class="section-intro">In this fictional layout: LC legs join an MMC head at the passive.</p>
       <div id="path-picture"></div>
       <p><a href="./patching.html#rack-path">See this fiber path inside a rack →</a></p>
       <p class="lesson-takeaway">A passive routes light; it does not make it. Follow the mapped port, strand and TX → RX pairing.</p>
@@ -224,7 +224,7 @@ function redPicture() {
     lightSource(129,90,'red')+'<path class="red-arrow" d="M210 85 l8 5 -8 5"/>'+text(207,57,'Isolated fiber','class="small" text-anchor="middle"')+text(180,145,'Active equipment disconnected','class="small" text-anchor="middle"')};
 }
 function pathPicture() {
-  return {...patchRouteIllustration(), caption:'TX starts at the optic → LC follower → MMC head → CAS → onward fiber. The separate RX path carries light from the remote optic. One pair shown; follow the full lane map in FIM.'};
+  return {...patchRouteIllustration(), caption:'TX starts at the optic → LC leg → MMC head → CAS → onward fiber. The separate RX path carries light from the remote optic. One pair shown; follow the full lane map in the connection record.'};
 }
 function loopPicture(selected) {
   const art = loopIllustration(selected ? 'passive' : 'direct');
@@ -280,24 +280,24 @@ function renderDevicesLesson(lesson,markupOnly=false) {
     <nav class="lesson-jumps" aria-label="In this chapter"><a href="#position">Read the position</a><a href="#ends">Local & remote</a><a href="#ports">Confirm the ports</a><a href="#lldp-neighbors">LLDP neighbors</a></nav>
     <section id="position" class="lesson-section" aria-labelledby="position-title">
       <h3 id="position-title">Every part narrows the location</h3>
-      <p class="position-code">QNO5.5C.16f.17.30</p>
+      <p class="position-code">DEMO / ROOM-A / ROW-02 / RACK-17 / U30</p>
       <p class="section-intro">Tap a part to see where it takes you.</p>
       <div class="position-parts" role="group" aria-label="Parts of the rack position">
-        <button type="button" data-position="0"><strong>QNO5</strong><span>Building</span></button>
-        <button type="button" data-position="1"><strong>5C</strong><span>Room</span></button>
-        <button type="button" data-position="2"><strong>16f</strong><span>Row / front</span></button>
-        <button type="button" data-position="3"><strong>17</strong><span>Rack</span></button>
-        <button type="button" data-position="4"><strong>30</strong><span>Elevation</span></button>
+        <button type="button" data-position="0"><strong>DEMO</strong><span>Building</span></button>
+        <button type="button" data-position="1"><strong>ROOM-A</strong><span>Room</span></button>
+        <button type="button" data-position="2"><strong>ROW-02</strong><span>Row</span></button>
+        <button type="button" data-position="3"><strong>RACK-17</strong><span>Rack</span></button>
+        <button type="button" data-position="4"><strong>U30</strong><span>Elevation</span></button>
       </div>
       <figure id="position-picture" class="lesson-figure"></figure>
-      <p class="picture-note">Your naming format. Drawings are illustrative; use the site labels and layout to locate the actual device.</p>
+      <p class="picture-note">Fictional naming format. Use the installed labels and actual layout to locate real equipment.</p>
     </section>
     <section id="ends" class="lesson-section" aria-labelledby="ends-title">
       <h3 id="ends-title">From your rack to the other room</h3>
       <p class="section-intro">The devices exchange data through a chain of fiber connections. Follow the optic’s light through three passives on each side of this example. Local is where you are checking; remote is the other device.</p>
       <div id="ends-picture"></div>
-      <div class="endpoint-locations"><p><strong>Device A · your example</strong><span>QNO5.5C.16f.17.30</span></p><p><strong>Device B · the other end</strong><span>Find its own position in the connection record.</span></p></div>
-      <p class="picture-note">A1–A3 and B1–B3, Port 12 and the room layouts are teaching examples. The rear female / front male MMC arrangement at the rack CAS follows your site example; connector gender depends on the assembly. Use FIM and the actual labels for the route, mating connectors and lane map.</p>
+      <div class="endpoint-locations"><p><strong>Device A · fictional example</strong><span>DEMO / ROOM-A / ROW-02 / RACK-17 / U30</span></p><p><strong>Device B · the other end</strong><span>Find its own position in the connection record.</span></p></div>
+      <p class="picture-note">All locations and assignments shown are fictional. Connector gender and lane mapping depend on the assembly; confirm the actual labels, specifications and connection record.</p>
     </section>
     ${perspectiveLesson()}
     <section id="ports" class="lesson-section" aria-labelledby="ports-title">
@@ -307,7 +307,7 @@ function renderDevicesLesson(lesson,markupOnly=false) {
       <p class="lesson-takeaway">Check what you can reach: loop the local optic, then extend through accessible passives. A passing local loop leaves the path beyond it unverified.</p>
     </section>
     ${lldpLesson()}
-    <p class="lesson-sources">Position format and rack connection: your site examples. References: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC gender and polarity</a>.</p>
+    <p class="lesson-sources">Fictional location format and rack example. References: <a href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-9200-switch-stack/222738-troubleshoot-fiber-links-on-catalyst-900.html" target="_blank" rel="noopener noreferrer">Cisco: TX/RX pairing</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC gender and polarity</a>.</p>
 `;
   if(markupOnly)return;
   setupLesson(lesson);mountDevices(lesson);
@@ -332,30 +332,30 @@ function mountDevices(lesson) {
 
 function positionPicture(selected) {
   const captions = [
-    'QNO5 = building. Start at this building.',
-    '5C = data hall / room. Find room 5C inside QNO5.',
-    '16f = row 16, front. The f identifies front in your naming format.',
-    '17 = rack. Find rack 17 in row 16, at the front.',
-    '30 = elevation. Find the device at elevation 30 in rack 17.'
+    'DEMO = building. Start at this building.',
+    'ROOM-A = data hall / room. Find room ROOM-A inside DEMO.',
+    'ROW-02 identifies row 2 in this fictional location.',
+    'RACK-17 identifies rack 17 in row 2.',
+    'U30 identifies rack unit 30 in rack 17.'
   ];
   let drawing;
   if (selected === 0) {
-    drawing = '<path class="site-building" d="M28 224 V64 L180 27 L332 64 V224 Z"/>'+text(180,87,'QNO5','class="position-large" text-anchor="middle"');
+    drawing = '<path class="site-building" d="M28 224 V64 L180 27 L332 64 V224 Z"/>'+text(180,87,'DEMO','class="position-large" text-anchor="middle"');
     for (let row=0; row<2; row++) for(let column=0; column<5; column++) drawing += `<rect class="site-window" x="${55+column*53}" y="${108+row*38}" width="35" height="22" rx="2"/>`;
     drawing += '<rect class="site-door" x="155" y="183" width="50" height="41" rx="2"/>'+text(180,250,'Building','text-anchor="middle"');
   } else if (selected === 1) {
-    drawing = text(15,25,'Inside building QNO5')+'<rect class="site-building" x="15" y="42" width="330" height="194" rx="6"/>';
-    drawing += '<rect class="site-room" x="30" y="60" width="133" height="72" rx="4"/><rect class="site-room" x="30" y="149" width="133" height="68" rx="4"/><rect class="position-active" x="182" y="60" width="145" height="157" rx="4"/>'+text(254,134,'5C','class="position-large" text-anchor="middle"')+text(254,160,'Data hall / room','class="small" text-anchor="middle"');
+    drawing = text(15,25,'Inside building DEMO')+'<rect class="site-building" x="15" y="42" width="330" height="194" rx="6"/>';
+    drawing += '<rect class="site-room" x="30" y="60" width="133" height="72" rx="4"/><rect class="site-room" x="30" y="149" width="133" height="68" rx="4"/><rect class="position-active" x="182" y="60" width="145" height="157" rx="4"/>'+text(254,134,'ROOM-A','class="position-large" text-anchor="middle"')+text(254,160,'Data hall / room','class="small" text-anchor="middle"');
   } else if (selected === 2) {
-    drawing = text(15,26,'Inside room 5C');
+    drawing = text(15,26,'Inside room ROOM-A');
     for (let row=0; row<3; row++) {
       const y=48+row*66;
       drawing += `<rect class="${row===1 ? 'position-active' : 'site-room'}" x="77" y="${y}" width="266" height="44" rx="4"/>`;
       for (let rack=0; rack<7; rack++) drawing += `<path class="site-divider" d="M${86+rack*37} ${y+5} V${y+39}"/>`;
-      if (row===1) drawing += text(12,y+27,'Row 16','class="small"')+`<path class="front-edge" d="M82 ${y+44} H338"/>`+text(210,y+60,'f = front','class="small" text-anchor="middle"');
+      if (row===1) drawing += text(12,y+27,'Row 2','class="small"')+`<path class="front-edge" d="M82 ${y+44} H338"/>`+text(210,y+60,'Front view','class="small" text-anchor="middle"');
     }
   } else if (selected === 3) {
-    drawing = text(15,26,'Room 5C · row 16 · front');
+    drawing = text(15,26,'Room ROOM-A · row 2');
     for (let rack=0; rack<5; rack++) {
       const x=11+rack*69;
       drawing += `<rect class="${rack===2 ? 'position-active' : 'site-room'}" x="${x}" y="51" width="61" height="155" rx="5"/>`;
@@ -380,49 +380,50 @@ function positionPicture(selected) {
 function renderPatchingLesson(lesson,markupOnly=false) {
   lesson.innerHTML = `
     <div class="chapter-heading"><p class="chapter-count">Chapter 3</p><button type="button" class="lesson-motion"></button></div>
-    <p class="lesson-intro">Match the optic position, the follower and its MMC head.</p>
-    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">LC position</a><a href="#rack-path">Rack view</a><a href="#fim-path">FIM path</a><a href="#mmc-fanout">MMC head & followers</a><a href="./simulations.html">Try the simulation →</a></nav>
+    <p class="lesson-intro">Match the optic position, the leg and its MMC head.</p>
+    <nav class="lesson-jumps" aria-label="In this chapter"><a href="#lc-position">LC position</a><a href="#rack-path">Rack view</a><a href="#fim-path">Connection record path</a><a href="#mmc-fanout">MMC head & legs</a><a href="./simulations.html">Try the simulation →</a></nav>
     <section id="lc-position" class="lesson-section" aria-labelledby="lc-position-title">
       <h3 id="lc-position-title">Same optic. Two LC positions.</h3>
-      <p class="section-intro">Choose the Ethernet port shown in FIM.</p>
+      <p class="section-intro">Choose the Ethernet port shown in the connection record.</p>
+      <p>Fictional upright map: 5/1 → position 1; 5/2 → position 2. Use the installed equipment map for real work.</p>
       <div id="patch-picture"></div>
       <div id="patch-mapping" class="patch-mapping"></div>
       <p class="lesson-takeaway">Tab above = upright. Flip the optic and the ports swap sides; their Ethernet numbers stay with them.</p>
-      <p class="picture-note">Your confirmed site example, facing the optic. Check the installed orientation and labels; other hardware may use a different mapping.</p>
+      <p class="picture-note">Fictional optic example. Check the installed orientation and labels; other hardware may use a different mapping.</p>
     </section>
     <section id="rack-path" class="lesson-section" aria-labelledby="rack-path-title">
       <h3 id="rack-path-title">Find the device. Follow its fiber.</h3>
       <p class="section-intro">From the optic, up the side manager, to the green CAS.</p>
       <div id="rack-picture"></div>
-      <p class="picture-note">Example rack layout. Elevations, CAS 1 / 12 and front/rear routes are teaching examples; confirm the installed path in FIM.</p>
+      <p class="picture-note">Example rack layout. Elevations, CAS 1 / 12 and front/rear routes are teaching examples; confirm the installed path in the connection record.</p>
     </section>
     <section id="fim-path" class="lesson-section" aria-labelledby="fim-path-title">
       <h3 id="fim-path-title">Follow the LC leg to its passive</h3>
-      <p class="section-intro">Use FIM to match the device, Ethernet port, leg ID and passive port.</p>
+      <p class="section-intro">Use the connection record to match the device, Ethernet port, leg ID and passive port.</p>
       <div id="patch-route-picture"></div>
-      <p class="lesson-takeaway">The Ethernet number chooses the optic position. FIM tells you which LC follower and MMC passive port belong to that connection.</p>
+      <p class="lesson-takeaway">Use the supplied map to identify the physical position. A port name alone does not define it. Match the assigned LC leg and passive port in the connection record.</p>
       <ol class="patch-steps">
-        <li><b>Match.</b> Confirm the device, port and fiber labels against FIM.</li>
+        <li><b>Match.</b> Confirm the device, port and fiber labels against the connection record.</li>
         <li><b>Inspect.</b> Isolate as required, inspect, clean if needed, then inspect again.</li>
-        <li><b>Seat & check.</b> Seat the mapped connectors fully. Check optic health in Cable Guy.</li>
+        <li><b>Seat & check.</b> Seat the mapped connectors fully. Check optic health in device diagnostics.</li>
       </ol>
       <p class="picture-note">Moving blue lines illustrate the intended IR path, not a measured result. Use the health check if light is missing.</p>
     </section>
     <section id="mmc-fanout" class="lesson-section" aria-labelledby="mmc-fanout-title">
-      <h3 id="mmc-fanout-title">One MMC head. 12 followers.</h3>
-      <p class="section-intro">The leader/head identifies this fanout. Its 12 legs belong to the same assembly.</p>
-      <p class="fanout-serial"><span>Example head serial</span><strong>S747885346FWL</strong></p>
+      <h3 id="mmc-fanout-title">One MMC head. 12 legs.</h3>
+      <p class="section-intro">The head identifies this fanout. Its 12 legs belong to the same assembly.</p>
+      <p class="fanout-serial"><span>Example head serial</span><strong>DEMO-FANOUT-001</strong></p>
       <p class="section-intro">Choose a leg to trace it back to the head.</p>
       <div id="fanout-picture"></div>
-      <p class="picture-note">One line per leg; individual strands are not shown. Leg numbers are illustration labels—use the actual labels and mapping in FIM.</p>
+      <p class="picture-note">One line per leg; individual strands are not shown. Leg numbers are illustration labels—use the actual labels and mapping in the connection record.</p>
       <p class="lesson-takeaway">A fanout groups separate fiber paths. It does not split one optic’s light among all 12 legs.</p>
       <h4 class="mmc-patch-title">Patch the head into the passive</h4>
       <div id="mmc-patch-picture"></div>
-      <p class="lesson-takeaway">The serial identifies the fanout. FIM identifies its destination passive and port. Then match each follower to its assigned optic port.</p>
+      <p class="lesson-takeaway">The serial identifies the fanout. The connection record identifies its destination passive and port. Then match each leg to its assigned optic port.</p>
     </section>
     ${patchTicketLesson()}
     <a class="next-chapter" href="./simulations.html">Practice LC & MMC patching in Simulations →</a>
-    <p class="lesson-sources">Port mapping and fanout: your site examples. <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
+    <p class="lesson-sources">Port mapping and fanout assignments are fictional teaching examples. <a href="https://www.thefoa.org/tech/ref/OSP/design.html" target="_blank" rel="noopener noreferrer">FOA: connection documentation</a> · <a href="https://www.cisco.com/c/en/us/support/docs/optical/synchronous-digital-hierarchy-sdh/51834-cleanfiber2.html" target="_blank" rel="noopener noreferrer">Cisco: inspection & cleaning</a> · <a href="https://www.usconec.com/featured-products/mmc-connector-solutions/speed-of-deployment" target="_blank" rel="noopener noreferrer">US Conec: MMC alignment & polarity</a>.</p>
     <a class="next-chapter" href="./quiz.html">Open Exams →</a>
     <a class="lesson-return" href="./index.html">Check optic / fiber health →</a>`;
   if(markupOnly)return;
@@ -432,7 +433,7 @@ function mountPatching(lesson) {
   if(lesson.querySelector('#patch-picture'))setupPatchExample();
   if(lesson.querySelector('#rack-picture'))setupRackExample();
   example('patch-route-picture', 'Selected LC path to the passive', [], patchRoutePicture,lesson);
-  example('fanout-picture', 'Choose a fanout follower', Array.from({length:12}, (_, index) => `Leg ${index+1}`), fanoutPicture,lesson);
+  example('fanout-picture', 'Choose a fanout leg', Array.from({length:12}, (_, index) => `Leg ${index+1}`), fanoutPicture,lesson);
   example('mmc-patch-picture', 'MMC patching steps', ['1 · Match', '2 · Prepare', '3 · Seat'], mmcPatchPicture,lesson);
 }
 
@@ -445,12 +446,12 @@ function renderSimulations() {
     <nav class="lesson-jumps" aria-label="Simulation activities"><a href="#patch-practice">LC & MMC patching</a><a href="#fanout-replacement">Fanout replacement</a></nav>
     <section id="patch-practice" class="lesson-section" aria-labelledby="practice-title">
       <h3 id="practice-title">LC & MMC patching</h3>
-      <p class="section-intro">Read a mock FIM ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question exam.</p>
+      <p class="section-intro">Read a mock connection record ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question exam.</p>
       <div id="patch-lab" class="patch-lab"></div>
-      <p class="picture-note">Each ticket is a separate training example using your site's 1 / 5 mapping. Matching a port does not prove light or link health. On site: confirm FIM, inspect/clean, seat fully, and check optic health.</p>
+      <p class="picture-note">Each ticket provides a fictional position map. Matching a port does not prove light or link health. Follow the approved procedure and verify the actual connection.</p>
     </section>
     <div id="fanout-simulation"></div>
-    <a class="next-chapter" href="./patching.html">Review FIM, LC & MMC patching →</a>
+    <a class="next-chapter" href="./patching.html">Review connection record, LC & MMC patching →</a>
     <a class="next-chapter" href="./quiz.html">Exams →</a>`;
   setupLesson(lesson);
   mountPatchPractice(document.getElementById('patch-lab'));
@@ -481,7 +482,7 @@ function setupRackExample() {
 function setupPatchExample() {
   let flipped = false;
   let selectedPort = 0;
-  const show = example('patch-picture', 'Ethernet port in FIM', ['Ethernet 5/1', 'Ethernet 5/5'], selected => {
+  const show = example('patch-picture', 'Ethernet port in the connection record', ['Ethernet 5/1', 'Ethernet 5/2'], selected => {
     selectedPort = selected;
     return opticIllustration({selected, flipped, optic:5, id:'lesson-optic'});
   });
@@ -497,7 +498,7 @@ function setupPatchExample() {
     status.textContent = flipped ? 'Upside down · tab below' : 'Upright · tab above';
     flip.setAttribute('aria-pressed', String(flipped));
     document.getElementById('patch-mapping').innerHTML = (flipped ? [1,0] : [0,1]).map((port,index) =>
-      `<p><strong>5/${port ? 5 : 1}</strong><span>Position ${port+1} · ${index ? 'right' : 'left'}</span></p>`).join('');
+      `<p><strong>5/${port ? 2 : 1}</strong><span>Position ${port+1} · ${index ? 'right' : 'left'}</span></p>`).join('');
   }
   flip.addEventListener('click', () => { flipped = !flipped; show(selectedPort); updateOrientation(); });
   updateOrientation();
@@ -508,8 +509,8 @@ function patchRoutePicture() {
 }
 
 function fanoutPicture(selected) {
-  let drawing = text(58,177,'Leader / head','class="small" text-anchor="middle"')+
-    text(298,38,'Followers','text-anchor="middle"');
+  let drawing = text(58,177,'Fanout head','class="small" text-anchor="middle"')+
+    text(298,38,'Legs','text-anchor="middle"');
   for (let index=0; index<12; index++) {
     const endY = 62+index*29;
     const startY = 221+index*1.5;
@@ -521,7 +522,7 @@ function fanoutPicture(selected) {
     drawing += `<rect class="fanout-tag${index===selected ? ' fanout-tag-selected' : ''}" x="275" y="${y-11}" width="48" height="22" rx="4"/>`+
       text(299,y+4,String(index+1),'class="small" text-anchor="middle"');
   }
-  return {height:407, hardware:true, caption:`Leg ${selected+1} belongs to MMC head S747885346FWL. Match this follower’s actual label in FIM.`, drawing};
+  return {height:407, hardware:true, caption:`Leg ${selected+1} belongs to MMC head DEMO-FANOUT-001. Match this leg’s actual label in the connection record.`, drawing};
 }
 
 function mmcPatchPicture(selected) {

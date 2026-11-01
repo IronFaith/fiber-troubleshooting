@@ -9,7 +9,7 @@ export const faults = {
 export const loopLabels = { pass: 'Pass', weak: 'Weak return', dark: 'No return light' };
 export const traceLabels = { seen: 'Expected port + strand', weak: 'Weak light', wrong: 'Different port', swapped: 'Other strand', dark: 'No light seen' };
 export const identityLabels = {
-  optic:'Device + optic port', fanout:'LC follower + MMC head',
+  optic:'Device + optic port', fanout:'LC leg + MMC head',
   route:'CAS route + ports', channels:'Strand mapping'
 };
 export const comparisonLabels = {
@@ -388,12 +388,12 @@ function basicAssessment(s) {
     if(trace==='seen' && stop?.kind==='head') return result('Light reaches the loose MMC head',
       'You confirmed continuity up to this connector. The cassette connection has not been tested.',
       'Plug the head into its mapped port, then check for light at the open opposite face.',shared);
-    if(trace==='seen' && stop?.port!==undefined && stop.port!==s.ports[s.selected-1]) return result('Check the port against FIM',
+    if(trace==='seen' && stop?.port!==undefined && stop.port!==s.ports[s.selected-1]) return result('Check the port against the connection record',
       `The diagram is patched to port ${stop.port}; the mapped destination is port ${s.ports[s.selected-1]}.`,
-      'Confirm the real patch and FIM record. Correct the connection if needed, then trace again.',{...shared,tone:'suspect'});
+      'Confirm the real patch and connection record. Correct the connection if needed, then trace again.',{...shared,tone:'suspect'});
     if (trace === 'wrong' || trace === 'swapped') return result(trace === 'wrong' ? 'Light reached a different port' : 'Light reached the other strand',
       'There is a route, but it does not match the expected port / TX–RX pairing.',
-      'Check the FIM destination, leader / follower mapping and polarity. Correct the route, then trace again.', shared);
+      'Check the connection record destination, head / leg mapping and polarity. Correct the route, then trace again.', shared);
     if (trace === 'dark') return result('Trace this section more closely',
       `No visible light at ${fiberPointName(s.selected,s)} does not identify a break or its exact position along ${traceName(s)}.`,
       `Verify the VFL and LC connection. ${longRoute?'Choose an intermediate CAS to check a shorter route. ':''}Check nearby ports, seating, end faces, bends and damage; use a loss test / OTDR if needed.`, shared);
@@ -405,7 +405,7 @@ function basicAssessment(s) {
   if(loops) return loops;
   const tx = s.simulated ? simulatedReadings(s).tx : s.tx;
   if (tx === 'dark') return result('Check why local TX is not emitting',
-    'A reported −40 indicates no light / the reporting floor. A fiber polarity mismatch alone does not explain absent local TX output.',
+    'A no-signal status needs verification against the device specifications and reporting range. A fiber polarity mismatch alone does not explain absent local TX output.',
     'Verify the report and lane, port / laser state and optic seating. Then use a supported loop or known-good comparison.',
     {suggestion:{point:0,tool:'loop'}});
   return result('Start with a direct optic loop',
@@ -521,7 +521,7 @@ export function comparisonGuide(s,key) {
   if(c.source==='fail'||c.source!=='pass'&&!sourceEvidence) return diagnostic('source',
     `Check the VFL on a known-good LC reference using the same LC connection used for ${letter}. Does the reference pass light?`,
     c.source==='fail'?{comparisonFinding:'The reference is also dark. Check the VFL, LC connection and reference lead before blaming the installed fiber.'}:{});
-  if(!identityConfirmed(s)) return terminal('Confirm the device / optic socket, follower-to-head serial, CAS ports and expected channel in “Match the physical path”. A working strand can still belong to the wrong fanout.',{needsIdentity:true,comparisonFinding:sourceEvidence?'Earlier light confirms this source and strand at that point. Confirm the physical mapping before blaming a component.':'The VFL reference passes. The intended fiber identity still needs confirmation.'});
+  if(!identityConfirmed(s)) return terminal('Confirm the device / optic socket, leg-to-head serial, CAS ports and expected channel in “Match the physical path”. A working strand can still belong to the wrong fanout.',{needsIdentity:true,comparisonFinding:sourceEvidence?'Earlier light confirms this source and strand at that point. Confirm the physical mapping before blaming a component.':'The VFL reference passes. The intended fiber identity still needs confirmation.'});
   if(!c.inspection) return diagnostic('inspection',
     sourceEvidence?`Switch off the VFL. Inspect the connectors and bends between ${fiberPointName(sourceEvidence.to,s)} and ${fiberPointName(r.to,s)}. Clean and reinspect as needed, then retest strand ${letter} from the same LC.`:
       `Turn the VFL off and isolate from active gear. Inspect the mapped ${letter} fiber end faces with a compatible inspection probe. Clean and reinspect as needed; check seating and visible bends. Retest the original route before continuing.`,
@@ -569,8 +569,8 @@ function traceAssessment(s) {
     const wrong=rows.find(r=>r.result==='wrong');
     const portMismatch=!isOptic(s,g.to)&&patchAt(s,g.to).port!==s.ports[g.to-1];
     if(wrong || portMismatch) {
-      make(90,'The observed route does not match FIM',portMismatch?`Patched port ${patchAt(s,g.to).port}; expected port ${s.ports[g.to-1]}.`:'Light was reported at a different port.',
-        'Verify the device, LC follower, MMC serial and FIM destination. Correct the patch only after confirming the mapping, then start a retest.',
+      make(90,'The observed route does not match the connection record',portMismatch?`Patched port ${patchAt(s,g.to).port}; expected port ${s.ports[g.to-1]}.`:'Light was reported at a different port.',
+        'Verify the device, LC leg, MMC serial and connection record destination. Correct the patch only after confirming the mapping, then start a retest.',
         {issue:'mapping',needsIdentity:!s.simulated,branches:[['Mapping matches','Recheck the strand and viewing point.'],['Mapping differs','Correct the confirmed misport, then retest.']]});
       continue;
     }
@@ -634,7 +634,7 @@ function traceAssessment(s) {
     }
     if(rows.some(r=>r.result==='swapped')) {
       make(70,'Check the documented strand mapping','Light is present, but at the other illustrated channel.',
-        'Compare both strands with the FIM / cable channel map. A / B are illustration labels; do not swap fibers solely because this picture differs.',
+        'Compare both strands with the connection record / cable channel map. A / B are illustration labels; do not swap fibers solely because this picture differs.',
         {issue:'polarity',check:rows.length===1?traceCheck({...rows[0],strand:rows[0].strand==='tx'?'rx':'tx'},'Check the other strand'):null,
           branches:[['Matches the channel map','Verify TX reaches the intended RX.'],['Does not match','Correct the verified pairing, then retest.']]});
       continue;

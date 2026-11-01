@@ -1,16 +1,16 @@
-// Fictional FIM tickets using the user's site-specific 1 / 5 optic mapping.
+// Fictional tickets carry an explicit physical position; port names do not imply it.
 export const patchTasks = [
-  {id:'lc-left', kind:'lc', optic:25, ethernet:1, flipped:false, leg:3, title:'Ethernet 25/1 · upright'},
-  {id:'lc-right', kind:'lc', optic:25, ethernet:5, flipped:false, leg:8, title:'Ethernet 25/5 · upright'},
-  {id:'lc-flipped', kind:'lc', optic:7, ethernet:1, flipped:true, leg:5, title:'Ethernet 7/1 · upside down'},
+  {id:'lc-left', kind:'lc', optic:25, ethernet:1, position:1, flipped:false, leg:3, title:'Ethernet 25/1 · upright'},
+  {id:'lc-right', kind:'lc', optic:25, ethernet:2, position:2, flipped:false, leg:8, title:'Ethernet 25/2 · upright'},
+  {id:'lc-flipped', kind:'lc', optic:7, ethernet:1, position:1, flipped:true, leg:5, title:'Ethernet 7/1 · upside down'},
   {id:'mmc-top', kind:'mmc', cas:1, port:12, title:'CAS 1 · Port 12'},
   {id:'mmc-bottom', kind:'mmc', cas:2, port:28, title:'CAS 2 · Port 28'}
 ];
-export const headSerial = 'S747885346FWL';
+export const headSerial = 'DEMO-FANOUT-001';
 
 export function targetSlot(task) {
   if(task.kind==='mmc') return String(task.port);
-  return (task.ethernet===5) !== task.flipped ? 'right' : 'left';
+  return (task.position===2) !== task.flipped ? 'right' : 'left';
 }
 
 export function placementCorrect(task,connector,slot) {
@@ -18,8 +18,8 @@ export function placementCorrect(task,connector,slot) {
 }
 
 export function placementExplanation(task) {
-  if(task.kind==='lc') return `${task.optic}/${task.ethernet} means optic ${task.optic}, position ${task.ethernet===1 ? 1 : 2}. With the tab ${task.flipped ? 'below' : 'above'}, that is the ${targetSlot(task)} side.`;
-  return `This head goes to CAS ${task.cas}, Port ${task.port}. ${task.port<=16 ? 'Top row: 1–16.' : 'Bottom row: 17–32.'} The head serial identifies the fanout; the FIM ticket gives its destination.`;
+  if(task.kind==='lc') return `The fictional map assigns ${task.optic}/${task.ethernet} to optic ${task.optic}, position ${task.position}. With the tab ${task.flipped ? 'below' : 'above'}, that is the ${targetSlot(task)} side.`;
+  return `This head goes to CAS ${task.cas}, Port ${task.port}. ${task.port<=16 ? 'Top row: 1–16.' : 'Bottom row: 17–32.'} The head serial identifies the fanout; the connection record ticket gives its destination.`;
 }
 
 export function recordPatchAnswer(answers,id,connector,slot) {

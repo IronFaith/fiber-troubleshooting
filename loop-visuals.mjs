@@ -1,7 +1,7 @@
-// Shared educational hardware drawings. Port numbering follows the site's layout;
+// Shared educational hardware drawings. Port numbering follows the example layout;
 // the enlarged light path illustrates one pair, not a connector pin map.
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {lcConnector} from './test-tool-visuals.mjs?v=1';
+import {lcConnector} from './test-tool-visuals.mjs?v=20261101';
 const text = (x,y,value,style='') => `<text x="${x}" y="${y}" class="hardware-label ${style}">${value}</text>`;
 
 export function cassetteFront({port = 12, inserted = false, patched = false, name = 'CAS 1'} = {}) {
@@ -91,7 +91,7 @@ export function patchRouteIllustration() {
   const out = 'M65 278 H148 Q250 278 250 217 V75';
   const back = 'M258 75 V225 Q258 318 148 318 H65';
   return {height:376, hardware:true,
-    caption:'Example: LC follower → MMC head → CAS 1 Port 12. Light continues through the passive; this is a patch, not a loopback. Use your actual FIM destination.',
+    caption:'Example: LC leg → MMC head → CAS 1 Port 12. Light continues through the passive; this is a patch, not a loopback. Use your actual connection record destination.',
     drawing:`${cassetteFront()}<g class="hardware-art">
       ${text(12,199,'Example · CAS 1 Port 12','hardware-small')}
       ${text(12,219,'CAS passes TX onward → remote RX','hardware-small')}
@@ -110,7 +110,7 @@ export function patchRouteIllustration() {
       <path class="hardware-tx-arrow" d="M142 274 l7 4 -7 4"/><path class="hardware-rx-arrow" d="M149 314 l-7 4 7 4"/>
       ${text(128,263,'TX starts here →','hardware-small hardware-center')}${text(128,340,'RX ← from remote','hardware-small hardware-center')}
       ${text(278,111,'MMC head','hardware-small')}
-      ${text(39,356,'Local optic','hardware-small hardware-center')}${text(168,368,'LC follower','hardware-small hardware-center')}
+      ${text(39,356,'Local optic','hardware-small hardware-center')}${text(168,368,'LC leg','hardware-small hardware-center')}
     </g>`};
 }
 
@@ -118,7 +118,7 @@ export function mmcPatchingIllustration(step) {
   const seated = step === 2;
   const headX = seated ? 199 : 100;
   const captions = [
-    'Match the head serial and FIM destination. CAS 1 Port 12 is only the destination used in this illustration.',
+    'Match the head serial and connection record destination. CAS 1 Port 12 is only the destination used in this illustration.',
     'Inspect, clean if needed, then inspect again. Align the head with the adapter rails; do not force it.',
     'Head seated in Port 12. Confirm the latch, support the cable and check optic health. Select Seat again to replay.'
   ];
@@ -140,7 +140,7 @@ export function mmcPatchingIllustration(step) {
       </svg>
       ${!seated ? '<path class="patch-insert" d="M199 298 H246 m-7 -5 7 5 -7 5"/>' : '<path class="mmc-seated-check" d="M233 254 l5 5 10 -12"/>'}
       ${text(140,356,seated ? 'Seated + latched' : step === 1 ? 'Align the rails' : 'Match the head','hardware-small hardware-center')}
-      ${text(180,383,'Head serial · S747885346FWL','hardware-small hardware-center')}
+      ${text(180,383,'Head serial · DEMO-FANOUT-001','hardware-small hardware-center')}
     </g>`};
 }
 

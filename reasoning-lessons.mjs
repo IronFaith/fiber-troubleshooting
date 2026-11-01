@@ -1,5 +1,5 @@
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=5';
-import {opticIllustration} from './patching-visuals.mjs?v=1';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=20261101';
+import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 import {lightFlow} from './light-visuals.mjs?v=1';
 
 const svg=(body,height=240,label='Worked example')=>`<svg viewBox="0 0 620 ${height}" role="img" aria-label="${label}">${body}</svg>`;
@@ -14,7 +14,7 @@ export function readingLesson() {
         ${label(30,104,'−6')}${label(170,104,'−3.00','text-anchor="middle"')}${label(310,104,'0','text-anchor="middle"')}${label(450,104,'+3.00','text-anchor="middle"')}${label(590,104,'+6','text-anchor="end"')}
         ${[[114,'−4.20','Too low'],[322,'+0.25','Within limits'],[487,'+3.80','Too high']].map(([x,value,note])=>`<path class="reason-pointer" d="M${x} 47 v34"/>${label(x,28,value,'text-anchor="middle"')}${label(x,135,note,'text-anchor="middle"')}`).join('')}`,160,'RX limits −3 to +3 dBm. −4.20 is below the minimum, +0.25 is inside, and +3.80 is above the maximum.')}
       <p>More negative means weaker power: <b>−4.20 is below −3.00</b>. Above the upper limit is also out of range. Zero is not a required target; TX and RX do not have to match.</p></div>
-    <p class="lesson-takeaway">A −40 report is this site’s no-light indication, not a diagnosis. Check each required lane against its own limits, then check link status. These example limits are not universal.</p></section>`;
+    <p class="lesson-takeaway">A no-signal status or reading below the reporting range is not a diagnosis. Check the reporting limits, each required lane and link status. These example limits are not universal.</p></section>`;
 }
 
 export function loopReasoningLesson() {
@@ -80,9 +80,9 @@ export function lldpLesson() {
       <div class="lldp-play-row"><button type="button" id="lldp-play" aria-controls="lldp-result">▶ Follow the name</button><span>Blue tag = LLDP message</span></div>
       <figcaption id="lldp-caption" aria-live="polite"></figcaption>
     </figure>
-    <h4 class="lldp-check-title">Now read the neighbor in Cable Guy</h4>
+    <h4 class="lldp-check-title">Now read the neighbor in device diagnostics</h4>
     <p class="picture-note"><b>LLDP calls the remote device a neighbor:</b> the next active device on this link, even in another room. The CAS units only pass the fiber through.</p>
-    <p class="picture-note">Compare the reported neighbor’s name + port with FIM. Does it match?</p>
+    <p class="picture-note">Compare the reported neighbor’s name + port with the connection record. Does it match?</p>
     <div class="lesson-options lldp-options" role="group" aria-label="Try a different neighbor report">
       <button type="button" data-lldp-case="match" aria-controls="lldp-result">Match</button>
       <button type="button" data-lldp-case="different" aria-controls="lldp-result">Other device</button>
@@ -94,7 +94,7 @@ export function lldpLesson() {
     <ul class="lldp-uses" aria-label="When LLDP helps">
       <li><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 6h15l11 10-11 10H3z"/><circle cx="8" cy="16" r="2"/><path d="M18 11v7m0 3v1"/></svg><span>Missing label?<b>Identify the other end.</b></span></li>
       <li><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9h22l-5-5m5 5-5 5M29 23H7l5-5m-5 5 5 5"/></svg><span>Patch changed?<b>Check the destination.</b></span></li>
-      <li><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="22" height="26" rx="3"/><path d="m10 16 4 4 8-9"/></svg><span>New connection?<b>Compare with FIM.</b></span></li>
+      <li><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="22" height="26" rx="3"/><path d="m10 16 4 4 8-9"/></svg><span>New connection?<b>Compare with the connection record.</b></span></li>
     </ul>
     <p class="lesson-takeaway"><b>LLDP identifies the remote device. Your local report lists it as a neighbor.</b><br>Same connection, no extra cable. Check TX/RX separately for light health.</p>
     <p class="lesson-sources"><a href="https://developer.cisco.com/docs/sonic/lldp/" target="_blank" rel="noopener noreferrer">Cisco · LLDP reference ↗</a></p>
@@ -111,8 +111,8 @@ export function mountLldpLesson(root) {
     const local=devices[view], expected=devices[view==='A'?'B':'A'];
     const examples={
       match:{...expected,status:'✓ Device and port match',next:'The expected device is on this link. Check TX/RX and link status too.'},
-      different:{name:'C',port:expected.port,status:`≠ Expected ${expected.name}. Heard C.`,next:'Check the patching and FIM. A misport or an outdated record could explain this.'},
-      port:{name:expected.name,port:expected.port.replace('/1','/5'),status:`≠ Expected ${expected.port}. Heard ${expected.port.replace('/1','/5')}.`,next:'Check the exact port and FIM before changing the patch.'},
+      different:{name:'C',port:expected.port,status:`≠ Expected ${expected.name}. Heard C.`,next:'Check the patching and connection record. A misport or an outdated record could explain this.'},
+      port:{name:expected.name,port:expected.port.replace('/1','/2'),status:`≠ Expected ${expected.port}. Heard ${expected.port.replace('/1','/2')}.`,next:'Check the exact port and connection record before changing the patch.'},
       missing:{name:'?',port:'',status:'? No identity reported',next:'Check link status, optic readings and LLDP settings. This alone does not prove bad fiber.'}
     };
     return {local,expected,neighbor:examples[selected]};
@@ -121,7 +121,7 @@ export function mountLldpLesson(root) {
     const {local,expected,neighbor}=currentReport();
     result.dataset.state=selected;
     result.dataset.pending=String(pending);
-    result.innerHTML=`<p class="lldp-report-location">Report at Device ${local.name} · local port <b>${local.port}</b></p><div class="lldp-compare"><div><span>FIM expects</span><strong>Device ${expected.name}</strong><b>Port ${expected.port}</b></div><div><span>LLDP neighbor</span><strong class="${!pending&&selected==='different'?'lldp-mismatch':''}">${pending?'Receiving…':neighbor.name==='?'?'Not reported':`Device ${neighbor.name}`}</strong><b class="${!pending&&selected==='port'?'lldp-mismatch':''}">${pending?'Name + port':neighbor.port?`Port ${neighbor.port}`:'Cause unknown'}</b></div></div><div class="lldp-verdict"><strong>${pending?`Message traveling to ${local.name}…`:neighbor.status}</strong><p>${pending?'Follow the blue ID tag on the existing fiber.':neighbor.next}</p></div>`;
+    result.innerHTML=`<p class="lldp-report-location">Report at Device ${local.name} · local port <b>${local.port}</b></p><div class="lldp-compare"><div><span>Connection record expects</span><strong>Device ${expected.name}</strong><b>Port ${expected.port}</b></div><div><span>LLDP neighbor</span><strong class="${!pending&&selected==='different'?'lldp-mismatch':''}">${pending?'Receiving…':neighbor.name==='?'?'Not reported':`Device ${neighbor.name}`}</strong><b class="${!pending&&selected==='port'?'lldp-mismatch':''}">${pending?'Name + port':neighbor.port?`Port ${neighbor.port}`:'Cause unknown'}</b></div></div><div class="lldp-verdict"><strong>${pending?`Message traveling to ${local.name}…`:neighbor.status}</strong><p>${pending?'Follow the blue ID tag on the existing fiber.':neighbor.next}</p></div>`;
   }
   function finish() {
     clearTimeout(timer);timer=undefined;
@@ -173,10 +173,10 @@ export function mountLldpLesson(root) {
 
 export function patchTicketLesson() {
   return `<section id="worked-ticket" class="lesson-section" aria-labelledby="ticket-title"><h3 id="ticket-title">Read one complete patching ticket</h3>
-    <div class="reason-ticket"><span>Mock position <b>QNO5.5C.16f.17.30</b></span><span>Ethernet <b>25/1</b></span><span>Follower <b>Leg 3</b></span><span>Head <b>S747885346FWL</b></span><span>Destination <b>CAS 2 / Port 28</b></span></div>
+    <div class="reason-ticket"><span>Mock position <b>DEMO / ROOM-A / ROW-02 / RACK-17 / U30</b></span><span>Ethernet <b>25/1</b></span><span>Leg <b>Leg 3</b></span><span>Head <b>DEMO-FANOUT-001</b></span><span>Destination <b>CAS 2 / Port 28</b></span></div>
     <div class="reason-example">${svg(`${face(35,5,190,true)}<svg x="285" y="25" width="315" height="181" viewBox="0 0 360 206">${cassetteFront({name:'CAS 2',port:28,patched:true})}</svg>${label(130,221,'Tab below · 25/1 is now right','text-anchor="middle"')}${label(450,221,'Mapped MMC head → Port 28','text-anchor="middle"')}`,245,'Flipped optic with purple tab below, so 25/1 is on the right. MMC head is mapped to CAS 2 Port 28.')}
-    <ol><li><b>Locate:</b> building QNO5, room 5C, row 16 front, rack 17, elevation 30. The rack number is not the elevation.</li>
-    <li><b>Orient:</b> tab above gives /1 left and /5 right. Tab below swaps their physical sides, not their Ethernet identities.</li>
+    <ol><li><b>Locate:</b> building DEMO, room ROOM-A, row 2, rack 17, elevation 30. The rack number is not the elevation.</li>
+    <li><b>Orient:</b> In this fictional map, 25/1 uses position 1 and 25/2 uses position 2 when upright. Flipping the optic reverses their displayed sides.</li>
     <li><b>Map:</b> use leg 3 from the named head. Match CAS 2 / 28, on the 17–32 bottom row. A shared head serial does not make the legs interchangeable.</li>
     <li><b>Verify:</b> inspect / clean, seat the mapped connections and check health. Correct placement alone does not prove a working link.</li></ol></div></section>`;
 }

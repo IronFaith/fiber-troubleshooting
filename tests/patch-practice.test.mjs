@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {patchTasks,targetSlot,placementCorrect,recordPatchAnswer,patchResult,loadPatchBest,savePatchBest} from '../patch-practice-data.mjs';
 
-test('LC destinations follow the 1/5 mapping through a flip, and MMC requires its mapped port',()=> {
-  for(const [ethernet,flipped,expected] of [[1,false,'left'],[5,false,'right'],[1,true,'right'],[5,true,'left']]) {
-    const task={kind:'lc',optic:25,ethernet,flipped};
+test('LC destinations follow the explicit position map through a flip, independent of the port name',()=> {
+  for(const [position,flipped,expected] of [[1,false,'left'],[2,false,'right'],[1,true,'right'],[2,true,'left']]) {
+    const task={kind:'lc',optic:25,ethernet:99,position,flipped};
     assert.equal(targetSlot(task),expected);
     assert.equal(placementCorrect(task,'lc',expected),true);
     assert.equal(placementCorrect(task,'lc',expected==='left' ? 'right' : 'left'),false);

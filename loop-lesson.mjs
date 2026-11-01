@@ -1,6 +1,6 @@
-import {rackJourneyIllustration} from './rack-visuals.mjs?v=9';
-import {mmcHead, cassetteFront} from './loop-visuals.mjs?v=5';
-import {opticIllustration} from './patching-visuals.mjs?v=1';
+import {rackJourneyIllustration} from './rack-visuals.mjs?v=20261101';
+import {mmcHead, cassetteFront} from './loop-visuals.mjs?v=20261101';
+import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
 
 const text=(x,y,value)=>`<text x="${x}" y="${y}">${value}</text>`;
@@ -10,9 +10,9 @@ const journeySteps=reverse=> {
   const first=reverse ? 2 : 1, next=reverse ? 1 : 2;
   return [
   {label:`${from} → TX`,title:`1. Device ${from} sends data through its optic`,copy:`Device ${from} supplies electrical signals to its installed optic. TX converts those signals into infrared light carrying the data.`},
-  {label:'LC → MMC',title:'2. Follow the leg up the rack',copy:'The LC follower runs up the cable manager to its MMC head. The head groups the fanout’s fibers; each keeps its own mapped path.'},
+  {label:'LC → MMC',title:'2. Follow the leg up the rack',copy:'The LC leg runs up the cable manager to its MMC head. The head groups the fanout’s fibers; each keeps its own mapped path.'},
   {label:`Through CAS ${first}`,title:'3. The cassette passes the light onward',copy:'At the mapped CAS connection, the incoming fiber joins the onward fiber. The passive carries the light without reading the data or producing new light.'},
-  {label:`CAS ${first} → ${next}`,title:'4. Light carries the data between cassettes',copy:`The onward fiber carries Device ${from}’s data as light from CAS ${first} to CAS ${next}. Follow that mapped route in FIM.`},
+  {label:`CAS ${first} → ${next}`,title:'4. Light carries the data between cassettes',copy:`The onward fiber carries Device ${from}’s data as light from CAS ${first} to CAS ${next}. Follow that mapped route in the connection record.`},
   {label:`RX → ${to}`,title:`5. Device ${to} receives the data`,copy:`The light reaches the installed optic’s RX. It converts that light back into electrical signals that Device ${to} can use.`}
   ];
 };
@@ -42,7 +42,7 @@ function closeup(index,reverse) {
       drawing+=`<path class="journey-fanout-leg${i===selected ? ' journey-chosen-leg' : ''}" d="${path}"/>`;
       if(i===selected) drawing+=lightFlow(path);
     }
-    return drawing+mmcHead(249,63,false)+text(16,172,'LC followers')+text(249,142,'MMC head');
+    return drawing+mmcHead(249,63,false)+text(16,172,'LC legs')+text(249,142,'MMC head');
   }
   if(index===2) {
     const path='M12 91 H348';

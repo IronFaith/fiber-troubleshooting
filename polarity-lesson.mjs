@@ -1,5 +1,5 @@
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
-import {vflPen} from './test-tool-visuals.mjs?v=1';
+import {vflPen} from './test-tool-visuals.mjs?v=20261101';
 
 // A/B name this teaching pair, not MMC pin positions or Ethernet ports.
 export function polarityExample({swapped=false,strand='a'}={}) {
@@ -77,7 +77,7 @@ export function polarityLesson() {
     <h3 id="pairing-title">Polarity: send light to the receiver</h3>
     <p class="section-intro">TX sends. RX receives. Polarity is how the strands connect those jobs through the whole path.</p>
     <div data-polarity-demo></div>
-    <p class="picture-note">One duplex pair, enlarged. A / B are teaching labels, not MMC pin numbers or the optic’s /1 and /5 port positions. This example expects A → A and B → B at the passives; use your actual cable and FIM channel map.</p>
+    <p class="picture-note">One duplex pair, enlarged. A / B are teaching labels, not MMC pin numbers or the optic’s physical port positions. This example expects A → A and B → B at the passives; use your actual cable and connection record channel map.</p>
     <div class="pol-takeaways">
       <p><b>Light on the other channel?</b> Trace both strands and compare the map. Both may carry light even when their destinations are wrong.</p>
       <p><b>No light on one strand?</b> Check the VFL / adapter, LC, fiber and MMC connections. Compare the loose head with the CAS output. This alone cannot identify a bad ferrule.</p>

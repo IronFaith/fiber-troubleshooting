@@ -1,10 +1,10 @@
-import {translateLines} from './locale.mjs?v=30';
-import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=23';
-import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=34';
-import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=8';
-import {mountPatchDrag} from './troubleshoot-patching.mjs?v=4';
-import {simpleVfl} from './vfl-simple.mjs?v=30';
-import {caseGuidance,retestFindingActions} from './case-guidance.mjs?v=2';
+import {translateLines} from './locale.mjs?v=20261101';
+import {createCase,changeCase,assessment,faults,pointName,spanName,loopLabels,traceLabels,simulatedReadings,canPlaceTool,fiberPointName,traceFrom,traceName,traceKey,parseTraceKey,patchAt,traceStop,caseHistory,restoreCaseHistory,canVerifyService,caseStatus,nextCheckActions,pathCoverage,identityLabels,comparisonLabels,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=20261101';
+import {workbenchDiagram} from './troubleshoot-visuals.mjs?v=20261101';
+import {toolNames,toolArt,mountToolDrag} from './troubleshoot-tools.mjs?v=20261101';
+import {mountPatchDrag} from './troubleshoot-patching.mjs?v=20261101';
+import {simpleVfl} from './vfl-simple.mjs?v=20261101';
+import {caseGuidance,retestFindingActions} from './case-guidance.mjs?v=20261101';
 
 const host=document.querySelector('#troubleshoot-workbench');
 const guided=document.querySelector('#guided-check');
@@ -21,7 +21,7 @@ const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const options=(items,value)=>items.map(([id,label])=>`<option value="${escape(id)}" ${String(id)===String(value)?'selected':''}>${escape(label)}</option>`).join('');
 const select=(field,label,items,value)=>`<label class="ts-field">${label}<select data-field="${field}">${options(items,value)}</select></label>`;
 const button=(action,label,extra='')=>`<button type="button" data-action="${action}" ${extra}>${label}</button>`;
-const statusLabels={unknown:'Not checked',good:'Light present',weak:'Weak / out of limits',dark:'−40 · no light reported'};
+const statusLabels={unknown:'Not checked',good:'Light present',weak:'Weak / out of limits',dark:'No signal reported'};
 const faultNotes={
   none:'A clear example path. Test results still cover only the pair and section tested.',
   optic_tx:'The selected optic is not emitting in this example. VFL uses its own light source.',
@@ -199,7 +199,7 @@ function setup(s) {
   if(!s.simulated) return `<section class="ts-path-settings" aria-label="Your path settings">${button('setup',`<span>Edit path · ${s.count} CAS</span><span class="ts-disclosure-arrow" aria-hidden="true"></span>`,`class="ts-disclosure" aria-expanded="${setupOpen}" aria-controls="ts-path-fields"`)}<div id="ts-path-fields" class="ts-setup" ${setupOpen?'':'hidden'}><div class="ts-fields">${topology}
     ${select('tx','Starting local TX',Object.entries(statusLabels),s.tx)}
     ${select('rx','Starting local RX',Object.entries({...statusLabels,good:'Within optic limits'}),s.rx)}</div>
-    <p class="ts-note">Enter your observations. Nothing is connected to Cable Guy or live equipment. A −40 report tells us no light was reported, not the cause.</p></div></section>`;
+    <p class="ts-note">Enter your observations. This tool has no live equipment connection. A no-signal report is an observation, not a diagnosis.</p></div></section>`;
   const f=s.fault;
   const opticOnly=f.kind.startsWith('optic_'), canAtOptic=['dirty','loose','none'].includes(f.kind);
   const locations=Array.from({length:s.count+2},(_,i)=>[i,i===0?'Optic face / LC socket':i===s.count+1?opticOnly?'Remote optic':`Beyond CAS ${s.count} → remote`:spanName(i,s)]).filter(([i])=>opticOnly?isOptic(s,i):canAtOptic||i>0);
@@ -212,7 +212,7 @@ function setup(s) {
 }
 function identityChecks(s) {
   if(s.simulated) return '';
-  const help={optic:'Device IDs + optic sockets at the tested ends, e.g. 25/1 vs 25/5',fanout:'Follower number + head serial match the record',route:'Accessible CAS faces and ports match FIM',channels:'Expected fiber / channel at both test ends'};
+  const help={optic:'Device IDs + optic sockets at the tested ends, e.g. 25/1 vs 25/2',fanout:'Leg number + head serial match the record',route:'Accessible CAS faces and ports match the connection record',channels:'Expected fiber / channel at both test ends'};
   return `<fieldset class="ts-path-identity"><legend>Match the physical path</legend><p class="sr-only">A pass belongs to the hardware tested. Confirm it is the intended path.</p>
     <div>${Object.entries(identityLabels).map(([key,label])=>`<label title="${help[key]}"><input type="checkbox" data-field="identity-${key}" aria-describedby="identity-help-${key}" ${s.identity?.[key]?'checked':''}><span>${label}</span><small id="identity-help-${key}" class="sr-only">${help[key]}</small></label>`).join('')}</div></fieldset>`;
 }

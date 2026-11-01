@@ -1,22 +1,22 @@
-import {mmcHead} from './loop-visuals.mjs?v=5';
-import {lcConnector} from './test-tool-visuals.mjs?v=1';
-import {newFanoutReplacement,changeFanoutReplacement,canPatchFanout} from './fanout-replacement-state.mjs?v=1';
+import {mmcHead} from './loop-visuals.mjs?v=20261101';
+import {lcConnector} from './test-tool-visuals.mjs?v=20261101';
+import {newFanoutReplacement,changeFanoutReplacement,canCompleteFanout} from './fanout-replacement-state.mjs?v=20261101';
 
-// Teaching identifiers and navigation are examples, not live FIMspect records.
+// Fictional teaching records; no employer software workflow is represented.
 export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson-section" aria-labelledby="fanout-title"><div id="fanout-guide">
   <div class="fg-viz-row"><span class="fg-viz-badge">Guided simulation</span><span class="fg-text-small">Worked example · 12 LC legs</span></div>
   <h3 id="fanout-title">Fanout replacement</h3>
-  <p>Replace one MMC and all its legs.</p>
+  <p>Fictional example: replace a fanout while preserving every connection assignment.</p>
   <ol class="fg-steps">
     <li class="fg-step-identity">
       <div>
         <div class="fg-step-heading"><span class="fg-number">01</span><h4>Find the MMC</h4></div>
         <p>Find the broken leg. Follow its label to the MMC and match the full serial.</p>
         <div class="fg-flow" aria-label="Trace the damaged leg to its assembly">
-          <div><span class="fg-text-small">Damaged follower</span><strong>Leg 7</strong></div><span aria-hidden="true">→</span>
-          <div><span class="fg-text-small">MMC leader serial</span><strong>S747885346FWL</strong></div>
+          <div><span class="fg-text-small">Damaged leg</span><strong>Leg 7</strong></div><span aria-hidden="true">→</span>
+          <div><span class="fg-text-small">MMC head serial</span><strong>DEMO-FANOUT-001</strong></div>
         </div>
-        <p class="fg-text-small">MMC = leader. Legs = followers.</p>
+        <p class="fg-text-small">One head groups separate fiber paths; each leg keeps its own assignment.</p>
       </div>
       <div>  <div class="fg-diagram">
     <svg id="fg-fanout" class="fg-hardware" role="img" aria-label="One MMC head connects to twelve LC legs. Leg 7 is the damaged example; the replacement includes the entire assembly."></svg>
@@ -28,63 +28,58 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
     <li>
       <div class="fg-step-heading"><span class="fg-number">02</span><h4>Save and match the map</h4></div>
       <div class="fg-action-pair">
-        <div><h5>FIMspect</h5><p>Save the room, rack, passive, MMC port and every leg’s device / port.</p></div>
-        <div><h5>MyPatch</h5><p>Open the device route, then the mapped P. Match the MMC serial and port to your saved map.</p></div>
+        <div><h5>Connection record</h5><p>Record the location, head serial, passive port and every leg’s endpoint.</p></div>
+        <div><h5>Physical labels</h5><p>Compare the record with the installed labels. Resolve any mismatch before work.</p></div>
       </div>
-      <div class="fg-location"><span class="fg-viz-badge">Worked example</span><strong dir="ltr">SSW → STSW / P · CAS 1 / 12 / S747885346FWL</strong></div>
-      <div class="fg-viz-row"><span><strong>A</strong> · active / device-side legs</span><span><strong>P</strong> · passive / MMC location</span></div>
+      <div class="fg-location"><span class="fg-viz-badge">Worked example</span><strong dir="ltr">Device A → Device B · CAS 1 / 12 · DEMO-FANOUT-001</strong></div>
+      <div class="fg-viz-row"><span>Device endpoints</span><span>Passive locations</span></div>
       <p class="fg-text-small">If the labels or map do not match, stop and resolve the mismatch.</p>
       <details class="fg-details"><summary>See the mapping example</summary>
               <table class="fg-table fg-table-sm">
-        <caption class="fg-sr-only">Illustrative mapping to capture before unpatching</caption>
+        <caption class="fg-sr-only">Fictional connection map</caption>
         <thead><tr><th scope="col">Match</th><th scope="col">Worked example</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Device relationship</th><td>SSW → STSW</td></tr>
-          <tr><th scope="row">Leader / destination</th><td>S747885346FWL → CAS 1 · port 12</td></tr>
-          <tr><th scope="row">Follower / endpoint</th><td>Leg 7 → SSW · 5/1</td></tr>
-          <tr><th scope="row">Whole assembly</th><td>Save each of the 12 follower IDs and its assigned device / port</td></tr>
+          <tr><th scope="row">Device relationship</th><td>Device A → Device B</td></tr>
+          <tr><th scope="row">Head / destination</th><td>DEMO-FANOUT-001 → CAS 1 · port 12</td></tr>
+          <tr><th scope="row">Leg / endpoint</th><td>Leg 7 → Device A · 5/1</td></tr>
+          <tr><th scope="row">Whole assembly</th><td>Record each of the 12 leg IDs and its assigned device / port</td></tr>
         </tbody>
       </table>
 
               <div class="fg-viz-controls"><label class="fg-form-label">Illustrated room layout<select class="fg-form-select" id="fg-passive-count"><option value="3">3 passive locations</option><option value="6">6 passive locations</option></select></label></div>
-      <div class="fg-route-title">SSW → STSW</div>
-      <div id="fg-route" class="fg-route" role="img" aria-label="SSW active endpoint, three passive locations, then STSW active endpoint"></div>
+      <div class="fg-route-title">Device A → Device B</div>
+      <div id="fg-route" class="fg-route" role="img" aria-label="Device A active endpoint, three passive locations, then Device B active endpoint"></div>
 
               <div class="fg-cassette" role="img" aria-label="CAS 1, 32 ports. Ports 1 to 16 are on top; 17 to 32 below. Port 12 is the example destination.">
         <div class="fg-cassette-label"><span>CAS 1 · front port reference</span><span>32 ports</span></div>
         <div class="fg-port-row" id="fg-ports-top"></div><div class="fg-port-row" id="fg-ports-bottom"></div>
       </div>
 
-        <p class="fg-text-small fg-text-muted">Schematic navigation based on the site workflow. The number of passives is not the number of fanout legs.</p>
-        <p class="fg-text-small fg-text-muted">Teaching values combined from the existing course and your example; these are not live FIMspect records.</p>
+        <p class="fg-text-small fg-text-muted">This fictional route illustrates connectivity. Passive count and fanout leg count are independent.</p>
+        <p class="fg-text-small fg-text-muted">All devices, assignments and serials in this example are fictional.</p>
       </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">03</span><h4>Unpatch the old bundle</h4></div>
-      <p>In MyPatch, unpatch the MMC first. Then unpatch every leg belonging to it.</p>
-      <div class="fg-rule"><strong>Clear the MMC AND every leg before adding the new MMC.</strong></div>
-      <details class="fg-details"><summary>Practice unpatching</summary>
-              <div class="fg-card" id="fg-demo">
-        <div class="fg-viz-row"><strong>Try the record-removal sequence</strong><span class="fg-viz-badge">Illustration only</span></div>
-        <div class="fg-leader-action"><div><span class="fg-text-small">Old leader · S747885346FWL</span><div id="fg-leader-state">Patched</div></div><button class="fg-btn" type="button" id="fg-remove-leader">Unpatch leader</button></div>
-        <div class="fg-followers-label"><span>Old followers · legs 1–12</span><span id="fg-follower-count" class="fg-tabular-nums">12 remaining</span></div>
-        <div class="fg-follower-grid" id="fg-followers"></div>
-        <hr>
-        <div class="fg-viz-row"><button class="fg-btn fg-btn-primary" type="button" id="fg-patch-new" disabled>Patch replacement leader</button><span id="fg-gate-label">Blocked · old records remain</span></div>
-        <p id="fg-status" aria-live="polite">First unpatch the old leader. All 12 followers must also be cleared.</p>
-      </div>
-
-        <p class="fg-text-small fg-text-muted">“Unpatch” here means a system-record action. This practice does not operate MyPatch or disconnect physical fibers. Button wording is illustrative.</p>
+      <div class="fg-step-heading"><span class="fg-number">03</span><h4>Replace under the approved procedure</h4></div>
+      <p>Confirm authorization, affected services and a compatible replacement. Follow the approved isolation, inspection, cleaning and installation procedure.</p>
+      <div class="fg-rule"><strong>Keep every leg matched to its recorded destination.</strong></div>
+    </li>
+    <li>
+      <div class="fg-step-heading"><span class="fg-number">04</span><h4>Update and verify the record</h4></div>
+      <p>Record the installed head and leg identifiers, destinations and required change history using the authorized process.</p>
+      <details class="fg-details"><summary>Practice checking the map</summary>
+        <div class="fg-card" id="fg-demo">
+          <div class="fg-viz-row"><strong>Account for the head and every leg</strong><span class="fg-viz-badge">Fictional checklist</span></div>
+          <div class="fg-leader-action"><div><span class="fg-text-small">Head · DEMO-FANOUT-001</span><div id="fg-leader-state">Not checked</div></div><button class="fg-btn" type="button" id="fg-remove-leader">Check head mapping</button></div>
+          <div class="fg-followers-label"><span>Legs 1–12</span><span id="fg-follower-count" class="fg-tabular-nums">12 remaining</span></div>
+          <div class="fg-follower-grid" id="fg-followers"></div>
+          <hr>
+          <div class="fg-viz-row"><button class="fg-btn fg-btn-primary" type="button" id="fg-patch-new" disabled>Finish checklist</button><span id="fg-gate-label">Mapping checks remain</span></div>
+          <p id="fg-status" aria-live="polite">Check the head and all 12 legs in any order.</p>
+        </div>
+        <p class="fg-text-small fg-text-muted">These buttons mark a fictional checklist. They do not change records, disconnect fibers or verify a live link.</p>
         <button class="fg-btn" type="button" id="fg-restart">Restart this simulation</button>
       </details>
-    </li>
-    <li>
-      <div class="fg-step-heading"><span class="fg-number">04</span><h4>Patch the new bundle</h4></div>
-      <div class="fg-action-pair">
-        <div><h5>At the rack</h5><p>Fit a compatible fanout at the saved destinations, following the site’s isolation, inspection and cleaning procedure.</p></div>
-        <div><h5>In MyPatch</h5><p>Patch the new MMC first, then every new leg to its saved device / port. Use the new labels.</p></div>
-      </div>
-      <div class="fg-flow"><div><strong>New MMC</strong></div><span aria-hidden="true">→</span><div><strong>Every new leg</strong></div><span aria-hidden="true">→</span><div><strong>Same saved destinations</strong></div></div>
     </li>
     <li>
       <div class="fg-step-heading"><span class="fg-number">05</span><h4>Check every link</h4></div>
@@ -100,8 +95,8 @@ export function mountFanoutReplacement(host) {
  const q=selector=>root.querySelector(selector);
  function drawFanout(){
    const svg=q('#fg-fanout'),width=Math.max(256,svg.getBoundingClientRect().width),tip=width-34;
-   let drawing='<title>One head, twelve followers</title><desc>The damaged example is leg 7. All twelve legs belong to MMC S747885346FWL; the full assembly is replaced.</desc>';
-   drawing+=`<text x="12" y="20">P · MMC leader</text><text x="${width-143}" y="20">A · LC followers</text>`;
+   let drawing='<title>One head, twelve legs</title><desc>The damaged example is leg 7. All twelve legs belong to MMC DEMO-FANOUT-001; the full assembly is replaced.</desc>';
+   drawing+=`<text x="12" y="20">MMC head</text><text x="${width-143}" y="20">LC legs</text>`;
    for(let i=0;i<12;i++){
      const y=44+i*25,startY=171+i*1.2,end=tip-64*.62;
      drawing+=`<path d="M133 ${startY} C${Math.min(width*.48,190)} ${startY} ${end-24} ${y} ${end} ${y}" fill="none" stroke="${i===6?"#a34c22":"#aa851d"}" stroke-width="${i===6?3:1.5}" ${i===6?'stroke-dasharray="5 3"':''}/>`;
@@ -109,50 +104,49 @@ export function mountFanoutReplacement(host) {
      drawing+=`<text x="${width-19}" y="${y+4}" text-anchor="middle">${i+1}${i===6?'*':''}</text>`;
    }
    drawing+=`<g transform="translate(112 202) rotate(180)">${mmcHead(0,0,false)}</g>`;
-   drawing+='<text x="12" y="223">S747885346FWL</text><text x="12" y="242">Entire assembly</text><text x="12" y="259">replaced together</text>';
+   drawing+='<text x="12" y="223">DEMO-FANOUT-001</text><text x="12" y="242">Entire assembly</text><text x="12" y="259">replaced together</text>';
    svg.setAttribute('viewBox',`0 0 ${width} 350`);svg.innerHTML=drawing;
  }
  function drawRoute(){
    const count=Number(q('#fg-passive-count').value),route=q('#fg-route');
-   route.innerHTML=`<div class="fg-route-node"><strong>A</strong><span>SSW</span></div>${Array.from({length:count},(_,i)=>`<div class="fg-route-node" ${i===0?'data-target="true"':''}><strong>P${i+1}</strong><span>${i===0?'CAS 1':'Passive'}</span>${i===0?'<span class="fg-text-small">Target</span>':''}</div>`).join('')}<div class="fg-route-node"><strong>A</strong><span>STSW</span></div>`;
-   route.setAttribute('aria-label',`SSW active endpoint, ${count} passive locations, then STSW active endpoint. The target assembly in this example is at CAS 1, the first passive. The fanout still has 12 legs.`);
+   route.innerHTML=`<div class="fg-route-node"><strong>Device A</strong><span>Endpoint</span></div>${Array.from({length:count},(_,i)=>`<div class="fg-route-node" ${i===0?'data-target="true"':''}><strong>P${i+1}</strong><span>${i===0?'CAS 1':'Passive'}</span>${i===0?'<span class="fg-text-small">Target</span>':''}</div>`).join('')}<div class="fg-route-node"><strong>Device B</strong><span>Endpoint</span></div>`;
+   route.setAttribute('aria-label',`Device A active endpoint, ${count} passive locations, then Device B active endpoint. The target assembly in this example is at CAS 1, the first passive. The fanout still has 12 legs.`);
  }
  for(const [selector,start] of [['#fg-ports-top',1],['#fg-ports-bottom',17]])q(selector).innerHTML=Array.from({length:16},(_,i)=>`<span class="fg-port"${i+start===12?' data-selected="true"':''}>${i+start}</span>`).join('');
 
  let state=newFanoutReplacement();
- const followers=q('#fg-followers');
+ const legs=q('#fg-followers');
  function renderFollowers(){
-   followers.innerHTML=state.followers.map((patched,i)=>`<div class="fg-follower-cell"><button class="fg-btn" type="button" data-leg="${i+1}" aria-label="Unpatch old follower leg ${i+1}" ${!state.leaderCleared||!patched?'disabled':''}>${patched?'Leg '+(i+1):(i+1)+' ✓'}</button><span class="fg-text-small" data-leg-status="${i+1}">${patched?'Patched':'Cleared'}</span></div>`).join('');
+   legs.innerHTML=state.legsVerified.map((verified,i)=>`<div class="fg-follower-cell"><button class="fg-btn" type="button" data-leg="${i+1}" aria-label="Check mapping for leg ${i+1}" ${verified?'disabled':''}>${verified?(i+1)+' ✓':'Leg '+(i+1)}</button><span class="fg-text-small" data-leg-status="${i+1}">${verified?'Checked':'Not checked'}</span></div>`).join('');
  }
  function updateGate(){
-   const remaining=state.followers.filter(Boolean).length;
+   const remaining=state.legsVerified.filter(verified=>!verified).length;
    q('#fg-follower-count').textContent=`${remaining} remaining`;
-   q('#fg-patch-new').disabled=!canPatchFanout(state);
-   q('#fg-gate-label').textContent=state.newLeaderPatched?'New leader patched':canPatchFanout(state)?'Ready · all old records cleared':'Blocked · old records remain';
+   q('#fg-patch-new').disabled=!canCompleteFanout(state);
+   q('#fg-gate-label').textContent=state.completed?'Checklist complete':canCompleteFanout(state)?'Ready to finish':'Mapping checks remain';
+   q('#fg-remove-leader').disabled=state.headVerified;
+   q('#fg-remove-leader').textContent=state.headVerified?'Head checked':'Check head mapping';
+   q('#fg-leader-state').textContent=state.headVerified?'Checked':'Not checked';
  }
  q('#fg-remove-leader').addEventListener('click',()=>{
-   state=changeFanoutReplacement(state,{type:'clearLeader'});
-   q('#fg-remove-leader').disabled=true;q('#fg-remove-leader').textContent='Leader cleared';q('#fg-leader-state').textContent='Unpatched';
-   followers.querySelectorAll('button').forEach(button=>button.disabled=false);
-   q('#fg-status').textContent='The old leader is cleared, but 12 followers remain. The replacement is still blocked. Select each leg to unpatch it.';updateGate();
+   state=changeFanoutReplacement(state,{type:'verifyHead'});
+   q('#fg-status').textContent='Head mapping checked. Account for every leg before finishing.';updateGate();
  });
- followers.addEventListener('click',event=>{
+ legs.addEventListener('click',event=>{
    const button=event.target.closest('button[data-leg]');if(!button||button.disabled)return;
-   const leg=Number(button.dataset.leg);state=changeFanoutReplacement(state,{type:'clearFollower',leg});
-   button.disabled=true;button.textContent=`${leg} ✓`;q(`[data-leg-status="${leg}"]`).textContent='Cleared';
-   const remaining=state.followers.filter(Boolean).length;
-   q('#fg-status').textContent=remaining?`Leg ${leg} cleared. Old followers remaining: ${remaining}.`:'Old leader cleared. All 12 old followers cleared. The replacement leader can now be patched.';updateGate();
+   const leg=Number(button.dataset.leg);state=changeFanoutReplacement(state,{type:'verifyLeg',leg});
+   button.disabled=true;button.textContent=`${leg} ✓`;q(`[data-leg-status="${leg}"]`).textContent='Checked';
+   const remaining=state.legsVerified.filter(verified=>!verified).length;
+   q('#fg-status').textContent=`Leg ${leg} checked. Legs remaining: ${remaining}.`;updateGate();
  });
  q('#fg-patch-new').addEventListener('click',()=>{
-   if(!canPatchFanout(state))return;
-   state=changeFanoutReplacement(state,{type:'patchNew'});
-   q('#fg-patch-new').textContent='New leader patched';q('#fg-status').textContent='Example: the new leader is patched. Next, patch every NEW follower to its saved destination. The replacement is not complete until all legs and affected links are verified.';updateGate();
+   if(!canCompleteFanout(state))return;
+   state=changeFanoutReplacement(state,{type:'complete'});
+   q('#fg-status').textContent='Checklist complete. Real work still requires the approved tests and verification of every affected link.';updateGate();
  });
  q('#fg-restart').addEventListener('click',()=>{
    state=newFanoutReplacement();renderFollowers();
-   q('#fg-remove-leader').disabled=false;q('#fg-remove-leader').textContent='Unpatch leader';q('#fg-leader-state').textContent='Patched';
-   q('#fg-patch-new').textContent='Patch replacement leader';
-   q('#fg-status').textContent='First unpatch the old leader. All 12 followers must also be cleared.';updateGate();
+   q('#fg-status').textContent='Check the head and all 12 legs in any order.';updateGate();
    q('#fg-remove-leader').focus();
  });
  q('#fg-passive-count').addEventListener('change',drawRoute);

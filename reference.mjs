@@ -1,8 +1,8 @@
-import {translate,getLanguage,formatBidi} from './locale.mjs?v=30';
-import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=34';
-import {opticIllustration} from './patching-visuals.mjs?v=1';
-import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=5';
-import {vflPen} from './test-tool-visuals.mjs?v=1';
+import {translate,getLanguage,formatBidi} from './locale.mjs?v=20261101';
+import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=20261101';
+import {opticIllustration} from './patching-visuals.mjs?v=20261101';
+import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=20261101';
+import {vflPen} from './test-tool-visuals.mjs?v=20261101';
 
 const text = (x,y,label) => `<text x="${x}" y="${y}" text-anchor="middle">${label}</text>`;
 const line = (x,y,end,color='#277bc2') => `<path d="M${x} ${y} H${end}" fill="none" stroke="${color}" stroke-width="5"/><path d="M${end-8} ${y-6} l8 6 -8 6" fill="none" stroke="${color}" stroke-width="3"/>`;
@@ -28,7 +28,7 @@ function illustration(term) {
   } else if(art==='fanout') {
     drawing=`<g class="hardware-art">${mmcHead(240,58,false)}</g>`;
     [35,80,125].forEach((y,i)=>{drawing+=`<path d="M73 ${y} C160 ${y} 170 82 220 82" stroke="#e5b821" stroke-width="6" fill="none"/>${box(14,y-17,`Leg ${i+1}`,58)}`;});
-    caption='Three followers shown · separate paths into one head';
+    caption='Three legs shown · separate paths into one head';
   } else if(['tx','rx','polarity','ends','ir'].includes(art)) {
     drawing=box(10,30,'A · TX')+box(262,30,'B · RX')+line(108,50,251)+box(10,106,'A · RX')+box(262,106,'B · TX')+
       '<path d="M251 126 H108 m8 -6 -8 6 8 6" fill="none" stroke="#178b76" stroke-width="5"/>';
@@ -40,15 +40,15 @@ function illustration(term) {
     caption='Neighbor identity and port · not an optical power reading';
   } else if(art==='power' || art==='dark') {
     drawing=`<rect x="39" y="24" width="282" height="104" rx="10" fill="${art==='dark'?'#fff0f2':'#edf5fa'}" stroke="${art==='dark'?'#bd3450':'#718b9e'}"/>`+
-      text(180,55,'RX · example report')+`<text x="180" y="99" text-anchor="middle" style="font-size:32px;font-weight:700;fill:${art==='dark'?'#b51f38':'#173b59'}">${art==='dark'?'−40':'+0.25'} dBm</text>`;
-    caption=art==='dark'?'No-light indication in our site report example':'Compare the reading with the installed optic’s limits.';
+      text(180,55,'RX · example report')+`<text x="180" y="99" text-anchor="middle" style="font-size:32px;font-weight:700;fill:${art==='dark'?'#b51f38':'#173b59'}">${art==='dark'?'No signal':'+0.25 dBm'}</text>`;
+    caption=art==='dark'?'No-signal status in a simulated report':'Compare the reading with the installed optic’s limits.';
   } else if(art==='vfl') {
     drawing=vflPen(105,78,{scale:.9,on:true})+line(105,78,304,'#d52942')+'<circle cx="317" cy="78" r="12" fill="#e22a43"/>'+text(183,128,'Isolated fiber → expected strand');
     caption='Visible red light · continuity is not a loss measurement';
   } else if(art==='ticket' || art==='rack') {
-    drawing=box(24,15,art==='rack'?'QNO5 · 5C · 16f · 17 · 30':'Device → Ethernet 25/1',312)+
+    drawing=box(24,15,art==='rack'?'DEMO · RACK-17 · U30':'Device → Ethernet 25/1',312)+
       box(24,73,art==='rack'?'Building / room / row / rack / height':'Leg 3 → named head → CAS 2 / 28',312);
-    caption='Site example · confirm the actual labels and record';
+    caption='Fictional example · confirm actual labels and records';
   } else if(art==='misport') {
     drawing=box(218,20,'Port 12')+box(218,102,'Port 13')+line(22,122,208,'#d52942')+text(117,37,'Expected: 12');
     caption='Observed at 13 · check the mapping';
@@ -118,7 +118,7 @@ export function mountReference(menuPanel, closeMenu, menuButton) {
 }
 
 // Only short teaching paragraphs are annotated; drawings, controls and exam answers stay intact.
-const inlineTerms={optic:'optic',LC:'lc',MMC:'mmc',CAS:'cas',fanout:'fanout',follower:'follower',ferrule:'ferrule',TX:'tx',RX:'rx',IR:'ir',dBm:'dbm',attenuation:'attenuation',polarity:'polarity',loopback:'loopback',VFL:'vfl',continuity:'continuity',misport:'misport',splice:'splice',local:'local-remote',remote:'local-remote',FIM:'fim',LLDP:'lldp'};
+const inlineTerms={optic:'optic',LC:'lc',MMC:'mmc',CAS:'cas',fanout:'fanout',leg:'follower',ferrule:'ferrule',TX:'tx',RX:'rx',IR:'ir',dBm:'dbm',attenuation:'attenuation',polarity:'polarity',loopback:'loopback',VFL:'vfl',continuity:'continuity',misport:'misport',splice:'splice',local:'local-remote',remote:'local-remote','connection record':'fim',LLDP:'lldp'};
 Object.assign(inlineTerms,{'óptico':'optic',ramal:'follower','férula':'ferrule','atenuación':'attenuation',polaridad:'polarity',continuidad:'continuity',empalme:'splice',remoto:'local-remote'});
 Object.assign(inlineTerms,{optique:'optic',branche:'follower','férule':'ferrule','atténuation':'attenuation','polarité':'polarity','continuité':'continuity','épissure':'splice',distant:'local-remote'});
 Object.assign(inlineTerms,{'الوحدة الضوئية':'optic','وحدة ضوئية':'optic','الفرع':'follower','الفيرول':'ferrule','فيرول':'ferrule','التوهين':'attenuation','القطبية':'polarity','الاستمرارية':'continuity','حلقة العودة':'loopback','اللحام':'splice','الفان آوت':'fanout'});

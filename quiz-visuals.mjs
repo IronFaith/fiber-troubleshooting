@@ -1,9 +1,9 @@
-import {cassetteFront, loopIllustration, mmcLoopback} from './loop-visuals.mjs?v=5';
-import {lcLoopback} from './test-tool-visuals.mjs?v=1';
-import {opticIllustration} from './patching-visuals.mjs?v=1';
+import {cassetteFront, loopIllustration, mmcLoopback} from './loop-visuals.mjs?v=20261101';
+import {lcLoopback} from './test-tool-visuals.mjs?v=20261101';
+import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 import {lightFlow} from './light-visuals.mjs?v=1';
-import {connectedCaseVisual} from './connected-case.mjs?v=3';
-import {caseVisual} from './exam-evidence.mjs?v=3';
+import {connectedCaseVisual} from './connected-case.mjs?v=20261101';
+import {caseVisual} from './exam-evidence.mjs?v=20261101';
 
 const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const text=(x,y,value,extra='')=>`<text x="${x}" y="${y}" ${extra}>${value}</text>`;
@@ -31,10 +31,10 @@ function connector(seated) {
 }
 
 function readings(kind,answered) {
-  const badge=(label,value,alert=false)=>`<div class="quiz-reading${alert ? ' reading-alert' : ''}"><span>${label}</span><strong>${value}</strong><small>dBm</small></div>`;
-  if(kind==='simple-dark') return `<div class="q-report-label">Cable Guy · training report</div><div class="quiz-reading-pair">${badge('RX','−40',true)}${badge('TX','−40',true)}</div>`;
-  if(kind==='simple-rx-dark') return `<div class="q-report-label">Local optic · training report</div><div class="quiz-reading-pair">${badge('TX','+0.80')}${badge('RX','−40',true)}</div>`;
-  if(kind==='light-returns') return `<div class="q-report-label">One connection cleaned and reseated</div><div class="quiz-reading-pair">${badge('Before · RX','−40',true)}${badge('After · RX','+0.25')}</div><p class="q-observation">Link status has not been checked yet.</p>`;
+  const badge=(label,value,alert=false)=>`<div class="quiz-reading${alert ? ' reading-alert' : ''}"><span>${label}</span><strong${value==='No signal'?' class="signal-status"':''}>${value}</strong>${value==='No signal'?'':'<small>dBm</small>'}</div>`;
+  if(kind==='simple-dark') return `<div class="q-report-label">Device diagnostics · training report</div><div class="quiz-reading-pair">${badge('RX','No signal',true)}${badge('TX','No signal',true)}</div>`;
+  if(kind==='simple-rx-dark') return `<div class="q-report-label">Local optic · training report</div><div class="quiz-reading-pair">${badge('TX','+0.80')}${badge('RX','No signal',true)}</div>`;
+  if(kind==='light-returns') return `<div class="q-report-label">One connection cleaned and reseated</div><div class="quiz-reading-pair">${badge('Before · RX','No signal',true)}${badge('After · RX','+0.25')}</div><p class="q-observation">Link status has not been checked yet.</p>`;
   const gauge=(label,value,min,max)=>{
     const location=(value+6)/12*100;
     return `<div class="q-gauge"><div class="q-gauge-value"><strong>${label}</strong><b>${value>0 ? '+' : '−'}${Math.abs(value).toFixed(2)} <small>dBm</small></b></div>
@@ -120,16 +120,16 @@ export function quizVisual(question,{answered=false,choice=null}={}) {
   else if(kind.startsWith('lldp-')) {
     const missing=kind==='lldp-missing', purpose=kind==='lldp-purpose';
     const device=kind==='lldp-device'?'Device C':'Device B';
-    const port=kind==='lldp-port'?'7/5':'7/1';
-    body=`<p class="q-report-label">${purpose?'LLDP · Link Layer Discovery Protocol':'Fresh Cable Guy report · local Device A / 25/1'}</p>
+    const port=kind==='lldp-port'?'7/2':'7/1';
+    body=`<p class="q-report-label">${purpose?'LLDP · Link Layer Discovery Protocol':'Fresh device diagnostics report · local Device A / 25/1'}</p>
       <div class="q-lldp-route"><div><b>Device A</b><small>Local · 25/1</small></div><span aria-hidden="true">↔</span><div class="q-lldp-cas"><b>CAS → CAS</b><small>Passive fiber path</small></div><span aria-hidden="true">↔</span><div><b>${missing?'Unconfirmed':device}</b><small>${missing?'No neighbor reported':`Remote · ${port}`}</small></div></div>
-      ${purpose?'<div class="q-lldp-message">“I’m Device B. My port is 7/1.”<small>Message received by Device A over this link</small></div>':`<div class="q-lldp-reports"><div><span>FIM expects</span><strong>Device B</strong><b>Port 7/1</b></div><div><span>LLDP reports</span><strong>${missing?'No neighbor':device}</strong><b>${missing?'Identity unconfirmed':`Port ${port}`}</b></div></div>`}
+      ${purpose?'<div class="q-lldp-message">“I’m Device B. My port is 7/1.”<small>Message received by Device A over this link</small></div>':`<div class="q-lldp-reports"><div><span>Connection record expects</span><strong>Device B</strong><b>Port 7/1</b></div><div><span>LLDP reports</span><strong>${missing?'No neighbor':device}</strong><b>${missing?'Identity unconfirmed':`Port ${port}`}</b></div></div>`}
       ${kind==='lldp-device'?'<p class="q-test-results"><strong>TX / RX within example limits</strong><span>Expected endpoint still needs confirmation</span></p>':''}`;
   }
   else if(kind.startsWith('case-')) body=caseVisual(question,answered);
   else if(['simple-dark','simple-rx-dark','light-returns','healthy','weak'].includes(kind)) body=readings(kind,answered);
   else if(kind==='connections') body=`<p class="q-observation">Side views · tap a connection</p><div class="q-connection-choices">${[0,1].map(i=>target(question,i,`<strong>Connection ${i===0 ? 'A' : 'B'}</strong>${connector(i===0)}`,answered,choice)).join('')}</div>`;
-  else if(kind==='seated-dark') body=`<div class="q-report-label">Connector after inspection and reseating</div>${connector(true)}<div class="quiz-reading reading-alert"><span>RX after reseating</span><strong>−40</strong><small>dBm</small></div>`;
+  else if(kind==='seated-dark') body=`<div class="q-report-label">Connector after inspection and reseating</div>${connector(true)}<div class="quiz-reading reading-alert"><span>RX after reseating</span><strong class="signal-status">No signal</strong></div>`;
   else if(kind==='dirty') body=svg(`<circle class="scope-face" cx="180" cy="104" r="80"/><circle class="scope-core" cx="180" cy="104" r="23"/><g class="q-contamination"><circle class="dirt" cx="171" cy="96" r="12"/><circle class="dirt" cx="199" cy="119" r="7"/><circle class="dirt" cx="142" cy="135" r="5"/></g>${answered ? '<circle class="q-inspection-ring" cx="180" cy="104" r="36"/>' : ''}${text(180,213,'Inspection image · isolated connector','text-anchor="middle"')}`,235,'Inspection view showing particles on the connector end face.');
   else if(kind==='bend-change') body=bendChange(answered);
   else if(kind==='bend') {
@@ -138,13 +138,13 @@ export function quizVisual(question,{answered=false,choice=null}={}) {
       ${text(180,26,'Cable-management clip','text-anchor="middle"')}<path class="q-data-line" d="M180 155 V119 m-5 7 5 -7 5 7"/>
       ${text(180,177,'Cable squeezed under the clip','text-anchor="middle"')}${text(180,204,'No tear visible in the outer covering','text-anchor="middle"')}`,225,'Fiber cable squeezed under a management clip. Its outer covering has no visible tear.');
   } else if(kind==='cassette') {
-    body=`<p class="q-fim-ticket"><span>Mock FIM destination</span><strong>CAS 2 / Port 28</strong></p><p class="q-observation">Top: 1–16 · Bottom: 17–32. Scroll to see every port.</p><div class="q-cas-scroll" tabindex="0" role="group" aria-label="CAS 2 cassette, scroll horizontally for all 32 ports"><div class="q-cas-board">${svg(cassetteFront({name:'CAS 2',port:answered ? 28 : null,patched:answered}),206)}${question.choices.map((_,i)=>target(question,i,'',answered,choice,`style="left:${(21.6+(i%16)*19.8)/360*100}%;top:${(i<16 ? 38 : 116)/206*100}%;width:5.5%;height:${52/206*100}%"`)).join('')}</div></div>`;
+    body=`<p class="q-fim-ticket"><span>Mock connection record destination</span><strong>CAS 2 / Port 28</strong></p><p class="q-observation">Top: 1–16 · Bottom: 17–32. Scroll to see every port.</p><div class="q-cas-scroll" tabindex="0" role="group" aria-label="CAS 2 cassette, scroll horizontally for all 32 ports"><div class="q-cas-board">${svg(cassetteFront({name:'CAS 2',port:answered ? 28 : null,patched:answered}),206)}${question.choices.map((_,i)=>target(question,i,'',answered,choice,`style="left:${(21.6+(i%16)*19.8)/360*100}%;top:${(i<16 ? 38 : 116)/206*100}%;width:5.5%;height:${52/206*100}%"`)).join('')}</div></div>`;
   } else if(kind==='recheck') body=`<div class="q-action-sequence"><span>Connector reseated</span><b aria-hidden="true">→</b><span class="${answered ? 'q-confirmed' : ''}">${answered ? 'Recheck + record' : 'Next observation?'}</span></div>${answered ? svg(`<path class="q-ir" d="M30 35 H330"/>${lightFlow('M30 35 H330')}`,70,'Observe the result after the change.') : '<p class="q-observation">No new health reading has been taken.</p>'}`;
   else if(kind==='optic') body=svg(`<rect class="q-rack" x="8" y="52" width="82" height="100" rx="4"/>${text(49,93,'Device','class="q-white" text-anchor="middle"')}${text(49,115,'data','class="q-white" text-anchor="middle"')}
     <path class="q-data-line" d="M90 103 H132"/>${optic(128,15,130,'purpose')}${cord('M258 101 H350')}${answered ? lightFlow('M258 101 H350') : ''}
     ${text(190,184,'Optic','text-anchor="middle"')}${text(311,140,'Fiber','text-anchor="middle"')}${text(180,222,answered ? 'Data → light    /    received light → data' : 'What happens inside this module?','text-anchor="middle"')}`,245,'A device connects through an optic module to a fiber.');
   else if(kind==='directions') body=directions(question,answered,choice);
-  else if(kind==='lanes') body=`<div class="q-report-label">Cable Guy · four receive lanes</div><div class="q-lane-choices">${['+0.25','+0.28','−40','+0.21'].map((value,i)=>target(question,i,`<span>RX lane ${i+1}</span><strong>${value}</strong><small>dBm</small>`,answered,choice,`data-reading="${value}"`)).join('')}</div>`;
+  else if(kind==='lanes') body=`<div class="q-report-label">Device diagnostics · four receive lanes</div><div class="q-lane-choices">${['+0.25','+0.28','No signal','+0.21'].map((value,i)=>target(question,i,`<span>RX lane ${i+1}</span><strong${value==='No signal'?' class="signal-status"':''}>${value}</strong>${value==='No signal'?'':'<small>dBm</small>'}`,answered,choice,`data-reading="${value}"`)).join('')}</div>`;
   else if(kind==='direct-loop') {
     const art=loopIllustration('direct');
     body=`<p class="q-test-results"><strong>Direct loop: pass</strong><span>Restored link: still failing</span></p>${svg(art.drawing,art.height,'Approved direct LC loopback at the local optic. The loop test passed.')}<p class="q-observation">The remote device is in another room.</p>`;
@@ -162,7 +162,7 @@ export function quizVisual(question,{answered=false,choice=null}={}) {
 export function quizThumbnail(topic) {
   if(topic===6) return `<span class="q-quiz-thumb" aria-hidden="true">${svg(`<g transform="translate(20 60) scale(1.4)">${mmcLoopback(142,42)}</g>`,250)}</span>`;
   const drawings=[
-    '<rect fill="#be2532" x="30" y="30" width="300" height="160" rx="10"/>'+text(180,95,'RX','class="q-white" text-anchor="middle"')+text(180,154,'−40','class="q-white q-thumb-number" text-anchor="middle"'),
+    '<rect fill="#be2532" x="30" y="30" width="300" height="160" rx="10"/>'+text(180,95,'RX','class="q-white" text-anchor="middle"')+text(180,154,'No signal','class="q-white" text-anchor="middle"'),
     '<rect class="q-cas" x="28" y="25" width="304" height="170" rx="8"/>'+[92,180,268].map(x=>`<rect class="q-adapter" x="${x-25}" y="78" width="50" height="80" rx="4"/><rect class="q-opening" x="${x-15}" y="90" width="30" height="55"/>`).join('')+text(180,64,'CAS','class="q-white" text-anchor="middle"'),
     optic(55,0,250,'quiz-thumb'),
     cord('M40 110 H320')+'<rect class="q-cas" x="50" y="62" width="70" height="100" rx="5"/><rect class="q-cas" x="237" y="62" width="70" height="100" rx="5"/>'+text(85,123,'✓','class="q-white" text-anchor="middle"')+text(272,123,'?','class="q-white" text-anchor="middle"')

@@ -1,5 +1,5 @@
-import {communicationRack} from './rack-visuals.mjs?v=9';
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=5';
+import {communicationRack} from './rack-visuals.mjs?v=20261101';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=20261101';
 import {lightFlow} from './light-visuals.mjs?v=1';
 
 const nodes=[
@@ -47,7 +47,7 @@ export function communicationRoute(reverse=false) {
         : node.kind==='passage' && previous.kind==='passage'
           ? `The inter-room fiber joins ${previous.id} to ${node.id}. This passive is the entry point on the other side of this example route. It passes the same optical signal onward.`
           : node.kind==='rack'
-            ? `From ${previous.id}, the fiber reaches ${node.id} at the device rack. In this site example, light enters through the front male MMC and leaves through the rear female MMC toward the LC fanout.`
+            ? `From ${previous.id}, the fiber reaches ${node.id} at the device rack. In this fictional example, light enters through the front male MMC and leaves through the rear female MMC toward the LC fanout.`
             : `The onward fiber from ${previous.id} reaches ${node.id}, the ${node.name.toLowerCase()}. Its mapped connection passes the light into the next fiber section. It does not read the data or create new light.`;
     steps.push({label:receiving ? `${node.id} · RX` : node.id,
       title:receiving ? `Device ${node.id} receives the light` : `${node.id} · ${node.name}`,

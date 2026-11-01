@@ -15,7 +15,7 @@ export function lcConnector(x=0,y=0,{scale=1,seated=false,reverse=false}={}) {
   </g>`;
 }
 
-// Both mating tips are on the right, vertically paired like the site's optic.
+// Both mating tips are on the right, vertically paired like the example optic.
 export function lcLoopback(x=0,y=0,{gap=46,scale=1,seated=false,result}={}) {
   const path=`M0 0 H-75 C-119 0 -119 ${gap} -75 ${gap} H0`;
   return `<g class="lc-loopback" transform="translate(${x} ${y}) scale(${scale})">

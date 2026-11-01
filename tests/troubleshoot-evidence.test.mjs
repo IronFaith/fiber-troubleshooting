@@ -29,7 +29,7 @@ test('A/B findings persist across selection and branch from the incoming head to
   assert.equal(assessment(s).check.to,2,'through-CAS pair success supersedes an incomplete head-only check');
   assert.notEqual(assessment(s).complete,true);
   const different=trace(createCase(),0,1,'tx','wrong');
-  assert.match(assessment(different).next,/FIM/);
+  assert.match(assessment(different).next,/connection record/);
   const collision=trace(trace(createCase(),0,1,'tx','seen'),0,1,'rx','swapped');
   assert.match(assessment(collision).title,/conflict/);
   const swapped=trace(trace(createCase(),0,1,'tx','swapped'),0,1,'rx','swapped');
