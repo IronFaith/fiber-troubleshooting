@@ -1,6 +1,6 @@
 # Project status
 
-Updated: **2026-10-20**. This is a maintained snapshot, not an automatic health monitor.
+Updated: **2026-11-01**. This is a maintained snapshot, not an automatic health monitor.
 
 [Live course](https://ironfaith.github.io/fiber-troubleshooting/) · [Standing instructions](AGENTS.md) · [Current behavior](README.md) · [Counter operations](counter/README.md) · [Deployment history](https://github.com/IronFaith/fiber-troubleshooting/actions)
 
@@ -8,13 +8,13 @@ Updated: **2026-10-20**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state, read AGENTS.md and this file, then consult the relevant README passages and code. Older plans remain historical references.
 
-- **Current objective:** Make lessons easy to browse and find again after the course was condensed too aggressively.
-- **Accepted scope — 2026-10-20:** Keep the five stages and all existing material. Open every lesson and the topic index; remove stage accordions and the one-lesson selector. Keep optional self-check explanations, quick reference, saved place and practice/exam handoffs.
-- **Completed and published:** All 23 lesson bodies and topic links are visible. Readers can scroll continuously, use browser Find or jump directly to a topic. Scrolling and topic links remember the current lesson with the existing storage key. Inactive-stage animations pause and leaving a guided light journey stops it. English, Spanish, French and Arabic ship together.
-- **Verification:** Existing course/locale checks passed, then final `npm run check` passed all 131 tests. Browser checks confirmed 23 visible lessons and links, no duplicate IDs, desktop and mobile layouts, all four languages without horizontal overflow, direct topic navigation, scroll/reload/resume, journey stopping, legacy FIM bookmarks and the Loopbacks exam handoff. No browser errors were reported.
+- **Current objective:** Keep the fanout replacement guide inside the existing Simulations page.
+- **Accepted scope — 2026-11-01:** Integrate the reviewed seven-step visual guide, reuse the course's MMC/LC artwork and mapping examples, add the leader/follower removal practice and a direct activity link. Preserve existing practice, exams and progress; ship all four languages together.
+- **Completed locally:** The guide and restartable unscored practice are at `simulations.html#fanout-replacement`. Replacement stays blocked until the old leader and all twelve followers are cleared. Three/six-passive illustrations retain the same twelve-leg bundle. Physical and system actions are distinguished.
+- **Verification:** Focused behavior/locale checks passed; final `npm run check` passed all 134 tests. Browser checks covered the direct anchor, desktop and 390/320px layouts, English/Spanish/French/Arabic, preserved state on language switching, the final follower gate, keyboard activation, restart, six-passive selection and unchanged port 12. No overflow, duplicate IDs or browser errors were reported. One missing dynamic translation found during inspection was added before final checks.
 - **Latest verified application release:** [`acca914`](https://github.com/IronFaith/fiber-troubleshooting/commit/acca914ca7fa64902fcc3431955da4b6ce3f84b5). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/39505715242) succeeded; SHA-256 checks confirmed all 19 changed runtime files served by Pages match the application commit.
-- **Remaining work / next action:** The requested milestone is complete. Use further field feedback to choose any later changes.
-- **Blockers / missing input:** None.
+- **Remaining work / next action:** Commit and publish the verified fanout milestone, then verify its exact Pages deployment and served runtime files.
+- **Blockers / missing input:** No blocker. No actual MyPatch screenshot or live integration is available; navigation follows the user's described workflow and is labeled schematic.
 
 Each future milestone must refresh this handoff with the latest objective, accepted scope, completed and verified work, work in progress, remaining defects, blockers or missing references, and the next agreed action.
 
@@ -33,7 +33,7 @@ The latest application release is [`acca914`](https://github.com/IronFaith/fiber
 | Area | Current behavior |
 | --- | --- |
 | Learn | Five stages covering equipment, connection identity, readings, tests, and isolation. All 23 lessons and the topic index stay open for browsing and browser Find. Objectives, unscored explanation checks, reference, scroll/topic resume and practice/exam links remain available. |
-| Simulations and Exams | Interactive LC/MMC patching, selectable five-question Beginner and Intermediate exams, saved attempts, local best scores and Fiber Apprentice badges. Questions are supported by lesson material. |
+| Simulations and Exams | Interactive LC/MMC patching plus the new fanout replacement guide and unscored record-removal practice (local, awaiting publication). Existing five-question exams, saved attempts, scores and badges are preserved. |
 | Troubleshooting | One test workspace with local/remote tools, editable CAS points, physical identity checks, inline results and compact findings. The path stacks on mobile. |
 | Evidence | Loop and VFL coverage remain separate. Findings show the suspect span/strand, a compact current-source results table and one next action, with steps/tools/outcomes and causes expandable. Missing channels and unresolved optical failures stay explicit. |
 | Case continuity | Normalize changes the illustrated setup; it does not declare a repair. History retains earlier checks. Made a change · retest in findings starts fresh evidence at the failed setup. New case begins a separate investigation. |
@@ -65,7 +65,7 @@ See the [commit history](https://github.com/IronFaith/fiber-troubleshooting/comm
 
 ## Outstanding work
 
-The open-lesson update is complete and verified live. The earlier compact findings and VFL guidance remain complete and verified live. No other redesign or curriculum work is queued.
+The fanout simulation is verified locally and awaiting publication. The open-lesson update and earlier compact findings/VFL guidance remain verified live. No other redesign or curriculum work is queued.
 
 ## Boundaries to preserve
 

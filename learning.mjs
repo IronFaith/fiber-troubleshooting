@@ -5,9 +5,10 @@ import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPa
 import { rackIllustration } from './rack-visuals.mjs?v=9';
 import { mountCommunicationRoute } from './communication-route.mjs?v=6';
 import { mountCourse, learningEntry } from './course.mjs?v=11';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=34';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=35';
 import { opticIllustration } from './patching-visuals.mjs?v=1';
 import { mountPatchPractice } from './patch-practice.mjs?v=14';
+import { mountFanoutReplacement } from './fanout-replacement.mjs?v=1';
 import { mountLightJourney } from './loop-lesson.mjs?v=9';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=3';
@@ -441,16 +442,19 @@ function renderSimulations() {
     <div class="chapter-heading"><p class="chapter-count">Hands-on practice</p><button type="button" class="lesson-motion"></button></div>
     <h2 id="lesson-title">Simulations</h2>
     <p class="lesson-intro">Move the cable. Match the port. Build confidence on mock hardware.</p>
+    <nav class="lesson-jumps" aria-label="Simulation activities"><a href="#patch-practice">LC & MMC patching</a><a href="#fanout-replacement">Fanout replacement</a></nav>
     <section id="patch-practice" class="lesson-section" aria-labelledby="practice-title">
       <h3 id="practice-title">LC & MMC patching</h3>
       <p class="section-intro">Read a mock FIM ticket, choose a connector, then drag it to the port—or tap the connector and port. Practice any ticket or take the 5-question exam.</p>
       <div id="patch-lab" class="patch-lab"></div>
       <p class="picture-note">Each ticket is a separate training example using your site's 1 / 5 mapping. Matching a port does not prove light or link health. On site: confirm FIM, inspect/clean, seat fully, and check optic health.</p>
     </section>
+    <div id="fanout-simulation"></div>
     <a class="next-chapter" href="./patching.html">Review FIM, LC & MMC patching →</a>
     <a class="next-chapter" href="./quiz.html">Exams →</a>`;
   setupLesson(lesson);
   mountPatchPractice(document.getElementById('patch-lab'));
+  mountFanoutReplacement(document.getElementById('fanout-simulation'));
 }
 
 function setupRackExample() {
