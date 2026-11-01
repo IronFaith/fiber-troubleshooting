@@ -1,8 +1,8 @@
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {cassetteFront, mmcHead} from './loop-visuals.mjs?v=20261101';
+import {cassetteFront, mmcHead} from './loop-visuals.mjs?v=2026110103';
 import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 import {patchCableVisual} from './patch-cable-visuals.mjs?v=1';
-import {patchTasks,headSerial,placementCorrect,placementExplanation,recordPatchAnswer,patchResult,loadPatchBest,savePatchBest,loadPatchDraft,savePatchDraft,clearPatchDraft} from './patch-practice-data.mjs?v=20261101';
+import {patchTasks,headSerial,placementCorrect,placementExplanation,recordPatchAnswer,patchResult,loadPatchBest,savePatchBest,loadPatchDraft,savePatchDraft,clearPatchDraft} from './patch-practice-data.mjs?v=2026110103';
 
 function connectorArt(kind) {
   if(kind==='mmc') return `<svg viewBox="0 0 130 85" aria-hidden="true"><path class="loop-cord" d="M2 48 H35"/><g class="lab-connector-head" transform="translate(32 24) scale(.85)">${mmcHead(0,0,false)}</g></svg>`;

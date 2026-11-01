@@ -1,18 +1,18 @@
 import {mountSiteCounter} from './site-counter.mjs?v=7';
 import {vflPen} from './test-tool-visuals.mjs?v=20261101';
 import {polarityLesson,mountPolarityLesson} from './polarity-lesson.mjs?v=20261101';
-import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=20261101';
-import { rackIllustration } from './rack-visuals.mjs?v=20261101';
-import { mountCommunicationRoute } from './communication-route.mjs?v=20261101';
+import { cassetteFront, loopIllustration, mmcHead, patchRouteIllustration, mmcPatchingIllustration } from './loop-visuals.mjs?v=2026110103';
+import { rackIllustration } from './rack-visuals.mjs?v=2026110103';
+import { mountCommunicationRoute } from './communication-route.mjs?v=2026110103';
 import { mountCourse, learningEntry } from './course.mjs?v=20261101';
-import { mountReference, linkLessonTerms } from './reference.mjs?v=20261101b';
+import { mountReference, linkLessonTerms } from './reference.mjs?v=2026110103b';
 import { opticIllustration } from './patching-visuals.mjs?v=20261101';
-import { mountPatchPractice } from './patch-practice.mjs?v=20261101';
-import { mountFanoutReplacement } from './fanout-replacement.mjs?v=20261101b';
-import { mountLightJourney } from './loop-lesson.mjs?v=20261101';
+import { mountPatchPractice } from './patch-practice.mjs?v=2026110103';
+import { mountFanoutReplacement } from './fanout-replacement.mjs?v=2026110103b';
+import { mountLightJourney } from './loop-lesson.mjs?v=2026110103';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
-import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=20261101';
-import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=20261101';
+import {connectedCaseLesson,mountConnectedCase} from './connected-case.mjs?v=2026110103';
+import {readingLesson,loopReasoningLesson,faultReasoningLesson,vflReasoningLesson,perspectiveLesson,lldpLesson,mountLldpLesson,patchTicketLesson,mountReasoningLessons} from './reasoning-lessons.mjs?v=2026110103';
 
 function el(tag, className = '', text = '') {
   const item = document.createElement(tag);
@@ -412,7 +412,7 @@ function renderPatchingLesson(lesson,markupOnly=false) {
     <section id="mmc-fanout" class="lesson-section" aria-labelledby="mmc-fanout-title">
       <h3 id="mmc-fanout-title">One MMC head. 12 legs.</h3>
       <p class="section-intro">The head identifies this fanout. Its 12 legs belong to the same assembly.</p>
-      <p class="fanout-serial"><span>Example head serial</span><strong>DEMO-FANOUT-001</strong></p>
+      <p class="fanout-serial"><span>Example head serial</span><strong>SN.4827.0619</strong></p>
       <p class="section-intro">Choose a leg to trace it back to the head.</p>
       <div id="fanout-picture"></div>
       <p class="picture-note">One line per leg; individual strands are not shown. Leg numbers are illustration labels—use the actual labels and mapping in the connection record.</p>
@@ -522,7 +522,7 @@ function fanoutPicture(selected) {
     drawing += `<rect class="fanout-tag${index===selected ? ' fanout-tag-selected' : ''}" x="275" y="${y-11}" width="48" height="22" rx="4"/>`+
       text(299,y+4,String(index+1),'class="small" text-anchor="middle"');
   }
-  return {height:407, hardware:true, caption:`Leg ${selected+1} belongs to MMC head DEMO-FANOUT-001. Match this leg’s actual label in the connection record.`, drawing};
+  return {height:407, hardware:true, caption:`Leg ${selected+1} belongs to MMC head SN.4827.0619. Match this leg’s actual label in the connection record.`, drawing};
 }
 
 function mmcPatchPicture(selected) {

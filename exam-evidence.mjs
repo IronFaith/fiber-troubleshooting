@@ -1,4 +1,4 @@
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=20261101';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=2026110103';
 import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 import {lightFlow} from './light-visuals.mjs?v=1';
 const text=(x,y,value,extra='')=>`<text x="${x}" y="${y}" ${extra}>${value}</text>`;
@@ -27,9 +27,9 @@ export function caseVisual(question,answered=false) {
     <p class="q-observation">Example RX limits: −3.00 to +3.00 dBm. Other required lanes and link status: not checked.</p>`;
   if(kind==='case-data') return `<p class="q-report-label">Device A is sending data to Device B</p>${linkDiagram({answered})}<div class="case-facts">${fact('At A','Device + installed optic')}${fact('Between devices','Fiber → CAS 1 → CAS 2 → fiber')}${fact('At B','Installed optic + device')}</div>`;
   if(kind==='case-perspective') return `${linkDiagram({perspective:true,answered})}<p class="q-observation">Arrows show the intended directions, not confirmed light arrival.</p><div class="case-facts">${fact('B · local TX','Within limits')}${fact('B · local RX','No signal reported')}${fact('A’s current readings','Not available')}</div>`;
-  if(kind==='case-ticket') return `<div class="reason-ticket"><span>Position <b>DEMO / ROOM-A / ROW-02 / RACK-17 / U30</b></span><span>Ethernet <b>7/2</b></span><span>Fictional upright map <b>7/2 → position 2</b></span><span>Leg <b>Leg 8</b></span><span>Head <b>DEMO-FANOUT-001</b></span><span>Destination <b>CAS 2 / Port 28</b></span></div>
+  if(kind==='case-ticket') return `<div class="reason-ticket"><span>Position <b>DEMO / ROOM-A / ROW-02 / RACK-17 / U30</b></span><span>Ethernet <b>7/2</b></span><span>Fictional upright map <b>7/2 → position 2</b></span><span>Leg <b>Leg 8</b></span><span>Head <b>SN.4827.0619</b></span><span>Destination <b>CAS 2 / Port 28</b></span></div>
     ${svg(`${optic(25,5,185,true)}<svg x="270" y="23" width="310" height="178" viewBox="0 0 360 206">${cassetteFront({name:'CAS 2',port:null})}</svg>${text(117,222,'Optic 7 · purple tab below','text-anchor="middle"')}${text(425,222,'Destination cassette','text-anchor="middle"')}`,245,'Mock ticket calls for Ethernet 7/2, leg 8, CAS 2 port 28. Optic is flipped with purple tab below.')}`;
-  if(kind==='case-fanout') return `<p class="q-report-label">Head serial DEMO-FANOUT-001 · 12 legs</p>${svg(`<g transform="translate(420 58) scale(1.5)">${mmcHead(0,0,false)}</g>
+  if(kind==='case-fanout') return `<p class="q-report-label">Head serial SN.4827.0619 · 12 legs</p>${svg(`<g transform="translate(420 58) scale(1.5)">${mmcHead(0,0,false)}</g>
     <path class="case-path" d="M140 51 C320 51 300 88 420 88 M140 135 C320 135 300 100 420 100"/>
     ${text(40,44,'Leg 3: dark')}${text(40,151,'Leg 8: works')}${text(300,185,'Two separate paths shown from the same fanout','text-anchor="middle"')}`,210,'Separate leg 3 and leg 8 paths join the same MMC assembly. Leg 3 is dark; leg 8 works.')}<p class="q-observation">Connection record assigns the affected optic to leg 3. No mapping change is authorized.</p>`;
   return `<div class="q-report-label">Local device · reported values</div><div class="quiz-reading-pair"><div class="quiz-reading reading-alert"><span>TX</span><strong class="signal-status">No signal</strong></div><div class="quiz-reading reading-alert"><span>RX</span><strong class="signal-status">No signal</strong></div></div><p class="q-observation">Source state and end-to-end pairing have not yet been verified.</p>`;

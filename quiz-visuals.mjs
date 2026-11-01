@@ -1,9 +1,9 @@
-import {cassetteFront, loopIllustration, mmcLoopback} from './loop-visuals.mjs?v=20261101';
+import {cassetteFront, loopIllustration, mmcLoopback} from './loop-visuals.mjs?v=2026110103';
 import {lcLoopback} from './test-tool-visuals.mjs?v=20261101';
 import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 import {lightFlow} from './light-visuals.mjs?v=1';
-import {connectedCaseVisual} from './connected-case.mjs?v=20261101';
-import {caseVisual} from './exam-evidence.mjs?v=20261101';
+import {connectedCaseVisual} from './connected-case.mjs?v=2026110103';
+import {caseVisual} from './exam-evidence.mjs?v=2026110103';
 
 const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const text=(x,y,value,extra='')=>`<text x="${x}" y="${y}" ${extra}>${value}</text>`;

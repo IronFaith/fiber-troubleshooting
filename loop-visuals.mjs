@@ -140,7 +140,7 @@ export function mmcPatchingIllustration(step) {
       </svg>
       ${!seated ? '<path class="patch-insert" d="M199 298 H246 m-7 -5 7 5 -7 5"/>' : '<path class="mmc-seated-check" d="M233 254 l5 5 10 -12"/>'}
       ${text(140,356,seated ? 'Seated + latched' : step === 1 ? 'Align the rails' : 'Match the head','hardware-small hardware-center')}
-      ${text(180,383,'Head serial · DEMO-FANOUT-001','hardware-small hardware-center')}
+      ${text(180,383,'Head serial · SN.4827.0619','hardware-small hardware-center')}
     </g>`};
 }
 

@@ -1,7 +1,7 @@
-import {translate,getLanguage,formatBidi} from './locale.mjs?v=20261101b';
-import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=20261101b';
+import {translate,getLanguage,formatBidi} from './locale.mjs?v=2026110103b';
+import {referenceTerms, referenceGroups, searchReference} from './reference-data.mjs?v=2026110103b';
 import {opticIllustration} from './patching-visuals.mjs?v=20261101';
-import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=20261101';
+import {cassetteFront, mmcHead, loopIllustration} from './loop-visuals.mjs?v=2026110103';
 import {vflPen} from './test-tool-visuals.mjs?v=20261101';
 
 const text = (x,y,label) => `<text x="${x}" y="${y}" text-anchor="middle">${label}</text>`;

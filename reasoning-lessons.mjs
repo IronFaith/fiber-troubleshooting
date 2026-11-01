@@ -1,4 +1,4 @@
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=20261101';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=2026110103';
 import {opticIllustration} from './patching-visuals.mjs?v=20261101';
 import {lightFlow} from './light-visuals.mjs?v=1';
 
@@ -173,7 +173,7 @@ export function mountLldpLesson(root) {
 
 export function patchTicketLesson() {
   return `<section id="worked-ticket" class="lesson-section" aria-labelledby="ticket-title"><h3 id="ticket-title">Read one complete patching ticket</h3>
-    <div class="reason-ticket"><span>Mock position <b>DEMO / ROOM-A / ROW-02 / RACK-17 / U30</b></span><span>Ethernet <b>25/1</b></span><span>Leg <b>Leg 3</b></span><span>Head <b>DEMO-FANOUT-001</b></span><span>Destination <b>CAS 2 / Port 28</b></span></div>
+    <div class="reason-ticket"><span>Mock position <b>DEMO / ROOM-A / ROW-02 / RACK-17 / U30</b></span><span>Ethernet <b>25/1</b></span><span>Leg <b>Leg 3</b></span><span>Head <b>SN.4827.0619</b></span><span>Destination <b>CAS 2 / Port 28</b></span></div>
     <div class="reason-example">${svg(`${face(35,5,190,true)}<svg x="285" y="25" width="315" height="181" viewBox="0 0 360 206">${cassetteFront({name:'CAS 2',port:28,patched:true})}</svg>${label(130,221,'Tab below · 25/1 is now right','text-anchor="middle"')}${label(450,221,'Mapped MMC head → Port 28','text-anchor="middle"')}`,245,'Flipped optic with purple tab below, so 25/1 is on the right. MMC head is mapped to CAS 2 Port 28.')}
     <ol><li><b>Locate:</b> building DEMO, room ROOM-A, row 2, rack 17, elevation 30. The rack number is not the elevation.</li>
     <li><b>Orient:</b> In this fictional map, 25/1 uses position 1 and 25/2 uses position 2 when upright. Flipping the optic reverses their displayed sides.</li>

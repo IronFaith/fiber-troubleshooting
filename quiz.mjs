@@ -1,9 +1,9 @@
-import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=20261101';
+import {loadExam,saveExam,clearExam} from './quiz-session.mjs?v=2026110103';
 import {startExamCount,recordExamCompletion} from './site-counter.mjs?v=7';
-import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=20261101';
+import {quizVisual, quizThumbnail, rankEmblem, examEmblem} from './quiz-visuals.mjs?v=2026110103';
 
-import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor,examDestination} from './quiz-data.mjs?v=20261101';
-import {loadPatchBest} from './patch-practice-data.mjs?v=20261101';
+import {questions, topics, allTopics, allDescriptions, levelFor, roundsForLevel, drawRoundIds, startAttempt, recordAnswer, isCorrectAnswer, resultsFor, roundProgress, apprenticeRank, loadQuizProgress, saveQuizProgress, recordRoundProgress, skillsFor,examDestination} from './quiz-data.mjs?v=2026110103';
+import {loadPatchBest} from './patch-practice-data.mjs?v=2026110103';
 import {loopTopic,loopTitle,loopDescription} from './loop-exam.mjs?v=1';
 
 const host = document.querySelector('#quiz');

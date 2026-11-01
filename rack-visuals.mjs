@@ -1,4 +1,4 @@
-import { mmcHead } from './loop-visuals.mjs?v=20261101';
+import { mmcHead } from './loop-visuals.mjs?v=2026110103';
 import { lightFlow, lightSource } from './light-visuals.mjs?v=1';
 
 // A teaching rack inspired by the reference photo, not a surveyed rack layout.

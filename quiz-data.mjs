@@ -1,5 +1,5 @@
 import {questionVariants} from './quiz-variants.mjs?v=20261101';
-import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=20261101';
+import {appliedQuestions, appliedTopics, appliedDescriptions} from './applied-exams.mjs?v=2026110103';
 import {loopTopic,loopTitle,loopDescription,loopQuestions} from './loop-exam.mjs?v=1';
 export const topics = ['Spot the problem', 'Check the connection', 'Understand the light', 'Narrow down the problem'];
 export const roundDescriptions = [

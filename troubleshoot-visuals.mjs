@@ -1,4 +1,4 @@
-import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=20261101';
+import {cassetteFront,mmcHead} from './loop-visuals.mjs?v=2026110103';
 import {lcConnector,lcLoopback,vflPen} from './test-tool-visuals.mjs?v=20261101';
 import {lightFlow,lightSource} from './light-visuals.mjs?v=1';
 import {pointName,loopLabels,simulatedReadings,simulatedTrace,connectionAt,traceFrom,traceKey,patchAt,traceStop,recordedContinuity,isOptic,loopSource,loopResult,loopEntries} from './troubleshoot-state.mjs?v=20261101';

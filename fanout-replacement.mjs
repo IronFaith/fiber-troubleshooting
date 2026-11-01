@@ -1,4 +1,4 @@
-import {mmcHead} from './loop-visuals.mjs?v=20261101';
+import {mmcHead} from './loop-visuals.mjs?v=2026110103';
 import {lcConnector} from './test-tool-visuals.mjs?v=20261101';
 import {newFanoutReplacement,changeFanoutReplacement,canCompleteFanout} from './fanout-replacement-state.mjs?v=20261101';
 
@@ -14,7 +14,7 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
         <p>Find the broken leg. Follow its label to the MMC and match the full serial.</p>
         <div class="fg-flow" aria-label="Trace the damaged leg to its assembly">
           <div><span class="fg-text-small">Damaged leg</span><strong>Leg 7</strong></div><span aria-hidden="true">→</span>
-          <div><span class="fg-text-small">MMC head serial</span><strong>DEMO-FANOUT-001</strong></div>
+          <div><span class="fg-text-small">MMC head serial</span><strong>SN.4827.0619</strong></div>
         </div>
         <p class="fg-text-small">One head groups separate fiber paths; each leg keeps its own assignment.</p>
       </div>
@@ -39,7 +39,7 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
         <div class="fg-route-scroll" tabindex="0" role="region" aria-label="Active and passive block diagram"><div id="fg-route" class="fg-route" role="list"></div></div>
         <p class="fg-text-small">Counts show patched / required. Each P shows 16/16 MMCs in this example.</p>
       </div>
-      <div class="fg-location"><span class="fg-viz-badge">Mapped passive</span><strong dir="ltr">P1 · CAS 1 / 12 · DEMO-FANOUT-001</strong></div>
+      <div class="fg-location"><span class="fg-viz-badge">Mapped passive</span><strong dir="ltr">P1 · CAS 1 / 12 · SN.4827.0619</strong></div>
       <p class="fg-text-small">Replace one of the 16 MMCs and its 12 legs.</p>
       <p class="fg-text-small">If the labels or map do not match, stop and resolve the mismatch.</p>
       <details class="fg-details"><summary>See the mapping example</summary>
@@ -48,7 +48,7 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
         <thead><tr><th scope="col">Match</th><th scope="col">Worked example</th></tr></thead>
         <tbody>
           <tr><th scope="row">Device relationship</th><td>Device A → Device B</td></tr>
-          <tr><th scope="row">Head / destination</th><td>DEMO-FANOUT-001 → CAS 1 · port 12</td></tr>
+          <tr><th scope="row">Head / destination</th><td>SN.4827.0619 → CAS 1 · port 12</td></tr>
           <tr><th scope="row">Leg / endpoint</th><td>Leg 7 → Device A · 5/1</td></tr>
           <tr><th scope="row">Whole assembly</th><td>Record each of the 12 leg IDs and its assigned device / port</td></tr>
         </tbody>
@@ -74,7 +74,7 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
       <details class="fg-details"><summary>Practice checking the map</summary>
         <div class="fg-card" id="fg-demo">
           <div class="fg-viz-row"><strong>Account for the head and every leg</strong><span class="fg-viz-badge">Fictional checklist</span></div>
-          <div class="fg-leader-action"><div><span class="fg-text-small">Head · DEMO-FANOUT-001</span><div id="fg-leader-state">Not checked</div></div><button class="fg-btn" type="button" id="fg-remove-leader">Check head mapping</button></div>
+          <div class="fg-leader-action"><div><span class="fg-text-small">Head · SN.4827.0619</span><div id="fg-leader-state">Not checked</div></div><button class="fg-btn" type="button" id="fg-remove-leader">Check head mapping</button></div>
           <div class="fg-followers-label"><span>Legs 1–12</span><span id="fg-follower-count" class="fg-tabular-nums">12 remaining</span></div>
           <div class="fg-follower-grid" id="fg-followers"></div>
           <hr>
@@ -99,7 +99,7 @@ export function mountFanoutReplacement(host) {
  const q=selector=>root.querySelector(selector);
  function drawFanout(){
    const svg=q('#fg-fanout'),width=Math.max(256,svg.getBoundingClientRect().width),tip=width-34;
-   let drawing='<title>One head, twelve legs</title><desc>The damaged example is leg 7. All twelve legs belong to MMC DEMO-FANOUT-001; the full assembly is replaced.</desc>';
+   let drawing='<title>One head, twelve legs</title><desc>The damaged example is leg 7. All twelve legs belong to MMC SN.4827.0619; the full assembly is replaced.</desc>';
    drawing+=`<text x="12" y="20">MMC head</text><text x="${width-143}" y="20">LC legs</text>`;
    for(let i=0;i<12;i++){
      const y=44+i*25,startY=171+i*1.2,end=tip-64*.62;
@@ -108,7 +108,7 @@ export function mountFanoutReplacement(host) {
      drawing+=`<text x="${width-19}" y="${y+4}" text-anchor="middle">${i+1}${i===6?'*':''}</text>`;
    }
    drawing+=`<g transform="translate(112 202) rotate(180)">${mmcHead(0,0,false)}</g>`;
-   drawing+='<text x="12" y="223">DEMO-FANOUT-001</text><text x="12" y="242">Entire assembly</text><text x="12" y="259">replaced together</text>';
+   drawing+='<text x="12" y="223">SN.4827.0619</text><text x="12" y="242">Entire assembly</text><text x="12" y="259">replaced together</text>';
    svg.setAttribute('viewBox',`0 0 ${width} 350`);svg.innerHTML=drawing;
  }
  function drawRoute(){

@@ -56,7 +56,7 @@ test('Spanish translates findings and composed diagram labels while preserving t
   assert.equal(translate('CAS 2 · Port 12','es'),'CAS 2 · Puerto 12');
   assert.equal(translate('1 current check · Round 3','es'),'1 comprobación actual · Ronda 3');
   assert.equal(translate('“I’m B”','es'),'«Soy B»');
-  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','DEMO-FANOUT-001','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'es'),id);
+  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','SN.4827.0619','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'es'),id);
   assert.equal(translate('Question 1 of 5','es'),'Pregunta 1 de 5');
   assert.equal(translate('Expected at CAS · A','es'),'Esperado en CAS · A');
   assert.equal(translate('✓ Seated in the correct port. The fictional map assigns 25/1 to optic 25, position 1. With the tab above, that is the left side.','es'),'✓ Asentado en el puerto correcto. El mapa ficticio asigna 25/1 al óptico 25, posición 1. Con la pestaña arriba, queda a la izquierda.');
@@ -101,7 +101,7 @@ test('French translates composed feedback and findings without mixing language c
   assert.equal(translate('CAS 2 · Port 12','fr'),'CAS 2 · port 12');
   assert.equal(translate('✓ Seated in the correct port. The fictional map assigns 25/1 to optic 25, position 1. With the tab above, that is the left side.','fr'),'✓ Enclenché dans le bon port. Le plan fictif affecte 25/1 au module 25, position 1. Avec la languette en haut, cela correspond au côté gauche.');
   assert.equal(translateLines('FIBER OBSERVATIONS — entered manually\nLoop · Local optic','fr'),'OBSERVATIONS FIBRE — saisies manuellement\nBoucle · Optique locale');
-  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','DEMO-FANOUT-001','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'fr'),id);
+  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','SN.4827.0619','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'fr'),id);
   assert.equal(translate(finding,'unsupported'),finding);
 });
 
@@ -145,7 +145,7 @@ test('Arabic translates questions, findings and feedback while keeping technical
   assert.equal(translate('Select all supported answers. Then check your answers.','ar'),'اختر جميع الإجابات التي تدعمها الأدلة. ثم تحقق من إجاباتك.');
   assert.equal(translate('Question 1 of 5','fr'),'Question 1 sur 5');
   assert.equal(translateLines('FIBER OBSERVATIONS — entered manually\nLoop · Local optic','ar'),'ملاحظات الألياف — أُدخلت يدويًا\nحلقة · الوحدة الضوئية المحلية');
-  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','DEMO-FANOUT-001','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'ar'),id);
+  for(const id of ['DEMO / ROOM-A / ROW-02 / RACK-17 / U30','SN.4827.0619','25/2','RX −4.20 dBm','TX +0.25 dBm']) assert.equal(translate(id,'ar'),id);
 });
 
 test('Arabic preference, direction and glossary search coexist with saved progress and other languages',()=>{

@@ -1665,8 +1665,8 @@ export const frenchMessages = [
     "Les branches 3 et 8 suivent des chemins séparés dans le même ensemble MMC. La branche 3 est sans lumière ; la 8 fonctionne."
   ],
   [
-    "Head serial DEMO-FANOUT-001 · 12 legs",
-    "N° de tête DEMO-FANOUT-001 · 12 branches"
+    "Head serial SN.4827.0619 · 12 legs",
+    "N° de tête SN.4827.0619 · 12 branches"
   ],
   [
     "connection record assigns the affected optic to leg 3. No mapping change is authorized.",
@@ -2841,8 +2841,8 @@ export const frenchMessages = [
     "Branches"
   ],
   [
-    "Leg {0} belongs to MMC head DEMO-FANOUT-001. Match this leg’s actual label in the connection record.",
-    "La branche {0} appartient à la tête MMC DEMO-FANOUT-001. Vérifiez son étiquette réelle dans le registre des connexions."
+    "Leg {0} belongs to MMC head SN.4827.0619. Match this leg’s actual label in the connection record.",
+    "La branche {0} appartient à la tête MMC SN.4827.0619. Vérifiez son étiquette réelle dans le registre des connexions."
   ],
   [
     "1. Device {0} sends data through its optic",
@@ -3085,8 +3085,8 @@ export const frenchMessages = [
     "Identifiez la tête"
   ],
   [
-    "Head serial · DEMO-FANOUT-001",
-    "Numéro de tête · DEMO-FANOUT-001"
+    "Head serial · SN.4827.0619",
+    "Numéro de tête · SN.4827.0619"
   ],
   [
     "LC loopback inserted into one duplex pair on the local optic. Purple tab above the ports. TX light travels through the loop and returns to RX.",
@@ -10058,7 +10058,7 @@ export const frenchMessages = [
   ["Read the physical labels. Trace that leg to its head; match the full serial.","Lisez les étiquettes physiques. Suivez cette branche jusqu’à sa tête et vérifiez le numéro de série complet."],
       ["Device relationship","Relation entre équipements"],
   ["Head / destination","Tête / destination"],
-  ["DEMO-FANOUT-001 → CAS 1 · port 12","DEMO-FANOUT-001 → CAS 1 · port 12"],
+  ["SN.4827.0619 → CAS 1 · port 12","SN.4827.0619 → CAS 1 · port 12"],
   ["Leg / endpoint","Branche / extrémité"],
   ["Whole assembly","Ensemble complet"],
   ["Save each of the 12 leg IDs and its assigned device / port","Conservez les identifiants des 12 branches et l’équipement / port affecté à chacune"],
@@ -10071,7 +10071,7 @@ export const frenchMessages = [
   ["Match the device relationship and room / building. Follow the mapped passive to the correct MMC.","Vérifiez la relation entre équipements et la salle / le bâtiment. Suivez l’élément passif indiqué jusqu’au bon MMC."],
     ["Match the exact head inside the passive","Identifiez la tête exacte dans l’élément passif"],
   ["P · mapped passive","P · élément passif indiqué"],
-  ["CAS 1 → port 12 → DEMO-FANOUT-001","CAS 1 → port 12 → DEMO-FANOUT-001"],
+  ["CAS 1 → port 12 → SN.4827.0619","CAS 1 → port 12 → SN.4827.0619"],
   ["CAS 1, 32 ports. Ports 1 to 16 are on top; 17 to 32 below. Port 12 is the example destination.","CAS 1, 32 ports. Les ports 1 à 16 sont en haut et 17 à 32 en bas. Le port 12 est la destination de l’exemple."],
   ["CAS 1 · front port reference","CAS 1 · repérage des ports en façade"],
   ["P · head record","P · enregistrement de la tête"],
@@ -10101,7 +10101,7 @@ export const frenchMessages = [
   ["Check every affected link with the required site tests and readings.","Vérifiez chaque liaison concernée avec les tests et mesures exigés sur le site."],
     ["Restart this simulation","Recommencer cette simulation"],
   ["One head, twelve legs","Une tête, douze branches"],
-  ["The damaged example is leg 7. All twelve legs belong to MMC DEMO-FANOUT-001; the full assembly is replaced.","La branche 7 est endommagée dans cet exemple. Les douze branches appartiennent au MMC DEMO-FANOUT-001 ; l’ensemble complet est remplacé."],
+  ["The damaged example is leg 7. All twelve legs belong to MMC SN.4827.0619; the full assembly is replaced.","La branche 7 est endommagée dans cet exemple. Les douze branches appartiennent au MMC SN.4827.0619 ; l’ensemble complet est remplacé."],
   ["P · MMC head","P · tête MMC"],
   ["A · LC legs","A · branches LC"],
   ["Entire assembly","Ensemble complet"],

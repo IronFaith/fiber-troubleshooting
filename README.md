@@ -64,7 +64,7 @@ The connection stage also includes an interactive rack mockup inspired by the su
 
 The original optic schematic uses a silver face, two adjacent vertical LC pairs and a purple pull tab. Flipping it reverses displayed positions while keeping each port’s identity. Labels, captions and the highlighted connector follow the physical position. The drawing is a fictional teaching model, not a specification or a replica of an internal software screen.
 
-The MMC section uses fictional head serial `DEMO-FANOUT-001` and 12 selectable legs. Each line represents a leg, not a strand count or ferrule pin assignment. A separate example covers matching the record, inspection/cleaning, compatible alignment and full seating. Locations use `DEMO / ROOM-A / ROW-02 / RACK-17 / U30`; these are synthetic teaching identifiers.
+The MMC section uses fictional head serial `SN.4827.0619` and 12 selectable legs. Each line represents a leg, not a strand count or ferrule pin assignment. A separate example covers matching the record, inspection/cleaning, compatible alignment and full seating. Locations use `DEMO / ROOM-A / ROW-02 / RACK-17 / U30`; these are synthetic teaching identifiers.
 
 Exams (`quiz.html`) opens with **Beginner · Foundations** and **Intermediate · Applied troubleshooting**. Beginner groups the four Apprentice knowledge rounds, the dedicated **Loopbacks** exam and hands-on patching. All exams have five questions, can be selected freely and pass at 4/5. Beginner teaches recognition and sensible first checks; Intermediate combines evidence and asks what a test does or does not establish. These are learning levels, not field qualifications.
 

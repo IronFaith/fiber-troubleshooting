@@ -1,4 +1,4 @@
-import {mmcLoopback} from './loop-visuals.mjs?v=20261101';
+import {mmcLoopback} from './loop-visuals.mjs?v=2026110103';
 import {lcLoopback,vflPen} from './test-tool-visuals.mjs?v=20261101';
 export const toolNames={lc:'LC loopback',mmc:'MMC loopback',vfl:'VFL'};
 export function toolArt(kind) {

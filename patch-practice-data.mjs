@@ -6,7 +6,7 @@ export const patchTasks = [
   {id:'mmc-top', kind:'mmc', cas:1, port:12, title:'CAS 1 · Port 12'},
   {id:'mmc-bottom', kind:'mmc', cas:2, port:28, title:'CAS 2 · Port 28'}
 ];
-export const headSerial = 'DEMO-FANOUT-001';
+export const headSerial = 'SN.4827.0619';
 
 export function targetSlot(task) {
   if(task.kind==='mmc') return String(task.port);
