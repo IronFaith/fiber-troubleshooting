@@ -9,10 +9,10 @@
 #fanout-guide .fg-key{display:inline-flex;align-items:center;gap:.5rem}
 #fanout-guide .fg-line{width:25px;height:0;border-top:3px solid #aa851d}
 #fanout-guide .fg-fault{border-top-color:#a34c22;border-top-style:dashed}
-#fanout-guide .fg-steps{list-style:none;margin:1.8rem 0 0;padding:0}
-#fanout-guide .fg-steps>li{padding:1.3rem 0;border-top:1px solid #c8d5de}
+#fanout-guide .fg-steps{list-style:none;margin:1.2rem 0 0;padding:0}
+#fanout-guide .fg-steps>li{padding:1rem 0;border-top:1px solid #c8d5de}
 #fanout-guide .fg-step-heading{display:flex;align-items:baseline;gap:.75rem;margin-bottom:.6rem}
-#fanout-guide .fg-number{font-variant-numeric:tabular-nums;color:#536c7c;flex:none}
+#fanout-guide .fg-number{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#173b59;color:#fff;font-variant-numeric:tabular-nums;font-weight:600;flex:none}
 #fanout-guide .fg-flow{display:flex;align-items:center;justify-content:space-between;gap:.65rem;flex-wrap:wrap;margin:1rem 0}
 #fanout-guide .fg-flow>div{display:flex;flex-direction:column;gap:.3rem}
 #fanout-guide .fg-build{margin-top:1.2rem}
@@ -108,13 +108,14 @@
 #fanout-guide .fg-flow>div {unicode-bidi:plaintext}
 @media(max-width:520px){#fanout-guide .fg-card{padding:12px} #fanout-guide .fg-btn{padding:8px}}
 
-#fanout-guide .fg-steps>li.fg-step-identity{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,1fr);gap:2rem;align-items:center}
-#fanout-guide .fg-step-identity>div{min-width:0}
-#fanout-guide .fg-step-identity .fg-flow{align-items:flex-start;flex-direction:column}
-#fanout-guide .fg-step-identity .fg-flow>span{transform:rotate(90deg)}
-#fanout-guide .fg-details{margin-top:1rem;border:1px solid #c8d5de;border-radius:6px;padding:0 14px}
-#fanout-guide .fg-details>summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:600}
+#fanout-guide .fg-identity-example{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1fr);gap:1.2rem;align-items:center}
+#fanout-guide .fg-identity-example>div{min-width:0}
+#fanout-guide .fg-identity-example .fg-flow{align-items:flex-start;flex-direction:column}
+#fanout-guide .fg-identity-example .fg-flow>span{transform:rotate(90deg)}
+#fanout-guide .fg-details{margin-top:.4rem}
+#fanout-guide .fg-details>summary{cursor:pointer;min-height:44px;padding:12px 0;font-size:13px;font-weight:500;color:#254b68}
+#fanout-guide .fg-details>summary:focus-visible{outline:2px solid #236da5;outline-offset:2px}
 #fanout-guide .fg-details[open]{padding-bottom:14px}
 #fanout-guide .fg-rule{padding:12px 14px;border-inline-start:4px solid #aa851d;background:#faf5e8}
 #fanout-guide .fg-verify>div{border-inline-start:3px solid #508563;padding-inline-start:10px}
-@media(max-width:700px){#fanout-guide .fg-steps>li.fg-step-identity{grid-template-columns:minmax(0,1fr);gap:.5rem} #fanout-guide .fg-action-pair{grid-template-columns:1fr;gap:.6rem}}
+@media(max-width:700px){#fanout-guide .fg-identity-example{grid-template-columns:minmax(0,1fr);gap:.5rem} #fanout-guide .fg-action-pair{grid-template-columns:1fr;gap:.6rem}}

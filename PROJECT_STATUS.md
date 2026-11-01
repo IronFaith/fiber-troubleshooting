@@ -8,12 +8,12 @@ Updated: **2026-11-01**. This is a maintained snapshot, not an automatic health 
 
 Fetch the latest repository state and read AGENTS.md and this file before continuing.
 
-- **Current objective:** Make the active and passive list visuals clearly show what learners should find in MyPatch.
-- **Completed and published:** The separate fanout page now labels an illustrative MyPatch management-system view. Device A and mapped P1 boxes link to active-leg and passive-MMC list previews. Highlighted rows connect damaged leg 7 to its MMC serial and passive port 12; the panels reinforce one MMC and twelve related legs. Fictional records and all four languages are retained. Existing page separation, five steps and order-independent checklist remain unchanged.
-- **Verification:** Focused behavior/locale checks passed (15 tests), then `npm run check` passed all 134 tests. Browser checks confirmed both list links, keyboard focus on their targets, three/six-passive selection and translated list labels. Desktop and mobile Spanish/Arabic layouts were inspected; French and Arabic showed no page overflow, including Arabic at 320px. The physical route stayed left-to-right in Arabic, and no browser errors were recorded. The published page was reloaded and its new headings, highlighted rows and passive-list link verified.
+- **Current objective:** Simplify fanout replacement so learners can see the overall actions before opening detailed visuals.
+- **Implemented locally:** Five numbered actions now each show one short instruction: find the damaged leg, find its MMC in MyPatch, save all twelve connections, replace and update, then check every link. Each step has a closed-by-default example or guidance disclosure. The existing fanout drawing, A/P boxes, highlighted lists, map, replacement guidance and order-independent checklist are retained on the separate page. All four languages are updated.
+- **Verification:** Focused behavior/locale checks passed (15 tests), followed by `npm run check` with all 134 tests passing. Browser checks confirmed five visible headings and closed examples, keyboard expansion, correct fanout sizing after opening, the six-passive layout and passive-list link, checklist state through close/reopen, and restart. Desktop and mobile Spanish/Arabic layouts were inspected, with translated headings in all four languages and no French/Arabic page overflow (Arabic at 320px). No browser errors were recorded. Publication is pending.
 - **Latest verified application release:** [e211835](https://github.com/IronFaith/fiber-troubleshooting/commit/e211835bac0e8c55e42090cf0cad23e503daa542). Its [exact Pages deployment](https://github.com/IronFaith/fiber-troubleshooting/actions/runs/41355199825) succeeded. SHA-256 comparisons confirmed all 18 changed runtime files served by Pages match the commit.
-- **Remaining work / next action:** The MyPatch list-visual milestone is complete and live. No further list changes are queued.
-- **Blockers:** None for the list visuals. The separate serial-format question remains unresolved below.
+- **Remaining work / next action:** Publish the simplified overview, then verify the exact deployment and served files.
+- **Blockers:** None for the simplified overview. The separate serial-format question remains unresolved below.
 
 ## Serial research retained
 

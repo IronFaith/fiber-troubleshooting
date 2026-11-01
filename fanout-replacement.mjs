@@ -4,14 +4,15 @@ import {newFanoutReplacement,changeFanoutReplacement,canCompleteFanout} from './
 
 // Illustrative MyPatch navigation requested by the user; records are fictional.
 export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson-section" aria-labelledby="fanout-title"><div id="fanout-guide">
-  <div class="fg-viz-row"><span class="fg-viz-badge">Guided simulation</span><span class="fg-text-small">Worked example · 12 LC legs</span></div>
+  <div class="fg-viz-row"><span class="fg-viz-badge">Guided simulation</span><span class="fg-text-small">Fictional example · 12 LC legs</span></div>
   <h2 id="fanout-title">Fanout replacement</h2>
-  <p>Fictional example: replace a fanout while preserving every connection assignment.</p>
+  <p>Replace one MMC and all 12 legs. Keep every connection matched.</p>
   <ol class="fg-steps">
-    <li class="fg-step-identity">
-      <div>
-        <div class="fg-step-heading"><span class="fg-number">01</span><h3>Find the MMC</h3></div>
+    <li>
+        <div class="fg-step-heading"><span class="fg-number">1</span><h3>Find the damaged leg</h3></div>
         <p>Find the broken leg. Follow its label to the MMC and match the full serial.</p>
+      <details class="fg-details"><summary>Show example: leg to MMC</summary>
+      <div class="fg-identity-example"><div>
         <div class="fg-flow" aria-label="Trace the damaged leg to its assembly">
           <div><span class="fg-text-small">Damaged leg</span><strong>Leg 7</strong></div><span aria-hidden="true">→</span>
           <div><span class="fg-text-small">MMC head serial</span><strong>SN.4827.0619</strong></div>
@@ -23,14 +24,13 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
   </div>
   <div class="fg-viz-row"><span class="fg-key"><span class="fg-line"></span> Same assembly</span><span class="fg-key"><span class="fg-line fg-fault"></span> Leg 7 · damaged example</span></div>
   <p class="fg-text-small fg-text-muted">One line represents one leg, not a strand or ferrule pin map. LC is the connector type in this example; confirm the actual assembly specification.</p>
-</div>
+</div></div>
+      </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">02</span><h3>Save and match the map</h3></div>
-      <div class="fg-action-pair">
-        <div><h4>Connection record</h4><p>Record the location, head serial, passive port and every leg’s endpoint.</p></div>
-        <div><h4>Physical labels</h4><p>Compare the record with the installed labels. Resolve any mismatch before work.</p></div>
-      </div>
+      <div class="fg-step-heading"><span class="fg-number">2</span><h3>Find its MMC in MyPatch</h3></div>
+      <p>Open the device pair. Match the MMC serial in the active leg list (A) and passive list (P).</p>
+      <details class="fg-details"><summary>Show example: where to look in MyPatch</summary>
       <div class="fg-build">
         <div class="fg-system-heading"><div><span class="fg-text-small">Management system</span><h4>Find these lists in MyPatch</h4></div><span class="fg-viz-badge">Illustrative view</span></div>
         <div class="fg-system-route"><span>Device relationship</span><strong>Device A → Device B</strong></div>
@@ -65,6 +65,11 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
       <div class="fg-record-link"><strong>Match the same MMC serial in both lists.</strong><span class="fg-text-small">Illustrative MyPatch view with fictional records.</span></div>
       <p class="fg-text-small">Replace one of the 16 MMCs and its 12 legs.</p>
       <p class="fg-text-small">If the labels or map do not match, stop and resolve the mismatch.</p>
+      </details>
+    </li>
+    <li>
+      <div class="fg-step-heading"><span class="fg-number">3</span><h3>Save all 12 connections</h3></div>
+      <p>Save the MMC location and port, plus all 12 leg destinations. Match the installed labels.</p>
       <details class="fg-details"><summary>See the mapping example</summary>
               <table class="fg-table fg-table-sm">
         <caption class="fg-sr-only">Fictional connection map</caption>
@@ -87,13 +92,17 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
       </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">03</span><h3>Replace under the approved procedure</h3></div>
+      <div class="fg-step-heading"><span class="fg-number">4</span><h3>Replace and update</h3></div>
+      <p>Replace the fanout using the approved procedure, then update its MMC and 12 leg records.</p>
+      <details class="fg-details"><summary>Replacement reminders</summary>
       <p>Confirm authorization, affected services and a compatible replacement. Follow the approved isolation, inspection, cleaning and installation procedure.</p>
       <div class="fg-rule"><strong>Keep every leg matched to its recorded destination.</strong></div>
+      <p>Record the installed head and leg identifiers, destinations and required change history using the authorized process.</p>
+      </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">04</span><h3>Update and verify the record</h3></div>
-      <p>Record the installed head and leg identifiers, destinations and required change history using the authorized process.</p>
+      <div class="fg-step-heading"><span class="fg-number">5</span><h3>Check every link</h3></div>
+      <p>Match the new labels and ports. Run the required site tests on every affected link before closing.</p>
       <details class="fg-details"><summary>Practice checking the map</summary>
         <div class="fg-card" id="fg-demo">
           <div class="fg-viz-row"><strong>Account for the head and every leg</strong><span class="fg-viz-badge">Fictional checklist</span></div>
@@ -107,11 +116,6 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
         <p class="fg-text-small fg-text-muted">These buttons mark a fictional checklist. They do not change records, disconnect fibers or verify a live link.</p>
         <button class="fg-btn" type="button" id="fg-restart">Restart this simulation</button>
       </details>
-    </li>
-    <li>
-      <div class="fg-step-heading"><span class="fg-number">05</span><h3>Check every link</h3></div>
-      <p>Match the new labels and ports. Run the required site tests on every affected link before closing.</p>
-      <div class="fg-verify"><div><strong>Labels match</strong></div><div><strong>Ports match</strong></div><div><strong>All links verified</strong></div></div>
     </li>
   </ol>
 </div></section>`;
