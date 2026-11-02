@@ -21,7 +21,20 @@
 #fanout-guide .fg-system-route{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;margin-bottom:16px;border:1px solid #c8d5de;border-top:0;border-radius:0 0 6px 6px}
 #fanout-guide .fg-system-route>strong{unicode-bidi:plaintext}
 #fanout-guide .fg-list-jump{display:flex;align-items:center;justify-content:center;min-height:44px;padding:6px;border:1px solid currentColor;border-radius:4px;margin-top:auto;font-size:12px;font-weight:600;unicode-bidi:plaintext}
-#fanout-guide .fg-record-lists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0 0}
+#fanout-guide .fg-record-lists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:20px;margin:18px 0 0}
+#fanout-guide .fg-trace-panel{min-width:0}
+#fanout-guide .fg-connection-path{list-style:none;margin:12px 0 0;padding:0;counter-reset:none}
+#fanout-guide .fg-connection-path>li{display:block;position:relative;margin:0 0 16px;padding:10px 12px;border:1px solid #a4b9c9;border-radius:4px;background:#fff}
+#fanout-guide .fg-connection-path>li:before{content:none}
+#fanout-guide .fg-connection-path>li:not(:last-child):after{content:"";position:absolute;bottom:-17px;left:50%;height:16px;border-left:2px solid #7a94a7}
+#fanout-guide .fg-connection-path>li.fg-trace-device{background:#edf3f7;border-color:#51738c}
+#fanout-guide .fg-connection-path>li[data-target]{background:#faf5e8;border:2px solid #aa851d;scroll-margin-top:18px}
+#fanout-guide .fg-connection-path>li:focus-visible{outline:2px solid #236da5;outline-offset:3px}
+#fanout-guide .fg-trace-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#fanout-guide .fg-connection-path dl{margin:7px 0 0;font-size:12px}
+#fanout-guide .fg-connection-path dl>div{display:flex;justify-content:space-between;gap:8px;margin-top:4px}
+#fanout-guide .fg-connection-path dt{color:#536c7c;min-width:0}
+#fanout-guide .fg-connection-path dd{margin:0;text-align:end;flex:none;white-space:nowrap}
 #fanout-guide .fg-record-panel{min-width:0;padding:14px;border:1px solid #a4b9c9;border-top:4px solid #51738c;border-radius:5px;scroll-margin-top:18px}
 #fanout-guide .fg-passive-panel{border-top-color:#aa851d}
 #fanout-guide .fg-record-panel:focus-visible{outline:2px solid #236da5;outline-offset:3px}

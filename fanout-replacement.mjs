@@ -2,7 +2,7 @@ import {mmcHead} from './loop-visuals.mjs?v=2026110103';
 import {lcConnector} from './test-tool-visuals.mjs?v=20261101';
 import {newFanoutReplacement,changeFanoutReplacement,canCompleteFanout} from './fanout-replacement-state.mjs?v=20261101';
 
-// Illustrative MyPatch navigation requested by the user; records are fictional.
+// Original educational connection view; all records and labels are fictional.
 export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson-section" aria-labelledby="fanout-title"><div id="fanout-guide">
   <div class="fg-viz-row"><span class="fg-viz-badge">Guided simulation</span><span class="fg-text-small">Fictional example · 12 LC legs</span></div>
   <h2 id="fanout-title">Fanout replacement</h2>
@@ -28,43 +28,42 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
       </details>
     </li>
     <li>
-      <div class="fg-step-heading"><span class="fg-number">2</span><h3>Find its MMC in MyPatch</h3></div>
-      <p>Open the device pair. Match the MMC serial in the active leg list (A) and passive list (P).</p>
-      <details class="fg-details"><summary>Show example: where to look in MyPatch</summary>
+      <div class="fg-step-heading"><span class="fg-number">2</span><h3>Find its connection record</h3></div>
+      <p>Find the device port and leg serial. Follow the record to its MMC, CAS and passive port.</p>
+      <details class="fg-details"><summary>Show example: trace the connection</summary>
       <div class="fg-build">
-        <div class="fg-system-heading"><div><span class="fg-text-small">Management system</span><h4>Find these lists in MyPatch</h4></div><span class="fg-viz-badge">Illustrative view</span></div>
+        <div class="fg-system-heading"><h4>Connection records</h4><span class="fg-viz-badge">Illustrative view</span></div>
         <div class="fg-system-route"><span>Device relationship</span><strong>Device A → Device B</strong></div>
+      </div>
+      <div class="fg-record-lists">
+        <section class="fg-record-panel fg-active-panel" id="fg-active-records" tabindex="-1" aria-labelledby="fg-active-list-title">
+          <div class="fg-record-heading"><span class="fg-list-badge" aria-hidden="true">A</span><div><h4 id="fg-active-list-title">Device A</h4><span class="fg-text-small">Active leg list</span></div></div>
+          <p>Find the port, then read the leg serial.</p>
+          <table class="fg-record-table"><caption>Example device ports</caption><thead><tr><th scope="col">Device port</th><th scope="col">Leg serial</th></tr></thead><tbody>
+            <tr><th scope="row"><bdi>4/2</bdi></th><td><bdi>DEMO-L06</bdi><span class="fg-row-note">Leg 6</span></td></tr>
+            <tr class="fg-record-match"><th scope="row"><bdi>5/1</bdi><span class="fg-row-note">Find this leg</span></th><td><bdi>DEMO-L07</bdi><span class="fg-row-note">Leg 7</span></td></tr>
+            <tr><th scope="row"><bdi>5/2</bdi></th><td><bdi>DEMO-L08</bdi><span class="fg-row-note">Leg 8</span></td></tr>
+          </tbody></table>
+          <p class="fg-text-small">3 example ports shown. The path follows the highlighted leg.</p>
+          <a class="fg-list-jump" href="#fg-passive-records">Find its MMC and CAS port</a>
+        </section>
+        <section class="fg-trace-panel" aria-labelledby="fg-trace-title">
+          <h4 id="fg-trace-title">Selected connection path</h4>
+          <p class="fg-text-small">Follow the boxes to the matching CAS and port.</p>
+          <ol id="fg-connection-path" class="fg-connection-path"></ol>
+        </section>
+      </div>
+      <div class="fg-record-link"><strong>Leg serial → MMC head serial → CAS and port</strong><span class="fg-text-small">Fictional records. Serial formats are examples only.</span></div>
+      <p class="fg-text-small">If the labels or map do not match, stop and resolve the mismatch.</p>
+      <details class="fg-details"><summary>Show the full active/passive build</summary>
         <div class="fg-viz-row"><strong>Fully patched example</strong><span class="fg-text-small">A = active legs. P = passive MMCs.</span></div>
         <div class="fg-build-equation" role="img" aria-label="192 legs ÷ 12 legs per MMC = 16 MMCs"><span dir="auto">192 legs</span><span aria-hidden="true">÷</span><span dir="auto">12 legs per MMC</span><span aria-hidden="true">=</span><span dir="auto">16 MMCs</span></div>
         <div class="fg-viz-controls"><label class="fg-form-label">Illustrated room layout<select class="fg-form-select" id="fg-passive-count"><option value="3">3 passive locations</option><option value="6">6 passive locations</option></select></label></div>
         <p class="fg-text-small fg-text-muted">Follow the boxes from Device A to Device B. Scroll sideways to see the full route.</p>
         <div class="fg-route-scroll" tabindex="0" role="region" aria-label="Active and passive block diagram"><div id="fg-route" class="fg-route" role="list"></div></div>
         <p class="fg-text-small">Counts show patched / required. Each P shows 16/16 MMCs in this example.</p>
-      </div>
-      <div class="fg-record-lists">
-        <section class="fg-record-panel fg-active-panel" id="fg-active-records" tabindex="-1" aria-labelledby="fg-active-list-title">
-          <div class="fg-record-heading"><span class="fg-list-badge" aria-hidden="true">A</span><div><h4 id="fg-active-list-title">Active leg list</h4><span class="fg-text-small">Device A · 192 legs</span></div></div>
-          <p>Find the damaged leg and read its MMC serial.</p>
-          <table class="fg-record-table"><caption>Example rows from the active list</caption><thead><tr><th scope="col">Leg</th><th scope="col">MMC serial</th></tr></thead><tbody>
-            <tr><th scope="row">Leg 6</th><td><bdi>SN.4827.0619</bdi></td></tr>
-            <tr class="fg-record-match"><th scope="row">Leg 7<span class="fg-row-note">Find this leg</span></th><td><bdi>SN.4827.0619</bdi><span class="fg-row-note">Device A · 5/1</span></td></tr>
-            <tr><th scope="row">Leg 8</th><td><bdi>SN.4827.0619</bdi></td></tr>
-          </tbody></table>
-          <p class="fg-text-small">3 example rows shown. Match all 12 legs belonging to this MMC.</p>
-        </section>
-        <section class="fg-record-panel fg-passive-panel" id="fg-passive-records" tabindex="-1" aria-labelledby="fg-passive-list-title">
-          <div class="fg-record-heading"><span class="fg-list-badge" aria-hidden="true">P1</span><div><h4 id="fg-passive-list-title">Passive MMC list</h4><span class="fg-text-small">CAS 1 · 16 MMCs</span></div></div>
-          <p>Find that same serial in the mapped passive. Match its port.</p>
-          <table class="fg-record-table"><caption>Example match from the passive list</caption><thead><tr><th scope="col">MMC serial</th><th scope="col">Port</th></tr></thead><tbody>
-            <tr class="fg-record-match"><th scope="row"><bdi>SN.4827.0619</bdi><span class="fg-row-note">Find this MMC</span></th><td><bdi>12</bdi></td></tr>
-          </tbody></table>
-          <div class="fg-record-scope"><strong>1 MMC</strong><span aria-hidden="true">↔</span><strong>12 related legs</strong></div>
-          <p class="fg-text-small">1 example match shown from the 16 MMCs at this passive.</p>
-        </section>
-      </div>
-      <div class="fg-record-link"><strong>Match the same MMC serial in both lists.</strong><span class="fg-text-small">Illustrative MyPatch view with fictional records.</span></div>
-      <p class="fg-text-small">Replace one of the 16 MMCs and its 12 legs.</p>
-      <p class="fg-text-small">If the labels or map do not match, stop and resolve the mismatch.</p>
+        <p class="fg-text-small">Replace one of the 16 MMCs and its 12 legs.</p>
+      </details>
       </details>
     </li>
     <li>
@@ -78,6 +77,7 @@ export const fanoutGuideMarkup = `<section id="fanout-replacement" class="lesson
           <tr><th scope="row">Device relationship</th><td>Device A → Device B</td></tr>
           <tr><th scope="row">Head / destination</th><td>SN.4827.0619 → CAS 1 · port 12</td></tr>
           <tr><th scope="row">Leg / endpoint</th><td>Leg 7 → Device A · 5/1</td></tr>
+          <tr><th scope="row">Leg serial</th><td><bdi>DEMO-L07</bdi></td></tr>
           <tr><th scope="row">Whole assembly</th><td>Record each of the 12 leg IDs and its assigned device / port</td></tr>
         </tbody>
       </table>
@@ -140,6 +140,9 @@ export function mountFanoutReplacement(host) {
  }
  function drawRoute(){
    const count=Number(q('#fg-passive-count').value),route=q('#fg-route');
+   const passivePorts=[12,8,4,10,6,2];
+   const deviceCard=(device,port,serial)=>`<li class="fg-trace-device"><strong>${device}</strong><dl><div><dt>Device port</dt><dd><bdi>${port}</bdi></dd></div><div><dt>Leg serial</dt><dd><bdi>${serial}</bdi></dd></div></dl></li>`;
+   q('#fg-connection-path').innerHTML=deviceCard('Device A','5/1','DEMO-L07')+Array.from({length:count},(_,i)=>`<li ${i===0?'id="fg-passive-records" tabindex="-1" aria-label="Mapped passive" data-target="true"':''}><div class="fg-trace-heading"><strong>CAS ${i+1}</strong><span class="fg-text-small">P${i+1}</span></div><dl><div><dt>Passive port</dt><dd><bdi>${passivePorts[i]}</bdi></dd></div><div><dt>MMC head serial</dt><dd><bdi>${i===0?'SN.4827.0619':`DEMO-MMC-${String(i+1).padStart(2,'0')}`}</bdi></dd></div></dl>${i===0?'<span class="fg-row-note">This MMC holds the 12 legs to replace.</span>':''}</li>`).join('')+deviceCard('Device B','3/1','DEMO-R07');
    const active=(device,showList=false)=>`<div class="fg-route-node fg-route-active" role="listitem"><strong class="fg-route-letter">A</strong><span>${device}</span><bdi class="fg-route-count" dir="ltr">192/192</bdi><span class="fg-text-small">Legs patched</span>${showList?'<a class="fg-list-jump" href="#fg-active-records">View leg list</a>':''}</div>`;
    route.innerHTML=active('Device A',true)+Array.from({length:count},(_,i)=>`<div class="fg-route-node" role="listitem" ${i===0?'data-target="true"':''}><strong class="fg-route-letter">P${i+1}</strong><span>${i===0?'CAS 1':'Passive'}</span><bdi class="fg-route-count" dir="ltr">16/16</bdi><span class="fg-text-small">MMCs patched</span>${i===0?'<span class="fg-route-target">Mapped passive</span><a class="fg-list-jump" href="#fg-passive-records">View MMC list</a>':''}</div>`).join('')+active('Device B');
  }
